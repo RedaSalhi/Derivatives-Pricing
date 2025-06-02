@@ -96,8 +96,8 @@ with tab2:
         T_fwd = st.number_input("Time to Maturity (T)", value=1.0, key="fwd_T")
         r_fwd = st.number_input("Risk-Free Rate (r)", value=0.05, key="fwd_r")
     with col2:
-        storage_cost = st.number_input("Storage Cost (c)", value=0.0)
-        dividend_yield = st.number_input("Dividend Yield (q)", value=0.0)
+        storage_cost = st.number_input("Storage Cost (c)", value=0.0, key="fwd_storage")
+        dividend_yield = st.number_input("Dividend Yield (q)", value=0.0, key="fwd_q")
         position = st.radio("Position", ["long", "short"])
 
     if st.button("📈 Price Forward Contract"):
