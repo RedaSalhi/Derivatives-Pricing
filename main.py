@@ -319,7 +319,7 @@ with tab4:
         with col1:
             option_type = st.selectbox("Option Type", ["call", "put"], key="bar_type")
             barrier_type = st.selectbox("Barrier Type", ["up-and-out", "up-and-in", "down-and-out", "down-and-in"], key="bar_style")
-            model = st.selectbox("Model", ["black_scholes", "monte_carlo"], key="bar_model")
+            model = st.selectbox("Model", ["monte_carlo"], key="bar_model")
         with col2:
             S = st.number_input("Spot Price (S)", value=100.0, key="bar_S")
             K = st.number_input("Strike Price (K)", value=100.0, key="bar_K")
@@ -355,15 +355,13 @@ with tab4:
                     kwargs["n_steps"] = n_steps
                     price, paths = price_barrier_option(**kwargs)
                 else:
-                    price = price_barrier_option(**kwargs)
+                    return print("Model is not defined yet for Barrier Options")
         
                 st.success(f"The {barrier_type} {option_type} option is worth: **{price:.4f}**")
         
                 if model == "monte_carlo":
                     st.subheader("Monte Carlo Sample Paths")
                     plot_sample_paths_barrier(paths, K=K, H=H, option_type=option_type, barrier_type=barrier_type)
-        
-                elif model == "black_scholes":
                     st.subheader("Payoff at Maturity")
                     plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
         
