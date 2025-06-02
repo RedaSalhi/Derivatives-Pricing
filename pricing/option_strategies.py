@@ -1,19 +1,15 @@
 from .vanilla_options import price_vanilla_option
 import numpy as np
 
-
 def price_option_strategy(legs, exercise_style, model, **kwargs):
     """
     Price a multi-leg option strategy by summing the price of each leg.
 
     Parameters:
-        legs (list): List of dictionaries, each containing:
-            - "type": "call" or "put"
-            - "strike": strike price
-            - "qty": quantity (positive for Long, negative for Short)
+        legs (list): Each dict has "type" ('call'/'put'), "strike", and "qty"
         exercise_style (str): "european" or "american"
         model (str): Pricing model ("black-scholes", "binomial", etc.)
-        kwargs: Common option parameters like S, T, sigma, r
+        kwargs: Common params like S, T, sigma, r...
 
     Returns:
         dict: {
@@ -26,9 +22,9 @@ def price_option_strategy(legs, exercise_style, model, **kwargs):
 
     for leg in legs:
         price = price_vanilla_option(
-            option_type=leg["type"],
-            exercise_style=exercise_style,
-            model=model,
+            option_type=leg["type"].lower(),
+            exercise_style=exercise_style.lower(),
+            model=model.lower(),
             K=leg["strike"],
             **kwargs
         )
@@ -37,10 +33,9 @@ def price_option_strategy(legs, exercise_style, model, **kwargs):
         individual_prices.append(leg_price)
 
     return {
-        "Strategy price": total_price,
-        "Individual prices": individual_prices
+        "strategy_price": total_price,
+        "individual_prices": individual_prices
     }
-
 
 def compute_strategy_payoff(legs, spot_prices):
     """
@@ -58,65 +53,64 @@ def compute_strategy_payoff(legs, spot_prices):
     for leg in legs:
         K = leg["strike"]
         qty = leg["qty"]
-        if leg["type"].lower() == "call":
+        opt_type = leg["type"].lower()
+
+        if opt_type == "call":
             payoffs += qty * np.maximum(spot_prices - K, 0)
-        elif leg["type"].lower() == "put":
+        elif opt_type == "put":
             payoffs += qty * np.maximum(K - spot_prices, 0)
+        else:
+            raise ValueError("Leg type must be 'call' or 'put'.")
 
     return payoffs
 
-
 def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=None):
     """
-    Return a predefined option strategy using explicit strike prices.
+    Return predefined multi-leg strategy.
 
     Parameters:
-        name (str): Strategy name: "Straddle", "Bull call Spread", "Bear put Spread", "Butterfly", etc.
-        strike1, strike2, strike3 (float): Strike prices as needed by the strategy
+        name (str): Strategy name
+        strike1..4: Strike prices used depending on strategy
 
     Returns:
-        list of dicts: Each dict has "type", "strike", and "qty"
+        list of dicts OR str if error
     """
-    name = name.lower()
+    name = name.strip().lower()
 
-    if name == "Straddle":
-        if strike2 is not None or strike3 is not None:
-            return "Straddle only requires strike1 (ATM)."
+    if name == "straddle":
         return [
             {"type": "call", "strike": strike1, "qty": 1},
             {"type": "put", "strike": strike1, "qty": 1}
         ]
-    
-    elif name == "Bull call Spread":
+
+    elif name == "bull call spread":
         if strike2 is None:
-            return "Bull call Spread requires strike1 (Long) and strike2 (Short)."
+            return "Bull Call Spread requires strike1 (Long) and strike2 (Short)."
         return [
             {"type": "call", "strike": strike1, "qty": 1},
             {"type": "call", "strike": strike2, "qty": -1}
         ]
 
-    elif name == "Bear put Spread":
+    elif name == "bear put spread":
         if strike2 is None:
-            return print("Bear put Spread requires strike1 (Long) and strike2 (Short).")
+            return "Bear Put Spread requires strike1 (Long) and strike2 (Short)."
         return [
             {"type": "put", "strike": strike1, "qty": 1},
             {"type": "put", "strike": strike2, "qty": -1}
         ]
-    
-    elif name == "Butterfly":
-        if strike2 is None or strike3 is None:
-            return print("Butterfly requires strike1 (low), strike2 (middle), and strike3 (high).")
+
+    elif name == "butterfly":
+        if None in (strike2, strike3):
+            return "Butterfly requires strike1 (low), strike2 (middle), and strike3 (high)."
         return [
             {"type": "call", "strike": strike1, "qty": 1},
             {"type": "call", "strike": strike2, "qty": -2},
             {"type": "call", "strike": strike3, "qty": 1}
         ]
 
-    elif name == "Iron Condor":
-        if strike2 is None or strike3 is None:
-            return print("Iron Condor requires 4 strikes: strike1 (put Long), strike2 (put Short), strike3 (call Short), strike4 (call Long)")
-        if strike4 is None:
-            return print("Iron Condor needs strike4 (call Long)")
+    elif name == "iron condor":
+        if None in (strike2, strike3, strike4):
+            return "Iron Condor requires 4 strikes: strike1 (Put Long), strike2 (Put Short), strike3 (Call Short), strike4 (Call Long)."
         return [
             {"type": "put", "strike": strike1, "qty": 1},
             {"type": "put", "strike": strike2, "qty": -1},
@@ -125,4 +119,4 @@ def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=N
         ]
 
     else:
-        return print(f"Unknown strategy name: {name}")
+        return f"Unknown strategy name: {name.capitalize()}"
