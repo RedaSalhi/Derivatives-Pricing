@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 import streamlit as st
 import numpy as np
 
-from pricing.vanilla_option import price_vanilla_option
+from pricing.vanilla_options import price_vanilla_option
 from pricing.forward import (
     price_forward_contract,
     plot_forward_mark_to_market,
