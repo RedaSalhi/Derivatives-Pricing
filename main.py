@@ -3,8 +3,8 @@
 import streamlit as st
 import numpy as np
 
-from pricing-vanilla_option import price_vanilla_option
-from pricing-forward import (
+from pricing_vanilla_option import price_vanilla_option
+from pricing_forward import (
     price_forward_contract,
     plot_forward_mark_to_market,
     plot_forward_payout_and_value
