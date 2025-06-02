@@ -1,4 +1,4 @@
-from .vanilla_option import price_vanilla_option
+from .vanilla_options import price_vanilla_option
 import numpy as np
 
 
