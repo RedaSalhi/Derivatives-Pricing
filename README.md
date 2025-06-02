@@ -4,8 +4,7 @@
 | -------------------------- | -------------------------------- | ------------------------------------------------------------------------------------- |
 | **Forward Contract**       | Plain Vanilla                    | Cost of Carry Model (Spot ± Carrying Costs)                                           |
 | **Futures Contract**       | Plain Vanilla                    | Cost of Carry + No-Arbitrage Principles                                               |
-| **European Option**        | Call / Put                       | Black-Scholes-Merton (BSM)                                                            |
-|                            | Basket, Index Options            | Multivariate BSM, Monte Carlo Simulation                                              |
+| **European Option**        | Call / Put                       | Black-Scholes-Merton (BSM)   |                                  
 | **American Option**        | Call / Put                       | Binomial Tree, Trinomial Tree, Finite Difference, Longstaff-Schwartz (Monte Carlo)    |
 | **Exotic Options**         | Barrier (e.g., Knock-in/out)     | Analytical (if solvable), Monte Carlo, Finite Difference                              |
 |                            | Asian (Average Price/Strike)     | Monte Carlo Simulation, PDE methods                                                   |
