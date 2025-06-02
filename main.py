@@ -25,15 +25,15 @@ from pricing.option_strategies import (
 # -----------------------------
 # Page Setup
 # -----------------------------
-st.set_page_config(page_title="📈 Derivatives Pricing App", layout="centered")
-st.title("📊 Derivatives Pricing App")
-st.caption("Built with ❤️ for students, quants, and finance enthusiasts")
+st.set_page_config(page_title="Derivatives Pricing App", layout="centered")
+st.title("Derivatives Pricing App")
+st.caption("Built for students, quants, and finance enthusiasts")
 
 
 # -----------------------------
 # Tabs Layout
 # -----------------------------
-tab1, tab2, tab3 = st.tabs(["🧮 Vanilla Options", "📉 Forward Contracts", "🧩 Option Strategies"])
+tab1, tab2, tab3 = st.tabs(["Vanilla Options", "Forward Contracts", "Option Strategies"])
 
 
 # -----------------------------
@@ -44,9 +44,9 @@ with tab1:
 
     col1, col2 = st.columns(2)
     with col1:
-        option_type = st.selectbox("Option Type", ["call", "put"])
-        exercise_style = st.selectbox("Exercise Style", ["european", "american"])
-        model = st.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"])
+        option_type = st.selectbox("Option Type", ["Call", "Put"])
+        exercise_style = st.selectbox("Exercise Style", ["European", "American"])
+        model = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"])
 
     with col2:
         S = st.number_input("Spot Price (S)", value=100.0)
@@ -56,12 +56,12 @@ with tab1:
         r = st.number_input("Risk-Free Rate (r)", value=0.05)
         q = st.number_input("Dividend Yield (q)", value=0.0)
 
-    if model == "binomial":
+    if model == "Binomial":
         N = st.slider("Binomial Tree Steps (N)", min_value=10, max_value=10000, value=100)
-    elif model == "monte-carlo":
+    elif model == "Monte-Carlo":
         n_sim = st.slider("Monte Carlo Simulations", min_value=1_000, max_value=100_000, step=5_000, value=10_000)
 
-    if st.button("💰 Compute Option Price"):
+    if st.button("Compute Option Price"):
         kwargs = {
             "S": S,
             "K": K,
@@ -71,9 +71,9 @@ with tab1:
             "q": q
         }
 
-        if model == "binomial":
+        if model == "Binomial":
             kwargs["N"] = N
-        elif model == "monte-carlo":
+        elif model == "Monte-Carlo":
             kwargs["n_simulations"] = n_sim
 
         try:
@@ -100,7 +100,7 @@ with tab2:
         dividend_yield = st.number_input("Dividend Yield (q)", value=0.0, key="fwd_q")
         position = st.radio("Position", ["long", "short"])
 
-    if st.button("📈 Price Forward Contract"):
+    if st.button("Price Forward Contract"):
         F = price_forward_contract(
             spot_price=S_fwd,
             interest_rate=r_fwd,
@@ -110,10 +110,10 @@ with tab2:
         )
         st.success(f"Theoretical Forward Price: **{F:.4f}**")
 
-        st.subheader("📉 Forward Payout at Maturity")
+        st.subheader("Forward Payout at Maturity")
         plot_forward_payout_and_value(K_fwd, position)
 
-        st.subheader("🔄 Mark-to-Market Value (Before Maturity)")
+        st.subheader("Mark-to-Market Value (Before Maturity)")
         plot_forward_mark_to_market(
             strike_price=K_fwd,
             time_to_maturity=T_fwd,
@@ -128,12 +128,12 @@ with tab2:
 # Tab 3 – Option Strategies
 # -----------------------------
 with tab3:
-    st.header("Multi-leg Option Strategy")
+    st.header("Option Strategies")
 
-    use_manual = st.checkbox("🔧 Build Strategy Manually")
+    use_manual = st.checkbox("Build Strategy Manually")
 
-    model_strat = st.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"], key="strat_model")
-    style_strat = st.selectbox("Exercise Style", ["european", "american"], key="strat_style")
+    model_strat = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"], key="strat_model")
+    style_strat = st.selectbox("Exercise Style", ["European", "American"], key="strat_style")
 
     S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
     T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
@@ -158,7 +158,7 @@ with tab3:
         with st.form("add_leg_form"):
             col1, col2, col3 = st.columns(3)
             with col1:
-                opt_type = st.selectbox("Type", ["call", "put"], key="leg_type")
+                opt_type = st.selectbox("Type", ["Call", "Put"], key="leg_type")
             with col2:
                 strike = st.number_input("Strike", value=100.0, key="leg_strike")
             with col3:
@@ -169,11 +169,11 @@ with tab3:
                 st.session_state.custom_legs.append({"type": opt_type, "strike": strike, "qty": qty})
 
         if st.session_state.custom_legs:
-            st.markdown("### 📜 Strategy Legs")
+            st.markdown("### Strategy Legs")
             for i, leg in enumerate(st.session_state.custom_legs):
                 st.write(f"Leg {i+1}: {leg['qty']} × {leg['type'].upper()} @ Strike {leg['strike']}")
 
-            if st.button("🧮 Price Custom Strategy"):
+            if st.button("Price Custom Strategy"):
                 try:
                     result = price_option_strategy(st.session_state.custom_legs, style_strat, model_strat, **kwargs)
                     st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
@@ -195,7 +195,7 @@ with tab3:
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-        if st.button("🗑️ Clear Strategy Legs"):
+        if st.button("Clear Strategy Legs"):
             st.session_state.custom_legs = []
 
     else:
@@ -203,21 +203,21 @@ with tab3:
 
         strategy = st.selectbox(
             "Choose a Strategy",
-            ["straddle", "bull_call_spread", "bear_put_spread", "butterfly", "iron_condor"],
+            ["Straddle", "Bull Call Spread", "Bear Put Spread", "Butterfly", "Iron Condor"],
             key="strat_type"
         )
 
         strike1 = st.number_input("Strike 1", value=95.0, key="strat_k1")
         strike2 = strike3 = strike4 = None
 
-        if strategy in ["bull_call_spread", "bear_put_spread", "butterfly", "iron_condor"]:
+        if strategy in ["Bull Call Spread", "Bear Put Spread", "Butterfly", "Iron Condor"]:
             strike2 = st.number_input("Strike 2", value=100.0, key="strat_k2")
-        if strategy in ["butterfly", "iron_condor"]:
+        if strategy in ["Butterfly", "Iron Condor"]:
             strike3 = st.number_input("Strike 3", value=105.0, key="strat_k3")
-        if strategy == "iron_condor":
+        if strategy == "Iron Condor":
             strike4 = st.number_input("Strike 4", value=110.0, key="strat_k4")
 
-        if st.button("📊 Price Predefined Strategy"):
+        if st.button("Price Predefined Strategy"):
             legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4=strike4)
             if isinstance(legs, str):
                 st.error(legs)
