@@ -42,9 +42,9 @@ def price_option_strategy(legs, exercise_style, model, **kwargs):
     }
 
 
-def comPute_strategy_payoff(legs, spot_prices):
+def compute_strategy_payoff(legs, spot_prices):
     """
-    ComPute total strategy payoff over a range of spot prices.
+    Compute total strategy payoff over a range of spot prices.
 
     Parameters:
         legs (list): Strategy legs as described above
