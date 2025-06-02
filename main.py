@@ -310,7 +310,7 @@ with tab4:
         with col1:
             option_type = st.selectbox("Option Type", ["call", "put"], key="bar_type")
             barrier_type = st.selectbox("Barrier Type", ["up-and-out", "up-and-in", "down-and-out", "down-and-in"], key="bar_style")
-            model = st.selectbox("Model", ["black_scholes", "monte_carlo"], key="bar_model")
+            model = st.selectbox("Model", ["black_scholes", "monte-carlo"], key="bar_model")
         with col2:
             S = st.number_input("Spot Price (S)", value=100.0, key="bar_S")
             K = st.number_input("Strike Price (K)", value=100.0, key="bar_K")
