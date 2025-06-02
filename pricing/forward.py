@@ -47,7 +47,7 @@ def plot_forward_mark_to_market(
     interest_rate: float,
     storage_cost: float = 0.0,
     dividend_yield: float = 0.0,
-    position: str = "long"
+    position: str = "Long"
 ):
     """
     Plots the mark-to-market (MtM) value of a forward contract at time t before maturity.
@@ -58,7 +58,7 @@ def plot_forward_mark_to_market(
         interest_rate (float): Annual continuous risk-free rate (r).
         storage_cost (float): Annual continuous storage cost rate (c).
         dividend_yield (float): Annual continuous dividend yield (q).
-        position (str): 'long' or 'short'
+        position (str): 'Long' or 'Short'
     """
     # Range of spot prices S_t
     S_t = np.linspace(0.5 * strike_price, 1.5 * strike_price, 500)
@@ -67,7 +67,7 @@ def plot_forward_mark_to_market(
     value_t = S_t * np.exp((interest_rate + storage_cost - dividend_yield) * time_to_maturity) \
               - strike_price * np.exp(-interest_rate * time_to_maturity)
 
-    if position == "short":
+    if position == "Short":
         value_t = -value_t
         label = "Short Forward Value (t < T)"
     else:
@@ -89,25 +89,25 @@ def plot_forward_mark_to_market(
 # Plot at T payout
 # -----------------------------
 
-def plot_forward_payout_and_value(strike_price: float, position: str = "long"):
+def plot_forward_payout_and_value(strike_price: float, position: str = "Long"):
     """
     Plots the payout and value of a forward contract at maturity.
 
     Parameters:
         strike_price (float): Agreed delivery price (K).
-        position (str): 'long' or 'short'
+        position (str): 'Long' or 'Short'
     """
     # Simulated spot prices at maturity
     S_T = np.linspace(0.5 * strike_price, 1.5 * strike_price, 500)
 
-    if position == "long":
+    if position == "Long":
         payout = S_T - strike_price
         label_payout = "Long Forward Payout"
-    elif position == "short":
+    elif position == "Short":
         payout = strike_price - S_T
         label_payout = "Short Forward Payout"
     else:
-        raise ValueError("Position must be 'long' or 'short'")
+        raise ValueError("Position must be 'Long' or 'Short'")
 
     # Plot
     plt.figure(figsize=(10, 6))
