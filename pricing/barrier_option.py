@@ -1,4 +1,10 @@
+# pricing/barrier_option.py
+
+import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
 from pricing.models.barrier_black_scholes import barrier_price
+
 
 def price_barrier_option(
     S, K, H, T, r, sigma,
@@ -38,31 +44,9 @@ def price_barrier_option(
         raise NotImplementedError(f"Model '{model}' not implemented.")
 
 
-import matplotlib.pyplot as plt
-import numpy as np
-
 def plot_barrier_payoff(K, H, option_type="call", barrier_type="up-and-out", S_min=0, S_max=200, num=500):
     """
-    Trace le payoff à maturité d'une option barrière européenne.
-
-    Paramètres :
-        K : float
-            Prix d'exercice (strike)
-        H : float
-            Niveau de barrière
-        option_type : str
-            'call' ou 'put'
-        barrier_type : str
-            'up-and-out', 'down-and-out', 'up-and-in', 'down-and-in'
-        S_min : float
-            Prix spot minimum pour l'axe x
-        S_max : float
-            Prix spot maximum pour l'axe x
-        num : int
-            Nombre de points de discrétisation
-
-    Affiche :
-        Un graphique matplotlib du payoff à maturité
+    Affiche dans Streamlit le payoff à maturité d'une option barrière européenne.
     """
     S_range = np.linspace(S_min, S_max, num)
     payoff = np.zeros_like(S_range)
@@ -84,8 +68,13 @@ def plot_barrier_payoff(K, H, option_type="call", barrier_type="up-and-out", S_m
             elif option_type == "put":
                 payoff[i] = max(K - S, 0)
 
-    plt.figure(figsize=(8, 4.5))
-    plt.plot(S_range, payoff, label="Payoff à maturité")
-    plt.axvline(x=K, linestyle="--", color="gray", label="Strike K")
-    plt.axvline(x=H, linestyle="--", color="red", label="Barrière H")
-    plt.titl
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    ax.plot(S_range, payoff, label="Payoff à maturité")
+    ax.axvline(x=K, linestyle="--", color="gray", label="Strike K")
+    ax.axvline(x=H, linestyle="--", color="red", label="Barrière H")
+    ax.set_title(f"Payoff – {option_type.upper()} {barrier_type.replace('-', ' ').title()}")
+    ax.set_xlabel("Spot Price at Maturity (S)")
+    ax.set_ylabel("Payoff")
+    ax.grid(True)
+    ax.legend()
+    st.pyplot(fig)
