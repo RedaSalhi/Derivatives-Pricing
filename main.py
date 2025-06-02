@@ -44,8 +44,8 @@ with tab1:
 
     col1, col2 = st.columns(2)
     with col1:
-        option_type = st.selectbox("Option Type", ["Call", "Put"])
-        exercise_style = st.selectbox("Exercise Style", ["European", "American"])
+        option_type = st.selectbox("Option Type", ["call", "put"])
+        exercise_style = st.selectbox("Exercise Style", ["european", "American"])
         model = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"])
 
     with col2:
@@ -133,7 +133,7 @@ with tab3:
     use_manual = st.checkbox("Build Strategy Manually")
 
     model_strat = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"], key="strat_model")
-    style_strat = st.selectbox("Exercise Style", ["European", "American"], key="strat_style")
+    style_strat = st.selectbox("Exercise Style", ["european", "American"], key="strat_style")
 
     S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
     T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
@@ -158,7 +158,7 @@ with tab3:
         with st.form("add_leg_form"):
             col1, col2, col3 = st.columns(3)
             with col1:
-                opt_type = st.selectbox("Type", ["Call", "Put"], key="leg_type")
+                opt_type = st.selectbox("Type", ["call", "put"], key="leg_type")
             with col2:
                 strike = st.number_input("Strike", value=100.0, key="leg_strike")
             with col3:
@@ -203,14 +203,14 @@ with tab3:
 
         strategy = st.selectbox(
             "Choose a Strategy",
-            ["Straddle", "Bull Call Spread", "Bear Put Spread", "Butterfly", "Iron Condor"],
+            ["Straddle", "Bull call Spread", "Bear put Spread", "Butterfly", "Iron Condor"],
             key="strat_type"
         )
 
         strike1 = st.number_input("Strike 1", value=95.0, key="strat_k1")
         strike2 = strike3 = strike4 = None
 
-        if strategy in ["Bull Call Spread", "Bear Put Spread", "Butterfly", "Iron Condor"]:
+        if strategy in ["Bull call Spread", "Bear put Spread", "Butterfly", "Iron Condor"]:
             strike2 = st.number_input("Strike 2", value=100.0, key="strat_k2")
         if strategy in ["Butterfly", "Iron Condor"]:
             strike3 = st.number_input("Strike 3", value=105.0, key="strat_k3")
