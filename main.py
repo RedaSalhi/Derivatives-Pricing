@@ -52,9 +52,39 @@ def implied_volatility(S, K, T, r, market_price, option_type="Call", tol=1e-5, m
         sigma -= diff / vega
     return None
 
+def binomial_tree_price(S, K, T, r, sigma, steps, option_type="Call", american=False):
+    dt = T / steps
+    u = np.exp(sigma * np.sqrt(dt))
+    d = 1 / u
+    q = (np.exp(r * dt) - d) / (u - d)
+    discount = np.exp(-r * dt)
+
+    # Initialize asset prices at maturity
+    asset_prices = np.array([S * (u ** j) * (d ** (steps - j)) for j in range(steps + 1)])
+
+    # Option payoffs at maturity
+    if option_type == "Call":
+        values = np.maximum(asset_prices - K, 0)
+    else:
+        values = np.maximum(K - asset_prices, 0)
+
+    # Backward induction
+    for i in range(steps - 1, -1, -1):
+        values = discount * (q * values[1:] + (1 - q) * values[:-1])
+        if american:
+            asset_prices = asset_prices[:i+1] * u
+            if option_type == "Call":
+                values = np.maximum(values, asset_prices - K)
+            else:
+                values = np.maximum(values, K - asset_prices)
+
+    return values[0]
+
+
 # -----------------------------
 # Real-Time Market Data
 # -----------------------------
+model = st.sidebar.selectbox("Choose a model", ["Black-Scholes", "Binomial Tree", "Monte Carlo"])
 with st.sidebar:
     st.header("🔍 Market Data")
     ticker = st.text_input("Enter stock ticker (e.g., AAPL)", value="AAPL")
@@ -91,4 +121,20 @@ if st.button("Calculate"):
             st.write(f"Theta: {theta:.4f}")
             st.write(f"Vega:  {vega:.4f}")
             st.write(f"Rho:   {rho:.4f}")
+
+elif model == "Binomial Tree":
+    st.subheader("🌲 Binomial Tree Option Pricing")
+    S = st.number_input("Spot Price", value=float(spot_price))
+    K = st.number_input("Strike Price", value=100.0)
+    T = st.number_input("Time to maturity (in years)", value=1.0)
+    r = st.number_input("Risk-free rate", value=0.05)
+    sigma = st.number_input("Volatility", value=0.2)
+    steps = st.slider("Number of steps", 1, 500, 50)
+    option_type = st.selectbox("Option Type", ["Call", "Put"])
+    american = st.checkbox("American Style", value=True)
+
+    if st.button("Price Option (Binomial)"):
+        price = binomial_tree_price(S, K, T, r, sigma, steps, option_type, american)
+        st.success(f"{'American' if american else 'European'} {option_type} Price: ${price:.4f}")
+
 
