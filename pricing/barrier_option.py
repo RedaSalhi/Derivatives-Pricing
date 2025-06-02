@@ -89,3 +89,23 @@ def plot_barrier_payoff(K, H, option_type="call", barrier_type="up-and-out", S_m
     ax.grid(True)
     ax.legend()
     st.pyplot(fig)
+
+
+def plot_sample_paths_barrier(S_paths, K, H, option_type, barrier_type):
+    """
+    Plot sample Monte Carlo paths and mark the barrier level.
+    """
+    fig, ax = plt.subplots(figsize=(8, 5))
+    for path in S_paths[:20]:  # plot first 20 paths
+        ax.plot(path, alpha=0.7)
+    
+    ax.axhline(y=H, color='red', linestyle='--', label=f"Barrier H = {H}")
+    ax.axhline(y=K, color='gray', linestyle='--', label=f"Strike K = {K}")
+    ax.set_title(f"Sample Price Paths – {option_type.upper()} {barrier_type.replace('-', ' ').title()}")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Simulated Spot Price")
+    ax.legend()
+    ax.grid(True)
+    st.pyplot(fig)
+
+
