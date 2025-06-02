@@ -66,7 +66,7 @@ def compute_strategy_payoff(legs, spot_prices):
     return payoffs
 
 
-def get_predefined_strategy(name, strike1, strike2=None, strike3=None):
+def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=None):
     """
     Return a predefined option strategy using explicit strike prices.
 
@@ -115,7 +115,6 @@ def get_predefined_strategy(name, strike1, strike2=None, strike3=None):
     elif name == "iron_condor":
         if strike2 is None or strike3 is None:
             return print("Iron Condor requires 4 strikes: strike1 (put long), strike2 (put short), strike3 (call short), strike4 (call long)")
-        strike4 = kwargs.get("strike4")
         if strike4 is None:
             return print("Iron Condor needs strike4 (call long)")
         return [
