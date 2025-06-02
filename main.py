@@ -57,7 +57,7 @@ with tab1:
         q = st.number_input("Dividend Yield (q)", value=0.0)
 
     if model == "binomial":
-        N = st.slider("Binomial Tree Steps (N)", min_value=10, max_value=500, value=100)
+        N = st.slider("Binomial Tree Steps (N)", min_value=10, max_value=10000, value=100)
     elif model == "monte-carlo":
         n_sim = st.slider("Monte Carlo Simulations", min_value=1_000, max_value=100_000, step=5_000, value=10_000)
 
