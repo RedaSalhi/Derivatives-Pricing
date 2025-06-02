@@ -23,11 +23,11 @@ def monte_carlo_price(option_type, S, K, T, r, sigma, q=0.0, n_simulations=100_0
 
     ST = S * np.exp((r - q - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * Z)
 
-    if option_type == 'call':
+    if option_type == 'Call':
         payoff = np.maximum(ST - K, 0)
-    elif option_type == 'put':
+    elif option_type == 'Put':
         payoff = np.maximum(K - ST, 0)
     else:
-        raise ValueError("option_type must be 'call' or 'put'")
+        raise ValueError("option_type must be 'Call' or 'Put'")
 
     return np.exp(-r * T) * np.mean(payoff)
