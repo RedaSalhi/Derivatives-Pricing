@@ -349,19 +349,24 @@ with tab4:
                     r=r,
                     sigma=sigma
                 )
-    
+        
                 if model == "monte_carlo":
                     kwargs["n_simulations"] = n_sim
                     kwargs["n_steps"] = n_steps
                     price, paths = price_barrier_option(**kwargs)
-                    st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
+                else:
+                    price = price_barrier_option(**kwargs)
+        
+                st.success(f"The {barrier_type} {option_type} option is worth: **{price:.4f}**")
+        
+                if model == "monte_carlo":
                     st.subheader("Monte Carlo Sample Paths")
-                    plot_sample_paths_barrier(paths, K=K, H=H, option_type=option_type, barrier_type=barrier_type)              
-
-                # Optional: don't plot if model is MC
-                if model == "black_scholes":
+                    plot_sample_paths_barrier(paths, K=K, H=H, option_type=option_type, barrier_type=barrier_type)
+        
+                elif model == "black_scholes":
                     st.subheader("Payoff at Maturity")
                     plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
-
+        
             except Exception as e:
                 st.error(f"Error: {e}")
+        
