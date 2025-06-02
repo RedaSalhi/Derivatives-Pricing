@@ -263,7 +263,7 @@ with tab3:
 # Tab 4 – Exotic Options
 # -----------------------------
 from pricing.digital_option import price_digital_option, plot_digital_payoff
-from pricing.barrier_option import price_barrier_option, plot_barrier_payoff
+from pricing.barrier_option import price_barrier_option, plot_barrier_payoff, plot_sample_paths_barrier
 
 with tab4:
     st.header("Exotic Option Pricing")
