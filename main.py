@@ -33,7 +33,13 @@ st.caption("Built for students, quants, and finance enthusiasts")
 # -----------------------------
 # Tabs Layout
 # -----------------------------
-tab1, tab2, tab3 = st.tabs(["Vanilla Options", "Forward Contracts", "Option Strategies"])
+tab1, tab2, tab3, tab4 = st.tabs([
+    "Vanilla Options", 
+    "Forward Contracts", 
+    "Option Strategies", 
+    "Digital Options" 
+])
+
 
 
 # -----------------------------
@@ -242,3 +248,52 @@ with tab3:
 
                 except Exception as e:
                     st.error(f"Error: {e}")
+
+# -----------------------------
+# Tab 4 – Digital Options
+# -----------------------------
+from pricing.digital_option import price_digital_option, plot_digital_payoff
+
+with tab4:
+    st.header("Digital Option Pricing")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        option_type_dig = st.selectbox("Option Type", ["call", "put"], key="dig_type")
+        style_dig = st.selectbox("Digital Style", ["cash", "asset"], key="dig_style")
+        model_dig = st.selectbox("Model", ["black_scholes"], key="dig_model")
+
+    with col2:
+        S_dig = st.number_input("Spot Price (S)", value=100.0, key="dig_S")
+        K_dig = st.number_input("Strike Price (K)", value=100.0, key="dig_K")
+        T_dig = st.number_input("Time to Maturity (T)", value=1.0, key="dig_T")
+        sigma_dig = st.number_input("Volatility (σ)", value=0.2, key="dig_sigma")
+        r_dig = st.number_input("Risk-Free Rate (r)", value=0.05, key="dig_r")
+        Q_dig = st.number_input("Payout (Q)", value=10.0, key="dig_Q")
+
+    if st.button("Compute Digital Option Price"):
+        try:
+            price_dig = price_digital_option(
+                model=model_dig,
+                option_type=option_type_dig,
+                style=style_dig,
+                S=S_dig,
+                K=K_dig,
+                T=T_dig,
+                r=r_dig,
+                sigma=sigma_dig,
+                Q=Q_dig
+            )
+            st.success(f"The {style_dig} digital {option_type_dig} is worth: **{price_dig:.4f}**")
+
+            st.subheader("Payoff at Maturity")
+            import matplotlib.pyplot as plt
+            import io
+            import contextlib
+
+            buf = io.BytesIO()
+            with contextlib.redirect_stdout(None):  # Avoid stdout noise from matplotlib
+                plot_digital_payoff(K=K_dig, option_type=option_type_dig, style=style_dig, Q=Q_dig)
+
+        except Exception as e:
+            st.error(f"Error: {e}")
