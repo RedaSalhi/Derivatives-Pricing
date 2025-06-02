@@ -21,7 +21,7 @@ def price_digital_option(model="black_scholes", option_type="call", style="cash"
     Returns:
         float: option price
     """
-    if model == "black_scholes":
+    if model == "Black-Scholes":
         if style == "cash":
             return digital_cash_or_nothing(option_type, S, K, T, r, sigma, Q)
         elif style == "asset":
