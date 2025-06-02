@@ -3,6 +3,10 @@
 import streamlit as st
 from pricing.vanilla_option import price_vanilla_option
 from pricing.european_options import plot_option_pnl_curve
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
 
 # Optional CSS styling
 def apply_css():
