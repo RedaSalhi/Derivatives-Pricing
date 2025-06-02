@@ -1,15 +1,9 @@
-import streamlit as st
-import numpy as np
-from scipy.stats import norm
-import yfinance as yf
-
 # main.py
 
 import streamlit as st
 from pricing.vanilla_option import price_vanilla_option
 from pricing.european_options import plot_option_pnl_curve
 
-# Optional: load styling
 def apply_css():
     try:
         with open("plan.css") as f:
@@ -17,68 +11,70 @@ def apply_css():
     except FileNotFoundError:
         pass
 
-apply_css()
+def main():
+    apply_css()
 
-# ----- Sidebar inputs -----
-st.sidebar.title("Option Parameters")
+    st.title("📊 Vanilla Option Pricing App")
 
-option_type = st.sidebar.selectbox("Option Type", ["call", "put"])
-exercise_style = st.sidebar.selectbox("Exercise Style", ["european", "american"])
-model = st.sidebar.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"])
+    st.sidebar.header("🧮 Parameters")
 
-S = st.sidebar.number_input("Spot Price (S)", value=100.0)
-K = st.sidebar.number_input("Strike Price (K)", value=100.0)
-T = st.sidebar.number_input("Time to Maturity (T, in years)", value=1.0)
-r = st.sidebar.number_input("Risk-Free Rate (r)", value=0.05)
-sigma = st.sidebar.number_input("Volatility (σ)", value=0.2)
-q = st.sidebar.number_input("Dividend Yield (q)", value=0.0)
+    # Basic inputs
+    option_type = st.sidebar.selectbox("Option Type", ["call", "put"])
+    exercise_style = st.sidebar.selectbox("Exercise Style", ["european", "american"])
+    model = st.sidebar.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"])
 
-# Model-specific inputs
-kwargs = {
-    "S": S,
-    "K": K,
-    "T": T,
-    "r": r,
-    "sigma": sigma,
-    "q": q
-}
+    S = st.sidebar.number_input("Spot Price (S)", value=100.0)
+    K = st.sidebar.number_input("Strike Price (K)", value=100.0)
+    T = st.sidebar.number_input("Time to Maturity (T in years)", value=1.0)
+    r = st.sidebar.number_input("Risk-Free Rate (r)", value=0.05)
+    sigma = st.sidebar.number_input("Volatility (σ)", value=0.2)
+    q = st.sidebar.number_input("Dividend Yield (q)", value=0.0)
 
-if model == "binomial":
-    kwargs["N"] = st.sidebar.slider("Time Steps (N)", min_value=10, max_value=500, value=200)
-elif model == "monte-carlo":
-    if exercise_style == "european":
+    kwargs = {
+        "S": S,
+        "K": K,
+        "T": T,
+        "r": r,
+        "sigma": sigma,
+        "q": q
+    }
+
+    # Model-specific options
+    if model == "binomial":
+        kwargs["N"] = st.sidebar.slider("Binomial Steps (N)", 10, 500, 200)
+    elif model == "monte-carlo":
         kwargs["n_simulations"] = st.sidebar.number_input("Simulations", value=100000)
-    else:
-        kwargs["n_simulations"] = st.sidebar.number_input("Simulations", value=100000)
-        kwargs["n_steps"] = st.sidebar.slider("Time Steps", min_value=10, max_value=200, value=50)
-        kwargs["poly_degree"] = st.sidebar.slider("Polynomial Degree", 1, 5, value=2)
+        if exercise_style == "american":
+            kwargs["n_steps"] = st.sidebar.slider("Time Steps", 10, 200, 50)
+            kwargs["poly_degree"] = st.sidebar.slider("Polynomial Degree", 1, 5, 2)
 
-# ----- Pricing Execution -----
-st.title("Vanilla Option Pricing App")
+    # Calculate price
+    st.subheader("💡 Option Price")
+    try:
+        price = price_vanilla_option(
+            option_type=option_type,
+            exercise_style=exercise_style,
+            model=model,
+            **kwargs
+        )
+        st.success(f"The option price is: **{price:.4f} €**")
 
-try:
-    price = price_vanilla_option(
-        option_type=option_type,
-        exercise_style=exercise_style,
-        model=model,
-        **kwargs
-    )
+        # Plot payoff diagram
+        st.subheader("📈 Payoff & Breakeven Plot")
+        plot_option_pnl_curve(
+            option_type=option_type,
+            S=S,
+            K=K,
+            price=price,
+            r=r,
+            T=T,
+            return_pct=True,
+            show_breakeven=True,
+            title=f"{exercise_style.capitalize()} {option_type.capitalize()} Option ({model.replace('-', ' ').title()})"
+        )
 
-    st.success(f"📈 Option Price: {price:.4f} €")
+    except ValueError as e:
+        st.error(f"Error: {e}")
 
-    # Plot P&L or Payoff
-    st.subheader("Payoff / Return Diagram")
-    plot_option_pnl_curve(
-        option_type=option_type,
-        S=S,
-        K=K,
-        price=price,
-        r=r,
-        T=T,
-        return_pct=True,
-        show_breakeven=True,
-        title=f"{exercise_style.capitalize()} {option_type.capitalize()} Option - {model.replace('-', ' ').title()}"
-    )
-
-except ValueError as e:
-    st.error(f"❌ {e}")
+if __name__ == "__main__":
+    main()
