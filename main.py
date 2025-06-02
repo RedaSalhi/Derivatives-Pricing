@@ -1,1 +1,94 @@
+import streamlit as st
+import numpy as np
+from scipy.stats import norm
+import yfinance as yf
+
+st.set_page_config(page_title="Derivative Pricing", layout="centered")
+st.title("📈 Derivative Pricing App - Tier 1")
+
+# -----------------------------
+# Black-Scholes Pricing
+# -----------------------------
+def black_scholes_price(S, K, T, r, sigma, option_type="Call"):
+    d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+    if option_type == "Call":
+        return S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    elif option_type == "Put":
+        return K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+
+# -----------------------------
+# Greeks
+# -----------------------------
+def black_scholes_greeks(S, K, T, r, sigma, option_type="Call"):
+    d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+    delta = norm.cdf(d1) if option_type == "Call" else norm.cdf(d1) - 1
+    gamma = norm.pdf(d1) / (S * sigma * np.sqrt(T))
+    vega = S * norm.pdf(d1) * np.sqrt(T)
+    theta = (
+        -S * norm.pdf(d1) * sigma / (2 * np.sqrt(T))
+        - r * K * np.exp(-r * T) * norm.cdf(d2 if option_type == "Call" else -d2)
+    )
+    rho = (
+        K * T * np.exp(-r * T) * norm.cdf(d2) if option_type == "Call"
+        else -K * T * np.exp(-r * T) * norm.cdf(-d2)
+    )
+    return delta, gamma, theta, vega, rho
+
+# -----------------------------
+# Implied Volatility Estimation
+# -----------------------------
+def implied_volatility(S, K, T, r, market_price, option_type="Call", tol=1e-5, max_iter=100):
+    sigma = 0.2
+    for _ in range(max_iter):
+        price = black_scholes_price(S, K, T, r, sigma, option_type)
+        vega = black_scholes_greeks(S, K, T, r, sigma, option_type)[3]
+        if vega == 0:
+            break
+        diff = price - market_price
+        if abs(diff) < tol:
+            return sigma
+        sigma -= diff / vega
+    return None
+
+# -----------------------------
+# Real-Time Market Data
+# -----------------------------
+with st.sidebar:
+    st.header("🔍 Market Data")
+    ticker = st.text_input("Enter stock ticker (e.g., AAPL)", value="AAPL")
+    data = yf.Ticker(ticker).history(period="1y")
+    spot_price = data["Close"].iloc[-1] if not data.empty else 100
+    st.write(f"Last price: ${spot_price:.2f}")
+
+st.subheader("🧮 Black-Scholes Option Pricing")
+
+S = st.number_input("Spot Price", value=float(spot_price))
+K = st.number_input("Strike Price", value=100.0)
+T = st.number_input("Time to maturity (in years)", value=1.0, min_value=0.01)
+r = st.number_input("Risk-free rate (e.g., 0.05 = 5%)", value=0.05)
+sigma = st.number_input("Volatility (e.g., 0.2 = 20%)", value=0.2)
+option_type = st.selectbox("Option Type", ["Call", "Put"])
+use_iv = st.checkbox("🔍 Estimate Implied Volatility")
+
+if st.button("Calculate"):
+    if use_iv:
+        market_price = st.number_input("Observed Market Option Price", value=10.0)
+        implied_vol = implied_volatility(S, K, T, r, market_price, option_type)
+        if implied_vol:
+            st.success(f"Estimated Implied Volatility: {implied_vol:.4f}")
+        else:
+            st.error("Could not converge to a solution.")
+    else:
+        price = black_scholes_price(S, K, T, r, sigma, option_type)
+        st.success(f"{option_type} Option Price: ${price:.2f}")
+        delta, gamma, theta, vega, rho = black_scholes_greeks(S, K, T, r, sigma, option_type)
+
+        with st.expander("📉 Option Greeks"):
+            st.write(f"Delta: {delta:.4f}")
+            st.write(f"Gamma: {gamma:.4f}")
+            st.write(f"Theta: {theta:.4f}")
+            st.write(f"Vega:  {vega:.4f}")
+            st.write(f"Rho:   {rho:.4f}")
 
