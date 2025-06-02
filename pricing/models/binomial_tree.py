@@ -32,9 +32,9 @@ def binomial_tree_price(option_type, S, K, T, r, sigma, q=0.0, N=100, american=F
     ST = np.array([S * (u**j) * (d**(N - j)) for j in range(N + 1)])
 
     # Initialize option values at maturity
-    if option_type == 'Call':
+    if option_type == 'call':
         option_values = np.maximum(ST - K, 0)
-    elif option_type == 'Put':
+    elif option_type == 'put':
         option_values = np.maximum(K - ST, 0)
     else:
         raise ValueError("option_type must be 'Call' or 'Put'")
