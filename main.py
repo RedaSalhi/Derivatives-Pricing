@@ -353,9 +353,10 @@ with tab4:
                 if model == "monte_carlo":
                     kwargs["n_simulations"] = n_sim
                     kwargs["n_steps"] = n_steps
-    
-                price = price_barrier_option(**kwargs)
-                st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
+                    price, paths = price_barrier_option(**kwargs)
+                    st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
+                    st.subheader("Monte Carlo Sample Paths")
+                    plot_sample_paths_barrier(paths, K=K, H=H, option_type=option_type, barrier_type=barrier_type)              
 
                 # Optional: don't plot if model is MC
                 if model == "black_scholes":
