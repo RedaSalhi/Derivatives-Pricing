@@ -7,7 +7,7 @@ def longstaff_schwartz_price(option_type, S, K, T, r, sigma, q=0.0, n_simulation
     Longstaff-Schwartz Monte Carlo pricing for American Call/Put options.
 
     Parameters:
-        option_type : 'Call' or 'Put'
+        option_type : 'call' or 'put' (case-insensitive)
         S : Spot price
         K : Strike price
         T : Time to maturity (in years)
@@ -21,6 +21,10 @@ def longstaff_schwartz_price(option_type, S, K, T, r, sigma, q=0.0, n_simulation
     Returns:
         float : Estimated American option price
     """
+    if option_type is None:
+        raise ValueError("Missing option_type: expected 'Call' or 'Put'")
+    option_type = option_type.lower()
+
     dt = T / n_steps
     df = np.exp(-r * dt)
 
@@ -33,20 +37,19 @@ def longstaff_schwartz_price(option_type, S, K, T, r, sigma, q=0.0, n_simulation
     for t in range(1, n_steps):
         paths[:, t] = paths[:, t-1] * np.exp((r - q - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z[:, t])
 
-    # ComPute payoffs at maturity
-    if option_type == 'Call':
+    # Compute payoffs at maturity
+    if option_type == 'call':
         payoff = np.maximum(paths[:, -1] - K, 0)
-    elif option_type == 'Put':
+    elif option_type == 'put':
         payoff = np.maximum(K - paths[:, -1], 0)
     else:
-        raise ValueError("option_type must be 'Call' or 'Put'")
+        raise ValueError("option_type must be 'call' or 'put' (case-insensitive)")
 
     cashflows = payoff.copy()
 
     # Backward induction using regression
     for t in range(n_steps - 2, 0, -1):
-        itm = None
-        if option_type == 'Call':
+        if option_type == 'call':
             itm = paths[:, t] > K
         else:
             itm = paths[:, t] < K
@@ -63,12 +66,16 @@ def longstaff_schwartz_price(option_type, S, K, T, r, sigma, q=0.0, n_simulation
         continuation_value = A @ coeffs
 
         # Exercise or continue
-        exercise_value = np.where(option_type == 'Call', X - K, K - X)
-        exercise = exercise_value > continuation_value
+        if option_type == 'call':
+            exercise_value = X - K
+        else:
+            exercise_value = K - X
 
+        exercise = exercise_value > continuation_value
         idx = np.where(itm)[0][exercise]
         cashflows[idx] = exercise_value[exercise]
 
         cashflows *= df
 
     return np.mean(cashflows)
+
