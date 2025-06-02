@@ -14,26 +14,26 @@ def price_vanilla_option(option_type, exercise_style, model, **kwargs):
     exercise_style = exercise_style.lower()
     model = model.lower()
 
-    if exercise_style not in ["european", "american"]:
-        raise ValueError("Exercise style must be 'european' or 'american'")
+    if exercise_style not in ["European", "American"]:
+        raise ValueError("Exercise style must be 'European' or 'American'")
 
     # Black-Scholes
-    if model == "black-scholes":
-        if exercise_style == "american":
+    if model == "Black-Scholes":
+        if exercise_style == "American":
             raise ValueError("Black-Scholes does not support American options.")
         return black_scholes_price(option_type=option_type, **kwargs)
 
     # Binomial Tree
-    elif model == "binomial":
+    elif model == "Binomial":
         return binomial_tree_price(
             option_type=option_type,
-            american=(exercise_style == "american"),
+            american=(exercise_style == "American"),
             **kwargs
         )
 
     # Monte Carlo
-    elif model == "monte-carlo":
-        if exercise_style == "american":
+    elif model == "Monte-Carlo":
+        if exercise_style == "American":
             return longstaff_schwartz_price(option_type=option_type, **kwargs)
         else:
             return monte_carlo_price(option_type=option_type, **kwargs)
