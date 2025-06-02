@@ -354,8 +354,6 @@ with tab4:
                     kwargs["n_simulations"] = n_sim
                     kwargs["n_steps"] = n_steps
                     price, paths = price_barrier_option(**kwargs)
-                else:
-                    return print("Model is not defined yet for Barrier Options")
         
                 st.success(f"The {barrier_type} {option_type} option is worth: **{price:.4f}**")
         
