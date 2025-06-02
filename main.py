@@ -131,10 +131,10 @@ elif model == "Binomial Tree":
     sigma = st.number_input("Volatility", value=0.2)
     steps = st.slider("Number of steps", 1, 500, 50)
     option_type = st.selectbox("Option Type", ["Call", "Put"])
-    american = st.checkbox("American Style", value=True)
+    style = st.selectbox("Option Style", ["American", "European"])
 
     if st.button("Price Option (Binomial)"):
-        price = binomial_tree_price(S, K, T, r, sigma, steps, option_type, american)
+        price = binomial_tree_price(S, K, T, r, sigma, steps, option_type, style)
         st.success(f"{'American' if american else 'European'} {option_type} Price: ${price:.4f}")
 
 
