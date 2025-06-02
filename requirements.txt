@@ -4,4 +4,4 @@ pandas
 scipy
 yfinance
 matplotlib
-scipy.stats
+scipy
