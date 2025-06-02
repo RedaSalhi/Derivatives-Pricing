@@ -45,7 +45,7 @@ with tab1:
     col1, col2 = st.columns(2)
     with col1:
         option_type = st.selectbox("Option Type", ["call", "put"])
-        exercise_style = st.selectbox("Exercise Style", ["european", "American"])
+        exercise_style = st.selectbox("Exercise Style", ["european", "american"])
         model = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"])
 
     with col2:
@@ -133,7 +133,7 @@ with tab3:
     use_manual = st.checkbox("Build Strategy Manually")
 
     model_strat = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"], key="strat_model")
-    style_strat = st.selectbox("Exercise Style", ["european", "American"], key="strat_style")
+    style_strat = st.selectbox("Exercise Style", ["european", "american"], key="strat_style")
 
     S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
     T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
