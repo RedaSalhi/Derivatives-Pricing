@@ -27,7 +27,7 @@ def price_vanilla_option(option_type, exercise_style, model, **kwargs):
     elif model == "Binomial":
         return binomial_tree_price(
             option_type=option_type,
-            american=(exercise_style == "American"),
+            American=(exercise_style == "American"),
             **kwargs
         )
 
