@@ -6,6 +6,46 @@ import yfinance as yf
 st.set_page_config(page_title="Derivative Pricing", layout="centered")
 st.title("📈 Derivative Pricing App - Tier 1")
 
+def inject_css():
+    st.markdown("""
+        <style>
+            /* Make headings bolder and modern */
+            h1, h2, h3 {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 700;
+            }
+
+            /* Modern button style */
+            .stButton>button {
+                background-color: #1E88E5;
+                color: white;
+                font-size: 16px;
+                padding: 10px 24px;
+                border-radius: 8px;
+                border: none;
+            }
+
+            /* Center all Streamlit containers */
+            .css-1v0mbdj, .block-container {
+                max-width: 900px;
+                margin: auto;
+            }
+
+            /* Modern input fields */
+            .stTextInput>div>input {
+                border: 1px solid #dcdcdc;
+                padding: 10px;
+                border-radius: 6px;
+            }
+
+            /* Light card-style background */
+            .stApp {
+                background-color: #f9f9f9;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+
 # -----------------------------
 # Black-Scholes Pricing
 # -----------------------------
