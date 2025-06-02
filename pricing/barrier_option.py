@@ -40,6 +40,12 @@ def price_barrier_option(
     """
     if model == "black_scholes":
         return barrier_price(S, K, H, T, r, sigma, option_type.lower(), barrier_type.lower())
+    elif model == "monte_carlo":
+        return monte_carlo_barrier(
+            S0=S, K=K, H=H, T=T, r=r, sigma=sigma,
+            option_type=option_type.lower(), barrier_type=barrier_type.lower(),
+            n_simulations=n_simulations, n_steps=n_steps
+        )
     else:
         raise NotImplementedError(f"Model '{model}' not implemented.")
 
