@@ -130,11 +130,8 @@ with tab2:
 with tab3:
     st.header("Multi-leg Option Strategy")
 
-    strategy = st.selectbox(
-        "Choose a Predefined Strategy",
-        ["straddle", "bull_call_spread", "bear_put_spread", "butterfly", "iron_condor"],
-        key="strat_type"
-    )
+    use_manual = st.checkbox("🔧 Build Strategy Manually")
+
     model_strat = st.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"], key="strat_model")
     style_strat = st.selectbox("Exercise Style", ["european", "american"], key="strat_style")
 
@@ -144,50 +141,104 @@ with tab3:
     r_strat = st.number_input("Risk-Free Rate (r)", value=0.05, key="strat_r")
     q_strat = st.number_input("Dividend Yield (q)", value=0.0, key="strat_q")
 
-    st.subheader("Enter Strike Prices")
-    strike1 = st.number_input("Strike 1", value=95.0, key="strat_k1")
+    kwargs = {
+        "S": S_strat,
+        "T": T_strat,
+        "sigma": sigma_strat,
+        "r": r_strat,
+        "q": q_strat
+    }
 
-    strike2 = None
-    strike3 = None
-    strike4 = None
+    if use_manual:
+        st.subheader("➕ Add Legs to Strategy")
 
-    if strategy in ["bull_call_spread", "bear_put_spread", "butterfly", "iron_condor"]:
-        strike2 = st.number_input("Strike 2", value=100.0, key="strat_k2")
-    if strategy in ["butterfly", "iron_condor"]:
-        strike3 = st.number_input("Strike 3", value=105.0, key="strat_k3")
-    if strategy == "iron_condor":
-        strike4 = st.number_input("Strike 4", value=110.0, key="strat_k4")
+        if "custom_legs" not in st.session_state:
+            st.session_state.custom_legs = []
 
-    if st.button("📊 Price Strategy & Show Payoff"):
-        # Pass all strikes (only used if strategy requires them)
-        legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4=strike4)
-        if isinstance(legs, str):
-            st.error(legs)
-        else:
-            kwargs = {
-                "S": S_strat,
-                "T": T_strat,
-                "sigma": sigma_strat,
-                "r": r_strat,
-                "q": q_strat
-            }
-            try:
-                result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
-                st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
+        with st.form("add_leg_form"):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                opt_type = st.selectbox("Type", ["call", "put"], key="leg_type")
+            with col2:
+                strike = st.number_input("Strike", value=100.0, key="leg_strike")
+            with col3:
+                qty = st.number_input("Quantity", step=1, value=1, key="leg_qty")
 
-                spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
-                payoff = compute_strategy_payoff(legs, spot_range)
+            submitted = st.form_submit_button("Add Leg")
+            if submitted:
+                st.session_state.custom_legs.append({"type": opt_type, "strike": strike, "qty": qty})
 
-                import matplotlib.pyplot as plt
-                fig, ax = plt.subplots(figsize=(10, 6))
-                ax.plot(spot_range, payoff, label="Strategy Payoff", color="green")
-                ax.axhline(0, color="black", linestyle="--")
-                ax.set_xlabel("Spot Price at Maturity (S)")
-                ax.set_ylabel("Net Payoff")
-                ax.set_title(f"Payoff Diagram: {strategy.title().replace('_', ' ')}")
-                ax.grid(True)
-                ax.legend()
-                st.pyplot(fig)
+        if st.session_state.custom_legs:
+            st.markdown("### 📜 Strategy Legs")
+            for i, leg in enumerate(st.session_state.custom_legs):
+                st.write(f"Leg {i+1}: {leg['qty']} × {leg['type'].upper()} @ Strike {leg['strike']}")
 
-            except Exception as e:
-                st.error(f"Error: {e}")
+            if st.button("🧮 Price Custom Strategy"):
+                try:
+                    result = price_option_strategy(st.session_state.custom_legs, style_strat, model_strat, **kwargs)
+                    st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
+
+                    spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
+                    payoff = compute_strategy_payoff(st.session_state.custom_legs, spot_range)
+
+                    import matplotlib.pyplot as plt
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    ax.plot(spot_range, payoff, label="Strategy Payoff", color="blue")
+                    ax.axhline(0, color="black", linestyle="--")
+                    ax.set_xlabel("Spot Price at Maturity (S)")
+                    ax.set_ylabel("Net Payoff")
+                    ax.set_title("Payoff Diagram: Custom Strategy")
+                    ax.grid(True)
+                    ax.legend()
+                    st.pyplot(fig)
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+        if st.button("🗑️ Clear Strategy Legs"):
+            st.session_state.custom_legs = []
+
+    else:
+        st.subheader("Predefined Strategy")
+
+        strategy = st.selectbox(
+            "Choose a Strategy",
+            ["straddle", "bull_call_spread", "bear_put_spread", "butterfly", "iron_condor"],
+            key="strat_type"
+        )
+
+        strike1 = st.number_input("Strike 1", value=95.0, key="strat_k1")
+        strike2 = strike3 = strike4 = None
+
+        if strategy in ["bull_call_spread", "bear_put_spread", "butterfly", "iron_condor"]:
+            strike2 = st.number_input("Strike 2", value=100.0, key="strat_k2")
+        if strategy in ["butterfly", "iron_condor"]:
+            strike3 = st.number_input("Strike 3", value=105.0, key="strat_k3")
+        if strategy == "iron_condor":
+            strike4 = st.number_input("Strike 4", value=110.0, key="strat_k4")
+
+        if st.button("📊 Price Predefined Strategy"):
+            legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4=strike4)
+            if isinstance(legs, str):
+                st.error(legs)
+            else:
+                try:
+                    result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
+                    st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
+
+                    spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
+                    payoff = compute_strategy_payoff(legs, spot_range)
+
+                    import matplotlib.pyplot as plt
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    ax.plot(spot_range, payoff, label="Strategy Payoff", color="green")
+                    ax.axhline(0, color="black", linestyle="--")
+                    ax.set_xlabel("Spot Price at Maturity (S)")
+                    ax.set_ylabel("Net Payoff")
+                    ax.set_title(f"Payoff Diagram: {strategy.title().replace('_', ' ')}")
+                    ax.grid(True)
+                    ax.legend()
+                    st.pyplot(fig)
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
