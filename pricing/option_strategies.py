@@ -29,7 +29,7 @@ def price_option_strategy(legs, exercise_style, model, **kwargs):
             option_type=leg["type"],
             exercise_style=exercise_style,
             model=model,
-            strike=leg["strike"],
+            K=leg["strike"],
             **kwargs
         )
         leg_price = leg["qty"] * price
