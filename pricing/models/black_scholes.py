@@ -26,4 +26,4 @@ def black_scholes_price(option_type, S, K, T, r, sigma, q=0.0):
     elif option_type == "put":
         return K * np.exp(-r * T) * norm.cdf(-d2) - S * np.exp(-q * T) * norm.cdf(-d1)
     else:
-        raise ValueError("option_type must be 'call' or 'put'")
+        return print("option_type must be 'call' or 'put'")
