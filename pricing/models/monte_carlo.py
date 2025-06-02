@@ -4,10 +4,10 @@ import numpy as np
 
 def monte_carlo_price(option_type, S, K, T, r, sigma, q=0.0, n_simulations=100_000):
     """
-    Monte Carlo pricing for European call or put options.
+    Monte Carlo pricing for European Call or Put options.
 
     Parameters:
-        option_type : 'call' or 'put'
+        option_type : 'Call' or 'Put'
         S : Spot price
         K : Strike price
         T : Time to maturity (in years)
