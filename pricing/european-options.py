@@ -1,29 +1,42 @@
-# pricing/models/black_scholes.py
-from scipy.stats import norm
-import numpy as np
+# pricing/vanilla_option.py
 
-def black_scholes_price(option_type, S, K, T, r, sigma, q=0.0):
+from .models.black_scholes import black_scholes_price
+from .models.binomial_tree import binomial_tree_price
+
+def price_vanilla_option(
+    option_type,
+    exercise_style,
+    model,
+    **kwargs
+):
     """
-    Black-Scholes formula for European option pricing.
+    Master pricing function for vanilla options.
 
     Parameters:
-        S : Spot price
-        K : Strike price
-        T : Time to maturity (in years)
-        r : Risk-free rate
-        sigma : Volatility
-        q : Dividend yield (default: 0.0)
+        option_type (str): 'call' or 'put'
+        exercise_style (str): 'european' or 'american'
+        model (str): 'black-scholes' or 'binomial'
+        kwargs: All pricing params (S, K, T, r, sigma, q, N...)
 
     Returns:
         float: option price
     """
-    d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
-    d2 = d1 - sigma * np.sqrt(T)
 
-    if option_type == "call":
-        return S * np.exp(-q * T) * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
-    elif option_type == "put":
-        return K * np.exp(-r * T) * norm.cdf(-d2) - S * np.exp(-q * T) * norm.cdf(-d1)
+    option_type = option_type.lower()
+    exercise_style = exercise_style.lower()
+    model = model.lower()
+
+    if exercise_style not in ["european", "american"]:
+        raise ValueError("exercise_style must be 'european' or 'american'")
+
+    if model == "black-scholes":
+        if exercise_style == "american":
+            raise ValueError("Black-Scholes model does not support American options.")
+        return black_scholes_price(option_type=option_type, **kwargs)
+
+    elif model == "binomial":
+        american_flag = exercise_style == "american"
+        return binomial_tree_price(option_type=option_type, american=american_flag, **kwargs)
+
     else:
-        raise ValueError("option_type must be 'call' or 'put'")
-
+        raise ValueError(f"Unknown model: {model}")
