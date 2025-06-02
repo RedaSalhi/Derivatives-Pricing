@@ -130,7 +130,11 @@ with tab2:
 with tab3:
     st.header("Multi-leg Option Strategy")
 
-    strategy = st.selectbox("Choose a Predefined Strategy", ["straddle", "bull_call_spread", "bear_put_spread", "butterfly"])
+    strategy = st.selectbox(
+        "Choose a Predefined Strategy",
+        ["straddle", "bull_call_spread", "bear_put_spread", "butterfly", "iron_condor"],
+        key="strat_type"
+    )
     model_strat = st.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"], key="strat_model")
     style_strat = st.selectbox("Exercise Style", ["european", "american"], key="strat_style")
 
@@ -141,12 +145,22 @@ with tab3:
     q_strat = st.number_input("Dividend Yield (q)", value=0.0, key="strat_q")
 
     st.subheader("Enter Strike Prices")
-    strike1 = st.number_input("Strike 1", value=95.0)
-    strike2 = st.number_input("Strike 2 (if needed)", value=100.0)
-    strike3 = st.number_input("Strike 3 (if needed)", value=105.0)
+    strike1 = st.number_input("Strike 1", value=95.0, key="strat_k1")
+
+    strike2 = None
+    strike3 = None
+    strike4 = None
+
+    if strategy in ["bull_call_spread", "bear_put_spread", "butterfly", "iron_condor"]:
+        strike2 = st.number_input("Strike 2", value=100.0, key="strat_k2")
+    if strategy in ["butterfly", "iron_condor"]:
+        strike3 = st.number_input("Strike 3", value=105.0, key="strat_k3")
+    if strategy == "iron_condor":
+        strike4 = st.number_input("Strike 4", value=110.0, key="strat_k4")
 
     if st.button("📊 Price Strategy & Show Payoff"):
-        legs = get_predefined_strategy(strategy, strike1, strike2, strike3)
+        # Pass all strikes (only used if strategy requires them)
+        legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4=strike4)
         if isinstance(legs, str):
             st.error(legs)
         else:
