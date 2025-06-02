@@ -71,18 +71,26 @@ with tab1:
             "q": q
         }
 
-        if model == "Binomial":
+        model_lower = model.lower()
+        if model_lower == "binomial":
             kwargs["N"] = N
-        elif model == "Monte-Carlo":
+        elif model_lower == "monte-carlo":
             kwargs["n_simulations"] = n_sim
 
         try:
-            price = price_vanilla_option(option_type, exercise_style, model, **kwargs)
-            st.success(f"The {exercise_style} {option_type} option is worth: **{price:.4f}**")
+            price = price_vanilla_option(
+                option_type.lower(),
+                exercise_style.lower(),
+                model_lower,
+                **kwargs
+            )
+            st.success(f"The {exercise_style.lower()} {option_type.lower()} option is worth: **{price:.4f}**")
         except Exception as e:
             st.error(f"Error: {e}")
 
-
+# -----------------------------
+# Tab 2 – Forward Contracts
+# -----------------------------
 # -----------------------------
 # Tab 2 – Forward Contracts
 # -----------------------------
@@ -92,38 +100,46 @@ with tab2:
     col1, col2 = st.columns(2)
     with col1:
         S_fwd = st.number_input("Spot Price", value=100.0, key="fwd_spot")
-        K_fwd = st.number_input("Strike Price", value=100.0, key="fwd_strike")
-        T_fwd = st.number_input("Time to Maturity (T)", value=1.0, key="fwd_T")
+        K_fwd = st.number_input("Strike Price (Delivery Price)", value=100.0, key="fwd_strike")
+        T_fwd = st.number_input("Time to Maturity (T, in years)", value=1.0, key="fwd_T")
         r_fwd = st.number_input("Risk-Free Rate (r)", value=0.05, key="fwd_r")
     with col2:
         storage_cost = st.number_input("Storage Cost (c)", value=0.0, key="fwd_storage")
         dividend_yield = st.number_input("Dividend Yield (q)", value=0.0, key="fwd_q")
-        position = st.radio("Position", ["long", "short"])
+        position = st.radio("Position", ["Long", "Short"])
 
     if st.button("Price Forward Contract"):
-        F = price_forward_contract(
-            spot_price=S_fwd,
-            interest_rate=r_fwd,
-            time_to_maturity=T_fwd,
-            storage_cost=storage_cost,
-            dividend_yield=dividend_yield
-        )
-        st.success(f"Theoretical Forward Price: **{F:.4f}**")
+        try:
+            F = price_forward_contract(
+                spot_price=S_fwd,
+                interest_rate=r_fwd,
+                time_to_maturity=T_fwd,
+                storage_cost=storage_cost,
+                dividend_yield=dividend_yield
+            )
+            st.success(f"Theoretical Forward Price: **{F:.4f}**")
 
-        st.subheader("Forward Payout at Maturity")
-        plot_forward_payout_and_value(K_fwd, position)
+            st.subheader("Forward Payout at Maturity")
+            plot_forward_payout_and_value(K_fwd, position)
 
-        st.subheader("Mark-to-Market Value (Before Maturity)")
-        plot_forward_mark_to_market(
-            strike_price=K_fwd,
-            time_to_maturity=T_fwd,
-            interest_rate=r_fwd,
-            storage_cost=storage_cost,
-            dividend_yield=dividend_yield,
-            position=position
-        )
+            st.subheader("Mark-to-Market Value (Before Maturity)")
+            plot_forward_mark_to_market(
+                strike_price=K_fwd,
+                time_to_maturity=T_fwd,
+                interest_rate=r_fwd,
+                storage_cost=storage_cost,
+                dividend_yield=dividend_yield,
+                position=position
+            )
+
+        except Exception as e:
+            st.error(f"Error: {e}")
 
 
+
+# -----------------------------
+# Tab 3 – Option Strategies
+# -----------------------------
 # -----------------------------
 # Tab 3 – Option Strategies
 # -----------------------------
@@ -136,7 +152,7 @@ with tab3:
     style_strat = st.selectbox("Exercise Style", ["european", "american"], key="strat_style")
 
     S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
-    T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
+    T_strat = st.number_input("Time to Maturity (T, in years)", value=1.0, key="strat_T")
     sigma_strat = st.number_input("Volatility (σ)", value=0.2, key="strat_sigma")
     r_strat = st.number_input("Risk-Free Rate (r)", value=0.05, key="strat_r")
     q_strat = st.number_input("Dividend Yield (q)", value=0.0, key="strat_q")
@@ -160,9 +176,9 @@ with tab3:
             with col1:
                 opt_type = st.selectbox("Type", ["call", "put"], key="leg_type")
             with col2:
-                strike = st.number_input("Strike", value=100.0, key="leg_strike")
+                strike = st.number_input("Strike Price", value=100.0, key="leg_strike")
             with col3:
-                qty = st.number_input("Quantity", step=1, value=1, key="leg_qty")
+                qty = st.number_input("Quantity", value=1, step=1, key="leg_qty")
 
             submitted = st.form_submit_button("Add Leg")
             if submitted:
@@ -175,8 +191,13 @@ with tab3:
 
             if st.button("Price Custom Strategy"):
                 try:
-                    result = price_option_strategy(st.session_state.custom_legs, style_strat, model_strat, **kwargs)
-                    st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
+                    result = price_option_strategy(
+                        legs=st.session_state.custom_legs,
+                        exercise_style=style_strat,
+                        model=model_strat,
+                        **kwargs
+                    )
+                    st.success(f"Total Strategy Price: **{result['Strategy price']:.4f}**")
 
                     spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
                     payoff = compute_strategy_payoff(st.session_state.custom_legs, spot_range)
@@ -219,12 +240,18 @@ with tab3:
 
         if st.button("Price Predefined Strategy"):
             legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4=strike4)
+
             if isinstance(legs, str):
                 st.error(legs)
             else:
                 try:
-                    result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
-                    st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
+                    result = price_option_strategy(
+                        legs=legs,
+                        exercise_style=style_strat,
+                        model=model_strat,
+                        **kwargs
+                    )
+                    st.success(f"Total Strategy Price: **{result['Strategy price']:.4f}**")
 
                     spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
                     payoff = compute_strategy_payoff(legs, spot_range)
@@ -235,10 +262,11 @@ with tab3:
                     ax.axhline(0, color="black", linestyle="--")
                     ax.set_xlabel("Spot Price at Maturity (S)")
                     ax.set_ylabel("Net Payoff")
-                    ax.set_title(f"Payoff Diagram: {strategy.title().replace('_', ' ')}")
+                    ax.set_title(f"Payoff Diagram: {strategy}")
                     ax.grid(True)
                     ax.legend()
                     st.pyplot(fig)
 
                 except Exception as e:
                     st.error(f"Error: {e}")
+
