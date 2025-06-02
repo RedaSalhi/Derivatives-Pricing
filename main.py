@@ -1,46 +1,61 @@
 # main.py
 
 import streamlit as st
+import numpy as np
+
 from pricing.vanilla_option import price_vanilla_option
-from pricing.european_options import plot_option_pnl_curve
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+from pricing.forward import (
+    price_forward_contract,
+    plot_forward_mark_to_market,
+    plot_forward_payout_and_value
+)
+from pricing.option_strategies import (
+    price_option_strategy,
+    compute_strategy_payoff,
+    get_predefined_strategy
+)
 
 
-# Optional CSS styling
-def apply_css():
-    try:
-        with open("plan.css") as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    except FileNotFoundError:
-        st.warning("No CSS file found — using default Streamlit theme.")
+# -----------------------------
+# Page Setup
+# -----------------------------
+st.set_page_config(page_title="📈 Derivatives Pricing App", layout="centered")
+st.title("📊 Derivatives Pricing App")
+st.caption("Built with ❤️ for students, quants, and finance enthusiasts")
 
-# Main layout
-def main():
-    apply_css()
 
-    st.set_page_config(page_title="Vanilla Option Pricer", layout="centered")
-    st.title("📊 Vanilla Option Pricer")
-    st.markdown("Price European and American Call/Put options using different models.")
+# -----------------------------
+# Tabs Layout
+# -----------------------------
+tab1, tab2, tab3 = st.tabs(["🧮 Vanilla Options", "📉 Forward Contracts", "🧩 Option Strategies"])
 
-    with st.form("pricing_form"):
-        col1, col2 = st.columns(2)
 
-        with col1:
-            option_type = st.selectbox("Option Type", ["call", "put"])
-            exercise_style = st.selectbox("Exercise Style", ["european", "american"])
-            model = st.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"])
+# -----------------------------
+# Tab 1 – Vanilla Options
+# -----------------------------
+with tab1:
+    st.header("Vanilla Option Pricing")
 
-        with col2:
-            S = st.number_input("Spot Price (S)", value=100.0)
-            K = st.number_input("Strike Price (K)", value=100.0)
-            T = st.number_input("Time to Maturity (T, in years)", value=1.0)
-            r = st.number_input("Risk-Free Rate (r)", value=0.05)
-            sigma = st.number_input("Volatility (σ)", value=0.2)
-            q = st.number_input("Dividend Yield (q)", value=0.0)
+    col1, col2 = st.columns(2)
+    with col1:
+        option_type = st.selectbox("Option Type", ["call", "put"])
+        exercise_style = st.selectbox("Exercise Style", ["european", "american"])
+        model = st.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"])
 
-        # Advanced model options
+    with col2:
+        S = st.number_input("Spot Price (S)", value=100.0)
+        K = st.number_input("Strike Price (K)", value=100.0)
+        T = st.number_input("Time to Maturity (T, in years)", value=1.0)
+        sigma = st.number_input("Volatility (σ)", value=0.2)
+        r = st.number_input("Risk-Free Rate (r)", value=0.05)
+        q = st.number_input("Dividend Yield (q)", value=0.0)
+
+    if model == "binomial":
+        N = st.slider("Binomial Tree Steps (N)", min_value=10, max_value=500, value=100)
+    elif model == "monte-carlo":
+        n_sim = st.slider("Monte Carlo Simulations", min_value=1_000, max_value=100_000, step=5_000, value=10_000)
+
+    if st.button("💰 Compute Option Price"):
         kwargs = {
             "S": S,
             "K": K,
@@ -51,41 +66,108 @@ def main():
         }
 
         if model == "binomial":
-            kwargs["N"] = st.slider("Steps (N)", 10, 500, 200)
-
+            kwargs["N"] = N
         elif model == "monte-carlo":
-            kwargs["n_simulations"] = st.number_input("Simulations", value=100000)
-            if exercise_style == "american":
-                kwargs["n_steps"] = st.slider("Time Steps", 10, 200, 50)
-                kwargs["poly_degree"] = st.slider("Polynomial Degree", 1, 5, 2)
+            kwargs["n_simulations"] = n_sim
 
-        submitted = st.form_submit_button("🔍 Price Option")
-
-    if submitted:
         try:
-            price = price_vanilla_option(
-                option_type=option_type,
-                exercise_style=exercise_style,
-                model=model,
-                **kwargs
-            )
-            st.success(f"💰 Option Price: **{price:.4f} €**")
-
-            st.subheader("📈 Payoff Diagram")
-            plot_option_pnl_curve(
-                option_type=option_type,
-                S=S,
-                K=K,
-                price=price,
-                r=r,
-                T=T,
-                return_pct=True,
-                show_breakeven=True,
-                title=f"{exercise_style.capitalize()} {option_type.capitalize()} Option ({model.replace('-', ' ').title()})"
-            )
-
+            price = price_vanilla_option(option_type, exercise_style, model, **kwargs)
+            st.success(f"The {exercise_style} {option_type} option is worth: **{price:.4f}**")
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            st.error(f"Error: {e}")
 
-if __name__ == "__main__":
-    main()
+
+# -----------------------------
+# Tab 2 – Forward Contracts
+# -----------------------------
+with tab2:
+    st.header("Forward Contract Pricing")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        S_fwd = st.number_input("Spot Price", value=100.0, key="fwd_spot")
+        K_fwd = st.number_input("Strike Price", value=100.0, key="fwd_strike")
+        T_fwd = st.number_input("Time to Maturity (T)", value=1.0, key="fwd_T")
+        r_fwd = st.number_input("Risk-Free Rate (r)", value=0.05, key="fwd_r")
+    with col2:
+        storage_cost = st.number_input("Storage Cost (c)", value=0.0)
+        dividend_yield = st.number_input("Dividend Yield (q)", value=0.0)
+        position = st.radio("Position", ["long", "short"])
+
+    if st.button("📈 Price Forward Contract"):
+        F = price_forward_contract(
+            spot_price=S_fwd,
+            interest_rate=r_fwd,
+            time_to_maturity=T_fwd,
+            storage_cost=storage_cost,
+            dividend_yield=dividend_yield
+        )
+        st.success(f"Theoretical Forward Price: **{F:.4f}**")
+
+        st.subheader("📉 Forward Payout at Maturity")
+        plot_forward_payout_and_value(K_fwd, position)
+
+        st.subheader("🔄 Mark-to-Market Value (Before Maturity)")
+        plot_forward_mark_to_market(
+            strike_price=K_fwd,
+            time_to_maturity=T_fwd,
+            interest_rate=r_fwd,
+            storage_cost=storage_cost,
+            dividend_yield=dividend_yield,
+            position=position
+        )
+
+
+# -----------------------------
+# Tab 3 – Option Strategies
+# -----------------------------
+with tab3:
+    st.header("Multi-leg Option Strategy")
+
+    strategy = st.selectbox("Choose a Predefined Strategy", ["straddle", "bull_call_spread", "bear_put_spread", "butterfly"])
+    model_strat = st.selectbox("Pricing Model", ["black-scholes", "binomial", "monte-carlo"], key="strat_model")
+    style_strat = st.selectbox("Exercise Style", ["european", "american"], key="strat_style")
+
+    S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
+    T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
+    sigma_strat = st.number_input("Volatility (σ)", value=0.2, key="strat_sigma")
+    r_strat = st.number_input("Risk-Free Rate (r)", value=0.05, key="strat_r")
+    q_strat = st.number_input("Dividend Yield (q)", value=0.0, key="strat_q")
+
+    st.subheader("Enter Strike Prices")
+    strike1 = st.number_input("Strike 1", value=95.0)
+    strike2 = st.number_input("Strike 2 (if needed)", value=100.0)
+    strike3 = st.number_input("Strike 3 (if needed)", value=105.0)
+
+    if st.button("📊 Price Strategy & Show Payoff"):
+        legs = get_predefined_strategy(strategy, strike1, strike2, strike3)
+        if isinstance(legs, str):
+            st.error(legs)
+        else:
+            kwargs = {
+                "S": S_strat,
+                "T": T_strat,
+                "sigma": sigma_strat,
+                "r": r_strat,
+                "q": q_strat
+            }
+            try:
+                result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
+                st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
+
+                spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
+                payoff = compute_strategy_payoff(legs, spot_range)
+
+                import matplotlib.pyplot as plt
+                fig, ax = plt.subplots(figsize=(10, 6))
+                ax.plot(spot_range, payoff, label="Strategy Payoff", color="green")
+                ax.axhline(0, color="black", linestyle="--")
+                ax.set_xlabel("Spot Price at Maturity (S)")
+                ax.set_ylabel("Net Payoff")
+                ax.set_title(f"Payoff Diagram: {strategy.title().replace('_', ' ')}")
+                ax.grid(True)
+                ax.legend()
+                st.pyplot(fig)
+
+            except Exception as e:
+                st.error(f"Error: {e}")
