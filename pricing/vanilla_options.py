@@ -11,11 +11,11 @@ def price_vanilla_option(option_type, exercise_style, model, **kwargs):
     model = model.lower()
 
     if exercise_style not in ["european", "american"]:
-        return "exercise_style must be 'european' or 'american'"
+        return print("Exercise style must be 'european' or 'american'")
 
     if model == "black-scholes":
         if exercise_style == "american":
-            return "Black-Scholes does not support American options."
+            return print("Black-Scholes does not support American options.")
         return black_scholes_price(option_type=option_type, **kwargs)
 
     elif model == "binomial":
