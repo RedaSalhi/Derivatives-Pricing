@@ -1,4 +1,9 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
+# -----------------------------
+# Pricing Function
+# -----------------------------
 
 def price_forward_contract(
     spot_price: float,
@@ -30,22 +35,71 @@ def price_forward_contract(
     else:
         raise NotImplementedError(f"Pricing model '{pricing_model}' is not implemented for forward contracts.")
 
-import matplotlib.pyplot as plt
-import numpy as np
+# -----------------------------
+# Plot at time t<T
+# -----------------------------
 
-def plot_forward_payout_and_price(forward_price: float, strike_price: float, position: str = "long"):
+
+
+def plot_forward_mark_to_market(
+    strike_price: float,
+    time_to_maturity: float,
+    interest_rate: float,
+    storage_cost: float = 0.0,
+    dividend_yield: float = 0.0,
+    position: str = "long"
+):
     """
-    Plots the payout and price of a forward contract at maturity.
+    Plots the mark-to-market (MtM) value of a forward contract at time t before maturity.
 
     Parameters:
-        forward_price (float): Fair value of the forward (from pricing model).
         strike_price (float): Agreed delivery price (K).
-        position (str): "long" or "short" forward position.
+        time_to_maturity (float): Remaining time to maturity in years (T - t).
+        interest_rate (float): Annual continuous risk-free rate (r).
+        storage_cost (float): Annual continuous storage cost rate (c).
+        dividend_yield (float): Annual continuous dividend yield (q).
+        position (str): 'long' or 'short'
     """
-    # Define range of spot prices at maturity
+    # Range of spot prices S_t
+    S_t = np.linspace(0.5 * strike_price, 1.5 * strike_price, 500)
+    
+    # Forward value at time t (not maturity)
+    value_t = S_t * np.exp((interest_rate + storage_cost - dividend_yield) * time_to_maturity) \
+              - strike_price * np.exp(-interest_rate * time_to_maturity)
+
+    if position == "short":
+        value_t = -value_t
+        label = "Short Forward Value (t < T)"
+    else:
+        label = "Long Forward Value (t < T)"
+
+    # Plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(S_t, value_t, label=label, color='purple')
+    plt.axhline(0, color='black', linestyle='--')
+    plt.xlabel("Spot Price at Time t (S_t)")
+    plt.ylabel("Forward Contract Value at Time t")
+    plt.title("Mark-to-Market Value of Forward Contract Before Maturity")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+# -----------------------------
+# Plot at T payout
+# -----------------------------
+
+def plot_forward_payout_and_value(strike_price: float, position: str = "long"):
+    """
+    Plots the payout and value of a forward contract at maturity.
+
+    Parameters:
+        strike_price (float): Agreed delivery price (K).
+        position (str): 'long' or 'short'
+    """
+    # Simulated spot prices at maturity
     S_T = np.linspace(0.5 * strike_price, 1.5 * strike_price, 500)
 
-    # Define payout depending on long or short
     if position == "long":
         payout = S_T - strike_price
         label_payout = "Long Forward Payout"
@@ -59,12 +113,12 @@ def plot_forward_payout_and_price(forward_price: float, strike_price: float, pos
     plt.figure(figsize=(10, 6))
     plt.plot(S_T, payout, label=label_payout, color='blue')
     plt.axhline(0, color='black', linewidth=0.8, linestyle='--')
-    plt.axhline(forward_price - strike_price, color='red', linestyle='--', label="Fair Forward Price (Today)")
-
-    plt.title(f"Forward Contract: {label_payout} and Fair Price")
+    
+    plt.title(f"Forward Contract: {label_payout}")
     plt.xlabel("Spot Price at Maturity (S_T)")
-    plt.ylabel("Payout / Forward Value")
+    plt.ylabel("Payout at Maturity")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
