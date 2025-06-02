@@ -8,10 +8,10 @@ def price_option_strategy(legs, exercise_style, model, **kwargs):
 
     Parameters:
         legs (list): List of dictionaries, each containing:
-            - "type": "call" or "put"
+            - "type": "Call" or "Put"
             - "strike": strike price
-            - "qty": quantity (positive for long, negative for short)
-        exercise_style (str): "european" or "american"
+            - "qty": quantity (positive for Long, negative for Short)
+        exercise_style (str): "European" or "American"
         model (str): Pricing model ("black-scholes", "binomial", etc.)
         kwargs: Common option parameters like S, T, sigma, r
 
@@ -42,9 +42,9 @@ def price_option_strategy(legs, exercise_style, model, **kwargs):
     }
 
 
-def compute_strategy_payoff(legs, spot_prices):
+def comPute_strategy_payoff(legs, spot_prices):
     """
-    Compute total strategy payoff over a range of spot prices.
+    ComPute total strategy payoff over a range of spot prices.
 
     Parameters:
         legs (list): Strategy legs as described above
@@ -71,7 +71,7 @@ def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=N
     Return a predefined option strategy using explicit strike prices.
 
     Parameters:
-        name (str): Strategy name: "straddle", "bull_call_spread", "bear_put_spread", "butterfly", etc.
+        name (str): Strategy name: "Straddle", "Bull Call Spread", "Bear Put Spread", "Butterfly", etc.
         strike1, strike2, strike3 (float): Strike prices as needed by the strategy
 
     Returns:
@@ -89,7 +89,7 @@ def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=N
     
     elif name == "Bull Call Spread":
         if strike2 is None:
-            return "Bull Call Spread requires strike1 (long) and strike2 (short)."
+            return "Bull Call Spread requires strike1 (Long) and strike2 (Short)."
         return [
             {"type": "Call", "strike": strike1, "qty": 1},
             {"type": "Call", "strike": strike2, "qty": -1}
@@ -97,7 +97,7 @@ def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=N
 
     elif name == "Bear Put Spread":
         if strike2 is None:
-            return print("Bear Put Spread requires strike1 (long) and strike2 (short).")
+            return print("Bear Put Spread requires strike1 (Long) and strike2 (Short).")
         return [
             {"type": "Put", "strike": strike1, "qty": 1},
             {"type": "Put", "strike": strike2, "qty": -1}
@@ -114,9 +114,9 @@ def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=N
 
     elif name == "Iron Condor":
         if strike2 is None or strike3 is None:
-            return print("Iron Condor requires 4 strikes: strike1 (put long), strike2 (put short), strike3 (call short), strike4 (call long)")
+            return print("Iron Condor requires 4 strikes: strike1 (Put Long), strike2 (Put Short), strike3 (Call Short), strike4 (Call Long)")
         if strike4 is None:
-            return print("Iron Condor needs strike4 (call long)")
+            return print("Iron Condor needs strike4 (Call Long)")
         return [
             {"type": "Put", "strike": strike1, "qty": 1},
             {"type": "Put", "strike": strike2, "qty": -1},
