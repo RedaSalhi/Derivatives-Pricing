@@ -37,8 +37,8 @@ def price_option_strategy(legs, exercise_style, model, **kwargs):
         individual_prices.append(leg_price)
 
     return {
-        "strategy_price": total_price,
-        "individual_prices": individual_prices
+        "Strategy price": total_price,
+        "Individual prices": individual_prices
     }
 
 
@@ -58,9 +58,9 @@ def compute_strategy_payoff(legs, spot_prices):
     for leg in legs:
         K = leg["strike"]
         qty = leg["qty"]
-        if leg["type"].lower() == "call":
+        if leg["type"].lower() == "Call":
             payoffs += qty * np.maximum(spot_prices - K, 0)
-        elif leg["type"].lower() == "put":
+        elif leg["type"].lower() == "Put":
             payoffs += qty * np.maximum(K - spot_prices, 0)
 
     return payoffs
@@ -79,49 +79,49 @@ def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=N
     """
     name = name.lower()
 
-    if name == "straddle":
+    if name == "Straddle":
         if strike2 is not None or strike3 is not None:
             return "Straddle only requires strike1 (ATM)."
         return [
-            {"type": "call", "strike": strike1, "qty": 1},
-            {"type": "put", "strike": strike1, "qty": 1}
+            {"type": "Call", "strike": strike1, "qty": 1},
+            {"type": "Put", "strike": strike1, "qty": 1}
         ]
     
-    elif name == "bull_call_spread":
+    elif name == "Bull Call Spread":
         if strike2 is None:
             return "Bull Call Spread requires strike1 (long) and strike2 (short)."
         return [
-            {"type": "call", "strike": strike1, "qty": 1},
-            {"type": "call", "strike": strike2, "qty": -1}
+            {"type": "Call", "strike": strike1, "qty": 1},
+            {"type": "Call", "strike": strike2, "qty": -1}
         ]
 
-    elif name == "bear_put_spread":
+    elif name == "Bear Put Spread":
         if strike2 is None:
             return print("Bear Put Spread requires strike1 (long) and strike2 (short).")
         return [
-            {"type": "put", "strike": strike1, "qty": 1},
-            {"type": "put", "strike": strike2, "qty": -1}
+            {"type": "Put", "strike": strike1, "qty": 1},
+            {"type": "Put", "strike": strike2, "qty": -1}
         ]
     
-    elif name == "butterfly":
+    elif name == "Butterfly":
         if strike2 is None or strike3 is None:
             return print("Butterfly requires strike1 (low), strike2 (middle), and strike3 (high).")
         return [
-            {"type": "call", "strike": strike1, "qty": 1},
-            {"type": "call", "strike": strike2, "qty": -2},
-            {"type": "call", "strike": strike3, "qty": 1}
+            {"type": "Call", "strike": strike1, "qty": 1},
+            {"type": "Call", "strike": strike2, "qty": -2},
+            {"type": "Call", "strike": strike3, "qty": 1}
         ]
 
-    elif name == "iron_condor":
+    elif name == "Iron Condor":
         if strike2 is None or strike3 is None:
             return print("Iron Condor requires 4 strikes: strike1 (put long), strike2 (put short), strike3 (call short), strike4 (call long)")
         if strike4 is None:
             return print("Iron Condor needs strike4 (call long)")
         return [
-            {"type": "put", "strike": strike1, "qty": 1},
-            {"type": "put", "strike": strike2, "qty": -1},
-            {"type": "call", "strike": strike3, "qty": -1},
-            {"type": "call", "strike": strike4, "qty": 1}
+            {"type": "Put", "strike": strike1, "qty": 1},
+            {"type": "Put", "strike": strike2, "qty": -1},
+            {"type": "Call", "strike": strike3, "qty": -1},
+            {"type": "Call", "strike": strike4, "qty": 1}
         ]
 
     else:
