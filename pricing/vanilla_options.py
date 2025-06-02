@@ -1,4 +1,4 @@
-# pricing/vanilla_option.py
+# pricing/vanilla_options.py
 
 from pricing.models.black_scholes import black_scholes_price
 from pricing.models.binomial_tree import binomial_tree_price
