@@ -331,7 +331,7 @@ with tab4:
         # Sliders appear only if Monte Carlo is selected
         if model == "monte_carlo":
             n_sim = st.slider("Number of Simulations", min_value=1_000, max_value=100_000, step=5_000, value=10_000)
-            n_steps = st.slider("Steps per Path", min_value=10, max_value=500, step=10, value=100)
+            n_steps = st.slider("Steps per Path", min_value=10, max_value=300, step=2, value=252)
         else:
             n_sim = None
             n_steps = None
