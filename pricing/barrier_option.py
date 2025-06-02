@@ -10,7 +10,7 @@ def price_barrier_option(
     S, K, H, T, r, sigma,
     option_type="call",
     barrier_type="up-and-out",
-    model="black_scholes"
+    model
 ):
     """
     Price a European barrier option using the specified model.
