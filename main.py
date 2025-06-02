@@ -62,42 +62,40 @@ with tab1:
         r = st.number_input("Risk-Free Rate (r)", value=0.05)
         q = st.number_input("Dividend Yield (q)", value=0.0)
 
-    # Sliders appear only if Monte Carlo is selected
-    if model == "monte_carlo":
-        n_sim = st.slider("Number of Simulations", min_value=1_000, max_value=100_000, step=5_000, value=10_000)
-        n_steps = st.slider("Steps per Path", min_value=10, max_value=500, step=10, value=100)
-    else:
-        n_sim = None
-        n_steps = None
+    if model == "Binomial":
+        N = st.slider("Binomial Tree Steps (N)", min_value=10, max_value=10000, value=100)
+    elif model == "Monte-Carlo":
+        n_sim = st.slider("Monte Carlo Simulations", min_value=1_000, max_value=100_000, step=5_000, value=10_000)
 
-    if st.button("Compute Barrier Option Price"):
+    if st.button("Compute Option Price"):
+        kwargs = {
+            "S": S,
+            "K": K,
+            "T": T,
+            "r": r,
+            "sigma": sigma,
+            "q": q
+        }
+
+        model_lower = model.lower()
+        if model_lower == "binomial":
+            kwargs["N"] = N
+        elif model_lower == "monte-carlo":
+            kwargs["n_simulations"] = n_sim
+
         try:
-            kwargs = dict(
-                model=model,
-                option_type=option_type,
-                barrier_type=barrier_type,
-                S=S,
-                K=K,
-                H=H,
-                T=T,
-                r=r,
-                sigma=sigma
+            price = price_vanilla_option(
+                option_type.lower(),
+                exercise_style.lower(),
+                model_lower,
+                **kwargs
             )
-
-            if model == "monte_carlo":
-                kwargs["n_simulations"] = n_sim
-                kwargs["n_steps"] = n_steps
-
-            price = price_barrier_option(**kwargs)
-            st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
-
-            # Optional: don't plot if model is MC
-            if model == "black_scholes":
-                st.subheader("Payoff at Maturity")
-                plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
-
+            st.success(f"The {exercise_style.lower()} {option_type.lower()} option is worth: **{price:.4f}**")
         except Exception as e:
             st.error(f"Error: {e}")
+
+
+    
 
 
 # -----------------------------
@@ -331,21 +329,30 @@ with tab4:
             r = st.number_input("Risk-Free Rate (r)", value=0.05, key="bar_r")
 
         if st.button("Compute Barrier Option Price"):
-            try:
-                price = price_barrier_option(
-                    model=model,
-                    option_type=option_type,
-                    barrier_type=barrier_type,
-                    S=S,
-                    K=K,
-                    H=H,
-                    T=T,
-                    r=r,
-                    sigma=sigma
-                )
-                st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
+        try:
+            kwargs = dict(
+                model=model,
+                option_type=option_type,
+                barrier_type=barrier_type,
+                S=S,
+                K=K,
+                H=H,
+                T=T,
+                r=r,
+                sigma=sigma
+            )
+
+            if model == "monte_carlo":
+                kwargs["n_simulations"] = n_sim
+                kwargs["n_steps"] = n_steps
+
+            price = price_barrier_option(**kwargs)
+            st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
+
+            # Optional: don't plot if model is MC
+            if model == "black_scholes":
                 st.subheader("Payoff at Maturity")
                 plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
 
-            except Exception as e:
-                st.error(f"Error: {e}")
+        except Exception as e:
+            st.error(f"Error: {e}")
