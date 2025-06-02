@@ -261,68 +261,80 @@ with tab4:
 
     exotic_type = st.selectbox("Select Exotic Option Type", ["Digital", "Barrier"])
 
+    # ===========================
+    # Digital Option Interface
+    # ===========================
     if exotic_type == "Digital":
         st.subheader("Digital Option")
 
         col1, col2 = st.columns(2)
         with col1:
-            option_type_dig = st.selectbox("Option Type", ["call", "put"], key="dig_type")
-            style_dig = st.selectbox("Digital Style", ["cash", "asset"], key="dig_style")
-            model_dig = st.selectbox("Model", ["black_scholes"], key="dig_model")
+            option_type = st.selectbox("Option Type", ["call", "put"], key="dig_type")
+            style = st.selectbox("Digital Style", ["cash", "asset"], key="dig_style")
+            model = st.selectbox("Model", ["black_scholes"], key="dig_model")
         with col2:
-            S_dig = st.number_input("Spot Price (S)", value=100.0, key="dig_S")
-            K_dig = st.number_input("Strike Price (K)", value=100.0, key="dig_K")
-            T_dig = st.number_input("Time to Maturity (T)", value=1.0, key="dig_T")
-            sigma_dig = st.number_input("Volatility (σ)", value=0.2, key="dig_sigma")
-            r_dig = st.number_input("Risk-Free Rate (r)", value=0.05, key="dig_r")
-            Q_dig = st.number_input("Payout (Q)", value=10.0, key="dig_Q")
+            S = st.number_input("Spot Price (S)", value=100.0, key="dig_S")
+            K = st.number_input("Strike Price (K)", value=100.0, key="dig_K")
+            T = st.number_input("Time to Maturity (T)", value=1.0, key="dig_T")
+            sigma = st.number_input("Volatility (σ)", value=0.2, key="dig_sigma")
+            r = st.number_input("Risk-Free Rate (r)", value=0.05, key="dig_r")
+            Q = st.number_input("Payout (Q)", value=10.0, key="dig_Q")
 
         if st.button("Compute Digital Option Price"):
             try:
-                price_dig = price_digital_option(
-                    model=model_dig,
-                    option_type=option_type_dig,
-                    style=style_dig,
-                    S=S_dig,
-                    K=K_dig,
-                    T=T_dig,
-                    r=r_dig,
-                    sigma=sigma_dig,
-                    Q=Q_dig
+                price = price_digital_option(
+                    model=model,
+                    option_type=option_type,
+                    style=style,
+                    S=S,
+                    K=K,
+                    T=T,
+                    r=r,
+                    sigma=sigma,
+                    Q=Q
                 )
-                st.success(f"The {style_dig} digital {option_type_dig} is worth: **{price_dig:.4f}**")
+                st.success(f"The {style} digital {option_type} is worth: **{price:.4f}**")
                 st.subheader("Payoff at Maturity")
-                plot_digital_payoff(K=K_dig, option_type=option_type_dig, style=style_dig, Q=Q_dig)
+                plot_digital_payoff(K=K, option_type=option_type, style=style, Q=Q)
+
             except Exception as e:
                 st.error(f"Error: {e}")
 
+    # ===========================
+    # Barrier Option Interface
+    # ===========================
     elif exotic_type == "Barrier":
         st.subheader("Barrier Option")
 
         col1, col2 = st.columns(2)
         with col1:
-            option_type_bar = st.selectbox("Option Type", ["call", "put"], key="bar_type")
+            option_type = st.selectbox("Option Type", ["call", "put"], key="bar_type")
             barrier_type = st.selectbox("Barrier Type", ["up-and-out", "up-and-in", "down-and-out", "down-and-in"], key="bar_style")
-            model_bar = st.selectbox("Model", ["black_scholes"], key="bar_model")
+            model = st.selectbox("Model", ["black_scholes"], key="bar_model")
         with col2:
-            S_bar = st.number_input("Spot Price (S)", value=100.0, key="bar_S")
-            K_bar = st.number_input("Strike Price (K)", value=100.0, key="bar_K")
-            H_bar = st.number_input("Barrier Level (H)", value=120.0, key="bar_H")
-            T_bar = st.number_input("Time to Maturity (T)", value=1.0, key="bar_T")
-            sigma_bar = st.number_input("Volatility (σ)", value=0.2, key="bar_sigma")
-            r_bar = st.number_input("Risk-Free Rate (r)", value=0.05, key="bar_r")
+            S = st.number_input("Spot Price (S)", value=100.0, key="bar_S")
+            K = st.number_input("Strike Price (K)", value=100.0, key="bar_K")
+            H = st.number_input("Barrier Level (H)", value=120.0, key="bar_H")
+            T = st.number_input("Time to Maturity (T)", value=1.0, key="bar_T")
+            sigma = st.number_input("Volatility (σ)", value=0.2, key="bar_sigma")
+            r = st.number_input("Risk-Free Rate (r)", value=0.05, key="bar_r")
 
         if st.button("Compute Barrier Option Price"):
             try:
                 price = price_barrier_option(
-                S=S_bar, K=K_bar, H=H_bar, T=T_bar, r=r_bar,
-                sigma=sigma_bar, option_type=option_type_bar, barrier_type=barrier_type, model=model_bar
-            )
-            st.success(f"The {barrier_type} {option_type_bar} option is worth: **{price:.4f}**")
-            st.subheader("Payoff at Maturity")
-            plot_barrier_payoff(K=K_bar, H=H_bar, option_type=option_type_bar, barrier_type=barrier_type)
+                    model=model,
+                    option_type=option_type,
+                    barrier_type=barrier_type,
+                    S=S,
+                    K=K,
+                    H=H,
+                    T=T,
+                    r=r,
+                    sigma=sigma
+                )
+                st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
+                st.subheader("Payoff at Maturity")
+                plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
 
             except Exception as e:
                 st.error(f"Error: {e}")
-
-
