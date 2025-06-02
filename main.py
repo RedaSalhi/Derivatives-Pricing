@@ -37,7 +37,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "Vanilla Options", 
     "Forward Contracts", 
     "Option Strategies", 
-    "Digital Options" 
+    "Exotic Options" 
 ])
 
 
