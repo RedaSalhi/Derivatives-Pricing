@@ -314,20 +314,15 @@ with tab4:
 
         if st.button("Compute Barrier Option Price"):
             try:
-                price_bar = price_barrier_option(
-                    model=model_bar,
-                    option_type=option_type_bar,
-                    barrier_type=barrier_type,
-                    S=S_bar,
-                    K=K_bar,
-                    H=H_bar,
-                    T=T_bar,
-                    r=r_bar,
-                    sigma=sigma_bar
-                )
-                st.success(f"The {barrier_type} {option_type_bar} option is worth: **{price_bar:.4f}**")
-                st.subheader("Payoff at Maturity")
-                plot_barrier_payoff(K=K_bar, H=H_bar, option_type=option_type_bar, barrier_type=barrier_type)
+                price = price_barrier_option(
+                S=S_bar, K=K_bar, H=H_bar, T=T_bar, r=r_bar,
+                sigma=sigma_bar, option_type=option_type_bar, barrier_type=barrier_type, model=model_bar
+            )
+            st.success(f"The {barrier_type} {option_type_bar} option is worth: **{price:.4f}**")
+            st.subheader("Payoff at Maturity")
+            plot_barrier_payoff(K=K_bar, H=H_bar, option_type=option_type_bar, barrier_type=barrier_type)
+
             except Exception as e:
                 st.error(f"Error: {e}")
+
 
