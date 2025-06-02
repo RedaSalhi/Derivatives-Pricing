@@ -4,7 +4,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 from pricing.models.barrier_black_scholes import barrier_price
-from pricing.models.barrier_monte_carlo import monte_carlo_barrier_
+from pricing.models.barrier_monte_carlo import monte_carlo_barrier
 
 
 def price_barrier_option(
