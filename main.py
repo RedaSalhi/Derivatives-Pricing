@@ -328,31 +328,39 @@ with tab4:
             sigma = st.number_input("Volatility (σ)", value=0.2, key="bar_sigma")
             r = st.number_input("Risk-Free Rate (r)", value=0.05, key="bar_r")
 
+        # Sliders appear only if Monte Carlo is selected
+        if model == "monte_carlo":
+            n_sim = st.slider("Number of Simulations", min_value=1_000, max_value=100_000, step=5_000, value=10_000)
+            n_steps = st.slider("Steps per Path", min_value=10, max_value=500, step=10, value=100)
+        else:
+            n_sim = None
+            n_steps = None
+
         if st.button("Compute Barrier Option Price"):
-        try:
-            kwargs = dict(
-                model=model,
-                option_type=option_type,
-                barrier_type=barrier_type,
-                S=S,
-                K=K,
-                H=H,
-                T=T,
-                r=r,
-                sigma=sigma
-            )
+            try:
+                kwargs = dict(
+                    model=model,
+                    option_type=option_type,
+                    barrier_type=barrier_type,
+                    S=S,
+                    K=K,
+                    H=H,
+                    T=T,
+                    r=r,
+                    sigma=sigma
+                )
+    
+                if model == "monte_carlo":
+                    kwargs["n_simulations"] = n_sim
+                    kwargs["n_steps"] = n_steps
+    
+                price = price_barrier_option(**kwargs)
+                st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
 
-            if model == "monte_carlo":
-                kwargs["n_simulations"] = n_sim
-                kwargs["n_steps"] = n_steps
+                # Optional: don't plot if model is MC
+                if model == "black_scholes":
+                    st.subheader("Payoff at Maturity")
+                    plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
 
-            price = price_barrier_option(**kwargs)
-            st.success(f"The {barrier_type} {option_type} is worth: **{price:.4f}**")
-
-            # Optional: don't plot if model is MC
-            if model == "black_scholes":
-                st.subheader("Payoff at Maturity")
-                plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
-
-        except Exception as e:
-            st.error(f"Error: {e}")
+            except Exception as e:
+                st.error(f"Error: {e}")
