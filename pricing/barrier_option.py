@@ -3,7 +3,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
-from pricing.models.barrier_black_scholes import barrier_price
 from pricing.models.barrier_monte_carlo import monte_carlo_barrier
 
 
@@ -11,7 +10,7 @@ def price_barrier_option(
     S, K, H, T, r, sigma,
     option_type="call",
     barrier_type="up-and-out",
-    model="black_scholes",
+    model="monte_carlo",
     n_simulations=10000,
     n_steps=100
 ):
@@ -42,9 +41,7 @@ def price_barrier_option(
     Returns:
         float: barrier option price
     """
-    if model == "black_scholes":
-        return barrier_price(S, K, H, T, r, sigma, option_type.lower(), barrier_type.lower())
-    elif model == "monte_carlo":
+    if model == "monte_carlo":
         price, paths = monte_carlo_barrier(
             S0=S, K=K, H=H, T=T, r=r, sigma=sigma,
             option_type=option_type.lower(), barrier_type=barrier_type.lower(),
