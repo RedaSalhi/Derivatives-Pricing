@@ -38,9 +38,9 @@ def price_barrier_option(
     Returns:
         float: barrier option price
     """
-    if model == "Black-Scholes":
+    if model == "black_scholes":
         return barrier_price(S, K, H, T, r, sigma, option_type.lower(), barrier_type.lower())
-    elif model == "Monte-Carlo":
+    elif model == "monte_carlo":
         return monte_carlo_barrier(
             S0=S, K=K, H=H, T=T, r=r, sigma=sigma,
             option_type=option_type.lower(), barrier_type=barrier_type.lower(),
