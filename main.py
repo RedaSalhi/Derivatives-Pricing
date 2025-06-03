@@ -266,7 +266,7 @@ from pricing.digital_option import price_digital_option, plot_digital_payoff
 from pricing.barrier_option import price_barrier_option, plot_barrier_payoff, plot_sample_paths_barrier
 from pricing.asian_option import price_asian_option, plot_asian_option_payoff, plot_monte_carlo_paths
 from pricing.models.asian_monte_carlo import simulate_asian_paths
-
+from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
 
 with tab4:
     st.header("Exotic Option Pricing")
@@ -416,4 +416,59 @@ with tab4:
 
             except Exception as e:
                 st.error(f"Error: {e}")
-        
+    # ===========================
+    # Lookback Option Interface
+    # ===========================
+    elif exotic_type == "Lookback":
+        st.subheader("Lookback Option")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            model = st.selectbox("Pricing Model", ["monte_carlo", "binomial"], key="lookback_model")
+            option_type = st.selectbox("Option Type", ["call", "put"], key="lookback_type")
+            floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
+        with col2:
+            S0 = st.number_input("Spot Price (S₀)", value=100.0, key="lookback_S")
+            K = st.number_input("Strike Price (K)", value=100.0, key="lookback_K")
+            T = st.number_input("Time to Maturity (T)", value=1.0, key="lookback_T")
+            sigma = st.number_input("Volatility (σ)", value=0.2, key="lookback_sigma")
+            r = st.number_input("Risk-Free Rate (r)", value=0.05, key="lookback_r")
+    
+        if model == "monte_carlo":
+            n_paths = st.slider("Monte Carlo Simulations", 1000, 100000, step=1000, value=10000, key="lookback_paths")
+            n_steps = st.slider("Steps per Path", 10, 365, step=5, value=252, key="lookback_steps")
+        else:
+            N = st.slider("Binomial Tree Steps", 10, 500, step=10, value=100, key="lookback_tree_steps")
+    
+        if st.button("Compute Lookback Option Price"):
+            from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
+    
+            try:
+                price, stderr = price_lookback_option(
+                    S0=S0, K=K if not floating_strike else None, r=r, sigma=sigma, T=T,
+                    model=model, option_type=option_type,
+                    floating_strike=floating_strike,
+                    n_paths=n_paths if model == "monte_carlo" else None,
+                    n_steps=n_steps if model == "monte_carlo" else None,
+                    N=N if model == "binomial" else None
+                )
+    
+                if stderr is not None:
+                    st.success(f"Monte Carlo Price: **{price:.4f} ± {1.96 * stderr:.4f}**")
+                else:
+                    st.success(f"Binomial Price: **{price:.4f}**")
+    
+                with st.expander("Payoff Function"):
+                    st.pyplot(plot_payoff(S0, option_type, K, floating_strike))
+    
+                with st.expander("Simulated Asset Paths"):
+                    st.pyplot(plot_paths(S0, r, sigma, T, n_paths=20, n_steps=252))
+    
+                if model == "monte_carlo":
+                    with st.expander("Distribution of Discounted Payoffs"):
+                        st.pyplot(plot_price_distribution(S0, r, sigma, T, option_type, floating_strike, n_paths, n_steps))
+    
+            except Exception as e:
+                st.error(f"Error: {e}")
+    
+            
