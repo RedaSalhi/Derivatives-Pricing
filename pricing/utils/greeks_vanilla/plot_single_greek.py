@@ -15,7 +15,7 @@ def plot_single_greek_vs_spot(
     S_range=None,
     n_points=200,
 ):
-    plt.style.use("seaborn-whitegrid")  # Try "ggplot", "bmh", or "default" too
+    plt.style.use("bmh")  # Try "ggplot", "bmh", or "default" too
 
     if S_range is None:
         S_range = np.linspace(0.5 * K, 1.5 * K, n_points)
