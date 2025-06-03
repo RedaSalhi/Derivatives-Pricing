@@ -126,6 +126,7 @@ with tab1:
     # -----------------------------
     if st.session_state["show_plot_controls"] or not st.session_state["show_plot_controls"]:
         st.subheader("Visualize Option Price vs Parameter")
+        st.markdown("<small>Compute the option price before generating the plot !</small>", unsafe_allow_html=True)
 
         param_to_vary = st.selectbox(
             "Select Parameter to Vary",
