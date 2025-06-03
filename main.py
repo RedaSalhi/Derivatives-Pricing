@@ -431,7 +431,6 @@ with tab4:
             Q = st.number_input("Payout (Q)", value=10.0, key="dig_Q")
 
         if st.button("Compute Digital Option Price"):
-            st.markdown("<small>Wait a few seconds for the plots !</small>", unsafe_allow_html=True)
             try:
                 price = price_digital_option(
                     model=model,
