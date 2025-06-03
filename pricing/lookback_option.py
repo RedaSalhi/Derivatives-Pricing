@@ -1,7 +1,6 @@
 # pricing/lookback_option.py
 
 from pricing.models.lookback_monte_carlo import monte_carlo_lookback_option
-from pricing.models.lookback_binomial import binomial_lookback_fixed_european
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -9,7 +8,7 @@ import streamlit as st
 def price_lookback_option(
     S0, K=None, r=0.05, sigma=0.2, T=1.0,
     model="monte_carlo", option_type="call", floating_strike=True,
-    n_paths=100000, n_steps=252, N=100
+    n_paths=100000, n_steps=252
 ):
     """
     General interface to price lookback options.
@@ -20,11 +19,10 @@ def price_lookback_option(
     - r: Risk-free rate
     - sigma: Volatility
     - T: Time to maturity
-    - model: 'monte_carlo' or 'binomial'
+    - model: 'monte_carlo'
     - option_type: 'call' or 'put'
     - floating_strike: True for floating strike, False for fixed
     - n_paths, n_steps: Monte Carlo parameters
-    - N: Binomial tree steps
 
     Returns:
     - price, stderr (for Monte Carlo) or price (for binomial)
@@ -37,25 +35,8 @@ def price_lookback_option(
             floating_strike=floating_strike
         )
 
-    elif model == "binomial":
-        if floating_strike:
-            raise NotImplementedError("Floating-strike lookback not supported in binomial yet.")
-        if K is None:
-            raise ValueError("K must be specified for fixed-strike options.")
-
-        price = binomial_lookback_fixed_european(
-            S0=S0, K=K, r=r, sigma=sigma, T=T, N=N, option_type=option_type
-        )
-        return price, None  # Keep signature consistent
-
     else:
         raise ValueError(f"Unknown model: {model}")
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-from pricing.models.lookback_monte_carlo import monte_carlo_lookback_option
-from pricing.models.lookback_binomial import binomial_lookback_fixed_european
 
 def price_lookback_option(S0, K=None, r=0.05, sigma=0.2, T=1.0,
                           model="monte_carlo", option_type="call", floating_strike=True,
@@ -67,15 +48,6 @@ def price_lookback_option(S0, K=None, r=0.05, sigma=0.2, T=1.0,
             option_type=option_type,
             floating_strike=floating_strike
         )
-    elif model == "binomial":
-        if floating_strike:
-            raise NotImplementedError("Floating-strike not supported in binomial.")
-        if K is None:
-            raise ValueError("Strike price K must be provided.")
-        price = binomial_lookback_fixed_european(
-            S0=S0, K=K, r=r, sigma=sigma, T=T, N=N, option_type=option_type
-        )
-        return price, None
     else:
         raise ValueError(f"Unknown model: {model}")
 
@@ -99,7 +71,7 @@ def plot_payoff(S0, option_type="call", K=None, floating_strike=True):
     ax.grid(True)
     return fig
 
-def plot_paths(S0, r, sigma, T, n_paths=20, n_steps=252):
+def plot_paths(S0, r, sigma, T, n_paths, n_steps=252):
     dt = T / n_steps
     drift = (r - 0.5 * sigma**2) * dt
     diffusion = sigma * np.sqrt(dt)
