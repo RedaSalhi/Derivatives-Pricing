@@ -264,6 +264,10 @@ with tab3:
 # -----------------------------
 from pricing.digital_option import price_digital_option, plot_digital_payoff
 from pricing.barrier_option import price_barrier_option, plot_barrier_payoff, plot_sample_paths_barrier
+from pricing.asian_option import price_asian_option, plot_asian_option_payoff, plot_monte_carlo_paths
+from pricing.models.asian_pde import price_asian_option_pde
+from pricing.models.asian_monte_carlo import simulate_asian_paths
+
 
 with tab4:
     st.header("Exotic Option Pricing")
@@ -363,6 +367,56 @@ with tab4:
                     st.subheader("Payoff at Maturity")
                     plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
         
+            except Exception as e:
+                st.error(f"Error: {e}")
+    # ===========================
+    # Asian Option Interface
+    # ===========================
+    elif exotic_type == "Asian":
+        st.subheader("Asian Option")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            method = st.selectbox("Pricing Method", ["monte_carlo", "pde"], key="asian_method")
+            option_type = st.selectbox("Option Type", ["call", "put"], key="asian_type")
+            asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="asian_style")
+        with col2:
+            S = st.number_input("Spot Price (S)", value=100.0, key="asian_S")
+            K = st.number_input("Strike Price (K)", value=100.0, key="asian_K")
+            T = st.number_input("Time to Maturity (T)", value=1.0, key="asian_T")
+            sigma = st.number_input("Volatility (σ)", value=0.2, key="asian_sigma")
+            r = st.number_input("Risk-Free Rate (r)", value=0.05, key="asian_r")
+
+        if method == "monte_carlo":
+            n_paths = st.slider("Monte Carlo Simulations", 1000, 100000, step=5000, value=10000)
+            n_steps = st.slider("Steps per Path", 10, 365, step=5, value=50)
+        else:
+            n_steps = st.slider("Number of PDE Time Steps", 10, 1000, step=10, value=200)
+            n_paths = None
+
+        if st.button("Compute Asian Option Price"):
+            try:
+                price = price_asian_option(
+                    S0=S, K=K, T=T, r=r, sigma=sigma,
+                    n_steps=n_steps,
+                    n_paths=n_paths or 10000,
+                    method=method,
+                    option_type=option_type,
+                    asian_type=asian_type
+                )
+
+                st.success(f"The {asian_type.replace('_', ' ')} Asian {option_type} is worth: **{price:.4f}**")
+
+                st.subheader("Payoff at Maturity")
+                plot_asian_option_payoff(K=K, option_type=option_type, asian_type=asian_type)
+
+                if method == "monte_carlo":
+                    st.subheader("Monte Carlo Sample Paths")
+                    paths = simulate_asian_paths(S0=S, T=T, r=r, sigma=sigma,
+                                                 n_steps=n_steps, n_paths=n_paths,
+                                                 option_type=option_type, asian_type=asian_type)
+                    plot_monte_carlo_paths(paths)
+
             except Exception as e:
                 st.error(f"Error: {e}")
         
