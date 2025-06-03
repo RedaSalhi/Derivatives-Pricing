@@ -103,8 +103,8 @@ with tab1:
                 **kwargs
             )
             st.success(f"The {exercise_style.lower()} {option_type.lower()} option is worth: **{price:.4f}**")
-        #except Exception as e:
-            #st.error(f"Error: {e}")
+        except Exception as e:
+            st.error(f"Error: {e}")
 
 
 
