@@ -120,3 +120,68 @@ def get_predefined_strategy(name, strike1, strike2=None, strike3=None, strike4=N
 
     else:
         return f"Unknown strategy name: {name.capitalize()}"
+
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+def plot_strategy_price_vs_param(
+    legs,
+    exercise_style,
+    model,
+    param_name,
+    param_range,
+    fixed_params,
+    n_points=50
+):
+    """
+    Plot the total price of an option strategy as one parameter varies.
+
+    Parameters:
+        legs : list of dicts describing the strategy
+        exercise_style : 'european' or 'american'
+        model : pricing model string
+        param_name : parameter to vary ('S', 'K', 'T', 'r', 'sigma', 'q')
+        param_range : (min, max) tuple
+        fixed_params : dict of fixed input parameters
+        n_points : number of values to compute
+
+    Returns:
+        matplotlib.figure.Figure
+    """
+    x_vals = np.linspace(param_range[0], param_range[1], n_points)
+    y_vals = []
+
+    for val in x_vals:
+        kwargs = fixed_params.copy()
+        kwargs[param_name] = val
+
+        # Pass extra parameters for binomial or monte-carlo
+        if model == "binomial":
+            kwargs["N"] = fixed_params.get("N", 100)
+        elif model == "monte-carlo":
+            kwargs["n_simulations"] = fixed_params.get("n_simulations", 1000)
+
+        try:
+            result = price_option_strategy(
+                legs=legs,
+                exercise_style=exercise_style,
+                model=model,
+                **kwargs
+            )
+            y_vals.append(result["strategy_price"])
+        except:
+            y_vals.append(np.nan)
+
+    # Plot
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
+    ax.plot(x_vals, y_vals, label="Strategy Price")
+    ax.set_xlabel(param_name)
+    ax.set_ylabel("Strategy Price")
+    ax.set_title(f"Strategy Price vs {param_name} ({model}, {exercise_style})")
+    ax.grid(True)
+    ax.legend()
+    return fig
+
