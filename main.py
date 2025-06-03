@@ -335,7 +335,7 @@ with tab4:
             elif barrier_type == "Down and In":
                 barrier_type = "down-and-in"
             model = st.selectbox("Model", ["Monte Carlo"], key="bar_model")
-            if model == "Monte Carlo"
+            if model == "Monte Carlo":
                 model = "monte_carlo"
         with col2:
             S = st.number_input("Spot Price (S)", value=100.0, key="bar_S")
