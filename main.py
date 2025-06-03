@@ -272,7 +272,7 @@ from pricing.models.asian_monte_carlo import simulate_asian_paths
 with tab4:
     st.header("Exotic Option Pricing")
 
-    exotic_type = st.selectbox("Select Exotic Option Type", ["Digital", "Barrier"])
+    exotic_type = st.selectbox("Select Exotic Option Type", ["Digital", "Barrier", "Asian"])
 
     # ===========================
     # Digital Option Interface
