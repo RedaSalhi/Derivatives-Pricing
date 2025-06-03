@@ -387,8 +387,8 @@ with tab4:
             r = st.number_input("Risk-Free Rate (r)", value=0.05, key="asian_r")
 
         if method == "monte_carlo":
-            n_paths = st.slider("Monte Carlo Simulations", 1000, 100000, step=5000, value=10000)
-            n_steps = st.slider("Steps per Path", 10, 365, step=5, value=50)
+            n_paths = st.slider("Monte Carlo Simulations", 10, 10000, step=10, value=10000)
+            n_steps = st.slider("Steps per Path", 10, 300, step=2, value=252)
 
         if st.button("Compute Asian Option Price"):
             try:
