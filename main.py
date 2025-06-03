@@ -320,9 +320,17 @@ with tab4:
 
         col1, col2 = st.columns(2)
         with col1:
-            option_type = st.selectbox("Option Type", ["call", "put"], key="bar_type")
-            barrier_type = st.selectbox("Barrier Type", ["up-and-out", "up-and-in", "down-and-out", "down-and-in"], key="bar_style")
-            model = st.selectbox("Model", ["monte_carlo"], key="bar_model")
+            option_type = st.selectbox("Option Type", ["Call", "Put"], key="bar_type")
+            if option_type == "Call":
+                option_type = "call"
+            elif option_type == "Put":
+                option_type = "put"
+            barrier_type = st.selectbox("Barrier Type", ["Up and Out", "Up and In", "Down and Out", "Down and In"], key="bar_style")
+            if barrier_type == "Up and Out", "Up and In", "Down and Out", "Down and In"
+                barrier_type = "up-and-out", "up-and-in", "down-and-out", "down-and-in"
+            model = st.selectbox("Model", ["Monte Carlo"], key="bar_model")
+            if model == "Monte Carlo"
+                model = "monte_carlo"
         with col2:
             S = st.number_input("Spot Price (S)", value=100.0, key="bar_S")
             K = st.number_input("Strike Price (K)", value=100.0, key="bar_K")
@@ -377,9 +385,17 @@ with tab4:
 
         col1, col2 = st.columns(2)
         with col1:
-            method = st.selectbox("Pricing Method", ["monte_carlo"], key="asian_method")
-            option_type = st.selectbox("Option Type", ["call", "put"], key="asian_type")
-            asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="asian_style")
+            method = st.selectbox("Pricing Method", ["Monte Carlo"], key="asian_method")
+            if method == "Monte Carlo":
+                method = "monte_carlo"
+            option_type = st.selectbox("Option Type", ["Call", "Put"], key="asian_type")
+            if option_type == "Call":
+                option_type = "call"
+            elif option_type == "Put":
+                option_type = "put"
+            asian_type = st.selectbox("Asian Type", ["Average Price", "Average Strike"], key="asian_style")
+            if asian_type == "Average Price", "Average Strike":
+                asian_type == "average_price", "average_strike"
         with col2:
             S = st.number_input("Spot Price (S)", value=100.0, key="asian_S")
             K = st.number_input("Strike Price (K)", value=100.0, key="asian_K")
@@ -425,7 +441,13 @@ with tab4:
         col1, col2 = st.columns(2)
         with col1:
             model = st.selectbox("Pricing Model", ["Monte Carlo"], key="lookback_model")
-            option_type = st.selectbox("Option Type", ["call", "put"], key="lookback_type")
+            if model == "Monte Carlo":
+                model = "monte_carlo"
+            option_type = st.selectbox("Option Type", ["Call", "Put"], key="lookback_type")
+            if option_type == "Call":
+                option_type = "call"
+            elif option_type == "Put":
+                option_type = "put"
             floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
         with col2:
             S0 = st.number_input("Spot Price (S₀)", value=100.0, key="lookback_S")
@@ -434,8 +456,7 @@ with tab4:
             sigma = st.number_input("Volatility (σ)", value=0.2, key="lookback_sigma")
             r = st.number_input("Risk-Free Rate (r)", value=0.05, key="lookback_r")
     
-        if model == "Monte Carlo":
-            model = "monte_carlo"
+        if model == "monte_carlo":
             n_paths = st.slider("Monte Carlo Simulations", 10, 10000, step=10, value=1000, key="lookback_paths")
             n_steps = st.slider("Steps per Path", 10, 300, step=2, value=252, key="lookback_steps")
     
