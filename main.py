@@ -133,7 +133,7 @@ with tab1:
         else:
             min_val = st.number_input(f"Minimum value of {param_to_vary}", value=0.0, key="min_val")
             max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 1.5, key="max_val")
-        n_points = st.slider("Number of Points", min_value=100, max_value=1000, value=500, key="n_points_slider")
+        n_points = st.slider("Resolution", min_value=100, max_value=1000, value=500, key="n_points_slider")
 
         if st.button("Generate Plot"):
             try:
@@ -310,7 +310,7 @@ with tab3:
                     min_val = st.number_input(f"Min {param}", value=default_val * 0, key="manual_min")
                     max_val = st.number_input(f"Max {param}", value=default_val * 1.5, key="manual_max")
 
-                n_points = st.slider("Number of Points", 50, 500, 100, key="manual_n")
+                n_points = st.slider("Resolution", 50, 500, 100, key="manual_n")
 
                 if st.button("Generate Plot for Custom Strategy"):
                     try:
@@ -386,7 +386,7 @@ with tab3:
                 min_val = st.number_input(f"Min {param}", value=default_val * 0, key="predef_min")
                 max_val = st.number_input(f"Max {param}", value=default_val * 1.5, key="predef_max")
 
-            n_points = st.slider("Number of Points", 50, 500, 100, key="predef_n")
+            n_points = st.slider("Resolution", 50, 500, 100, key="predef_n")
 
             if st.button("Generate Plot for Predefined Strategy"):
                 try:
