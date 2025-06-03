@@ -227,11 +227,14 @@ with tab2:
             )
 
 
+hey gpt,
+
+j'aime pas trop le résultâtes de ce code, est ce que tu peux me le refaire avec de preference un seul bouton qui fait tourner tout le reste ?
+n'utilise pas Canva, renvoie le code complet modifié dans le chat sous forme de bloc 
+
+
 from pricing.option_strategies import price_option_strategy, compute_strategy_payoff, get_predefined_strategy, plot_strategy_price_vs_param
 from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
-import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
 
 # -----------------------------
 # Tab 3 – Option Strategies
@@ -241,34 +244,36 @@ with tab3:
 
     use_manual = st.checkbox("Build Strategy Manually")
 
-    model_strat = st.selectbox("Pricing Model", ["Black Scholes", "Binomial", "Monte Carlo"])
+    model_strat = st.selectbox("Pricing Model", ["Black Scholes", "Binomial", "Monte Carlo"], key="strat_model")
     model_strat = {"Black Scholes": "black-scholes", "Monte Carlo": "monte-carlo"}.get(model_strat, "binomial")
 
-    style_strat = st.selectbox("Exercise Style", ["European", "American"]).lower()
+    style_strat = st.selectbox("Exercise Style", ["European", "American"], key="strat_style").lower()
 
-    S_strat = st.number_input("Spot Price (S)", value=100.0)
-    T_strat = st.number_input("Time to Maturity (T)", value=1.0)
-    sigma_strat = st.number_input("Volatility (σ)", value=0.2)
-    r_strat = st.number_input("Risk-Free Rate (r)", value=0.05)
-    q_strat = st.number_input("Dividend Yield (q)", value=0.0)
+    S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
+    T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
+    sigma_strat = st.number_input("Volatility (σ)", value=0.2, key="strat_sigma")
+    r_strat = st.number_input("Risk-Free Rate (r)", value=0.05, key="strat_r")
+    q_strat = st.number_input("Dividend Yield (q)", value=0.0, key="strat_q")
+
     kwargs = {"S": S_strat, "T": T_strat, "sigma": sigma_strat, "r": r_strat, "q": q_strat}
 
-    legs = []
-    strategy_label = ""
-
+    # -----------------------------
+    # Manual Strategy
+    # -----------------------------
     if use_manual:
         st.subheader("➕ Add Legs to Strategy")
+
         if "custom_legs" not in st.session_state:
             st.session_state.custom_legs = []
 
         with st.form("add_leg_form"):
             col1, col2, col3 = st.columns(3)
             with col1:
-                opt_type = st.selectbox("Type", ["call", "put"])
+                opt_type = st.selectbox("Type", ["call", "put"], key="leg_type")
             with col2:
-                strike = st.number_input("Strike", value=100.0)
+                strike = st.number_input("Strike", value=100.0, key="leg_strike")
             with col3:
-                qty = st.number_input("Quantity", step=1, value=1)
+                qty = st.number_input("Quantity", step=1, value=1, key="leg_qty")
             if st.form_submit_button("Add Leg"):
                 st.session_state.custom_legs.append({"type": opt_type, "strike": strike, "qty": qty})
 
@@ -276,89 +281,173 @@ with tab3:
             st.markdown("### Strategy Legs")
             for i, leg in enumerate(st.session_state.custom_legs):
                 st.write(f"Leg {i+1}: {leg['qty']} × {leg['type'].upper()} @ Strike {leg['strike']}")
-            legs = st.session_state.custom_legs
-            strategy_label = "Custom Strategy"
+
+            if st.button("Price Custom Strategy"):
+                try:
+                    legs = st.session_state.custom_legs
+                    st.session_state["manual_legs"] = legs
+                    result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
+                    st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
+
+                    spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
+                    payoff = compute_strategy_payoff(legs, spot_range)
+
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    ax.plot(spot_range, payoff, label="Strategy Payoff", color="blue")
+                    ax.axhline(0, color="black", linestyle="--")
+                    ax.set_xlabel("Spot Price at Maturity (S)")
+                    ax.set_ylabel("Net Payoff")
+                    ax.set_title("Payoff Diagram: Custom Strategy")
+                    ax.grid(True)
+                    ax.legend()
+                    st.pyplot(fig)
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+            if "manual_legs" in st.session_state:
+                st.subheader("Visualize Strategy Price vs Parameter")
+
+                param = st.selectbox("Parameter to Vary", ["S", "T", "r", "sigma", "q"], key="manual_vary")
+                default_val = float(kwargs.get(param, 1.0))
+
+                min_val = st.number_input(f"Min {param}", value=0.0 if param in ["r", "q", "sigma"] else 0.01, key="manual_min")
+                max_val = st.number_input(f"Max {param}", value=default_val * (1.5 if param == "S" else 100), key="manual_max")
+                n_points = st.slider("Resolution", 50, 500, 100, key="manual_n")
+
+                if st.button("Generate Plot for Custom Strategy"):
+                    try:
+                        fig = plot_strategy_price_vs_param(
+                            legs=st.session_state["manual_legs"],
+                            exercise_style=style_strat,
+                            model=model_strat,
+                            param_name=param,
+                            param_range=(min_val, max_val),
+                            fixed_params=kwargs,
+                            n_points=n_points
+                        )
+                        st.pyplot(fig)
+                    except Exception as e:
+                        st.error(f"Plotting failed: {e}")
+
+                st.subheader("Visualize Strategy Greek vs Spot Price")
+
+                greek = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"], key="manual_greek")
+                S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="manual_greek_smin")
+                S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="manual_greek_smax")
+                greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="manual_greek_n")
+
+                if st.button("Plot Strategy Greek (Manual)"):
+                    try:
+                        fig = plot_strategy_greek_vs_spot(
+                            greek_name=greek,
+                            legs=st.session_state["manual_legs"],
+                            model=model_strat,
+                            S0=S_strat,
+                            T=T_strat,
+                            r=r_strat,
+                            sigma=sigma_strat,
+                            q=q_strat,
+                            S_range=np.linspace(S_min, S_max, greek_res)
+                        )
+                        st.pyplot(fig)
+                    except Exception as e:
+                        st.error(f"Greek plot failed: {e}")
+
+        if st.button("Clear Strategy Legs"):
+            st.session_state.custom_legs = []
+            st.session_state.pop("manual_legs", None)
+
+    # -----------------------------
+    # Predefined Strategy
+    # -----------------------------
     else:
         st.subheader("Predefined Strategy")
-        strategy = st.selectbox("Choose a Strategy", ["Straddle", "Bull call Spread", "Bear put Spread", "Butterfly", "Iron Condor"])
-        strike1 = st.number_input("Strike 1", value=95.0)
+        strategy = st.selectbox("Choose a Strategy", ["Straddle", "Bull call Spread", "Bear put Spread", "Butterfly", "Iron Condor"], key="strat_type")
+
+        strike1 = st.number_input("Strike 1", value=95.0, key="strat_k1")
         strike2 = strike3 = strike4 = None
         if strategy in ["Bull call Spread", "Bear put Spread", "Butterfly", "Iron Condor"]:
-            strike2 = st.number_input("Strike 2", value=100.0)
+            strike2 = st.number_input("Strike 2", value=100.0, key="strat_k2")
         if strategy in ["Butterfly", "Iron Condor"]:
-            strike3 = st.number_input("Strike 3", value=105.0)
+            strike3 = st.number_input("Strike 3", value=105.0, key="strat_k3")
         if strategy == "Iron Condor":
-            strike4 = st.number_input("Strike 4", value=110.0)
-        legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4)
-        strategy_label = strategy
+            strike4 = st.number_input("Strike 4", value=110.0, key="strat_k4")
 
-    # Param and Greek Inputs
-    st.markdown("### Parameter & Greek Settings")
-    param = st.selectbox("Parameter to Vary", ["S", "T", "r", "sigma", "q"])
-    default_val = float(kwargs.get(param, 1.0))
-    min_val = st.number_input(f"Min {param}", value=0.0 if param in ["r", "q", "sigma"] else 0.01)
-    max_val = st.number_input(f"Max {param}", value=default_val * (1.5 if param == "S" else 100))
-    n_points = st.slider("Resolution (Param)", 50, 500, 100)
+        if st.button("Price Predefined Strategy"):
+            legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4=strike4)
+            if isinstance(legs, str):
+                st.error(legs)
+            else:
+                try:
+                    st.session_state["predefined_legs"] = legs
+                    result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
+                    st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
 
-    greek = st.selectbox("Greek", ["delta", "gamma", "vega", "theta", "rho"])
-    S_min = st.number_input("Min Spot (Greek)", value=0.5 * S_strat)
-    S_max = st.number_input("Max Spot (Greek)", value=1.5 * S_strat)
-    greek_res = st.slider("Resolution (Greek)", 50, 1000, 300)
+                    spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
+                    payoff = compute_strategy_payoff(legs, spot_range)
 
-    # Master Button
-    if st.button("Run Strategy Analysis"):
-        if isinstance(legs, str):
-            st.error(legs)
-        else:
-            try:
-                # Pricing
-                result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
-                st.success(f"Total {strategy_label} Price: **{result['strategy_price']:.4f}**")
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    ax.plot(spot_range, payoff, label="Strategy Payoff", color="green")
+                    ax.axhline(0, color="black", linestyle="--")
+                    ax.set_xlabel("Spot Price at Maturity (S)")
+                    ax.set_ylabel("Net Payoff")
+                    ax.set_title(f"Payoff Diagram: {strategy}")
+                    ax.grid(True)
+                    ax.legend()
+                    st.pyplot(fig)
+                except Exception as e:
+                    st.error(f"Error: {e}")
 
-                # Payoff
-                spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
-                payoff = compute_strategy_payoff(legs, spot_range)
-                fig, ax = plt.subplots(figsize=(10, 6))
-                ax.plot(spot_range, payoff, label="Payoff", color="blue")
-                ax.axhline(0, color="black", linestyle="--")
-                ax.set_title(f"{strategy_label} Payoff Diagram")
-                ax.set_xlabel("Spot Price at Maturity (S)")
-                ax.set_ylabel("Net Payoff")
-                ax.grid(True)
-                ax.legend()
-                st.pyplot(fig)
+        if "predefined_legs" in st.session_state:
+            st.subheader("Visualize Strategy Price vs Parameter")
 
-                # Price vs Param
-                fig2 = plot_strategy_price_vs_param(
-                    legs=legs,
-                    exercise_style=style_strat,
-                    model=model_strat,
-                    param_name=param,
-                    param_range=(min_val, max_val),
-                    fixed_params=kwargs,
-                    n_points=n_points
-                )
-                st.pyplot(fig2)
+            param = st.selectbox("Parameter to Vary", ["S", "T", "r", "sigma", "q"], key="predef_vary")
+            default_val = float(kwargs.get(param, 1.0))
 
-                # Greek vs Spot
-                fig3 = plot_strategy_greek_vs_spot(
-                    greek_name=greek,
-                    legs=legs,
-                    model=model_strat,
-                    S0=S_strat,
-                    T=T_strat,
-                    r=r_strat,
-                    sigma=sigma_strat,
-                    q=q_strat,
-                    S_range=np.linspace(S_min, S_max, greek_res)
-                )
-                st.pyplot(fig3)
+            min_val = st.number_input(f"Min {param}", value=0.0 if param in ["r", "q", "sigma"] else 0.01, key="predef_min")
+            max_val = st.number_input(f"Max {param}", value=default_val * (1.5 if param == "S" else 100), key="predef_max")
+            n_points = st.slider("Resolution", 50, 500, 100, key="predef_n")
 
-            except Exception as e:
-                st.error(f"Error: {e}")
+            if st.button("Generate Plot for Predefined Strategy"):
+                try:
+                    fig = plot_strategy_price_vs_param(
+                        legs=st.session_state["predefined_legs"],
+                        exercise_style=style_strat,
+                        model=model_strat,
+                        param_name=param,
+                        param_range=(min_val, max_val),
+                        fixed_params=kwargs,
+                        n_points=n_points
+                    )
+                    st.pyplot(fig)
+                except Exception as e:
+                    st.error(f"Plotting failed: {e}")
 
-    if use_manual and st.button("Clear Custom Legs"):
-        st.session_state.custom_legs = []
+            st.subheader("Visualize Strategy Greek vs Spot Price")
+
+            greek = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"], key="predef_greek")
+            S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="predef_greek_smin")
+            S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="predef_greek_smax")
+            greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="predef_greek_n")
+
+            if st.button("Plot Strategy Greek (Predefined)"):
+                try:
+                    fig = plot_strategy_greek_vs_spot(
+                        greek_name=greek,
+                        legs=st.session_state["predefined_legs"],
+                        model=model_strat,
+                        S0=S_strat,
+                        T=T_strat,
+                        r=r_strat,
+                        sigma=sigma_strat,
+                        q=q_strat,
+                        S_range=np.linspace(S_min, S_max, greek_res)
+                    )
+                    st.pyplot(fig)
+                except Exception as e:
+                    st.error(f"Greek plot failed: {e}")
+
+
 
 
 
