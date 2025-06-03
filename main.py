@@ -330,7 +330,7 @@ with tab4:
                 barrier_type = "up-and-out"
             elif barrier_type == "Up and In":
                 barrier_type = "up-and-in"
-            elif barrier_type == "Down and Out"
+            elif barrier_type == "Down and Out":
                 barrier_type = "down-and-out"
             elif barrier_type == "Down and In":
                 barrier_type = "down-and-in"
