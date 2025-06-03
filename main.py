@@ -361,10 +361,11 @@ with tab4:
                 st.success(f"The {barrier_type} {option_type} option is worth: **{price:.4f}**")
         
                 if model == "monte_carlo":
-                    st.subheader("Monte Carlo Sample Paths")
-                    plot_sample_paths_barrier(paths, K=K, H=H, option_type=option_type, barrier_type=barrier_type)
                     st.subheader("Payoff at Maturity")
                     plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
+                    st.subheader("Monte Carlo Sample Paths")
+                    plot_sample_paths_barrier(paths, K=K, H=H, option_type=option_type, barrier_type=barrier_type)
+                    
         
             except Exception as e:
                 st.error(f"Error: {e}")
