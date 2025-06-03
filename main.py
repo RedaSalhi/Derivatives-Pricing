@@ -271,7 +271,7 @@ from pricing.lookback_option import price_lookback_option, plot_payoff, plot_pat
 with tab4:
     st.header("Exotic Option Pricing")
 
-    exotic_type = st.selectbox("Select Exotic Option Type", ["Digital", "Barrier", "Asian"])
+    exotic_type = st.selectbox("Select Exotic Option Type", ["Digital", "Barrier", "Asian", "Lookback"])
 
     # ===========================
     # Digital Option Interface
