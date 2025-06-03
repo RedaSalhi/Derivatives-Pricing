@@ -113,7 +113,7 @@ with tab1:
         # --------------------------------------
         # Visualization section – plot vs param
         # --------------------------------------
-        st.header("Visualize Option Price vs Parameter")
+        st.subheader("Visualize Option Price vs Parameter")
     
         param_to_vary = st.selectbox(
             "Select Parameter to Vary",
