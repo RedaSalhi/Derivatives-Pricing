@@ -181,6 +181,12 @@ def plot_strategy_price_vs_param(
     ax.set_xlabel(param_name)
     ax.set_ylabel("Strategy Price")
     ax.set_title(f"Strategy Price vs {param_name} ({model}, {exercise_style})")
+
+    # Adjust y-axis to start from 0 or the minimum value (if it's negative)
+    y_min = np.nanmin(y_vals)
+    y_start = min(0, y_min)  # Ensures axis starts from 0 or below
+    ax.set_ylim(bottom=y_start)
+    
     ax.grid(True)
     ax.legend()
     return fig
