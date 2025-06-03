@@ -431,6 +431,7 @@ with tab4:
             Q = st.number_input("Payout (Q)", value=10.0, key="dig_Q")
 
         if st.button("Compute Digital Option Price"):
+            st.markdown("<small>Wait a few seconds for the plots !</small>", unsafe_allow_html=True)
             try:
                 price = price_digital_option(
                     model=model,
@@ -492,6 +493,7 @@ with tab4:
             n_steps = None
 
         if st.button("Compute Barrier Option Price"):
+            st.markdown("<small>Wait a few seconds for the plots !</small>", unsafe_allow_html=True)
             try:
                 kwargs = dict(
                     model=model,
@@ -554,6 +556,7 @@ with tab4:
             n_steps = st.slider("Steps per Path", 10, 300, step=2, value=252)
 
         if st.button("Compute Asian Option Price"):
+            st.markdown("<small>Wait a few seconds for the plots !</small>", unsafe_allow_html=True)
             try:
                 price = price_asian_option(
                     S0=S, K=K, T=T, r=r, sigma=sigma,
@@ -607,6 +610,7 @@ with tab4:
             n_steps = st.slider("Steps per Path", 10, 300, step=2, value=252, key="lookback_steps")
     
         if st.button("Compute Lookback Option Price"):
+            st.markdown("<small>Wait a few seconds for the plots !</small>", unsafe_allow_html=True)
             from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
     
             try:
