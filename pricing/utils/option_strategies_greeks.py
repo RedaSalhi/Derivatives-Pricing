@@ -32,7 +32,7 @@ def plot_strategy_greek_vs_spot(
     Returns:
         matplotlib.figure.Figure
     """
-    plt.style.use("seaborn-whitegrid")
+    plt.style.use("bmh")
 
     K_list = [leg["strike"] for leg in legs]
     if S_range is None:
