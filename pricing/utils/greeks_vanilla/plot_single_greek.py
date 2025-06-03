@@ -38,13 +38,14 @@ def plot_single_greek_vs_spot(
     ax.grid(True, alpha=0.3)
     ax.legend(facecolor='black')
 
-    # Dark theme styling
-    #fig.patch.set_facecolor('#111')
-    #ax.set_facecolor('#111')
-    ax.tick_params(colors='white')
-    ax.spines['bottom'].set_color('white')
-    ax.spines['top'].set_color('white')
-    ax.spines['left'].set_color('white')
-    ax.spines['right'].set_color('white')
+    # Optional: reset face colors to white
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
+
+    ax.tick_params(colors='black')
+    ax.spines['bottom'].set_color('black')
+    ax.spines['top'].set_color('black')
+    ax.spines['left'].set_color('black')
+    ax.spines['right'].set_color('black')
 
     return fig
