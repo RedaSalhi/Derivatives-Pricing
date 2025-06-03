@@ -146,7 +146,7 @@ with tab1:
             max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 100, key="max_val")
         else:
             min_val = st.number_input(f"Minimum value of {param_to_vary}", value=default_val * 0, key="min_val")
-            max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 3, key="max_val")
+            max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 1.5, key="max_val")
         n_points = st.slider("Number of Points", min_value=100, max_value=1000, value=500, key="n_points_slider")
 
         if st.button("Generate Plot"):
@@ -291,9 +291,9 @@ with tab3:
                     max_val = st.number_input(f"Max {param}", value=1.0, key="manual_max")
                 elif param == "T":
                     min_val = st.number_input(f"Min {param}", value=0.01, key="manual_min")
-                    max_val = st.number_input(f"Max {param}", value=default_val * 3, key="manual_max")
+                    max_val = st.number_input(f"Max {param}", value=default_val * 100, key="manual_max")
                 else:
-                    min_val = st.number_input(f"Min {param}", value=default_val * 0.5, key="manual_min")
+                    min_val = st.number_input(f"Min {param}", value=default_val * 0, key="manual_min")
                     max_val = st.number_input(f"Max {param}", value=default_val * 1.5, key="manual_max")
 
                 n_points = st.slider("Number of Points", 50, 500, 100, key="manual_n")
@@ -370,7 +370,7 @@ with tab3:
                 max_val = st.number_input(f"Max {param}", value=default_val * 100, key="predef_max")
             else:
                 min_val = st.number_input(f"Min {param}", value=default_val * 0, key="predef_min")
-                max_val = st.number_input(f"Max {param}", value=default_val * 3, key="predef_max")
+                max_val = st.number_input(f"Max {param}", value=default_val * 1.5, key="predef_max")
 
             n_points = st.slider("Number of Points", 50, 500, 100, key="predef_n")
 
