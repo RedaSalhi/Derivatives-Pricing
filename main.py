@@ -226,6 +226,8 @@ with tab2:
                 position=position
             )
 
+from pricing.option_strategies import price_option_strategy, compute_strategy_payoff, get_predefined_strategy, plot_strategy_price_vs_param
+from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
 
 # -----------------------------
 # Tab 3 – Option Strategies
@@ -238,8 +240,7 @@ with tab3:
     model_strat = st.selectbox("Pricing Model", ["Black Scholes", "Binomial", "Monte Carlo"], key="strat_model")
     model_strat = {"Black Scholes": "black-scholes", "Monte Carlo": "monte-carlo"}.get(model_strat, "binomial")
 
-    style_strat = st.selectbox("Exercise Style", ["European", "American"], key="strat_style")
-    style_strat = style_strat.lower()
+    style_strat = st.selectbox("Exercise Style", ["European", "American"], key="strat_style").lower()
 
     S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
     T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
@@ -249,7 +250,9 @@ with tab3:
 
     kwargs = {"S": S_strat, "T": T_strat, "sigma": sigma_strat, "r": r_strat, "q": q_strat}
 
+    # -----------------------------
     # Manual Strategy
+    # -----------------------------
     if use_manual:
         st.subheader("➕ Add Legs to Strategy")
 
@@ -300,16 +303,8 @@ with tab3:
                 param = st.selectbox("Parameter to Vary", ["S", "T", "r", "sigma", "q"], key="manual_vary")
                 default_val = float(kwargs.get(param, 1.0))
 
-                if param in ["r", "q", "sigma"]:
-                    min_val = st.number_input(f"Min {param}", value=0.0, key="manual_min")
-                    max_val = st.number_input(f"Max {param}", value=1.0, key="manual_max")
-                elif param == "T":
-                    min_val = st.number_input(f"Min {param}", value=0.01, key="manual_min")
-                    max_val = st.number_input(f"Max {param}", value=default_val * 100, key="manual_max")
-                else:
-                    min_val = st.number_input(f"Min {param}", value=default_val * 0, key="manual_min")
-                    max_val = st.number_input(f"Max {param}", value=default_val * 1.5, key="manual_max")
-
+                min_val = st.number_input(f"Min {param}", value=0.0 if param in ["r", "q", "sigma"] else 0.01, key="manual_min")
+                max_val = st.number_input(f"Max {param}", value=default_val * (1.5 if param == "S" else 100), key="manual_max")
                 n_points = st.slider("Resolution", 50, 500, 100, key="manual_n")
 
                 if st.button("Generate Plot for Custom Strategy"):
@@ -327,11 +322,37 @@ with tab3:
                     except Exception as e:
                         st.error(f"Plotting failed: {e}")
 
+                st.subheader("Visualize Strategy Greek vs Spot Price")
+
+                greek = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"], key="manual_greek")
+                S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="manual_greek_smin")
+                S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="manual_greek_smax")
+                greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="manual_greek_n")
+
+                if st.button("Plot Strategy Greek (Manual)"):
+                    try:
+                        fig = plot_strategy_greek_vs_spot(
+                            greek_name=greek,
+                            legs=st.session_state["manual_legs"],
+                            model=model_strat,
+                            S0=S_strat,
+                            T=T_strat,
+                            r=r_strat,
+                            sigma=sigma_strat,
+                            q=q_strat,
+                            S_range=np.linspace(S_min, S_max, greek_res)
+                        )
+                        st.pyplot(fig)
+                    except Exception as e:
+                        st.error(f"Greek plot failed: {e}")
+
         if st.button("Clear Strategy Legs"):
             st.session_state.custom_legs = []
             st.session_state.pop("manual_legs", None)
 
+    # -----------------------------
     # Predefined Strategy
+    # -----------------------------
     else:
         st.subheader("Predefined Strategy")
         strategy = st.selectbox("Choose a Strategy", ["Straddle", "Bull call Spread", "Bear put Spread", "Butterfly", "Iron Condor"], key="strat_type")
@@ -376,16 +397,8 @@ with tab3:
             param = st.selectbox("Parameter to Vary", ["S", "T", "r", "sigma", "q"], key="predef_vary")
             default_val = float(kwargs.get(param, 1.0))
 
-            if param in ["r", "q", "sigma"]:
-                min_val = st.number_input(f"Min {param}", value=0.0, key="predef_min")
-                max_val = st.number_input(f"Max {param}", value=1.0, key="predef_max")
-            elif param == "T":
-                min_val = st.number_input(f"Min {param}", value=0.01, key="predef_min")
-                max_val = st.number_input(f"Max {param}", value=default_val * 100, key="predef_max")
-            else:
-                min_val = st.number_input(f"Min {param}", value=default_val * 0, key="predef_min")
-                max_val = st.number_input(f"Max {param}", value=default_val * 1.5, key="predef_max")
-
+            min_val = st.number_input(f"Min {param}", value=0.0 if param in ["r", "q", "sigma"] else 0.01, key="predef_min")
+            max_val = st.number_input(f"Max {param}", value=default_val * (1.5 if param == "S" else 100), key="predef_max")
             n_points = st.slider("Resolution", 50, 500, 100, key="predef_n")
 
             if st.button("Generate Plot for Predefined Strategy"):
@@ -403,6 +416,29 @@ with tab3:
                 except Exception as e:
                     st.error(f"Plotting failed: {e}")
 
+            st.subheader("Visualize Strategy Greek vs Spot Price")
+
+            greek = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"], key="predef_greek")
+            S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="predef_greek_smin")
+            S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="predef_greek_smax")
+            greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="predef_greek_n")
+
+            if st.button("Plot Strategy Greek (Predefined)"):
+                try:
+                    fig = plot_strategy_greek_vs_spot(
+                        greek_name=greek,
+                        legs=st.session_state["predefined_legs"],
+                        model=model_strat,
+                        S0=S_strat,
+                        T=T_strat,
+                        r=r_strat,
+                        sigma=sigma_strat,
+                        q=q_strat,
+                        S_range=np.linspace(S_min, S_max, greek_res)
+                    )
+                    st.pyplot(fig)
+                except Exception as e:
+                    st.error(f"Greek plot failed: {e}")
 
 
 # -----------------------------
