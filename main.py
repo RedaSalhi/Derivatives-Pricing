@@ -124,7 +124,7 @@ with tab1:
     # -----------------------------
     # Visualization Section
     # -----------------------------
-    if st.session_state["show_plot_controls"]:
+    if st.session_state["show_plot_controls"] or not st.session_state["show_plot_controls"]:
         st.subheader("Visualize Option Price vs Parameter")
 
         param_to_vary = st.selectbox(
