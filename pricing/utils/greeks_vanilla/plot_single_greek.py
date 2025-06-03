@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use("seaborn-v0_8-whitegrid")
+
 from pricing.utils.greeks_vanilla.greeks_interface import compute_greek
 
 def plot_single_greek_vs_spot(
