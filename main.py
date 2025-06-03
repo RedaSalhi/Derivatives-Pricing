@@ -367,10 +367,10 @@ with tab3:
                 max_val = st.number_input(f"Max {param}", value=1.0, key="predef_max")
             elif param == "T":
                 min_val = st.number_input(f"Min {param}", value=0.01, key="predef_min")
-                max_val = st.number_input(f"Max {param}", value=default_val * 3, key="predef_max")
+                max_val = st.number_input(f"Max {param}", value=default_val * 100, key="predef_max")
             else:
-                min_val = st.number_input(f"Min {param}", value=default_val * 0.5, key="predef_min")
-                max_val = st.number_input(f"Max {param}", value=default_val * 1.5, key="predef_max")
+                min_val = st.number_input(f"Min {param}", value=default_val * 0, key="predef_min")
+                max_val = st.number_input(f"Max {param}", value=default_val * 3, key="predef_max")
 
             n_points = st.slider("Number of Points", 50, 500, 100, key="predef_n")
 
