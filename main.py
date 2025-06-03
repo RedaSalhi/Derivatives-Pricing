@@ -424,7 +424,7 @@ with tab4:
 
         col1, col2 = st.columns(2)
         with col1:
-            model = st.selectbox("Pricing Model", ["monte_carlo"], key="lookback_model")
+            model = st.selectbox("Pricing Model", ["Monte Carlo"], key="lookback_model")
             option_type = st.selectbox("Option Type", ["call", "put"], key="lookback_type")
             floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
         with col2:
@@ -434,7 +434,8 @@ with tab4:
             sigma = st.number_input("Volatility (σ)", value=0.2, key="lookback_sigma")
             r = st.number_input("Risk-Free Rate (r)", value=0.05, key="lookback_r")
     
-        if model == "monte_carlo":
+        if model == "Monte Carlo":
+            model = "monte_carlo"
             n_paths = st.slider("Monte Carlo Simulations", 10, 10000, step=10, value=1000, key="lookback_paths")
             n_steps = st.slider("Steps per Path", 10, 300, step=2, value=252, key="lookback_steps")
     
