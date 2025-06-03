@@ -41,7 +41,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 ])
 
 
-
+from pricing.vanilla_options import plot_option_price_vs_param
 # -----------------------------
 # Tab 1 – Vanilla Options
 # -----------------------------
@@ -107,7 +107,61 @@ with tab1:
             st.error(f"Error: {e}")
 
 
-    
+
+
+
+            # --------------------------------------
+            # Visualization section – plot vs param
+            # --------------------------------------
+            st.subheader("Visualize Option Price vs Parameter")
+
+            param_to_vary = st.selectbox(
+                "Select Parameter to Vary",
+                ["S", "K", "T", "r", "sigma", "q"],
+                key="vary_param"
+            )
+
+            min_val = st.number_input(
+                f"Minimum value of {param_to_vary}",
+                value=float(kwargs[param_to_vary]) * 0.5
+            )
+
+            max_val = st.number_input(
+                f"Maximum value of {param_to_vary}",
+                value=float(kwargs[param_to_vary]) * 1.5
+            )
+
+            n_points = st.slider("Number of Points", min_value=10, max_value=300, value=50)
+
+            plot_button = st.button("Generate Plot")
+
+            if plot_button:
+                try:
+
+                    # Pass model in lowercase for the pricing function
+                    fixed_inputs = kwargs.copy()
+                    if model_lower == "binomial":
+                        fixed_inputs["N"] = N
+                    elif model_lower == "monte-carlo":
+                        fixed_inputs["n_simulations"] = n_sim
+
+                    fig = plot_option_price_vs_param(
+                        option_type=option_type,
+                        exercise_style=exercise_style,
+                        model=model_lower,
+                        param_name=param_to_vary,
+                        param_range=(min_val, max_val),
+                        fixed_params=fixed_inputs,
+                        n_points=n_points,
+                    )
+
+                    st.pyplot(fig)
+
+                except Exception as e:
+                    st.error(f"Plotting failed: {e}")
+
+
+
 
 
 # -----------------------------
