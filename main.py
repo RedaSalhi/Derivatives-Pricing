@@ -135,10 +135,16 @@ with tab1:
 
         fixed_kwargs = st.session_state["option_kwargs"]
         default_val = float(fixed_kwargs.get(param_to_vary, 1.0))
-
-        min_val = st.number_input(f"Minimum value of {param_to_vary}", value=default_val * 0.5, key="min_val")
-        max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 1.5, key="max_val")
-        n_points = st.slider("Number of Points", min_value=10, max_value=300, value=50, key="n_points_slider")
+        if param_to_vary == "r" or "q" or "sigma":
+            min_val = st.number_input(f"Minimum value of {param_to_vary}", 0, key="min_val")
+            max_val = st.number_input(f"Maximum value of {param_to_vary}", 1, key="max_val")
+        elif param_to_vary == "T":
+            min_val = st.number_input(f"Minimum value of {param_to_vary}", value=default_val * 0, key="min_val")
+            max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 100, key="max_val")
+        else:
+            min_val = st.number_input(f"Minimum value of {param_to_vary}", value=default_val * 0, key="min_val")
+            max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 3, key="max_val")
+        n_points = st.slider("Number of Points", min_value=100, max_value=1000, value=500, key="n_points_slider")
 
         if st.button("Generate Plot"):
             try:
