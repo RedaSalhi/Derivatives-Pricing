@@ -457,15 +457,15 @@ with tab4:
 
                 st.success(f"The {asian_type.replace('_', ' ')} Asian {option_type} is worth: **{price:.4f}**")
 
-                st.subheader("Payoff at Maturity")
-                plot_asian_option_payoff(K=K, option_type=option_type, asian_type=asian_type)
+                with st.expander("Payoff at Maturity"):    
+                    plot_asian_option_payoff(K=K, option_type=option_type, asian_type=asian_type)
 
                 if method == "monte_carlo":
-                    st.subheader("Monte Carlo Sample Paths")
                     paths = simulate_asian_paths(S0=S, T=T, r=r, sigma=sigma,
                                                  n_steps=n_steps, n_paths=n_paths,
                                                  option_type=option_type, asian_type=asian_type)
-                    plot_monte_carlo_paths(paths)
+                    with st.expander("Monte Carlo Sample Paths"):
+                        plot_monte_carlo_paths(paths)
 
             except Exception as e:
                 st.error(f"Error: {e}")
