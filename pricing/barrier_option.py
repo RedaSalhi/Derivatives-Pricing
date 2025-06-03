@@ -93,7 +93,7 @@ def plot_sample_paths_barrier(S_paths, K, H, option_type, barrier_type):
     Plot sample Monte Carlo paths and mark the barrier level.
     """
     fig, ax = plt.subplots(figsize=(8, 5))
-    for path in S_paths[:20]:  # plot first 20 paths
+    for path in S_paths[]:  # plot first 20 paths
         ax.plot(path, alpha=0.7)
     
     ax.axhline(y=H, color='red', linestyle='--', label=f"Barrier H = {H}")
