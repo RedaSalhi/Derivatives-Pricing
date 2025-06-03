@@ -424,7 +424,7 @@ with tab4:
 
         col1, col2 = st.columns(2)
         with col1:
-            model = st.selectbox("Pricing Model", ["monte_carlo", "binomial"], key="lookback_model")
+            model = st.selectbox("Pricing Model", ["monte_carlo"], key="lookback_model")
             option_type = st.selectbox("Option Type", ["call", "put"], key="lookback_type")
             floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
         with col2:
@@ -435,10 +435,8 @@ with tab4:
             r = st.number_input("Risk-Free Rate (r)", value=0.05, key="lookback_r")
     
         if model == "monte_carlo":
-            n_paths = st.slider("Monte Carlo Simulations", 1000, 100000, step=1000, value=10000, key="lookback_paths")
-            n_steps = st.slider("Steps per Path", 10, 365, step=5, value=252, key="lookback_steps")
-        else:
-            N = st.slider("Binomial Tree Steps", 10, 500, step=10, value=100, key="lookback_tree_steps")
+            n_paths = st.slider("Monte Carlo Simulations", 10, 10000, step=10, value=1000, key="lookback_paths")
+            n_steps = st.slider("Steps per Path", 10, 300, step=2, value=252, key="lookback_steps")
     
         if st.button("Compute Lookback Option Price"):
             from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
@@ -449,20 +447,17 @@ with tab4:
                     model=model, option_type=option_type,
                     floating_strike=floating_strike,
                     n_paths=n_paths if model == "monte_carlo" else None,
-                    n_steps=n_steps if model == "monte_carlo" else None,
-                    N=N if model == "binomial" else None
+                    n_steps=n_steps if model == "monte_carlo" else None
                 )
     
                 if stderr is not None:
-                    st.success(f"Monte Carlo Price: **{price:.4f} ± {1.96 * stderr:.4f}**")
-                else:
-                    st.success(f"Binomial Price: **{price:.4f}**")
+                    st.success(f"Monte Carlo Price: **{price:.4f}**")
     
                 with st.expander("Payoff Function"):
                     st.pyplot(plot_payoff(S0, option_type, K, floating_strike))
     
                 with st.expander("Simulated Asset Paths"):
-                    st.pyplot(plot_paths(S0, r, sigma, T, n_paths=20, n_steps=252))
+                    st.pyplot(plot_paths(S0, r, sigma, T, n_paths, n_steps))
     
                 if model == "monte_carlo":
                     with st.expander("Distribution of Discounted Payoffs"):
