@@ -1,7 +1,6 @@
 #princing/asian_option.py
 
 from pricing.models.asian_monte_carlo import simulate_asian_paths
-from pricing.models.asian_pde import price_asian_option_pde
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
@@ -36,7 +35,7 @@ def price_asian_option(
     Returns:
         float: Estimated option price
     """
-    assert method in {"monte_carlo", "pde"}, "Invalid method"
+    assert method in {"monte_carlo"}, "Invalid method"
     assert option_type in {"call", "put"}, "Invalid option type"
     assert asian_type in {"average_price", "average_strike"}, "Invalid Asian option type"
 
@@ -50,15 +49,6 @@ def price_asian_option(
             S_T = paths[:, -1]
             payoffs = np.maximum(S_T - averages, 0) if option_type == "call" else np.maximum(averages - S_T, 0)
         return np.exp(-r * T) * np.mean(payoffs)
-
-    elif method == "pde":
-        return price_asian_option_pde(
-            S0=S0, K=K, T=T, r=r, sigma=sigma,
-            Smax=3*S0, M=200, N=n_steps,
-            option_type=option_type,
-            asian_type=asian_type
-        )
-
 
 
 def plot_asian_option_payoff(K: float, option_type: str = "call", asian_type: str = "average_price"):
@@ -94,7 +84,7 @@ def plot_asian_option_payoff(K: float, option_type: str = "call", asian_type: st
     st.pyplot(fig)
 
 
-def plot_monte_carlo_paths(paths: np.ndarray, n_paths_to_plot: int = 20):
+def plot_monte_carlo_paths(paths: np.ndarray):
     """
     Display simulated Monte Carlo paths using Streamlit.
 
@@ -106,10 +96,10 @@ def plot_monte_carlo_paths(paths: np.ndarray, n_paths_to_plot: int = 20):
     time_grid = np.linspace(0, 1, n_steps)
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    for i in range(min(n_paths_to_plot, n_paths)):
+    for i in range(n_paths):
         ax.plot(time_grid, paths[i], lw=0.8, alpha=0.7)
 
-    ax.set_title(f"Monte Carlo Simulated Paths (n={min(n_paths_to_plot, n_paths)})")
+    ax.set_title(f"Monte Carlo Simulated Paths (n=n_paths))")
     ax.set_xlabel("Time (normalized)")
     ax.set_ylabel("Asset Price")
     ax.grid(True)
