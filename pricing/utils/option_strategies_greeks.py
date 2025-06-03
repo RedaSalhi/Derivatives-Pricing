@@ -77,3 +77,28 @@ def plot_strategy_greek_vs_spot(
         spine.set_color("black")
 
     return fig
+
+
+def get_all_strategy_greek_plots(
+    legs, model, S0, T, r, sigma, q=0.0, S_range=None, n_points=200
+):
+    greeks = ["delta", "gamma", "vega", "theta", "rho"]
+    figs = []
+
+    for greek in greeks:
+        fig = plot_strategy_greek_vs_spot(
+            greek_name=greek,
+            legs=legs,
+            model=model,
+            S0=S0,
+            T=T,
+            r=r,
+            sigma=sigma,
+            q=q,
+            S_range=S_range,
+            n_points=n_points
+        )
+        figs.append((greek, fig))
+
+    return figs
+
