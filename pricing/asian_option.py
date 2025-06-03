@@ -1,8 +1,10 @@
-
+#princing/asian_option.py
 
 from pricing.models.asian_monte_carlo import simulate_asian_paths
 from pricing.models.asian_pde import price_asian_option_pde
 import numpy as np
+import matplotlib.pyplot as plt
+import streamlit as st
 
 def price_asian_option(
     S0: float,
@@ -56,3 +58,60 @@ def price_asian_option(
             option_type=option_type,
             asian_type=asian_type
         )
+
+
+
+def plot_asian_option_payoff(K: float, option_type: str = "call", asian_type: str = "average_price"):
+    """
+    Display the payoff function of an Asian option using Streamlit.
+
+    Parameters:
+        K (float): Strike price
+        option_type (str): "call" or "put"
+        asian_type (str): "average_price" or "average_strike"
+    """
+    x = np.linspace(0.5 * K, 1.5 * K, 200)
+
+    if asian_type == "average_price":
+        x_label = "Average Price"
+        payoff = np.maximum(x - K, 0) if option_type == "call" else np.maximum(K - x, 0)
+
+    elif asian_type == "average_strike":
+        x_label = "Final Price (S_T)"
+        payoff = np.maximum(x - K, 0) if option_type == "call" else np.maximum(K - x, 0)
+
+    else:
+        st.error("Invalid asian_type")
+        return
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(x, payoff, label="Payoff", linewidth=2)
+    ax.set_title(f"{asian_type.replace('_', ' ').title()} Asian {option_type.title()} Payoff")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel("Payoff")
+    ax.grid(True)
+    ax.legend()
+    st.pyplot(fig)
+
+
+def plot_monte_carlo_paths(paths: np.ndarray, n_paths_to_plot: int = 20):
+    """
+    Display simulated Monte Carlo paths using Streamlit.
+
+    Parameters:
+        paths (np.ndarray): Simulated asset price paths (n_paths, n_steps)
+        n_paths_to_plot (int): Number of paths to plot
+    """
+    n_paths, n_steps = paths.shape
+    time_grid = np.linspace(0, 1, n_steps)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for i in range(min(n_paths_to_plot, n_paths)):
+        ax.plot(time_grid, paths[i], lw=0.8, alpha=0.7)
+
+    ax.set_title(f"Monte Carlo Simulated Paths (n={min(n_paths_to_plot, n_paths)})")
+    ax.set_xlabel("Time (normalized)")
+    ax.set_ylabel("Asset Price")
+    ax.grid(True)
+    st.pyplot(fig)
+
