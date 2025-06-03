@@ -55,8 +55,16 @@ with tab1:
             option_type = "call"
         elif option_type == "Put":
             option_type = "put"
-        exercise_style = st.selectbox("Exercise Style", ["european", "american"])
-        model = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"])
+        exercise_style = st.selectbox("Exercise Style", ["European", "American"])
+        if exercise_style == "American":
+            exercise_style = "american"
+        elif exercise_style == "European":
+            exercise_style = "european"
+        model = st.selectbox("Pricing Model", ["Black Scholes", "Binomial", "Monte Carlo"])
+        if model == "Black Scholes":
+            model = "Black-Scholes"
+        if model == "Monte Carlo":
+            model = "Monte-Carlo"
 
     with col2:
         S = st.number_input("Spot Price (S)", value=100.0)
@@ -67,9 +75,9 @@ with tab1:
         q = st.number_input("Dividend Yield (q)", value=0.0)
 
     if model == "Binomial":
-        N = st.slider("Binomial Tree Steps (N)", min_value=10, max_value=10000, value=100)
+        N = st.slider("Binomial Tree Steps (N)", min_value=0, max_value=10000, step=2, value=100)
     elif model == "Monte-Carlo":
-        n_sim = st.slider("Monte Carlo Simulations", min_value=1_000, max_value=100_000, step=5_000, value=10_000)
+        n_sim = st.slider("Monte Carlo Simulations", min_value=10, max_value=10000, step=2, value=1000)
 
     if st.button("Compute Option Price"):
         kwargs = {
@@ -117,7 +125,11 @@ with tab2:
     with col2:
         storage_cost = st.number_input("Storage Cost (c)", value=0.0, key="fwd_storage")
         dividend_yield = st.number_input("Dividend Yield (q)", value=0.0, key="fwd_q")
-        position = st.radio("Position", ["long", "short"])
+        position = st.radio("Position", ["Long", "Short"])
+        if position == "Long":
+            position = "long"
+        elif position == "Short":
+            position = "short"
 
     if st.button("Price Forward Contract"):
         F = price_forward_contract(
@@ -151,9 +163,16 @@ with tab3:
 
     use_manual = st.checkbox("Build Strategy Manually")
 
-    model_strat = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"], key="strat_model")
-    style_strat = st.selectbox("Exercise Style", ["european", "american"], key="strat_style")
-
+    model_strat = st.selectbox("Pricing Model", ["Black Scholes", "Binomial", "Monte Carlo"], key="strat_model")
+    if model_strat == "Black Scholes":
+        model_strat = "Black-Scholes"
+    if model_strat == "Monte Carlo":
+        model_strat = "Monte-Carlo"
+    style_strat = st.selectbox("Exercise Style", ["European", "American"], key="strat_style")
+    if style_strat == "American":
+        style_strat = "american"
+    elif exercise_style == "European":
+        style_strat = "european"
     S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
     T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
     sigma_strat = st.number_input("Volatility (σ)", value=0.2, key="strat_sigma")
