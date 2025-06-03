@@ -39,8 +39,8 @@ def plot_single_greek_vs_spot(
     ax.legend(facecolor='black')
 
     # Dark theme styling
-    fig.patch.set_facecolor('#111')
-    ax.set_facecolor('#111')
+    #fig.patch.set_facecolor('#111')
+    #ax.set_facecolor('#111')
     ax.tick_params(colors='white')
     ax.spines['bottom'].set_color('white')
     ax.spines['top'].set_color('white')
