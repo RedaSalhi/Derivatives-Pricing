@@ -265,7 +265,6 @@ with tab3:
 from pricing.digital_option import price_digital_option, plot_digital_payoff
 from pricing.barrier_option import price_barrier_option, plot_barrier_payoff, plot_sample_paths_barrier
 from pricing.asian_option import price_asian_option, plot_asian_option_payoff, plot_monte_carlo_paths
-from pricing.models.asian_pde import price_asian_option_pde
 from pricing.models.asian_monte_carlo import simulate_asian_paths
 
 
@@ -377,7 +376,7 @@ with tab4:
 
         col1, col2 = st.columns(2)
         with col1:
-            method = st.selectbox("Pricing Method", ["monte_carlo", "pde"], key="asian_method")
+            method = st.selectbox("Pricing Method", ["monte_carlo"], key="asian_method")
             option_type = st.selectbox("Option Type", ["call", "put"], key="asian_type")
             asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="asian_style")
         with col2:
@@ -390,9 +389,6 @@ with tab4:
         if method == "monte_carlo":
             n_paths = st.slider("Monte Carlo Simulations", 1000, 100000, step=5000, value=10000)
             n_steps = st.slider("Steps per Path", 10, 365, step=5, value=50)
-        else:
-            n_steps = st.slider("Number of PDE Time Steps", 10, 1000, step=10, value=200)
-            n_paths = None
 
         if st.button("Compute Asian Option Price"):
             try:
