@@ -227,12 +227,6 @@ with tab2:
             )
 
 
-hey gpt,
-
-j'aime pas trop le résultâtes de ce code, est ce que tu peux me le refaire avec de preference un seul bouton qui fait tourner tout le reste ?
-n'utilise pas Canva, renvoie le code complet modifié dans le chat sous forme de bloc 
-
-
 from pricing.option_strategies import price_option_strategy, compute_strategy_payoff, get_predefined_strategy, plot_strategy_price_vs_param
 from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
 
