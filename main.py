@@ -41,32 +41,36 @@ tab1, tab2, tab3, tab4 = st.tabs([
 ])
 
 
-from pricing.vanilla_options import plot_option_price_vs_param
+from pricing.vanilla_options import price_vanilla_option, plot_option_price_vs_param
+
 # -----------------------------
 # Tab 1 – Vanilla Options
 # -----------------------------
 with tab1:
-    if "show_plot_controls" not in st.session_state:
-        st.session_state["show_plot_controls"] = False
     st.header("Vanilla Option Pricing")
 
+    # Init session state
+    if "show_plot_controls" not in st.session_state:
+        st.session_state["show_plot_controls"] = False
+    if "option_kwargs" not in st.session_state:
+        st.session_state["option_kwargs"] = {}
+
+    # Input form
     col1, col2 = st.columns(2)
     with col1:
         option_type = st.selectbox("Option Type", ["Call", "Put"])
-        if option_type == "Call":
-            option_type = "call"
-        elif option_type == "Put":
-            option_type = "put"
+        option_type = option_type.lower()
+
         exercise_style = st.selectbox("Exercise Style", ["European", "American"])
-        if exercise_style == "American":
-            exercise_style = "american"
-        elif exercise_style == "European":
-            exercise_style = "european"
+        exercise_style = exercise_style.lower()
+
         model = st.selectbox("Pricing Model", ["Black Scholes", "Binomial", "Monte Carlo"])
         if model == "Black Scholes":
-            model = "Black-Scholes"
-        if model == "Monte Carlo":
-            model = "Monte-Carlo"
+            model_lower = "black-scholes"
+        elif model == "Monte Carlo":
+            model_lower = "monte-carlo"
+        else:
+            model_lower = "binomial"
 
     with col2:
         S = st.number_input("Spot Price (S)", value=100.0)
@@ -76,11 +80,13 @@ with tab1:
         r = st.number_input("Risk-Free Rate (r)", value=0.05)
         q = st.number_input("Dividend Yield (q)", value=0.0)
 
-    if model == "Binomial":
-        N = st.slider("Binomial Tree Steps (N)", min_value=0, max_value=10000, step=2, value=100)
-    elif model == "Monte-Carlo":
-        n_sim = st.slider("Monte Carlo Simulations", min_value=10, max_value=10000, step=2, value=1000)
+    # Additional model parameters
+    if model_lower == "binomial":
+        N = st.slider("Binomial Tree Steps (N)", min_value=1, max_value=10000, step=2, value=100)
+    elif model_lower == "monte-carlo":
+        n_sim = st.slider("Monte Carlo Simulations", min_value=10, max_value=10000, step=100, value=1000)
 
+    # Pricing button
     if st.button("Compute Option Price"):
         kwargs = {
             "S": S,
@@ -91,7 +97,6 @@ with tab1:
             "q": q
         }
 
-        model_lower = model.lower()
         if model_lower == "binomial":
             kwargs["N"] = N
         elif model_lower == "monte-carlo":
@@ -99,70 +104,57 @@ with tab1:
 
         try:
             price = price_vanilla_option(
-                option_type.lower(),
-                exercise_style.lower(),
-                model_lower,
+                option_type=option_type,
+                exercise_style=exercise_style,
+                model=model_lower,
                 **kwargs
             )
-            st.success(f"The {exercise_style.lower()} {option_type.lower()} option is worth: **{price:.4f}**")
-            st.session_state["show_plot_controls"] = True  # Enable plotting controls after pricing
+            st.success(f"The {exercise_style} {option_type} option is worth: **{price:.4f}**")
+
+            st.session_state["show_plot_controls"] = True
+            st.session_state["option_kwargs"] = kwargs.copy()
+            st.session_state["model_lower"] = model_lower
+            st.session_state["option_type"] = option_type
+            st.session_state["exercise_style"] = exercise_style
+
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"Error computing option price: {e}")
             st.session_state["show_plot_controls"] = False
 
-
-
-
-
-        # --------------------------------------
-        # Visualization section – plot vs param
-        # --------------------------------------
+    # -----------------------------
+    # Visualization Section
+    # -----------------------------
+    if st.session_state["show_plot_controls"]:
         st.subheader("Visualize Option Price vs Parameter")
-    
-        if st.session_state["show_plot_controls"]:
-            st.subheader("Visualize Option Price vs Parameter")
 
-            param_to_vary = st.selectbox(
-                "Select Parameter to Vary",
-                ["S", "K", "T", "r", "sigma", "q"],
-                key="vary_param"
-            )
-        
-            min_val = st.number_input(
-                f"Minimum value of {param_to_vary}",
-                value=float(kwargs[param_to_vary]) * 0.5
-            )
-        
-            max_val = st.number_input(
-                f"Maximum value of {param_to_vary}",
-                value=float(kwargs[param_to_vary]) * 1.5
-            )
-        
-            n_points = st.slider("Number of Points", min_value=10, max_value=300, value=50)
-        
-            if st.button("Generate Plot"):
-                try:
-                    fixed_inputs = kwargs.copy()
-                    if model_lower == "binomial":
-                        fixed_inputs["N"] = N
-                    elif model_lower == "monte-carlo":
-                        fixed_inputs["n_simulations"] = n_sim
-        
-                    fig = plot_option_price_vs_param(
-                        option_type=option_type,
-                        exercise_style=exercise_style,
-                        model=model_lower,
-                        param_name=param_to_vary,
-                        param_range=(min_val, max_val),
-                        fixed_params=fixed_inputs,
-                        n_points=n_points,
-                    )
-        
-                    st.pyplot(fig)
-        
-                except Exception as e:
-                    st.error(f"Plotting failed: {e}")
+        param_to_vary = st.selectbox(
+            "Select Parameter to Vary",
+            ["S", "K", "T", "r", "sigma", "q"],
+            key="vary_param"
+        )
 
+        fixed_kwargs = st.session_state["option_kwargs"]
+        default_val = float(fixed_kwargs.get(param_to_vary, 1.0))
+
+        min_val = st.number_input(f"Minimum value of {param_to_vary}", value=default_val * 0.5, key="min_val")
+        max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 1.5, key="max_val")
+        n_points = st.slider("Number of Points", min_value=10, max_value=300, value=50, key="n_points_slider")
+
+        if st.button("Generate Plot"):
+            try:
+                fig = plot_option_price_vs_param(
+                    option_type=st.session_state["option_type"],
+                    exercise_style=st.session_state["exercise_style"],
+                    model=st.session_state["model_lower"],
+                    param_name=param_to_vary,
+                    param_range=(min_val, max_val),
+                    fixed_params=fixed_kwargs,
+                    n_points=n_points
+                )
+                st.pyplot(fig)
+
+            except Exception as e:
+                st.error(f"Plotting failed: {e}")
 
 
 
