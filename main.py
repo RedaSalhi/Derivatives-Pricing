@@ -326,8 +326,14 @@ with tab4:
             elif option_type == "Put":
                 option_type = "put"
             barrier_type = st.selectbox("Barrier Type", ["Up and Out", "Up and In", "Down and Out", "Down and In"], key="bar_style")
-            if barrier_type == "Up and Out", "Up and In", "Down and Out", "Down and In":
-                barrier_type = "up-and-out", "up-and-in", "down-and-out", "down-and-in"
+            if barrier_type == "Up and Out":
+                barrier_type = "up-and-out"
+            elif barrier_type == "Up and In":
+                barrier_type = "up-and-in"
+            elif barrier_type == "Down and Out"
+                barrier_type = "down-and-out"
+            elif barrier_type == "Down and In":
+                barrier_type = "down-and-in"
             model = st.selectbox("Model", ["Monte Carlo"], key="bar_model")
             if model == "Monte Carlo"
                 model = "monte_carlo"
