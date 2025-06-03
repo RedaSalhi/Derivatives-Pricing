@@ -50,7 +50,11 @@ with tab1:
 
     col1, col2 = st.columns(2)
     with col1:
-        option_type = st.selectbox("Option Type", ["call", "put"])
+        option_type = st.selectbox("Option Type", ["Call", "Put"])
+        if option_type == "Call":
+            option_type = "call"
+        elif option_type == "Put":
+            option_type = "put"
         exercise_style = st.selectbox("Exercise Style", ["european", "american"])
         model = st.selectbox("Pricing Model", ["Black-Scholes", "Binomial", "Monte-Carlo"])
 
@@ -281,9 +285,15 @@ with tab4:
 
         col1, col2 = st.columns(2)
         with col1:
-            option_type = st.selectbox("Option Type", ["call", "put"], key="dig_type")
+            option_type = st.selectbox("Option Type", ["Call", "Put"], key="dig_type")
+            if option_type == "Call":
+                option_type = "call"
+            elif option_type == "Put":
+                option_type = "put"
             style = st.selectbox("Digital Style", ["cash", "asset"], key="dig_style")
-            model = st.selectbox("Model", ["black_scholes"], key="dig_model")
+            model = st.selectbox("Model", ["Black Scholes"], key="dig_model")
+            if model == "Black Scholes":
+                model = "black_scholes"
         with col2:
             S = st.number_input("Spot Price (S)", value=100.0, key="dig_S")
             K = st.number_input("Strike Price (K)", value=100.0, key="dig_K")
