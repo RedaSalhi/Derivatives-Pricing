@@ -319,6 +319,7 @@ with tab3:
                 st.error(legs)
             else:
                 try:
+                    st.session_state["predefined_legs"] = legs
                     result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
                     st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
 
@@ -364,12 +365,12 @@ with tab3:
 
         n_points = st.slider("Number of Points", min_value=50, max_value=500, value=100, key="strat_n_points")
 
-        if st.button("Generate Strategy Price Plot"):
+        if "predefined_legs" in st.session_state and st.button("Generate Strategy Price Plot"):
             from pricing.option_strategies import plot_strategy_price_vs_param
 
             try:
                 fig = plot_strategy_price_vs_param(
-                    legs=legs,
+                    legs=st.session_state["predefined_legs"],
                     exercise_style=style_strat,
                     model=model_strat.lower(),
                     param_name=param_to_vary,
@@ -381,6 +382,9 @@ with tab3:
 
             except Exception as e:
                 st.error(f"Plotting failed: {e}")
+        else:
+            st.info("Please price the strategy first to enable plotting.")
+
 
 
 
