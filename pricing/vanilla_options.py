@@ -42,6 +42,7 @@ def price_vanilla_option(option_type, exercise_style, model, **kwargs):
 
 
 
+
 def plot_option_price_vs_param(
     option_type,
     exercise_style,
@@ -62,6 +63,9 @@ def plot_option_price_vs_param(
         param_range : tuple, (min_value, max_value)
         fixed_params : dict, fixed values for other parameters
         n_points : int, number of points to evaluate
+
+    Returns:
+        matplotlib.figure.Figure
     """
     param_values = np.linspace(param_range[0], param_range[1], n_points)
     prices = []
@@ -69,21 +73,31 @@ def plot_option_price_vs_param(
     for val in param_values:
         input_params = fixed_params.copy()
         input_params[param_name] = val
-        price = price_vanilla_option(
-            option_type=option_type,
-            exercise_style=exercise_style,
-            model=model,
-            **input_params
-        )
+
+        if model == "binomial":
+            input_params["N"] = fixed_params.get("N", 100)
+        elif model == "monte-carlo":
+            input_params["n_simulations"] = fixed_params.get("n_simulations", 1000)
+
+        try:
+            price = price_vanilla_option(
+                option_type=option_type,
+                exercise_style=exercise_style,
+                model=model,
+                **input_params
+            )
+        except:
+            price = np.nan
+
         prices.append(price)
 
-    # Plot
-    plt.figure(figsize=(10, 6))
-    plt.plot(param_values, prices, label=f"{option_type.capitalize()} Option")
-    plt.xlabel(param_name)
-    plt.ylabel("Option Price")
-    plt.title(f"Option Price vs {param_name} ({model}, {exercise_style})")
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
+    ax.plot(param_values, prices, label=f"Price vs {param_name}")
+    ax.set_xlabel(param_name)
+    ax.set_ylabel("Option Price")
+    ax.set_title(f"{model.title()} {exercise_style.title()} {option_type.title()} Option")
+    ax.grid(True)
+    ax.legend()
+    return fig
+
