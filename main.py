@@ -16,10 +16,12 @@ from pricing.forward import (
     plot_forward_payout_and_value
 )
 from pricing.option_strategies import (
+    get_predefined_strategy,
     price_option_strategy,
     compute_strategy_payoff,
-    get_predefined_strategy
+    plot_strategy_price_vs_param  
 )
+
 
 
 # -----------------------------
@@ -310,7 +312,7 @@ with tab3:
             strike3 = st.number_input("Strike 3", value=105.0, key="strat_k3")
         if strategy == "Iron Condor":
             strike4 = st.number_input("Strike 4", value=110.0, key="strat_k4")
-
+        
         if st.button("Price Predefined Strategy"):
             legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4=strike4)
             if isinstance(legs, str):
@@ -336,6 +338,50 @@ with tab3:
 
                 except Exception as e:
                     st.error(f"Error: {e}")
+
+        # --------------------------------------------
+        # Extra Visualization: Strategy Price vs Param
+        # --------------------------------------------
+        st.subheader("Visualize Strategy Price vs Parameter")
+
+        param_to_vary = st.selectbox(
+            "Select Parameter to Vary",
+            ["S", "T", "r", "sigma", "q"],
+            key="strat_vary_param"
+        )
+
+        default_val = float(kwargs.get(param_to_vary, 1.0))
+
+        if param_to_vary in ["r", "q", "sigma"]:
+            min_val = st.number_input(f"Min {param_to_vary}", value=0.0, key="strat_min_val")
+            max_val = st.number_input(f"Max {param_to_vary}", value=1.0, key="strat_max_val")
+        elif param_to_vary == "T":
+            min_val = st.number_input(f"Min {param_to_vary}", value=0.01, key="strat_min_val")
+            max_val = st.number_input(f"Max {param_to_vary}", value=default_val * 3, key="strat_max_val")
+        else:
+            min_val = st.number_input(f"Min {param_to_vary}", value=default_val * 0.5, key="strat_min_val")
+            max_val = st.number_input(f"Max {param_to_vary}", value=default_val * 1.5, key="strat_max_val")
+
+        n_points = st.slider("Number of Points", min_value=50, max_value=500, value=100, key="strat_n_points")
+
+        if st.button("Generate Strategy Price Plot"):
+            from pricing.option_strategies import plot_strategy_price_vs_param
+
+            try:
+                fig = plot_strategy_price_vs_param(
+                    legs=legs,
+                    exercise_style=style_strat,
+                    model=model_strat.lower(),
+                    param_name=param_to_vary,
+                    param_range=(min_val, max_val),
+                    fixed_params=kwargs,
+                    n_points=n_points
+                )
+                st.pyplot(fig)
+
+            except Exception as e:
+                st.error(f"Plotting failed: {e}")
+
 
 
 # -----------------------------
