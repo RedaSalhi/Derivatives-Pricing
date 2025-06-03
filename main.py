@@ -45,6 +45,8 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 from pricing.vanilla_options import price_vanilla_option, plot_option_price_vs_param
 
+from pricing.utils.greeks_vanilla.plot_single_greek import plot_single_greek_vs_spot
+
 # -----------------------------
 # Tab 1 – Vanilla Options
 # -----------------------------
@@ -60,19 +62,13 @@ with tab1:
     # Input form
     col1, col2 = st.columns(2)
     with col1:
-        option_type = st.selectbox("Option Type", ["Call", "Put"])
-        option_type = option_type.lower()
-
-        exercise_style = st.selectbox("Exercise Style", ["European", "American"])
-        exercise_style = exercise_style.lower()
-
+        option_type = st.selectbox("Option Type", ["Call", "Put"]).lower()
+        exercise_style = st.selectbox("Exercise Style", ["European", "American"]).lower()
         model = st.selectbox("Pricing Model", ["Black Scholes", "Binomial", "Monte Carlo"])
-        if model == "Black Scholes":
-            model_lower = "black-scholes"
-        elif model == "Monte Carlo":
-            model_lower = "monte-carlo"
-        else:
-            model_lower = "binomial"
+        model_lower = {
+            "Black Scholes": "black-scholes",
+            "Monte Carlo": "monte-carlo"
+        }.get(model, "binomial")
 
     with col2:
         S = st.number_input("Spot Price (S)", value=100.0)
@@ -82,23 +78,13 @@ with tab1:
         r = st.number_input("Risk-Free Rate (r)", value=0.05)
         q = st.number_input("Dividend Yield (q)", value=0.0)
 
-    # Additional model parameters
     if model_lower == "binomial":
         N = st.slider("Binomial Tree Steps (N)", min_value=1, max_value=10000, step=2, value=100)
     elif model_lower == "monte-carlo":
         n_sim = st.slider("Monte Carlo Simulations", min_value=10, max_value=10000, step=100, value=1000)
 
-    # Pricing button
     if st.button("Compute Option Price"):
-        kwargs = {
-            "S": S,
-            "K": K,
-            "T": T,
-            "r": r,
-            "sigma": sigma,
-            "q": q
-        }
-
+        kwargs = {"S": S, "K": K, "T": T, "r": r, "sigma": sigma, "q": q}
         if model_lower == "binomial":
             kwargs["N"] = N
         elif model_lower == "monte-carlo":
@@ -126,7 +112,7 @@ with tab1:
     # -----------------------------
     # Visualization Section
     # -----------------------------
-    if st.session_state["show_plot_controls"] or not st.session_state["show_plot_controls"]:
+    if st.session_state["show_plot_controls"]:
         st.subheader("Visualize Option Price vs Parameter")
         st.markdown("<small>Compute the option price before generating the plot !</small>", unsafe_allow_html=True)
 
@@ -145,7 +131,7 @@ with tab1:
             min_val = st.number_input(f"Minimum value of {param_to_vary}", value=default_val * 0.01, key="min_val")
             max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 100, key="max_val")
         else:
-            min_val = st.number_input(f"Minimum value of {param_to_vary}", value=default_val * 0, key="min_val")
+            min_val = st.number_input(f"Minimum value of {param_to_vary}", value=0.0, key="min_val")
             max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 1.5, key="max_val")
         n_points = st.slider("Number of Points", min_value=100, max_value=1000, value=500, key="n_points_slider")
 
@@ -161,9 +147,37 @@ with tab1:
                     n_points=n_points
                 )
                 st.pyplot(fig)
-
             except Exception as e:
                 st.error(f"Plotting failed: {e}")
+
+        # -----------------------------
+        # Greek Visualizations vs Spot
+        # -----------------------------
+        st.subheader("Greeks vs Spot Price")
+        st.markdown("<small>Delta, Gamma, Vega, Theta, Rho</small>", unsafe_allow_html=True)
+
+        greek = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"])
+        S_range_min = st.number_input("Min Spot", value=0.5 * S)
+        S_range_max = st.number_input("Max Spot", value=1.5 * S)
+        n_points_greek = st.slider("Resolution", min_value=50, max_value=1000, value=300)
+
+        if st.button("Plot Greek vs Spot"):
+            try:
+                fig_greek = plot_single_greek_vs_spot(
+                    greek_name=greek,
+                    model=st.session_state["model_lower"],
+                    option_type=st.session_state["option_type"],
+                    S0=S,
+                    K=K,
+                    T=T,
+                    r=r,
+                    sigma=sigma,
+                    q=q,
+                    S_range=np.linspace(S_range_min, S_range_max, n_points_greek)
+                )
+                st.pyplot(fig_greek)
+            except Exception as e:
+                st.error(f"Greek plot failed: {e}")
 
 
 
