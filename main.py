@@ -46,6 +46,8 @@ from pricing.vanilla_options import plot_option_price_vs_param
 # Tab 1 – Vanilla Options
 # -----------------------------
 with tab1:
+    if "show_plot_controls" not in st.session_state:
+        st.session_state["show_plot_controls"] = False
     st.header("Vanilla Option Pricing")
 
     col1, col2 = st.columns(2)
@@ -103,8 +105,10 @@ with tab1:
                 **kwargs
             )
             st.success(f"The {exercise_style.lower()} {option_type.lower()} option is worth: **{price:.4f}**")
+            st.session_state["show_plot_controls"] = True  # Enable plotting controls after pricing
         except Exception as e:
             st.error(f"Error: {e}")
+            st.session_state["show_plot_controls"] = False
 
 
 
