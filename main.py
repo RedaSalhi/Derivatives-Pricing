@@ -136,8 +136,8 @@ with tab1:
         fixed_kwargs = st.session_state["option_kwargs"]
         default_val = float(fixed_kwargs.get(param_to_vary, 1.0))
         if param_to_vary == "r" or "q" or "sigma":
-            min_val = st.number_input(f"Minimum value of {param_to_vary}", 0, key="min_val")
-            max_val = st.number_input(f"Maximum value of {param_to_vary}", 1, key="max_val")
+            min_val = st.number_input(f"Minimum value of {param_to_vary}", value=0, key="min_val")
+            max_val = st.number_input(f"Maximum value of {param_to_vary}", value=1, key="max_val")
         elif param_to_vary == "T":
             min_val = st.number_input(f"Minimum value of {param_to_vary}", value=default_val * 0, key="min_val")
             max_val = st.number_input(f"Maximum value of {param_to_vary}", value=default_val * 100, key="max_val")
