@@ -394,8 +394,10 @@ with tab4:
             elif option_type == "Put":
                 option_type = "put"
             asian_type = st.selectbox("Asian Type", ["Average Price", "Average Strike"], key="asian_style")
-            if asian_type == "Average Price", "Average Strike":
-                asian_type == "average_price", "average_strike"
+            if asian_type == "Average Price":
+                asian_type = "average_price"
+            elif asian_type == "Average Strike":
+                asian_type = "average_strike"
         with col2:
             S = st.number_input("Spot Price (S)", value=100.0, key="asian_S")
             K = st.number_input("Strike Price (K)", value=100.0, key="asian_K")
