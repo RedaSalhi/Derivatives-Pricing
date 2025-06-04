@@ -8,9 +8,9 @@ st.caption("Engineering student | Finance enthusiast | Quant researcher")
 st.markdown("""
 **SALHI Reda**  
 🎓 Engineering student at **Centrale Méditerranée**  
-📈 Passionate about **quantitative finance**, **stochastic models**, and **economic research**  
-🌍 International experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, etc.  
-🏅 Merit scholar | Ranked 1st out of 150+ students | Solo traveler and lifelong learner  
+📈 Passionate about **mathematics**, **financial markets**, and **economic research**  
+🌍 International solo travel experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, Portugal, United Kingdom, etc.  
+🏅 Solo traveler   
 """)
 
 # CV Download
