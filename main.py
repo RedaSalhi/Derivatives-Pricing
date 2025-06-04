@@ -17,7 +17,7 @@ st.caption("Built for students, quants, and finance enthusiasts")
 st.sidebar.title("Navigation")
 selected_page = st.sidebar.radio(
     "Select Page",
-    ["Pricer", "About Me", "Finance Background"],
+    ["Pricer", "Portfolio Optimizer using Markowitz & CAPM", "About Me", "Finance Background"],
 )
 
 if selected_page == "Pricer":
