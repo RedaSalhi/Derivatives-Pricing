@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 import streamlit as st
 import numpy as np
 
-from pricing.vanilla_options import price_vanilla_option
+from pricing.vanilla_options import price_vanilla_option, plot_option_price_vs_param
 from pricing.forward import (
     price_forward_contract,
     plot_forward_mark_to_market,
@@ -26,15 +26,6 @@ def render_pricer_page():
     st.header("Derivatives Pricer")
     # your full app logic for vanilla, forward, etc. goes here
 
-
-    # -----------------------------
-    # Page Setup
-    # -----------------------------
-    st.set_page_config(page_title="Derivatives Pricing App", layout="centered")
-    st.title("Derivatives Pricing App")
-    st.caption("Built for students, quants, and finance enthusiasts")
-    
-    
     # -----------------------------
     # Tabs Layout
     # -----------------------------
@@ -45,8 +36,6 @@ def render_pricer_page():
         "Exotic Options" 
     ])
     
-    
-    from pricing.vanilla_options import price_vanilla_option, plot_option_price_vs_param
     
     from pricing.utils.greeks_vanilla.plot_single_greek import plot_single_greek_vs_spot
     
