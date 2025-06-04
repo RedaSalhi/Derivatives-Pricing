@@ -99,6 +99,9 @@ def optimize_portfolio(tickers, expected_return=None, expected_std=None, include
     return opt_weights, capm_expected_returns, betas, alphas, w, R_target, sigma_target, fig
 
 
+st.set_page_config(page_title="Portfolio Optimizer", layout="wide")
+
+
 with st.sidebar:
     st.header("⚙️ User Inputs")
     tickers_str = st.text_input("📃 Tickers (comma-separated)", "AAPL, MSFT, GOOG")
