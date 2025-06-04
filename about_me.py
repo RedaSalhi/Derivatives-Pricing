@@ -1,3 +1,9 @@
+import sys
+import os
+import runpy
+import streamlit as st
+
+
 st.header("About Me")
     st.markdown(
         "This section can include your CV, a link to your "
