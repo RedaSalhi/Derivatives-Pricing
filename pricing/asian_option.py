@@ -99,7 +99,7 @@ def plot_monte_carlo_paths(paths: np.ndarray):
     for i in range(n_paths):
         ax.plot(time_grid, paths[i], lw=0.8, alpha=0.7)
 
-    ax.set_title(f"Monte Carlo Simulated Paths (n=n_paths))")
+    ax.set_title(f"Monte Carlo Simulated Paths (n={n_paths})")
     ax.set_xlabel("Time (normalized)")
     ax.set_ylabel("Asset Price")
     ax.grid(True)
