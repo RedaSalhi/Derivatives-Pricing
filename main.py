@@ -156,7 +156,17 @@ with tab1:
         st.subheader("Greeks vs Spot Price")
         st.markdown("<small>Delta, Gamma, Vega, Theta, Rho</small>", unsafe_allow_html=True)
 
-        greek = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"])
+        greek = st.selectbox("Select Greek", ["Delta", "Gamma", "Vega", "Theta", "Rho"])
+                if greek == "Delta":
+                    greek = "delta"
+                elif greek == "Gamma":
+                    greek = "gamma"
+                elif greek == "Vega":
+                    greek = "vega"
+                elif greek == "Theta":
+                    greek = "theta"
+                elif greek == "Rho":
+                    greek = "rho"
         S_range_min = st.number_input("Min Spot", value=0.5 * S)
         S_range_max = st.number_input("Max Spot", value=1.5 * S)
         n_points_greek = st.slider("Resolution", min_value=50, max_value=1000, value=300)
@@ -327,7 +337,17 @@ with tab3:
 
                 st.subheader("Visualize Strategy Greek vs Spot Price")
 
-                greek = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"], key="manual_greek")
+                greek = st.selectbox("Select Greek", ["Delta", "Gamma", "Vega", "Theta", "Rho"], key="manual_greek")
+                if greek == "Delta":
+                    greek = "delta"
+                elif greek == "Gamma":
+                    greek = "gamma"
+                elif greek == "Vega":
+                    greek = "vega"
+                elif greek == "Theta":
+                    greek = "theta"
+                elif greek == "Rho":
+                    greek = "rho"
                 S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="manual_greek_smin")
                 S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="manual_greek_smax")
                 greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="manual_greek_n")
@@ -423,7 +443,17 @@ with tab3:
 
             st.subheader("Visualize Strategy Greek vs Spot Price")
 
-            greek = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"], key="predef_greek")
+            greek = st.selectbox("Select Greek", ["Delta", "Gamma", "Vega", "Theta", "Rho"], key="manual_greek")
+                if greek == "Delta":
+                    greek = "delta"
+                elif greek == "Gamma":
+                    greek = "gamma"
+                elif greek == "Vega":
+                    greek = "vega"
+                elif greek == "Theta":
+                    greek = "theta"
+                elif greek == "Rho":
+                    greek = "rho"
             S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="predef_greek_smin")
             S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="predef_greek_smax")
             greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="predef_greek_n")
