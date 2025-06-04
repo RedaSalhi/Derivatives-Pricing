@@ -43,9 +43,11 @@ if os.path.exists(cv_fr):
 # ----------------------
 st.markdown("---")
 st.subheader("🔗 Links")
+
 st.markdown("""
 - [LinkedIn](https://www.linkedin.com/in/reda-salhi-195297290/)
 - [GitHub](https://github.com/RedaSalhi)
+""")
 
 # ----------------------
 # Current Projects
@@ -77,15 +79,13 @@ st.markdown("""
 # ----------------------
 # Contact Info
 # ----------------------
-
 st.markdown("---")
 st.subheader("📬 Contact Me")
-
 st.markdown("If you'd like to get in touch, just fill out the form below:")
 
-formsubmit_email = "salhi.reda47@gmail.com"  # Do not show this in the frontend
+# Obfuscated email (only used in form action, not visible)
+formsubmit_email = "salhi.reda47@gmail.com"
 
-# Use HTML form that works inside Streamlit
 form_code = f"""
 <form action="https://formsubmit.co/{formsubmit_email}" method="POST">
     <input type="hidden" name="_captcha" value="false">
