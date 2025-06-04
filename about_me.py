@@ -32,7 +32,6 @@ st.subheader("🔗 Links")
 st.markdown("""
 - [LinkedIn](https://www.linkedin.com/in/reda-salhi-195297290/)
 - [GitHub](https://github.com/RedaSalhi)
-#- [ResearchGate (if any)](https://www.researchgate.net/)
 """)
 
 # Projects & Interests
