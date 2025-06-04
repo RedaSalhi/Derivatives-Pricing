@@ -17,14 +17,11 @@ st.caption("Built for students, quants, and finance enthusiasts")
 st.sidebar.title("Navigation")
 selected_page = st.sidebar.radio(
     "Select Page",
-    ["Pricer", "Portfolio Optimizer using Markowitz & CAPM", "About Me", "Finance Background"],
+    ["Pricer", "About Me", "Finance Background"],
 )
 
 if selected_page == "Pricer":
     runpy.run_path(os.path.join(os.path.dirname(__file__), "pricer_page.py"))
-
-elif selected_page == "Portfolio Optimizer using Markowitz & CAPM":
-    runpy.run_path(os.path.join(os.path.dirname(__file__), "streamlit_app.py"))
 
 elif selected_page == "About Me":
     runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
