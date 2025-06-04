@@ -11,7 +11,7 @@ st.markdown("""
 **SALHI Reda**  
 🎓 Engineering student at **Centrale Méditerranée**  
 📈 Passionate about **mathematics**, **financial markets**, and **economic research**  
-🌍 International solo travel experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, Portugal, United Kingdom, etc.   
+🌍 International backpacking experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, Portugal, United Kingdom, etc.   
 """)
 
 # ----------------------
@@ -53,7 +53,7 @@ st.markdown("""
 # Future Enhancements
 # ----------------------
 st.markdown("---")
-st.subheader("Future Enhancements for Derivatives-Pricing App")
+st.subheader("Future Enhancements for the Pricing App")
 
 st.markdown("""
 This platform is an ongoing project. Future enhancement include:
@@ -64,17 +64,14 @@ This platform is an ongoing project. Future enhancement include:
 - **Futures Pricing Module**: Finalize the placeholder with fair value pricing, arbitrage detection, and visual comparisons against spot prices.
 
 #### Phase 2 — Advanced Analytics & Visualization
-- **Real-Time Market Feed**: Pull live data from Yahoo Finance or Finnhub, auto-populating inputs (e.g., spot price, interest rate).
-- **3D Surface Viewer**: Visualize price or Greek values across strike and maturity dimensions using 3D plots.
 - **Monte Carlo Animations**: Animate sample paths for exotic options like Asian or Barrier, helping users intuit risk profiles.
 
 #### Phase 3 — Quant Models & Research Tools
 - **Local & Stochastic Volatility Models**: Add support for Heston and Dupire models with implied surface calibration and dynamic plotting.
-- **Stress Testing Suite**: Automate sensitivity analysis across key parameters and export results (PDF/CSV) for audit or report use.
+- **Stress Testing Suite**: Automate sensitivity analysis across key parameters.
 
 #### Phase 4 — Deployment & Community
 - **Public Deployment**: Host the platform on Streamlit Cloud or Render for public and academic use.
-- **Full Documentation & Tutorials**: Expand the `README.md` with a roadmap, screenshots, feature map, and auto-generated model docs via `pdoc`.
 
 #### Bonus: Model Benchmarking Dashboard
 - Compare execution speed and accuracy across models (Black-Scholes, Binomial, Monte Carlo) under various scenarios. Display errors vs analytical benchmarks and visualize trade-offs.
