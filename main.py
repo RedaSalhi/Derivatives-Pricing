@@ -22,6 +22,10 @@ selected_page = st.sidebar.radio(
 
 if selected_page == "Pricer":
     runpy.run_path(os.path.join(os.path.dirname(__file__), "pricer_page.py"))
+
+elif selected_page == "Portfolio Optimizer using Markowitz & CAPM":
+    runpy.run_path(os.path.join(os.path.dirname(__file__), "streamlit_app.py"))
+
 elif selected_page == "About Me":
     runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
     
