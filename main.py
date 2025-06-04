@@ -23,11 +23,8 @@ selected_page = st.sidebar.radio(
 if selected_page == "Pricer":
     runpy.run_path(os.path.join(os.path.dirname(__file__), "pricer_page.py"))
 elif selected_page == "About Me":
-    st.header("About Me")
-    st.markdown(
-        "This section can include your CV, a link to your "
-        "[LinkedIn](https://www.linkedin.com/) profile, and showcase other projects."
-    )
+    runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
+    
 elif selected_page == "Finance Background":
     st.header("Finance Background & Methodology")
     st.markdown(
