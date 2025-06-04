@@ -1,7 +1,6 @@
 import streamlit as st
 
-st.title("📘 Finance Background & Methodology")
-st.markdown("---")
+
 
 st.header("🎯 Objective")
 st.markdown("""
