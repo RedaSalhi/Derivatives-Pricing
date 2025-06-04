@@ -157,16 +157,16 @@ with tab1:
         st.markdown("<small>Delta, Gamma, Vega, Theta, Rho</small>", unsafe_allow_html=True)
 
         greek = st.selectbox("Select Greek", ["Delta", "Gamma", "Vega", "Theta", "Rho"])
-                if greek == "Delta":
-                    greek = "delta"
-                elif greek == "Gamma":
-                    greek = "gamma"
-                elif greek == "Vega":
-                    greek = "vega"
-                elif greek == "Theta":
-                    greek = "theta"
-                elif greek == "Rho":
-                    greek = "rho"
+        if greek == "Delta":
+            greek = "delta"
+        elif greek == "Gamma":
+            greek = "gamma"
+        elif greek == "Vega":
+            greek = "vega"
+        elif greek == "Theta":
+            greek = "theta"
+        elif greek == "Rho":
+            greek = "rho"
         S_range_min = st.number_input("Min Spot", value=0.5 * S)
         S_range_max = st.number_input("Max Spot", value=1.5 * S)
         n_points_greek = st.slider("Resolution", min_value=50, max_value=1000, value=300)
