@@ -5,20 +5,13 @@ import os
 st.title("👨‍💼 About Me")
 st.caption("Engineering student | Finance enthusiast | Quant researcher")
 
-# Profile Section
-col1, col2 = st.columns([1, 3])
-
-with col1:
-    st.image("assets/profile.jpg", width=150)  # Replace with your image path
-
-with col2:
-    st.markdown("""
-    **SALHI Reda**  
-    🎓 Engineering student at **Centrale Méditerranée**  
-    📈 Passionate about **quantitative finance**, **stochastic models**, and **economic research**  
-    🌍 International experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, etc.  
-    🏅 Merit scholar | Ranked 1st out of 150+ students | Solo traveler and lifelong learner  
-    """)
+st.markdown("""
+**SALHI Reda**  
+🎓 Engineering student at **Centrale Méditerranée**  
+📈 Passionate about **quantitative finance**, **stochastic models**, and **economic research**  
+🌍 International experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, etc.  
+🏅 Merit scholar | Ranked 1st out of 150+ students | Solo traveler and lifelong learner  
+""")
 
 # CV Download
 cv_path = "assets/Reda_Salhi_CV_EN.pdf"  # Or just "SALHI_Reda_CV.pdf" if in the same directory
