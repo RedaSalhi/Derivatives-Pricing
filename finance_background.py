@@ -88,7 +88,7 @@ The app computes standard **Greeks** — partial derivatives of the option price
 Represents sensitivity of the option price $ V $ to changes in the underlying asset price $ S $:
 
 $$
-\Delta = \frac{\partial V}{\partial S}
+\Delta = \\frac{\\partial V}{\\partial S}
 $$
 
 ---
@@ -97,16 +97,16 @@ $$
 Second derivative of the option price with respect to $ S $. Measures the curvature of $ V(S) $:
 
 $$
-\Gamma = \frac{\partial^2 V}{\partial S^2}
+\Gamma = \\frac{\\partial^2 V}{\\partial S^2}
 $$
 
 ---
 
-### 🔹 Vega ($ \nu $)
-Sensitivity of the option price to volatility $ \sigma $:
+### 🔹 Vega ($ \\nu $)
+Sensitivity of the option price to volatility $ \\sigma $:
 
 $$
-\nu = \frac{\partial V}{\partial \sigma}
+\\nu = \\frac{\\partial V}{\\partial \\sigma}
 $$
 
 ---
@@ -115,12 +115,12 @@ $$
 Rate of change of the option price with respect to time $ t $:
 
 $$
-\Theta = \frac{\partial V}{\partial t}
+\Theta = \\frac{\\partial V}{\\partial t}
 $$
 
 ---
 
-### 🔹 Rho ($ \rho $)
+### 🔹 Rho ($ \\rho $)
 Sensitivity of the option price to the risk-free interest rate $ r $:
 
 $$
