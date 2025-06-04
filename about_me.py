@@ -14,17 +14,25 @@ st.markdown("""
 """)
 
 # CV Download
-cv_path = "assets/Reda_Salhi_CV_EN.pdf"  # Or just "SALHI_Reda_CV.pdf" if in the same directory
-if os.path.exists(cv_path):
-    with open(cv_path, "rb") as f:
-        st.download_button(
-            label="📄 Download My CV",
-            data=f,
-            file_name="Reda_Salhi_CV_EN.pdf",
-            mime="application/pdf"
-        )
-else:
-    st.warning("CV not found. Please make sure 'SALHI_Reda_CV.pdf' is in the correct path.")
+cv_en = "assets/Reda_Salhi_CV_EN.pdf"  # Or just "SALHI_Reda_CV.pdf" if in the same directory
+
+cv_fr = "assets/Reda_Salhi_CV_FR.pdf"  # Or just "SALHI_Reda_CV.pdf" if in the same directory
+
+with open(cv_en, "rb") as f:
+    st.download_button(
+        label="📄 Download My CV - English Version",
+        data=f,
+        file_name="Reda_Salhi_CV_EN.pdf",
+        mime="application/pdf"
+    )
+
+with open(cv_fr, "rb") as f:
+    st.download_button(
+        label="📄 Download My CV - French Version",
+        data=f,
+        file_name="Reda_Salhi_CV_FR.pdf",
+        mime="application/pdf"
+    )
 
 # Links
 st.markdown("---")
