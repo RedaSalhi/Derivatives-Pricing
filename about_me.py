@@ -60,39 +60,39 @@ st.subheader("📈 Future Enhancements for Derivatives-Pricing Platform")
 st.markdown("""
 This platform is an ongoing project designed to evolve into a multi-asset, model-rich educational and professional toolkit. Future enhancements include:
 
-#### 🧱 Phase 1 — Core Features
+#### Phase 1 — Core Features
 - **Exotic Greeks Engine**: Compute Greeks for digital, barrier, and lookback options using Monte Carlo and analytical methods.
 - **Strategy Optimizer**: Build a new tab to construct and optimize option strategies under cost/risk/return constraints.
 - **Futures Pricing Module**: Finalize the placeholder with fair value pricing, carry arbitrage logic, and visual comparisons.
 
-#### 📊 Phase 2 — Advanced Analytics & Visualization
+#### Phase 2 — Advanced Analytics & Visualization
 - **Monte Carlo Path Animations**: Animate simulations for exotics (Asian, Barrier, Lookback) to visualize risk dynamics.
 - **Stress Testing Suite**: Automate multi-parameter stress tests (e.g., spot, rate, vol) with exportable results.
 
-#### 🧮 Phase 3 — Fixed Income & Credit Products
+#### Phase 3 — Fixed Income & Credit Products
 - **Interest Rate Swaps (IRS)**: Price using **discounted cash flows**, with discounting from **OIS curves** and forecasting from **forward LIBOR/SOFR curves**.
 - **Currency Swaps**: Implement dual-currency valuation with **FX forward curves** and **cross-currency basis adjustments**.
 - **Equity Swaps**: Model synthetic total return swaps via **forward replication** and dividend assumptions.
 - **Caps & Floors**: Price using **Black’s model** (caplets/floorlets) and **Hull-White** for term structure consistency.
 - **Swaptions**: Add models including **Black lognormal**, **Hull-White**, and the **LIBOR Market Model (LMM)** for more realistic term volatility.
 
-#### 🧷 Phase 4 — Credit Derivatives & Structured Products
+#### Phase 4 — Credit Derivatives & Structured Products
 - **Credit Default Swaps (CDS)**: Implement pricing with **reduced-form (Jarrow-Turnbull)** and **structural models (Merton)**.
 - **Collateralized Debt Obligations (CDOs)**: Integrate **copula models** (e.g., Gaussian copula) for tranche-level pricing and correlation stress.
 
-#### 🔁 Phase 5 — Complex & Embedded Options
+#### Phase 5 — Complex & Embedded Options
 - **Convertible Bonds**: Decompose into bond + option; price via **binomial trees**, **Monte Carlo**, or **finite difference PDE solvers**.
 - **Swaptions with Smile Adjustment**: Add SABR or LMM-based volatility surfaces for realistic implied smiles.
 
-#### 📈 Phase 6 — Volatility & Real Options
+#### Phase 6 — Volatility & Real Options
 - **Variance & Volatility Swaps**: Use replication via portfolios of options and model-free estimators.
 - **Real Options Analysis**: Extend the pricing engine to include corporate finance applications (e.g., delay, abandon, expand projects) via binomial/MC models.
 
-#### 🚀 Deployment & Community
+#### Deployment & Community
 - **Public Deployment**: Host on **Streamlit Cloud** or **Render**, enabling public demos and academic access.
 - **Documentation & Tutorials**: Include video walkthroughs, model comparisons, and GitHub-backed docs.
 
-#### 🧪 Bonus: Model Benchmarking Dashboard
+#### Bonus: Model Benchmarking Dashboard
 - Benchmark models across pricing speed, memory, and error vs analytical targets.
 - Visualize accuracy–performance trade-offs (e.g., BS vs Binomial vs MC).
 
