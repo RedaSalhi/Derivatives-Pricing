@@ -50,46 +50,33 @@ st.markdown("""
 """)
 
 # ----------------------
-# Current Projects
-# ----------------------
-st.markdown("---")
-st.subheader("📊 Current Interests & Projects")
-
-st.markdown("""
-- 📘 Research on **Zipf’s Law** in urban economics, with applications across cities and brain networks  
-- 📉 Financial modeling: **Black-Scholes**, **Hull-White**, **Monte Carlo**, **EVT for systemic risk**  
-- 🤖 Building a **web-based derivatives pricing app** for students and quants  
-- 🧮 Strong foundation in **portfolio theory**, **CAPM regression**, and **macro forecasting with VAR models**  
-""")
-
-# ----------------------
 # Future Enhancements
 # ----------------------
 st.markdown("---")
-st.subheader("📈 Future Enhancements for Derivatives-Pricing App")
+st.subheader("Future Enhancements for Derivatives-Pricing App")
 
 st.markdown("""
-The `Derivatives-Pricing` platform is an ongoing project designed to evolve into a complete educational and professional toolkit. Upcoming milestones include:
+This platform is an ongoing project. Future enhancement include:
 
-#### 🔬 Phase 1 — Core Features
-- 🧮 **Exotic Greeks Engine**: Add closed-form Greeks for digital options and Monte Carlo-based Greeks (e.g., pathwise derivatives) for barrier and lookback payoffs.
-- 🧠 **Strategy Optimizer**: Build a new tab for optimizing multi-leg strategies with objectives like max profit, min premium, or risk-neutral hedging, using numerical solvers (`scipy.optimize`).
-- 📉 **Futures Pricing Module**: Finalize the placeholder with fair value pricing, arbitrage detection, and visual comparisons against spot prices.
+#### Phase 1 — Core Features
+- **Exotic Greeks Engine**: Add closed-form Greeks for digital options and Monte Carlo-based Greeks (e.g., pathwise derivatives) for barrier and lookback payoffs.
+- **Strategy Optimizer**: Build a new tab for optimizing multi-leg strategies with objectives like max profit, min premium, or risk-neutral hedging, using numerical solvers (`scipy.optimize`).
+- **Futures Pricing Module**: Finalize the placeholder with fair value pricing, arbitrage detection, and visual comparisons against spot prices.
 
-#### 📊 Phase 2 — Advanced Analytics & Visualization
-- 🔄 **Real-Time Market Feed**: Pull live data from Yahoo Finance or Finnhub, auto-populating inputs (e.g., spot price, interest rate).
-- 🧭 **3D Surface Viewer**: Visualize price or Greek values across strike and maturity dimensions using 3D plots.
-- 🎥 **Monte Carlo Animations**: Animate sample paths for exotic options like Asian or Barrier, helping users intuit risk profiles.
+#### Phase 2 — Advanced Analytics & Visualization
+- **Real-Time Market Feed**: Pull live data from Yahoo Finance or Finnhub, auto-populating inputs (e.g., spot price, interest rate).
+- **3D Surface Viewer**: Visualize price or Greek values across strike and maturity dimensions using 3D plots.
+- **Monte Carlo Animations**: Animate sample paths for exotic options like Asian or Barrier, helping users intuit risk profiles.
 
-#### 📚 Phase 3 — Quant Models & Research Tools
-- 📈 **Local & Stochastic Volatility Models**: Add support for Heston and Dupire models with implied surface calibration and dynamic plotting.
-- ⚠️ **Stress Testing Suite**: Automate sensitivity analysis across key parameters and export results (PDF/CSV) for audit or report use.
+#### Phase 3 — Quant Models & Research Tools
+- **Local & Stochastic Volatility Models**: Add support for Heston and Dupire models with implied surface calibration and dynamic plotting.
+- **Stress Testing Suite**: Automate sensitivity analysis across key parameters and export results (PDF/CSV) for audit or report use.
 
-#### 🌐 Phase 4 — Deployment & Community
-- 🚀 **Public Deployment**: Host the platform on Streamlit Cloud or Render for public and academic use.
-- 📝 **Full Documentation & Tutorials**: Expand the `README.md` with a roadmap, screenshots, feature map, and auto-generated model docs via `pdoc`.
+#### Phase 4 — Deployment & Community
+- **Public Deployment**: Host the platform on Streamlit Cloud or Render for public and academic use.
+- **Full Documentation & Tutorials**: Expand the `README.md` with a roadmap, screenshots, feature map, and auto-generated model docs via `pdoc`.
 
-#### 🧪 Bonus: Model Benchmarking Dashboard
+#### Bonus: Model Benchmarking Dashboard
 - Compare execution speed and accuracy across models (Black-Scholes, Binomial, Monte Carlo) under various scenarios. Display errors vs analytical benchmarks and visualize trade-offs.
 
 ---
