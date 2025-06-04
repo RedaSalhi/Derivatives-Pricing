@@ -143,10 +143,6 @@ In real-world trading, investors often combine multiple options into **strategie
 These strategies can be custom-built and visualized, with **net payoff** and **Greek sensitivity charts**.
 """)
 
-st.header("Engineering & Design")
-st.markdown("""
-All the code is written in **Python** and available on **GitHub**. The app is fully modular and easy to extend.
-""")
 
 st.header("Risk-Neutral Framework")
 
@@ -163,12 +159,6 @@ Where:
 - $ T $ is the maturity
 - $ S_T $ is the underlying asset price at time $ T $
 - $ \mathcal{F}_t $ is the information available at time $ t $
-
----
-
-### Why Risk-Neutral?
-
-In a **complete and arbitrage-free market**, any contingent claim can be replicated and therefore must be priced as the discounted expected value of its payoff under $ \mathbb{Q} $. This avoids reliance on investors' actual risk preferences.
 
 ---
 
@@ -193,6 +183,12 @@ V_0 \approx e^{-rT} \cdot \frac{1}{M} \sum_{i=1}^M \text{Payoff}^{(i)}
 $$
 
 This unified framework enables the consistent pricing of a wide range of derivatives.
+""")
+
+
+st.header("Engineering & Design")
+st.markdown("""
+All the code is written in **Python** and available on **GitHub**. The app is fully modular and easy to extend.
 """)
 
 
