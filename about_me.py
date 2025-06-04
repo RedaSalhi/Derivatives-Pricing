@@ -20,22 +20,22 @@ col1, col2 = st.columns([1, 3])
 
 with col1:
     if os.path.exists(cv_en):
-    with open(cv_en, "rb") as f:
-        st.download_button(
-            label="📄 Download My CV - English Version",
-            data=f,
-            file_name="Reda_Salhi_CV_EN.pdf",
-            mime="application/pdf"
-        )
+        with open(cv_en, "rb") as f:
+            st.download_button(
+                label="📄 Download My CV - English Version",
+                data=f,
+                file_name="Reda_Salhi_CV_EN.pdf",
+                mime="application/pdf"
+            )
 with col2:
     if os.path.exists(cv_fr):
-    with open(cv_fr, "rb") as f:
-        st.download_button(
-            label="📄 Download My CV - French Version",
-            data=f,
-            file_name="Reda_Salhi_CV_FR.pdf",
-            mime="application/pdf"
-        )
+        with open(cv_fr, "rb") as f:
+            st.download_button(
+                label="📄 Download My CV - French Version",
+                data=f,
+                file_name="Reda_Salhi_CV_FR.pdf",
+                mime="application/pdf"
+            )
 
 # Links
 st.markdown("---")
