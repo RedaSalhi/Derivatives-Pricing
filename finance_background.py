@@ -168,7 +168,7 @@ Where:
 
 ### Why Risk-Neutral?
 
-In a **complete and arbitrage-free market**, any contingent claim can be replicated and therefore must be priced as the discounted expected value of its payoff under \\( \mathbb{Q} \\). This avoids reliance on investors' actual risk preferences.
+In a **complete and arbitrage-free market**, any contingent claim can be replicated and therefore must be priced as the discounted expected value of its payoff under $ \mathbb{Q} $. This avoids reliance on investors' actual risk preferences.
 
 ---
 
