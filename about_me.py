@@ -3,14 +3,13 @@ import os
 
 # Header
 st.title("👨‍💼 About Me")
-st.caption("Engineering student | Finance enthusiast | Quant researcher")
+st.caption("Financial Engineering Student | Quant Researcher")
 
 st.markdown("""
 **SALHI Reda**  
 🎓 Engineering student at **Centrale Méditerranée**  
 📈 Passionate about **mathematics**, **financial markets**, and **economic research**  
-🌍 International solo travel experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, Portugal, United Kingdom, etc.  
-🏅 Solo traveler   
+🌍 International solo travel experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, Portugal, United Kingdom, etc.   
 """)
 
 # CV Download
