@@ -16,7 +16,10 @@ st.markdown("""
 cv_en = "assets/Reda_Salhi_CV_EN.pdf"
 cv_fr = "assets/Reda_Salhi_CV_FR.pdf"
 
-if os.path.exists(cv_en):
+col1, col2 = st.columns([1, 3])
+
+with col1:
+    if os.path.exists(cv_en):
     with open(cv_en, "rb") as f:
         st.download_button(
             label="📄 Download My CV - English Version",
@@ -24,8 +27,8 @@ if os.path.exists(cv_en):
             file_name="Reda_Salhi_CV_EN.pdf",
             mime="application/pdf"
         )
-
-if os.path.exists(cv_fr):
+with col2:
+    if os.path.exists(cv_fr):
     with open(cv_fr, "rb") as f:
         st.download_button(
             label="📄 Download My CV - French Version",
