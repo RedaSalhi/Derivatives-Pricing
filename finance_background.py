@@ -1,14 +1,14 @@
 import streamlit as st
 
-st.title("📘 Finance Background & Methodology")
+st.title("Finance Background & Methodology")
 st.markdown("---")
 
-st.header("🎯 Objective")
+st.header("Objective")
 st.markdown("""
 The **Derivatives Pricing App** is built to help users understand and visualize how various financial derivatives are priced and analyzed using different mathematical models. Whether you're a student, a quant, or a curious learner, this app aims to bridge theory and implementation.
 """)
 
-st.header("🧮 Methodology & Pricing Models")
+st.header("Methodology & Pricing Models")
 
 st.markdown(r"""
 We implement core pricing methodologies under the **risk-neutral measure** ($ \mathbb{Q} $), where the present value of any derivative is the discounted expected payoff:
@@ -133,7 +133,7 @@ For each option, these sensitivities are computed numerically and visualized to 
 """)
 
 
-st.header("📊 Multi-Leg Strategies")
+st.header("Multi-Leg Strategies")
 st.markdown("""
 In real-world trading, investors often combine multiple options into **strategies**:
 - **Spreads**: Vertical, horizontal, diagonal
@@ -143,19 +143,58 @@ In real-world trading, investors often combine multiple options into **strategie
 These strategies can be custom-built and visualized, with **net payoff** and **Greek sensitivity charts**.
 """)
 
-st.header("🔧 Engineering & Design")
+st.header("Engineering & Design")
 st.markdown("""
 All the code is written in **Python** and available on **GitHub**. The app is fully modular and easy to extend.
 """)
 
+st.header("Risk-Neutral Framework")
 
-st.header("🔍 Risk-Neutral Framework")
-st.markdown("""
-All models assume the **risk-neutral measure**:
-> Expected discounted payoff under risk-neutral probability = Current Price
+st.markdown(r"""
+All pricing models in this app are based on the **risk-neutral measure** \\( \mathbb{Q} \\), under which the discounted price of a traded asset is a **martingale**. This leads to the fundamental pricing formula:
 
-This fundamental idea allows us to price any derivative whose payoff is known and depends on future asset paths.
+$$
+V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]
+$$
+
+Where:
+- $ V(t) $ is the value of the derivative at time $ t $
+- $ r $ is the risk-free interest rate
+- $ T $ is the maturity
+- $ S_T $ is the underlying asset price at time $ T $
+- $ \mathcal{F}_t $ is the information available at time $ t $
+
+---
+
+### Why Risk-Neutral?
+
+In a **complete and arbitrage-free market**, any contingent claim can be replicated and therefore must be priced as the discounted expected value of its payoff under \\( \mathbb{Q} \\). This avoids reliance on investors' actual risk preferences.
+
+---
+
+### Application in Models
+
+- In **Black-Scholes**, we transform real-world drift $ \mu $ to $ r $, and simulate:
+
+$$
+dS_t = r S_t dt + \sigma S_t dW_t^{\mathbb{Q}}
+$$
+
+- In **Binomial models**, we construct a **risk-neutral probability**:
+
+$$
+p = \frac{e^{r \Delta t} - d}{u - d}
+$$
+
+- In **Monte Carlo**, each simulated payoff is discounted:
+
+$$
+V_0 \approx e^{-rT} \cdot \frac{1}{M} \sum_{i=1}^M \text{Payoff}^{(i)}
+$$
+
+This unified framework enables the consistent pricing of a wide range of derivatives.
 """)
+
 
 
 st.markdown("---")
