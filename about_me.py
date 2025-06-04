@@ -46,8 +46,6 @@ st.subheader("🔗 Links")
 st.markdown("""
 - [LinkedIn](https://www.linkedin.com/in/reda-salhi-195297290/)
 - [GitHub](https://github.com/RedaSalhi)
-- 📅 [Book a Call](https://calendly.com/reda-salhi/30min) — Schedule a meeting
-""")
 
 # ----------------------
 # Current Projects
