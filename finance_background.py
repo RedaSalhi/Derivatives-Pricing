@@ -9,37 +9,129 @@ The **Derivatives Pricing App** is built to help users understand and visualize 
 """)
 
 st.header("🧮 Methodology & Pricing Models")
-st.markdown("""
-We use multiple models depending on the product type:
 
-### 1. **Black-Scholes Model**
-- Closed-form analytical model for European options.
-- Assumes constant volatility and no early exercise.
-- Also extended to price **digital options**.
+st.markdown(r"""
+We implement core pricing methodologies under the **risk-neutral measure** (\\( \mathbb{Q} \\)), where the present value of any derivative is the discounted expected payoff:
+
+\[
+V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]
+\]
+
+---
+
+### 1. **Black–Scholes Model**
+
+Used for **European options**, assumes:
+- Geometric Brownian Motion (GBM): \\( dS_t = \mu S_t dt + \sigma S_t dW_t \\)
+- Constant volatility \\( \sigma \\)
+- No arbitrage, no dividends
+
+Closed-form price for a European **Call**:
+
+\[
+C = S_0 N(d_1) - K e^{-rT} N(d_2)
+\]
+
+with:
+
+\[
+d_1 = \frac{\ln\left(\frac{S_0}{K}\right) + \left( r + \frac{1}{2}\sigma^2 \right) T}{\sigma \sqrt{T}}, \quad
+d_2 = d_1 - \sigma \sqrt{T}
+\]
+
+We also use a modified version for **digital options** where the payoff is binary.
+
+---
 
 ### 2. **Binomial Tree Model**
-- Discrete-time model for both European and American options.
-- Useful for early exercise features.
-- Supports vanilla, lookback, and barrier options.
+
+Used for **European and American options**:
+- Builds a discrete recombining tree with \\( N \\) steps
+- Up/down factors: \\( u = e^{\sigma \sqrt{\Delta t}}, \quad d = \frac{1}{u} \\)
+- Risk-neutral probability:
+
+\[
+p = \frac{e^{r \Delta t} - d}{u - d}
+\]
+
+Backward induction yields the fair price. Useful for early-exercise features and American options. Adapted for **barrier** and **lookback** options.
+
+---
 
 ### 3. **Monte Carlo Simulation**
-- Numerical technique for path-dependent options like Asian or Lookback.
-- Simulates thousands of paths under the risk-neutral measure.
-- Extended using **Longstaff-Schwartz** for American-style derivatives.
 
+Used for **path-dependent options** (e.g., Asian, Lookback). Simulates \\( M \\) sample paths of the underlying:
+
+\[
+S_{t+\Delta t} = S_t \cdot \exp\left( \left( r - \frac{1}{2}\sigma^2 \right)\Delta t + \sigma \sqrt{\Delta t} \cdot Z \right), \quad Z \sim \mathcal{N}(0,1)
+\]
+
+Option value estimated as:
+
+\[
+V_0 \approx e^{-rT} \cdot \frac{1}{M} \sum_{i=1}^M \text{Payoff}^{(i)}
+\]
+
+Extended with **Longstaff-Schwartz** regression for American options.
+
+---
 """)
 
 st.header("📐 Greeks & Sensitivities")
-st.markdown("""
-To help you assess **risk exposure**, the app computes the **Greeks**:
-- **Delta** – Sensitivity to underlying price.
-- **Gamma** – Convexity of Delta.
-- **Vega** – Sensitivity to volatility.
-- **Theta** – Time decay of the option.
-- **Rho** – Sensitivity to interest rate changes.
 
-We provide **visual plots** to show how these metrics evolve across strike prices or spot movements.
+st.markdown("""
+The app computes standard **Greeks** — partial derivatives of the option price with respect to key parameters — for **vanilla options** under the **Black-Scholes** model.
+
+---
+
+### 🔹 Delta (\\( \\Delta \\ ))
+Represents sensitivity of the option price \\( V \\) to changes in the underlying asset price \\( S \\):
+
+\\[
+\\Delta = \\frac{\\partial V}{\\partial S}
+\\]
+
+---
+
+### 🔹 Gamma (\\( \\Gamma \\ ))
+Second derivative of the option price with respect to \\( S \\). Measures the curvature of \\( V(S) \\):
+
+\\[
+\\Gamma = \\frac{\\partial^2 V}{\\partial S^2}
+\\]
+
+---
+
+### 🔹 Vega (\\( \\nu \\ ))
+Sensitivity of the option price to volatility \\( \\sigma \\):
+
+\\[
+\\nu = \\frac{\\partial V}{\\partial \\sigma}
+\\]
+
+---
+
+### 🔹 Theta (\\( \\Theta \\ ))
+Rate of change of the option price with respect to time \\( t \\):
+
+\\[
+\\Theta = \\frac{\\partial V}{\\partial t}
+\\]
+
+---
+
+### 🔹 Rho (\\( \\rho \\ ))
+Sensitivity of the option price to the risk-free interest rate \\( r \\):
+
+\\[
+\\rho = \\frac{\\partial V}{\\partial r}
+\\]
+
+---
+
+For each option, these sensitivities are computed numerically and visualized to show how risk exposure evolves across strike prices and underlying values.
 """)
+
 
 st.header("📊 Multi-Leg Strategies")
 st.markdown("""
@@ -53,14 +145,9 @@ These strategies can be custom-built and visualized, with **net payoff** and **G
 
 st.header("🔧 Engineering & Design")
 st.markdown("""
-- Built in **Python** using **Streamlit** for an interactive frontend.
-- Modular pricing logic organized under `/pricing/`:
-    - `models/`: Analytical and numerical pricing engines
-    - `utils/`: Greek computation and plotting
-    - `option_strategies.py`: Strategy builder and payoff engine
-
-You can **extend** this app with new instruments, exotic derivatives, or even real-time data feeds.
+All the code is written in **Python** and available on **GitHub**. The app is fully modular and easy to extend.
 """)
+
 
 st.header("🔍 Risk-Neutral Framework")
 st.markdown("""
@@ -70,7 +157,6 @@ All models assume the **risk-neutral measure**:
 This fundamental idea allows us to price any derivative whose payoff is known and depends on future asset paths.
 """)
 
-st.info("Want to dive deeper? Explore each pricing method through the Pricer tab!")
 
 st.markdown("---")
-st.caption("Built with ❤️ for financial learning.")
+st.caption("Built for financial learning.")
