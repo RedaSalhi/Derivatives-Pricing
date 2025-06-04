@@ -286,15 +286,16 @@ with tab3:
                     spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
                     payoff = compute_strategy_payoff(legs, spot_range)
 
-                    fig, ax = plt.subplots(figsize=(10, 6))
-                    ax.plot(spot_range, payoff, label="Strategy Payoff", color="blue")
-                    ax.axhline(0, color="black", linestyle="--")
-                    ax.set_xlabel("Spot Price at Maturity (S)")
-                    ax.set_ylabel("Net Payoff")
-                    ax.set_title("Payoff Diagram: Custom Strategy")
-                    ax.grid(True)
-                    ax.legend()
-                    st.pyplot(fig)
+                    with st.expander("Payoff Plot"):
+                        fig, ax = plt.subplots(figsize=(10, 6))
+                        ax.plot(spot_range, payoff, label="Strategy Payoff", color="blue")
+                        ax.axhline(0, color="black", linestyle="--")
+                        ax.set_xlabel("Spot Price at Maturity (S)")
+                        ax.set_ylabel("Net Payoff")
+                        ax.set_title("Payoff Diagram: Custom Strategy")
+                        ax.grid(True)
+                        ax.legend()
+                        st.pyplot(fig)
                 except Exception as e:
                     st.error(f"Error: {e}")
 
@@ -310,16 +311,17 @@ with tab3:
 
                 if st.button("Generate Plot for Custom Strategy"):
                     try:
-                        fig = plot_strategy_price_vs_param(
-                            legs=st.session_state["manual_legs"],
-                            exercise_style=style_strat,
-                            model=model_strat,
-                            param_name=param,
-                            param_range=(min_val, max_val),
-                            fixed_params=kwargs,
-                            n_points=n_points
-                        )
-                        st.pyplot(fig)
+                        with st.expander("Strategy Premium vs Parameter"):
+                            fig = plot_strategy_price_vs_param(
+                                legs=st.session_state["manual_legs"],
+                                exercise_style=style_strat,
+                                model=model_strat,
+                                param_name=param,
+                                param_range=(min_val, max_val),
+                                fixed_params=kwargs,
+                                n_points=n_points
+                            )
+                            st.pyplot(fig)
                     except Exception as e:
                         st.error(f"Plotting failed: {e}")
 
@@ -332,17 +334,18 @@ with tab3:
 
                 if st.button("Plot Strategy Greek (Manual)"):
                     try:
-                        fig = plot_strategy_greek_vs_spot(
-                            greek_name=greek,
-                            legs=st.session_state["manual_legs"],
-                            model=model_strat,
-                            S0=S_strat,
-                            T=T_strat,
-                            r=r_strat,
-                            sigma=sigma_strat,
-                            q=q_strat,
-                            S_range=np.linspace(S_min, S_max, greek_res)
-                        )
+                        with st.expander("Strategy Greek"):
+                            fig = plot_strategy_greek_vs_spot(
+                                greek_name=greek,
+                                legs=st.session_state["manual_legs"],
+                                model=model_strat,
+                                S0=S_strat,
+                                T=T_strat,
+                                r=r_strat,
+                                sigma=sigma_strat,
+                                q=q_strat,
+                                S_range=np.linspace(S_min, S_max, greek_res)
+                            )
                         st.pyplot(fig)
                     except Exception as e:
                         st.error(f"Greek plot failed: {e}")
@@ -379,16 +382,16 @@ with tab3:
 
                     spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
                     payoff = compute_strategy_payoff(legs, spot_range)
-
-                    fig, ax = plt.subplots(figsize=(10, 6))
-                    ax.plot(spot_range, payoff, label="Strategy Payoff", color="green")
-                    ax.axhline(0, color="black", linestyle="--")
-                    ax.set_xlabel("Spot Price at Maturity (S)")
-                    ax.set_ylabel("Net Payoff")
-                    ax.set_title(f"Payoff Diagram: {strategy}")
-                    ax.grid(True)
-                    ax.legend()
-                    st.pyplot(fig)
+                    with st.expander("Payoff Plot"):
+                        fig, ax = plt.subplots(figsize=(10, 6))
+                        ax.plot(spot_range, payoff, label="Strategy Payoff", color="green")
+                        ax.axhline(0, color="black", linestyle="--")
+                        ax.set_xlabel("Spot Price at Maturity (S)")
+                        ax.set_ylabel("Net Payoff")
+                        ax.set_title(f"Payoff Diagram: {strategy}")
+                        ax.grid(True)
+                        ax.legend()
+                        st.pyplot(fig)
                 except Exception as e:
                     st.error(f"Error: {e}")
 
@@ -404,16 +407,17 @@ with tab3:
 
             if st.button("Generate Plot for Predefined Strategy"):
                 try:
-                    fig = plot_strategy_price_vs_param(
-                        legs=st.session_state["predefined_legs"],
-                        exercise_style=style_strat,
-                        model=model_strat,
-                        param_name=param,
-                        param_range=(min_val, max_val),
-                        fixed_params=kwargs,
-                        n_points=n_points
-                    )
-                    st.pyplot(fig)
+                    with st.expander("Strategy Premium vs Parameter"):
+                        fig = plot_strategy_price_vs_param(
+                            legs=st.session_state["predefined_legs"],
+                            exercise_style=style_strat,
+                            model=model_strat,
+                            param_name=param,
+                            param_range=(min_val, max_val),
+                            fixed_params=kwargs,
+                            n_points=n_points
+                        )
+                        st.pyplot(fig)
                 except Exception as e:
                     st.error(f"Plotting failed: {e}")
 
@@ -426,18 +430,19 @@ with tab3:
 
             if st.button("Plot Strategy Greek (Predefined)"):
                 try:
-                    fig = plot_strategy_greek_vs_spot(
-                        greek_name=greek,
-                        legs=st.session_state["predefined_legs"],
-                        model=model_strat,
-                        S0=S_strat,
-                        T=T_strat,
-                        r=r_strat,
-                        sigma=sigma_strat,
-                        q=q_strat,
-                        S_range=np.linspace(S_min, S_max, greek_res)
-                    )
-                    st.pyplot(fig)
+                    with st.expander("Strategy Greek"):
+                        fig = plot_strategy_greek_vs_spot(
+                            greek_name=greek,
+                            legs=st.session_state["predefined_legs"],
+                            model=model_strat,
+                            S0=S_strat,
+                            T=T_strat,
+                            r=r_strat,
+                            sigma=sigma_strat,
+                            q=q_strat,
+                            S_range=np.linspace(S_min, S_max, greek_res)
+                        )
+                        st.pyplot(fig)
                 except Exception as e:
                     st.error(f"Greek plot failed: {e}")
 
