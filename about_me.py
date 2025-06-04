@@ -79,33 +79,33 @@ st.markdown("""
 # ----------------------
 # Contact Info
 # ----------------------
+
 st.markdown("---")
 st.subheader("📬 Contact")
 
-# Obfuscated email
-email_user = "salhi.reda47"
-email_domain = "gmail.com"
-obfuscated_email = f"{email_user} @ {email_domain.replace('.', ' [dot] ')}"
+st.markdown("If you'd like to get in touch, just fill out the form below:")
 
-st.markdown(f"""
-📧 Email: `{obfuscated_email}`  
-📱 Phone (France): +33 7 58 29 80 19 
-""")
+# Contact form using FormSubmit
+form_html = """
+<form action="https://formsubmit.co/salhi.reda47@gmail.com" method="POST">
+    <!-- Protects from spam -->
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_autoresponse" value="Thanks for contacting Reda! He'll reply shortly.">
+    <input type="hidden" name="_subject" value="New message from your Streamlit app!">
 
-# ----------------------
-# Contact Form
-# ----------------------
-with st.form("contact_form"):
-    st.markdown("### 📩 Get in Touch")
+    <label for="name">Your Name</label><br>
+    <input type="text" name="name" required style="width: 100%; padding: 0.5rem;"><br><br>
 
-    name = st.text_input("Your Name")
-    email = st.text_input("Your Email")
-    message = st.text_area("Message", height=150)
-    submitted = st.form_submit_button("Send Message")
+    <label for="email">Your Email</label><br>
+    <input type="email" name="email" required style="width: 100%; padding: 0.5rem;"><br><br>
 
-    if submitted:
-        if name and email and message:
-            st.success(f"Thank you {name}, your message has been received!")
-            # Optionally: store to a database, send email, or log the message
-        else:
-            st.warning("Please complete all fields before submitting.")
+    <label for="message">Message</label><br>
+    <textarea name="message" rows="6" required style="width: 100%; padding: 0.5rem;"></textarea><br><br>
+
+    <button type="submit" style="padding: 0.5rem 1rem; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Send</button>
+</form>
+"""
+
+# Render form
+st.markdown(form_html, unsafe_allow_html=True)
