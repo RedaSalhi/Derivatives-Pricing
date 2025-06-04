@@ -444,16 +444,16 @@ with tab3:
             st.subheader("Visualize Strategy Greek vs Spot Price")
 
             greek = st.selectbox("Select Greek", ["Delta", "Gamma", "Vega", "Theta", "Rho"], key="manual_greek")
-                if greek == "Delta":
-                    greek = "delta"
-                elif greek == "Gamma":
-                    greek = "gamma"
-                elif greek == "Vega":
-                    greek = "vega"
-                elif greek == "Theta":
-                    greek = "theta"
-                elif greek == "Rho":
-                    greek = "rho"
+            if greek == "Delta":
+                greek = "delta"
+            elif greek == "Gamma":
+                greek = "gamma"
+            elif greek == "Vega":
+                greek = "vega"
+            elif greek == "Theta":
+                greek = "theta"
+            elif greek == "Rho":
+                greek = "rho"
             S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="predef_greek_smin")
             S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="predef_greek_smax")
             greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="predef_greek_n")
