@@ -27,7 +27,4 @@ elif selected_page == "About Me":
     runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
     
 elif selected_page == "Finance Background":
-    st.header("Finance Background & Methodology")
-    st.markdown(
-        "Provide information about your finance background and the methodology used in the pricer."
-    )
+    runpy.run_path(os.path.join(os.path.dirname(__file__), "finance_background.py"))
