@@ -23,14 +23,7 @@ from pricing.option_strategies import (
 )
 
 
-
-# -----------------------------
-# Page Setup
-# -----------------------------
-st.set_page_config(page_title="Derivatives Pricing App", layout="centered")
-st.title("Derivatives Pricing App")
-st.caption("Built for students, quants, and finance enthusiasts")
-
+# The main app is responsible for setting page configuration
 
 # -----------------------------
 # Tabs Layout
