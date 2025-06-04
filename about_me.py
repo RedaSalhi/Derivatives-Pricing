@@ -13,25 +13,26 @@ st.markdown("""
 """)
 
 # CV Download
-cv_en = "assets/Reda_Salhi_CV_EN.pdf"  # Or just "SALHI_Reda_CV.pdf" if in the same directory
+cv_en = "assets/Reda_Salhi_CV_EN.pdf"
+cv_fr = "assets/Reda_Salhi_CV_FR.pdf"
 
-cv_fr = "assets/Reda_Salhi_CV_FR.pdf"  # Or just "SALHI_Reda_CV.pdf" if in the same directory
+if os.path.exists(cv_en):
+    with open(cv_en, "rb") as f:
+        st.download_button(
+            label="📄 Download My CV - English Version",
+            data=f,
+            file_name="Reda_Salhi_CV_EN.pdf",
+            mime="application/pdf"
+        )
 
-with open(cv_en, "rb") as f:
-    st.download_button(
-        label="📄 Download My CV - English Version",
-        data=f,
-        file_name="Reda_Salhi_CV_EN.pdf",
-        mime="application/pdf"
-    )
-
-with open(cv_fr, "rb") as f:
-    st.download_button(
-        label="📄 Download My CV - French Version",
-        data=f,
-        file_name="Reda_Salhi_CV_FR.pdf",
-        mime="application/pdf"
-    )
+if os.path.exists(cv_fr):
+    with open(cv_fr, "rb") as f:
+        st.download_button(
+            label="📄 Download My CV - French Version",
+            data=f,
+            file_name="Reda_Salhi_CV_FR.pdf",
+            mime="application/pdf"
+        )
 
 # Links
 st.markdown("---")
@@ -52,7 +53,10 @@ st.markdown("""
 - 🧮 Strong foundation in **portfolio theory**, **CAPM regression**, and **macro forecasting with VAR models**  
 """)
 
-# Optional: contact section
+# Contact Section
 st.markdown("---")
 st.subheader("📬 Contact")
-st.markdown("Feel free to reach out via LinkedIn or GitHub for collaboration opportunities or internship inquiries.")
+st.markdown("""
+Feel free to reach out via LinkedIn or GitHub for collaboration opportunities or internship inquiries.  
+📧 Email: [salhi.reda47@gmail.com](mailto:salhi.reda47@gmail.com)
+""")
