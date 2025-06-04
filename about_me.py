@@ -83,13 +83,13 @@ st.markdown("---")
 st.subheader("📬 Contact")
 
 # Obfuscated email
-email_user = "reda.salhi"
-email_domain = "etu.centralesupelec.fr"
-obfuscated_email = f"{email_user} [at] {email_domain.replace('.', ' [dot] ')}"
+email_user = "salhi.reda47"
+email_domain = "gmail.com"
+obfuscated_email = f"{email_user} @ {email_domain.replace('.', ' [dot] ')}"
 
 st.markdown(f"""
 📧 Email: `{obfuscated_email}`  
-📱 Phone (France): +33 7 XX XX XX XX  
+📱 Phone (France): +33 7 58 29 80 19 
 """)
 
 # ----------------------
