@@ -739,7 +739,7 @@ with tab5:
     model = st.selectbox("Model", {
         "IRS": ["DCF", "LMM"],
         "Currency": ["DCF"],
-        "Equity": ["DCF", "Replication"]
+        "Equity": ["DCF"]
     }[swap_type])
 
     swap_type_lower = swap_type.lower()
@@ -826,15 +826,6 @@ with tab5:
                 "fixed_rate": fixed_rate,
                 "payment_times": payment_times,
                 "discount_curve": discount_curve
-            }
-
-        elif model_lower == "replication":
-            fixed_params = {
-                "S0": S0,
-                "K": K,
-                "r": r,
-                "q": q,
-                "T": T
             }
 
     # ---- Run Pricing ----
