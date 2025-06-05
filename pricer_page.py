@@ -750,7 +750,7 @@ with tab5:
     payment_times = []
 
     if swap_type_lower == "irs":
-        notional = st.number_input("Notional", value=1_000_000)
+        notional = st.number_input("Notional", value=100)
         fixed_rate = st.slider("Fixed Rate", 0.01, 0.10, 0.03)
         payment_times = [0.5 * i for i in range(1, 11)]
 
@@ -784,7 +784,7 @@ with tab5:
             }
 
     elif swap_type_lower == "currency":
-        notional = st.number_input("Notional (Domestic)", value=1_000_000)
+        notional = st.number_input("Notional (Domestic)", value=100)
         r_dom = st.slider("Domestic Rate", 0.00, 0.10, 0.03)
         r_for = st.slider("Foreign Rate", 0.00, 0.10, 0.015)
         fx_spot = st.number_input("Spot FX Rate", value=1.10)
@@ -807,7 +807,7 @@ with tab5:
         }
 
     elif swap_type_lower == "equity":
-        notional = st.number_input("Notional", value=1_000_000)
+        notional = st.number_input("Notional", value=100)
         S0 = st.number_input("Equity Start Price", value=100.0)
         ST = st.number_input("Equity End Price", value=110.0)
         K = st.number_input("Fixed Strike (K)", value=105.0)
