@@ -1,3 +1,5 @@
+import numpy as np
+
 def build_flat_discount_curve(rate):
     return lambda T: np.exp(-rate * T)
 
