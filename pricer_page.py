@@ -838,29 +838,9 @@ with tab5:
             }
 
     # ---- Run Pricing ----
-    if st.button("💰 Calculate Swap Price"):
+    if st.button("Calculate Swap Price"):
         try:
             result = price_swap(swap_type=swap_type_lower, model=model_lower, **fixed_params)
             st.success(f"Swap Price: {result:.2f}")
         except Exception as e:
             st.error(f"Error during pricing: {e}")
-
-    # ---- Optional Plotting ----
-    with st.expander("📊 Plot Price vs Parameter"):
-        if fixed_params:
-            param_to_vary = st.selectbox("Parameter to Vary", list(fixed_params.keys()))
-            min_val = st.number_input(f"Min value for {param_to_vary}", value=0.5 * float(fixed_params[param_to_vary]) if isinstance(fixed_params[param_to_vary], (int, float)) else 0.01)
-            max_val = st.number_input(f"Max value for {param_to_vary}", value=1.5 * float(fixed_params[param_to_vary]) if isinstance(fixed_params[param_to_vary], (int, float)) else 0.1)
-
-            if st.button("📈 Plot Swap Sensitivity"):
-                try:
-                    fig = plot_swap_price_vs_param(
-                        swap_type=swap_type_lower,
-                        model=model_lower,
-                        param_name=param_to_vary,
-                        param_range=(min_val, max_val),
-                        fixed_params=fixed_params
-                    )
-                    st.pyplot(fig)
-                except Exception as e:
-                    st.error(f"Error during plotting: {e}")
