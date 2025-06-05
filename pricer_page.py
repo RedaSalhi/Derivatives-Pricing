@@ -32,7 +32,8 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "Vanilla Options", 
     "Forward Contracts", 
     "Option Strategies", 
-    "Exotic Options" 
+    "Exotic Options",
+    "Swaps"
 ])
 
 
@@ -716,4 +717,139 @@ with tab4:
     
             except Exception as e:
                 st.error(f"Error: {e}")
+
+
+
+
+
+# -----------------------------
+# Tab 5 – Swaps
+# -----------------------------
+
+from pricing.swaps import price_swap, plot_swap_price_vs_param
+from pricing.models.swaps.ois_fx import (
+    build_flat_discount_curve,
+    build_flat_fx_forward_curve
+)
+
+with tab5:
+    st.subheader("Swap Pricer")
+
+    # Step 1: Select Swap Type and Model
+    swap_type = st.selectbox("Swap Type", ["IRS", "Currency", "Equity"])
+    model = st.selectbox("Model", {
+        "IRS": ["DCF", "LMM"],
+        "Currency": ["DCF"],
+        "Equity": ["DCF", "Replication"]
+    }[swap_type])
+
+    swap_type_lower = swap_type.lower()
+    model_lower = model.lower()
+
+    # Step 2: Collect Parameters
+    st.markdown("### Parameters")
+
+    if swap_type_lower == "irs":
+        notional = st.number_input("Notional", value=1_000_000)
+        fixed_rate = st.slider("Fixed Rate", 0.01, 0.10, 0.03)
+        payment_times = [0.5 * i for i in range(1, 11)]
+
+        if model_lower == "dcf":
+            floating_rate = st.slider("Floating Rate", 0.01, 0.10, 0.025)
+            discount_rate = st.slider("OIS Discount Rate", 0.00, 0.10, 0.02)
+            discount_curve = build_flat_discount_curve(discount_rate)
+
+            result = price_swap(
+                swap_type="irs",
+                model="dcf",
+                notional=notional,
+                fixed_rate=fixed_rate,
+                floating_rates=[floating_rate]*len(payment_times),
+                payment_times=payment_times,
+                discount_curve=discount_curve
+            )
+            st.success(f"IRS Price (DCF): {result:.2f}")
+
+        elif model_lower == "lmm":
+            L0 = st.slider("Initial Forward Rate (L0)", 0.01, 0.10, 0.025)
+            vol = st.slider("Volatility", 0.01, 0.50, 0.15)
+            discount_rate = st.slider("OIS Discount Rate", 0.00, 0.10, 0.02)
+            discount_curve = build_flat_discount_curve(discount_rate)
+
+            result = price_swap(
+                swap_type="irs",
+                model="lmm",
+                notional=notional,
+                fixed_rate=fixed_rate,
+                L0=L0,
+                vol=vol,
+                payment_times=payment_times,
+                discount_curve=discount_curve,
+                n_paths=5000
+            )
+            st.success(f"IRS Price (LMM): {result:.2f}")
+
+    elif swap_type_lower == "currency":
+        notional = st.number_input("Notional (Domestic)", value=1_000_000)
+        r_dom = st.slider("Domestic Rate", 0.00, 0.10, 0.03)
+        r_for = st.slider("Foreign Rate", 0.00, 0.10, 0.015)
+        rate_domestic = [r_dom]*10
+        rate_foreign = [r_for]*10
+        fx_spot = st.number_input("Spot FX Rate", value=1.10)
+        payment_times = [0.5 * i for i in range(1, 11)]
+
+        discount_dom = build_flat_discount_curve(r_dom)
+        discount_for = build_flat_discount_curve(r_for)
+        fx_curve = build_flat_fx_forward_curve(fx_spot, r_dom, r_for)
+
+        result = price_swap(
+            swap_type="currency",
+            model="dcf",
+            notional_domestic=notional,
+            rate_domestic=rate_domestic,
+            rate_foreign=rate_foreign,
+            payment_times=payment_times,
+            discount_domestic=discount_dom,
+            discount_foreign=discount_for,
+            fx_forward_curve=fx_curve
+        )
+        st.success(f"Currency Swap Price: {result:.2f}")
+
+    elif swap_type_lower == "equity":
+        notional = st.number_input("Notional", value=1_000_000)
+        S0 = st.number_input("Equity Start Price (S0)", value=100.0)
+        ST = st.number_input("Equity End Price (ST)", value=110.0)
+        K = st.number_input("Fixed Strike or Forward Value (K)", value=105.0)
+        r = st.slider("Risk-Free Rate", 0.00, 0.10, 0.03)
+        q = st.slider("Dividend Yield", 0.00, 0.10, 0.01)
+        fixed_rate = st.slider("Fixed Leg Rate", 0.01, 0.10, 0.03)
+        T = 5
+        payment_times = [1 * i for i in range(1, T + 1)]
+        discount_curve = build_flat_discount_curve(r)
+
+        if model_lower == "dcf":
+            result = price_swap(
+                swap_type="equity",
+                model="dcf",
+                notional=notional,
+                equity_start=S0,
+                equity_end=ST,
+                fixed_rate=fixed_rate,
+                payment_times=payment_times,
+                discount_curve=discount_curve
+            )
+            st.success(f"Equity Swap Price (DCF): {result:.2f}")
+
+        elif model_lower == "replication":
+            result = price_swap(
+                swap_type="equity",
+                model="replication",
+                S0=S0,
+                K=K,
+                r=r,
+                q=q,
+                T=T
+            )
+            st.success(f"Equity Swap Price (Replication): {result:.2f}")
+
     
