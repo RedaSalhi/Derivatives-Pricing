@@ -147,7 +147,7 @@ These strategies can be custom-built and visualized, with **net payoff** and **G
 st.header("Risk-Neutral Framework")
 
 st.markdown(r"""
-All pricing models in this app are based on the **risk-neutral measure** \\( \mathbb{Q} \\), under which the discounted price of a traded asset is a **martingale**. This leads to the fundamental pricing formula:
+All pricing models in this app are based on the **risk-neutral measure** $ \mathbb{Q} $, under which the discounted price of a traded asset is a **martingale**. This leads to the fundamental pricing formula:
 
 $$
 V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]
