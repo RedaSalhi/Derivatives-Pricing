@@ -28,7 +28,7 @@ st.header("Derivatives Pricer")
 # -----------------------------
 # Tabs Layout
 # -----------------------------
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "Vanilla Options", 
     "Forward Contracts", 
     "Option Strategies", 
