@@ -1,5 +1,12 @@
 # Derivatives-Pricing
 
+
+
+A simple Streamlit app template for you to modify!
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://derivatives-pricing.streamlit.app/#about-me)
+
+
 | **Derivative Type**        | **Sub-type / Feature**           | **Common Pricing Models**                                                             |
 | -------------------------- | -------------------------------- | ------------------------------------------------------------------------------------- |
 | **Forward Contract**       | Plain Vanilla                    | Cost of Carry Model (Spot ± Carrying Costs)                                           |
