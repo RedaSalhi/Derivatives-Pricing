@@ -2,7 +2,7 @@
 
 
 
-A simple Streamlit app template for you to modify!
+To open the app click here
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://derivatives-pricing.streamlit.app/#about-me)
 
