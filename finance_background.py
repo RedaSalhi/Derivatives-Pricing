@@ -192,6 +192,6 @@ All the code is written in **Python** and available on **GitHub**. The app is fu
 """)
 
 
-
+# Footer Caption
 st.markdown("---")
-st.caption("Built for financial learning.")
+st.caption("© 2025 | SALHI Reda | Financial Engineering Research")
