@@ -28,12 +28,13 @@ st.header("Derivatives Pricer")
 # -----------------------------
 # Tabs Layout
 # -----------------------------
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "Vanilla Options", 
     "Forward Contracts", 
     "Option Strategies", 
     "Exotic Options",
-    "Swaps"
+    "Swaps",
+    "Interest Rate Instruments"
 ])
 
 
@@ -835,3 +836,32 @@ with tab5:
             st.success(f"Swap Price: {result:.2f}")
         except Exception as e:
             st.error(f"Error during pricing: {e}")
+
+
+
+# -----------------------------
+# Tab 6 – IR Instruments
+# -----------------------------
+
+with tab6:
+    st.subheader("Interest Rate Instruments Pricer (Not accurate)")
+    st.sidebar.selectbox("Choose Interest Rate Model", ["Hull-White (1F)"])
+    st.sidebar.slider("Mean Reversion (alpha)", 0.01, 1.0, 0.1)
+    st.sidebar.slider("Volatility (sigma)", 0.001, 1.0, 0.01)
+    st.sidebar.number_input("Initial Rate r(0)", value=0.03)
+    
+    instrument = st.selectbox("Select Instrument", ["Zero-Coupon Bond", "Cap", "Floor", "Swaption"])
+    if instrument == "Cap":
+        # show extra cap inputs
+
+    if instrument == "Floor":
+        # show extra cap inputs
+
+    if instrument == "Swaption":
+        # show extra cap inputs
+
+    if instrument == "Zero-Coupon Bond":
+        # show extra cap inputs
+    
+    st.button("Run Pricing")
+    
