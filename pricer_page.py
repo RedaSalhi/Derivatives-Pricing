@@ -853,15 +853,6 @@ with tab6:
     instrument = st.selectbox("Select Instrument", ["Zero-Coupon Bond", "Cap", "Floor", "Swaption"])
     if instrument == "Cap":
         # show extra cap inputs
-
-    elif instrument == "Floor":
-        # show extra cap inputs
-
-    elif instrument == "Swaption":
-        # show extra cap inputs
-
-    elif instrument == "Zero-Coupon Bond":
-        # show extra cap inputs
     
     st.button("Run Pricing")
     
