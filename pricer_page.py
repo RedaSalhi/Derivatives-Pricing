@@ -733,7 +733,7 @@ from pricing.models.swaps.ois_fx import (
 )
 
 with tab5:
-    st.subheader("Swap Pricer")
+    st.subheader("Swap Pricer (Not accurate)")
 
     swap_type = st.selectbox("Swap Type", ["IRS", "Currency", "Equity"])
     model = st.selectbox("Model", {
