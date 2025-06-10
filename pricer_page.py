@@ -23,7 +23,6 @@ from pricing.option_strategies import (
 )
 
 st.header("Derivatives Pricer")
-# your full app logic for vanilla, forward, etc. goes here
 
 # -----------------------------
 # Tabs Layout
@@ -483,7 +482,7 @@ from pricing.models.asian_monte_carlo import simulate_asian_paths
 from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
 
 with tab4:
-    st.header("Exotic Option Pricing")
+    st.header("Exotic Option Pricing (In Progress)")
 
     exotic_type = st.selectbox("Select Exotic Option Type", ["Digital", "Barrier", "Asian", "Lookback"])
 
@@ -734,7 +733,7 @@ from pricing.models.swaps.ois_fx import (
 )
 
 with tab5:
-    st.subheader("Swap Pricer (Not accurate)")
+    st.subheader("Swap Pricer (In Progress)")
 
     swap_type = st.selectbox("Swap Type", ["IRS", "Currency", "Equity"])
     model = st.selectbox("Model", {
@@ -844,7 +843,7 @@ with tab5:
 # -----------------------------
 
 with tab6:
-    st.subheader("Interest Rate Instruments Pricer (Not accurate)")
+    st.subheader("Interest Rate Instruments Pricer (Planned)")
     st.selectbox("Choose Interest Rate Model", ["Hull-White (1F)"])
     st.slider("Mean Reversion (alpha)", 0.01, 1.0, 0.1)
     st.slider("Volatility (sigma)", 0.001, 1.0, 0.01)
