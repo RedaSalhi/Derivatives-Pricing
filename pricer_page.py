@@ -854,13 +854,13 @@ with tab6:
     if instrument == "Cap":
         # show extra cap inputs
 
-    if instrument == "Floor":
+    elif instrument == "Floor":
         # show extra cap inputs
 
-    if instrument == "Swaption":
+    elif instrument == "Swaption":
         # show extra cap inputs
 
-    if instrument == "Zero-Coupon Bond":
+    elif instrument == "Zero-Coupon Bond":
         # show extra cap inputs
     
     st.button("Run Pricing")
