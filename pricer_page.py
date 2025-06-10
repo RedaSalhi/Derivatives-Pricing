@@ -845,10 +845,10 @@ with tab5:
 
 with tab6:
     st.subheader("Interest Rate Instruments Pricer (Not accurate)")
-    st.sidebar.selectbox("Choose Interest Rate Model", ["Hull-White (1F)"])
-    st.sidebar.slider("Mean Reversion (alpha)", 0.01, 1.0, 0.1)
-    st.sidebar.slider("Volatility (sigma)", 0.001, 1.0, 0.01)
-    st.sidebar.number_input("Initial Rate r(0)", value=0.03)
+    st.selectbox("Choose Interest Rate Model", ["Hull-White (1F)"])
+    st.slider("Mean Reversion (alpha)", 0.01, 1.0, 0.1)
+    st.slider("Volatility (sigma)", 0.001, 1.0, 0.01)
+    st.number_input("Initial Rate r(0)", value=0.03)
     
     instrument = st.selectbox("Select Instrument", ["Zero-Coupon Bond", "Cap", "Floor", "Swaption"])
     
