@@ -851,8 +851,7 @@ with tab6:
     st.sidebar.number_input("Initial Rate r(0)", value=0.03)
     
     instrument = st.selectbox("Select Instrument", ["Zero-Coupon Bond", "Cap", "Floor", "Swaption"])
-    if instrument == "Cap":
-        # show extra cap inputs
+    
     
     st.button("Run Pricing")
     
