@@ -733,7 +733,7 @@ from pricing.models.swaps.ois_fx import (
 )
 
 with tab5:
-    st.subheader("Swap Pricer (In Progress)")
+    st.header("Swap Pricer (In Progress)")
 
     swap_type = st.selectbox("Swap Type", ["IRS", "Currency", "Equity"])
     model = st.selectbox("Model", {
@@ -843,7 +843,7 @@ with tab5:
 # -----------------------------
 
 with tab6:
-    st.subheader("Interest Rate Instruments Pricer (Planned)")
+    st.header("Interest Rate Instruments Pricer (Planned)")
     st.selectbox("Choose Interest Rate Model", ["Hull-White (1F)"])
     st.slider("Mean Reversion (alpha)", 0.01, 1.0, 0.1)
     st.slider("Volatility (sigma)", 0.001, 1.0, 0.01)
