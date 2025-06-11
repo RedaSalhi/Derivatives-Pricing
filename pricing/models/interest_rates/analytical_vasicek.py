@@ -5,6 +5,8 @@ import datetime
 from pandas_datareader import data as web
 import yfinance as yf
 from scipy.optimize import minimize
+import numpy as np
+import matplotlib.pyplot as plt
 
 # ----------------------
 # 1. Auto-Detect Data Loader (FRED → yfinance fallback)
