@@ -841,16 +841,69 @@ with tab5:
 # -----------------------------
 # Tab 6 – IR Instruments
 # -----------------------------
-
 with tab6:
-    st.header("Interest Rate Instruments Pricer (Planned)")
-    st.selectbox("Choose Interest Rate Model", ["Hull-White (1F)"])
-    st.slider("Mean Reversion (alpha)", 0.01, 1.0, 0.1)
-    st.slider("Volatility (sigma)", 0.001, 1.0, 0.01)
-    st.number_input("Initial Rate r(0)", value=0.03)
-    
-    instrument = st.selectbox("Select Instrument", ["Zero-Coupon Bond", "Cap", "Floor", "Swaption"])
-    
-    
-    st.button("Run Pricing")
+    import streamlit as st
+    from pricing.vanilla_vasicek import price_zero_coupon, price_bond_option
+    from pricing.models.interest_rates.analytical_vasicek import vasicek_zero_coupon_price
+    from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc
+
+    st.header("Interest Rate Instruments Pricer (Vasicek Model)")
+
+    # --- Model & Parameters ---
+    model = st.selectbox("Choose Interest Rate Model", ["Vasicek"], index=0)
+    method = st.radio("Pricing Method", ["Analytical", "Monte Carlo"])
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        a = st.slider("Mean Reversion Speed (a)", min_value=0.01, max_value=1.0, value=0.1)
+    with col2:
+        sigma = st.slider("Volatility (σ)", min_value=0.001, max_value=1.0, value=0.01)
+    with col3:
+        lam = st.number_input("Long-Term Mean Level (λ)", value=0.05)
+
+    r0 = st.number_input("Initial Short Rate r(0)", value=0.03, format="%.4f")
+
+    # --- Instrument selection ---
+    instrument = st.selectbox("Select Instrument", [
+        "Zero-Coupon Bond", 
+        "Bond Option (European)", 
+        "Cap (Planned)", 
+        "Floor (Planned)", 
+        "Swaption (Planned)"
+    ])
+
+    st.markdown("---")
+
+    # --- Input fields per instrument ---
+    if instrument == "Zero-Coupon Bond":
+        maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
+        face_value = st.number_input("Face Value", value=1.0)
+
+    elif instrument == "Bond Option (European)":
+        T1 = st.slider("Option Expiry T1 (years)", 0.5, 10.0, 3.0, step=0.5)
+        T2 = st.slider("Bond Maturity T2 (years)", T1 + 0.5, 30.0, 5.0, step=0.5)
+        K = st.number_input("Strike Price (P(T1, T2))", value=0.85)
+        option_type = st.radio("Option Type", ["call", "put"])
+        face_value = st.number_input("Face Value", value=1.0)
+        n_paths = st.number_input("Monte Carlo Paths", value=10000, step=1000)
+        dt = 1/12
+
+    # --- Pricing ---
+    if st.button("Run Pricing"):
+        if instrument == "Zero-Coupon Bond":
+            price = price_zero_coupon(r0, 0, maturity, a, lam, sigma, face_value, model=method)
+            st.success(f"Zero-Coupon Bond Price: {price:.6f}")
+
+        elif instrument == "Bond Option (European)":
+            if method == "Analytical":
+                from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option_price
+                price = vasicek_bond_option_price(r0, 0, T1, T2, K, a, lam, sigma, face_value, option_type)
+            elif method == "Monte Carlo":
+                price, std = vasicek_bond_option_price_mc(r0, a, lam, sigma, T1, T2, K, dt, n_paths, face_value, option_type)
+                st.info(f"Monte Carlo Std Error: {std:.6f}")
+            st.success(f"Bond Option Price ({option_type}): {price:.6f}")
+
+        else:
+            st.warning("This instrument is planned but not yet implemented.")
+
     
