@@ -6,3 +6,10 @@ yfinance
 matplotlib
 scipy
 pandas_datareader
+statsmodels
+pillow
+plotly
+streamlit
+seaborn
+streamlit_option_menu
+datetime
