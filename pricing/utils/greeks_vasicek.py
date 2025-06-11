@@ -3,8 +3,9 @@
 import numpy as np
 import scipy.stats as ss
 import matplotlib.pyplot as plt
-from pricing.models.interest_rates.monte_carlo_vasicek.py import vasicek_bond_option_price_mc
-from pricing.models.interest_rates.analytical_vasicek.py import vasicek_bond_option_price, vasicek_zero_coupon_price
+from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc
+from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option_price, vasicek_zero_coupon_price
+
 
 # Compute numerical Greeks
 def compute_greek_vs_spot(greek: str, t, T1, T2, K, a, lam, sigma, face, option_type='call', n_paths=10000, r_min=0.01, r_max=0.2, n=100, model="Analytical"):
