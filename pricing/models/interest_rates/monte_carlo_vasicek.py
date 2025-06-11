@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.stats as ss
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 
 def simulate_vasicek_paths_mc(a, lam, sigma, r0, T=10, paths=10000, dt=1/12):
