@@ -5,7 +5,6 @@
 from datetime import datetime
 import numpy as np
 import pandas as pd
-import datetime
 from pandas_datareader import data as web
 import yfinance as yf
 from scipy.optimize import minimize
