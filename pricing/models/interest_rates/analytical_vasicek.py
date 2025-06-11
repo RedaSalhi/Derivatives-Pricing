@@ -7,6 +7,7 @@ import yfinance as yf
 from scipy.optimize import minimize
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 # ----------------------
 # 1. Auto-Detect Data Loader (FRED → yfinance fallback)
@@ -130,3 +131,22 @@ def plot_yield_curves(yield_curves, maturities):
     plt.tight_layout()
     plt.show()
 
+def vasicek_bond_option_price(r_t, t, T1, T2, K, a, lam, sigma, face=1.0, option_type='call'):
+    P_t_T1 = vasicek_zero_coupon_price(r_t, t, T1, a, lam, sigma)
+    P_t_T2 = vasicek_zero_coupon_price(r_t, t, T2, a, lam, sigma)
+
+    B = (1 - np.exp(-a * (T2 - T1))) / a
+    sigma_P_sq = (sigma**2 / (2 * a**3)) * (1 - np.exp(-a * (T2 - T1)))**2 * (1 - np.exp(-2 * a * (T1 - t)))
+
+    sigma_P = np.sqrt(sigma_P_sq)
+
+    d1 = (np.log( face * P_t_T2 / (K * P_t_T1)) / sigma_P) + 0.5 * sigma_P
+    d2 = d1 - sigma_P
+    if option_type == 'call':
+        call_price = face * P_t_T2 * norm.cdf(d1) - K * P_t_T1 * norm.cdf(d2)
+    elif option_type == 'put':
+        call_price = K * P_t_T1 * norm.cdf(-d2) - face * P_t_T2 * norm.cdf(-d1) 
+
+
+    #call_price = face * P_t_T2 * norm.cdf(d1) - K * P_t_T1 * norm.cdf(d2)
+    return call_price
