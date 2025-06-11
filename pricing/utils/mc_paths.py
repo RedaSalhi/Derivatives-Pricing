@@ -1,3 +1,8 @@
+import numpy as np
+import scipy.stats as ss
+import matplotlib.pyplot as plt
+
+
 def plot_vasicek_paths(r, T_vec, lam, sigma, a, dt, plot_paths=1000):
     """
     Affiche les chemins simulés du modèle de Vasicek.
