@@ -4,7 +4,6 @@ pandas
 scipy
 yfinance
 matplotlib
-scipy
 pandas_datareader
 statsmodels
 pillow
