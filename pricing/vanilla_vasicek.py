@@ -1,3 +1,5 @@
+#pricing/vanilla_vasicek.py
+
 def price_zero_coupon(r_t, t, T, a, lam, sigma, face_value=1.0, model="Analytical"):
     if model == "Analytical":
         from pricing.models.interest_rates.analytical_vasicek import vasicek_zero_coupon_price
