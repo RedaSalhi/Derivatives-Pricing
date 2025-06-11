@@ -868,13 +868,15 @@ with tab6:
     param_mode = st.radio("How to set parameters?", ["Manual input", "Calibrate from market data (FRED/Yahoo)"])
 
     if param_mode == "Manual input":
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             a = st.slider("Mean Reversion Speed (a)", 0.01, 1.0, st.session_state.a)
         with col2:
             sigma = st.slider("Volatility (σ)", 0.001, 1.0, st.session_state.sigma)
         with col3:
             lam = st.number_input("Long-Term Mean Level (λ)", value=st.session_state.lam)
+        with col4:
+            dt = st.number_input("Data frequency (dt)", value=st.session_state.dt)
 
         r0 = st.number_input("Initial Short Rate r(0)", value=st.session_state.r0, format="%.4f")
 
@@ -883,6 +885,7 @@ with tab6:
         st.session_state.lam = lam
         st.session_state.sigma = sigma
         st.session_state.r0 = r0
+        st.session_state.dt = dt
 
     else:
         ticker = st.text_input("Enter FRED/Yahoo Ticker", value="DGS3MO")
@@ -895,18 +898,21 @@ with tab6:
             st.session_state.lam = lam
             st.session_state.sigma = sigma
             st.session_state.r0 = r0
-            st.success(f"✔️ Calibrated: a={a:.4f}, λ={lam:.4f}, σ={sigma:.4f}, r₀={r0:.4f}")
+            st.session_state.dt = dt
+            st.success(f"✔️ Calibrated: a={a:.4f}, λ={lam:.4f}, σ={sigma:.4f}, r₀={r0:.4f}, dt={dt:.4f}")
 
     # Use from session
     a = st.session_state.a
     lam = st.session_state.lam
     sigma = st.session_state.sigma
     r0 = st.session_state.r0
+    dt = st.session_state.dt
 
     st.markdown("### 📈 Select Instrument to Price")
     instrument = st.selectbox("Instrument", [
         "Zero-Coupon Bond",
-        "Bond Option (European)",
+        "Coupon Bond",
+        "Bond Option",
         "Cap (Planned)",
         "Floor (Planned)",
         "Swaption (Planned)"
@@ -915,6 +921,11 @@ with tab6:
     if instrument == "Zero-Coupon Bond":
         maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
         face_value = st.number_input("Face Value", value=1.0)
+
+    elif instrument == "Coupon Bond":
+        maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
+        face_value = st.number_input("Face Value", value=1.0)
+        coupon = st.slider("Coupon Rate", 0.0, 1.0, 0.05, step=0.01)
 
     elif instrument == "Bond Option (European)":
         T1 = st.slider("Option Expiry T1 (years)", 0.5, 10.0, 3.0, step=0.5)
@@ -925,7 +936,6 @@ with tab6:
         option_type = st.radio("Option Type", ["call", "put"])
         face_value = st.number_input("Face Value", value=1.0)
         n_paths = st.number_input("Monte Carlo Paths", value=10000, step=1000)
-        dt = 1 / 12
 
     st.markdown("---")
     c1, c2 = st.columns(2)
@@ -935,6 +945,10 @@ with tab6:
         if instrument == "Zero-Coupon Bond":
             price = price_zero_coupon(r0, 0, maturity, a, lam, sigma, face_value, model=method)
             st.success(f"Zero-Coupon Bond Price: {price:.6f}")
+
+        elif instrument == "Coupon Bond":
+            price = price_coupon_bond(r0, a, lam, sigma, maturity, coupon, face_value, dt)
+            st.success(f"Coupon Bond Price: {price:.6f}")
 
         elif instrument == "Bond Option (European)":
             if T2 <= T1:
@@ -953,13 +967,24 @@ with tab6:
 
     # --- Yield Curve Plot Button ---
     if c2.button("Plot Simulated Yield Curve"):
-        T = 10  # horizon
-        sim_dt = 0.1
+        T = st.slider("Horizon Maturities (years)", 1, 30.0, 10.0, step=1)  # horizon
+        sim_dt = dt
         time, r_path = simulate_vasicek_path(r0, a, lam, sigma, T=T, dt=sim_dt)
-        maturities = np.linspace(0.5, 30, 60)
-        snapshots = [0, 1, 3, 5]
-        yield_curves = generate_yield_curves(r_path, snapshots, maturities, a, lam, sigma, sim_dt)
-        plot_yield_curves(yield_curves, maturities)
+        maturities = np.linspace(0.5, T, 60)
+        # Possible snapshot points (up to T)
+        possible_snapshots = list(np.arange(0, T + sim_dt, 0.5))  # 0.0, 0.5, 1.0, ..., 10.0
+    
+        snapshot_times = st.multiselect(
+            "Select snapshot times (in years)",
+            options=possible_snapshots,
+            default=[0, 1, 3, 5]
+        )
+    
+        if not snapshot_times:
+            st.warning("Please select at least one snapshot time.")
+        else:
+            yield_curves = generate_yield_curves(r_path, snapshots, maturities, a, lam, sigma, sim_dt)
+            plot_yield_curves(yield_curves, maturities)
 
     # --- Show parameters summary ---
     with st.expander("🔍 Current Parameters"):
