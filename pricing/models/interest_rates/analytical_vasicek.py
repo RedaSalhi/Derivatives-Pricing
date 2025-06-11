@@ -96,3 +96,35 @@ def vasicek_zero_coupon_price(r_t, t, T, a, lam, sigma, face_value=1.0):
     A = np.exp((lam - sigma**2 / (2 * a**2)) * (B - (T - t)) - (sigma**2 / (4 * a)) * B**2)
     return face_value * A * np.exp(-B * r_t)
 
+# ------------------------------------------------------------------------------
+# 3. Generate Yield Curves at Different Snapshot Times
+# ------------------------------------------------------------------------------
+def generate_yield_curves(r_path, snapshot_times, maturities, a, lam, sigma, dt):
+    yield_curves = {}
+    for t_snap in snapshot_times:
+        idx = int(t_snap / dt)
+        r_t = r_path[idx]
+        yields = []
+        for m in maturities:
+            T = t_snap + m
+            P = vasicek_zero_coupon_price(r_t, t_snap, T, a, lam, sigma)
+            y = -np.log(P) / m
+            yields.append(y)
+        yield_curves[t_snap] = yields
+    return yield_curves
+
+# ------------------------------------------------------------------------------
+# 4. Plot Yield Curves
+# ------------------------------------------------------------------------------
+def plot_yield_curves(yield_curves, maturities):
+    plt.figure(figsize=(10, 6))
+    for t_snap, yields in yield_curves.items():
+        plt.plot(maturities, yields, label=f'Time {t_snap}y')
+    plt.title('Simulated Yield Curves under Vasicek Model')
+    plt.xlabel('Maturity (years)')
+    plt.ylabel('Yield (continuously compounded)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
