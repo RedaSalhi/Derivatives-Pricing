@@ -1,6 +1,6 @@
 # pricing/models/interest_rates/analytical_vasicek.py
 
-
+# from pricing.models.interest_rates.analytical_vasicek import price_coupon_bond, run_ou_estimation, simulate_vasicek_path, vasicek_zero_coupon_price, plot_yield_curves, generate_yield_curves
 
 from datetime import datetime
 import numpy as np
@@ -8,12 +8,11 @@ import pandas as pd
 from pandas_datareader import data as web
 import yfinance as yf
 from scipy.optimize import minimize
-import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 # ----------------------
-# 1. Auto-Detect Data Loader (FRED → yfinance fallback)
+# Auto-Detect Data Loader (FRED → yfinance fallback)
 # ----------------------
 
 def load_data_auto(ticker, start='1990-01-01', end=None):
@@ -38,91 +37,123 @@ def load_data_auto(ticker, start='1990-01-01', end=None):
     return df
 
 # ----------------------
-# 2. Preprocessing Function
+# Preprocessing Function
 # ----------------------
 
 def preprocess(df, freq='ME'):
     df = df.resample(freq).last().dropna()
     df['dt'] = df.index.to_series().diff().dt.days / 365.0
-    return df['Rate'], df['dt'].iloc[1]
+    return df['Rate'], df['dt'].iloc[-1]
 
-# ----------------------
-# 3. OU Process: Negative Log-Likelihood
-# ----------------------
 
-def neg_log_likelihood(params, r, dt):
-    a, lam, sigma = params
-    r_t, r_tp = r[:-1], r[1:]
-    mu = r_t + a * (lam - r_t) * dt
-    var = sigma**2 * dt
-    return 0.5 * np.sum(np.log(2 * np.pi * var) + ((r_tp - mu)**2) / var)
+#-----------------
+# Calibrage (Likelihood)
+#-----------------
 
-# ----------------------
-# 4. Parameter Estimation Function
-# ----------------------
+import numpy as np
+import pandas as pd
+
+def compute_sufficient_stats(r):
+    r_prev = r[:-1]
+    r_next = r[1:]
+    n = len(r_prev)
+
+    S0 = np.mean(r_prev)
+    S1 = np.mean(r_next)
+    S00 = np.mean(r_prev * r_prev)
+    S01 = np.mean(r_prev * r_next)
+
+    return S0, S1, S00, S01, r_prev, r_next, n
+
+def estimate_ab(S0, S1, S00, S01, dt):
+    numerator = S1 * S00 - S0 * S01
+    denominator = S1 * S0 - S0**2 + S00 - S01
+    b_hat = numerator / denominator
+
+    ratio = (S0 - b_hat) / (S1 - b_hat)
+    a_hat = (1 / dt) * np.log(ratio)
+
+    return a_hat, b_hat
+
+def estimate_sigma(a, b, r_prev, r_next, dt):
+    beta = (1 / a) * (1 - np.exp(-a * dt))
+    m = b * a * beta + r_prev * (1 - a * beta)
+    n = len(r_prev)
+
+    numerator = np.sum((r_next - m) ** 2)
+    sigma_squared = (1 / (n * beta * (1 - 0.5 * a * beta))) * numerator
+
+    return np.sqrt(sigma_squared)
 
 def estimate_ou_parameters(rates, dt):
-    r_values = rates.values
-    init = [1.0, np.mean(r_values), np.std(r_values)]
-    bounds = [(1e-4, 10), (None, None), (1e-6, None)]
-    res = minimize(neg_log_likelihood, init, args=(r_values, dt), bounds=bounds)
-    return res.x  # a, lam, sigma
+    S0, S1, S00, S01, r_prev, r_next, n = compute_sufficient_stats(rates.values)
+    a, b = estimate_ab(S0, S1, S00, S01, dt)
+    sigma = estimate_sigma(a, b, r_prev, r_next, dt)
+    return a, b, sigma
 
-# ----------------------
-# 5. Main Wrapper Function
-# ----------------------
-
-def run_ou_estimation(ticker, start='1990-01-01', end=None, freq='ME'):
+def run_ou_estimation(ticker, start='1990-01-01', end=None, freq='ME'):  #need extraction from pricing.models.interest_rates.analytical_vasicek import run_ou_estimation
     df = load_data_auto(ticker, start, end)
     r_series, dt = preprocess(df, freq=freq)
     a, lam, sigma = estimate_ou_parameters(r_series, dt)
-    return a, lam, sigma, dt, r_series
+    a, lam, sigma = float(a), float(lam), float(sigma)
+    print(f"\nEstimated parameters for {ticker}:")
+    print(f"  a (speed of mean reversion):   {a:.4f}")
+    print(f"  lambda (long-term mean level): {lam:.4f}")
+    print(f"  sigma (volatility):            {sigma:.4f}")
+    return a, lam, sigma, dt, float(r_series.iloc[-1])
+
 
 
 # ------------------------------------------------------------------------------
-# 1. Simulate Short Rate Path (Euler–Maruyama for Vasicek)
+# Simulate Short Rate Path (Euler–Maruyama for Vasicek)
 # ------------------------------------------------------------------------------
 
-def simulate_vasicek_path(r0, a, lam, sigma, T, dt):
+def simulate_vasicek_path(r0, a, lam, sigma, T, dt):  #need extraction from pricing.models.interest_rates.analytical_vasicek import simulate_vasicek_path
     N = int(T / dt) + 1
     time = np.linspace(0, T, N)
     r = np.zeros(N)
     r[0] = r0
     for t in range(1, N):
         du = np.random.normal()
-        r[t] = r[t - 1] + a * (lam - r[t - 1]) * dt + sigma * np.sqrt((1 - np.exp(-2 * a * dt)) / (2 * a)) * du
+        sigma_p = sigma * np.sqrt((1 - np.exp(-2 * a * dt)) / (2 * a))
+        mu_t = r0 * np.exp(-a * dt) + lam * (1 - np.exp(-a * dt))
+        r[t] = mu_t + sigma_p * du
     return time, r
 
 # ------------------------------------------------------------------------------
-# 2. Vasicek Zero-Coupon Bond Price Formula
+# Vasicek Zero-Coupon Bond Price Formula
 # ------------------------------------------------------------------------------
 
-def vasicek_zero_coupon_price(r_t, t, T, a, lam, sigma, face_value=1.0):
+def vasicek_zero_coupon_price(r_t, t, T, a, lam, sigma, face_value=1.0):  #need extraction from pricing.models.interest_rates.analytical_vasicek import vasicek_zero_coupon_price
     B = (1 - np.exp(-a * (T - t))) / a
     A = np.exp((lam - sigma**2 / (2 * a**2)) * (B - (T - t)) - (sigma**2 / (4 * a)) * B**2)
     return face_value * A * np.exp(-B * r_t)
 
+
 # ------------------------------------------------------------------------------
-# 3. Generate Yield Curves at Different Snapshot Times
+# Generate Yield Curves at Different Snapshot Times
 # ------------------------------------------------------------------------------
-def generate_yield_curves(r_path, snapshot_times, maturities, a, lam, sigma, dt):
+def generate_yield_curves(r_path, snapshot_times, maturities, a, theta, sigma, dt): #need extraction from pricing.models.interest_rates.analytical_vasicek import generate_yield_curves
     yield_curves = {}
+    n = len(r_path)
     for t_snap in snapshot_times:
         idx = int(t_snap / dt)
+        if idx >= n:
+            continue  # Avoid IndexError
         r_t = r_path[idx]
         yields = []
         for m in maturities:
             T = t_snap + m
-            P = vasicek_zero_coupon_price(r_t, t_snap, T, a, lam, sigma)
+            P = vasicek_zero_coupon_price(r_t, t_snap, T, a, theta, sigma)
             y = -np.log(P) / m
             yields.append(y)
         yield_curves[t_snap] = yields
     return yield_curves
 
 # ------------------------------------------------------------------------------
-# 4. Plot Yield Curves
+# Plot Yield Curves
 # ------------------------------------------------------------------------------
-def plot_yield_curves(yield_curves, maturities):
+def plot_yield_curves(yield_curves, maturities): #need extraction from pricing.models.interest_rates.analytical_vasicek import plot_yield_curves
     plt.figure(figsize=(10, 6))
     for t_snap, yields in yield_curves.items():
         plt.plot(maturities, yields, label=f'Time {t_snap}y')
@@ -135,19 +166,24 @@ def plot_yield_curves(yield_curves, maturities):
     plt.show()
 
 # ------------------------------------------------------------------------------
-# 5. Price a Coupon Bond Using the Simulated Short Rate Path
+# Price a Coupon Bond Using the Simulated Short Rate Path
 # ------------------------------------------------------------------------------
-def price_coupon_bond(rates, a, lam, sigma, maturity=5, coupon=0.05, face_value=1.0, dt=0.5):
-    cashflow_dates = np.arange(dt, maturity + dt, dt)
+def price_coupon_bond(r0, t, a, lam, sigma, maturity=5, coupon=0.05, face=1.0, dt=0.5): #need extraction from pricing.models.interest_rates.analytical_vasicek import price_coupon_bond
+    cashflow_dates = np.arange(t+dt, maturity + 1e-6, dt)
     price = 0
-    for T in cashflow_dates:
-        coupon_payment = coupon * face_value * dt
-        if np.isclose(T, maturity):
-            coupon_payment += face_value
-        P = vasicek_zero_coupon_price(rates, 0, T, a, lam, sigma, face_value)
+    coupon_payment = face * coupon * dt
+
+    for t_i in cashflow_dates:
+        P = vasicek_zero_coupon_price(r0, t, t_i, a, lam, sigma, face_value=1)
         price += coupon_payment * P
+
+    f_price = vasicek_zero_coupon_price(r0, t, maturity, a, lam, sigma, face_value=1)
+    price += face * f_price
     return price
 
+# -----------------
+# Bond Option Price
+# -----------------
 
 def vasicek_bond_option_price(r_t, t, T1, T2, K, a, lam, sigma, face=1.0, option_type='call'):
     P_t_T1 = vasicek_zero_coupon_price(r_t, t, T1, a, lam, sigma)
@@ -163,7 +199,7 @@ def vasicek_bond_option_price(r_t, t, T1, T2, K, a, lam, sigma, face=1.0, option
     if option_type == 'call':
         call_price = face * P_t_T2 * norm.cdf(d1) - K * P_t_T1 * norm.cdf(d2)
     elif option_type == 'put':
-        call_price = K * P_t_T1 * norm.cdf(-d2) - face * P_t_T2 * norm.cdf(-d1) 
+        call_price = K * P_t_T1 * norm.cdf(-d2) - face * P_t_T2 * norm.cdf(-d1)
 
 
     #call_price = face * P_t_T2 * norm.cdf(d1) - K * P_t_T1 * norm.cdf(d2)
