@@ -18,7 +18,7 @@ from scipy.stats import norm
 
 def load_data_auto(ticker, start='1990-01-01', end=None):
     if end is None:
-        end = datetime.datetime.today().strftime('%Y-%m-%d')
+        end = datetime.today().date()
     start_dt = pd.to_datetime(start)
     end_dt = pd.to_datetime(end)
 
