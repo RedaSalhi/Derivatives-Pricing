@@ -1,47 +1,54 @@
 # pricing/models/interest_rates/monte_carlo_vasicek.py
 
+# from pricing.models.interest_rates.monte_carlo_vasicek import simulate_vasicek_paths, plot_vasicek_paths, plot_yield_distribution, vasicek_bond_option_price_mc
 
 
-
+from scipy.optimize import bisect
 import numpy as np
 import scipy.stats as ss
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 
-def simulate_vasicek_paths_mc(a, lam, sigma, r0, T=10, paths=10000, dt=1/12):
-    """
-    Simule les chemins de taux d'intérêt selon le modèle de Vasicek.
-    Retourne les chemins simulés, le vecteur temps et la distribution terminale.
-    """
+def simulate_vasicek_paths(a, lam, sigma, r0, T, dt, n_paths):
     N = round(T / dt)
-    T_vec = np.linspace(0, T, N)
-    std_dt = np.sqrt(sigma**2 / (2 * a) * (1 - np.exp(-2 * a * dt)))
-    
-    r = np.zeros((N, paths))
+    r = np.zeros((N, n_paths))
     r[0, :] = r0
-
     for t in range(N - 1):
-        W = np.random.normal(size=paths)
-        r[t + 1, :] = lam + np.exp(-a * dt) * (r[t, :] - lam) + std_dt * W
+        Z = np.random.normal(0, 1, n_paths)
+        mu = r[t, :] * np.exp(-a * dt) + lam * (1 - np.exp(-a * dt))
+        std = np.sqrt(sigma**2 / (2 * a) * (1 - np.exp(-2 * a * dt)))
+        r[t + 1, :] = mu + std * Z
+    return np.linspace(0, T, N), r
 
-    return r, T_vec, lam, sigma, a, dt
-
-
-def plot_vasicek_paths(r, T_vec, lam, sigma, a, dt, plot_paths=1000):
-    """
-    Affiche les chemins simulés du modèle de Vasicek.
-    """
-    std_asy = sigma * np.sqrt((1 - np.exp(-2 * a * dt)) / (2 * a))
-    
+def plot_vasicek_paths(T_vec, r_paths, lam, std_dt, n_plot=1000):
     plt.figure(figsize=(10, 5))
-    plt.plot(T_vec, r[:, :plot_paths], lw=0.7)
-    plt.axhline(lam + std_asy, color='black', linestyle='--', label='±1 std')
-    plt.axhline(lam - std_asy, color='black', linestyle='--')
-    plt.axhline(lam, color='red', label='Mean')
+    plt.plot(T_vec, r_paths[:, :n_plot], lw=0.6, alpha=0.6)
+    plt.axhline(lam, color='red', linestyle='--', label='Mean Reversion Level (λ)')
+    plt.axhline(lam + std_dt, color='black', linestyle='--', label='±1 Std Dev')
+    plt.axhline(lam - std_dt, color='black', linestyle='--')
     plt.title("Vasicek Sample Paths")
-    plt.xlabel("Time (years)")
-    plt.ylabel("Interest Rate")
+    plt.xlabel("Time (Years)")
+    plt.ylabel("Short Rate")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+def plot_yield_distribution(r):
+    r_T = r[-1, :]
+    mean_yield = np.mean(r_T)
+    std_yield = np.std(r_T)
+    x = np.linspace(r_T.min(), r_T.max(), 200)
+    pdf_fit = ss.norm.pdf(x, mean_yield, std_yield)
+
+    plt.figure(figsize=(10, 5))
+    plt.hist(r_T, bins=50, density=True, color='lightblue', edgecolor='black', label='Simulated Prices')
+    plt.plot(x, pdf_fit, color='red', lw=2, label='Normal Fit')
+    plt.axvline(mean_yield, color='green', linestyle='--', label=f'Mean = {mean_yield:.4f}')
+    plt.title("Terminal Distribution at T")
+    plt.xlabel("Yield")
+    plt.ylabel("Density")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
