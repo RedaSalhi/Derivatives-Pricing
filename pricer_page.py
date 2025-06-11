@@ -848,7 +848,7 @@ with tab6:
     import pandas as pd
     from pricing.vanilla_vasicek import price_zero_coupon, price_bond_option
     from pricing.models.interest_rates.analytical_vasicek import run_ou_estimation
-    from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc, simulate_vasicek_path
+    from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc, simulate_vasicek_paths_mc
     from pricing.models.interest_rates.analytical_vasicek import generate_yield_curves, plot_yield_curves
 
     # Init session state
