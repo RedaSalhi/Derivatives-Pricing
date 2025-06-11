@@ -1,4 +1,4 @@
-# /pricing/utils/mc_paths_vasicek.py
+# /pricing/utils/greeks_vasicek.py
 
 import numpy as np
 import scipy.stats as ss
