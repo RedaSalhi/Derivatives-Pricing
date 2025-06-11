@@ -42,12 +42,12 @@ def compute_greek_vs_spot(greek: str, t, T1, T2, K, a, lam, sigma, face, option_
                 down, _ = vasicek_bond_option_price_mc(r - h, a, lam, sigma, T1, T2, K, dt, n_paths, face, option_type)
                 g = (up - down) / (2 * h)
             elif greek == 'vega':
-                up, _ = vasicek_bond_option_price_mc(r_t, a, lam, sigma + h, T1, T2, K, dt, n_paths, face, option_type)
-                down, _ = vasicek_bond_option_price_mc(r_t, a, lam, sigma - h, T1, T2, K, dt, n_paths, face, option_type)
+                up, _ = vasicek_bond_option_price_mc(r, a, lam, sigma + h, T1, T2, K, dt, n_paths, face, option_type)
+                down, _ = vasicek_bond_option_price_mc(r, a, lam, sigma - h, T1, T2, K, dt, n_paths, face, option_type)
                 g = (up - down) / (2 * h)
             elif greek == 'rho':
-                up, _ = vasicek_bond_option_price_mc(r_t, a, lam + h, sigma, T1, T2, K, dt, n_paths, face, option_type)
-                down, _ = vasicek_bond_option_price_mc(r_t, a, lam - h, sigma, T1, T2, K, dt, n_paths, face, option_type)
+                up, _ = vasicek_bond_option_price_mc(r, a, lam + h, sigma, T1, T2, K, dt, n_paths, face, option_type)
+                down, _ = vasicek_bond_option_price_mc(r, a, lam - h, sigma, T1, T2, K, dt, n_paths, face, option_type)
                 g = (up - down) / (2 * h)
             else:
                 g = np.nan
