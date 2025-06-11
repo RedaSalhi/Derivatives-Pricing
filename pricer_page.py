@@ -857,6 +857,7 @@ with tab6:
         st.session_state.lam = 0.05
         st.session_state.sigma = 0.01
         st.session_state.r0 = 0.03
+        st.session_state.dt = 0.08
 
     st.header("Interest Rate Instruments Pricer (Vasicek Model)")
 
