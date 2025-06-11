@@ -846,7 +846,7 @@ with tab6:
     import streamlit as st
     import numpy as np
     import pandas as pd
-    from pricing.vanilla_vasicek import price_zero_coupon, price_bond_option
+    from pricing.vanilla_vasicek import price_zero_coupon, price_bond_option, price_coupon_bond
     from pricing.models.interest_rates.analytical_vasicek import run_ou_estimation, simulate_vasicek_path
     from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc, simulate_vasicek_paths_mc
     from pricing.models.interest_rates.analytical_vasicek import generate_yield_curves, plot_yield_curves
@@ -968,7 +968,7 @@ with tab6:
 
     # --- Yield Curve Plot Button ---
     if c2.button("Plot Simulated Yield Curve"):
-        T = st.slider("Horizon Maturities (years)", 1, 30.0, 10.0, step=1)  # horizon
+        T = st.slider("Simulation horizon (years)", min_value=1, max_value=30, value=10, step=1)
         sim_dt = dt
         time, r_path = simulate_vasicek_path(r0, a, lam, sigma, T=T, dt=sim_dt)
         maturities = np.linspace(0.5, T, 60)
@@ -984,7 +984,7 @@ with tab6:
         if not snapshot_times:
             st.warning("Please select at least one snapshot time.")
         else:
-            yield_curves = generate_yield_curves(r_path, snapshots, maturities, a, lam, sigma, sim_dt)
+            yield_curves = generate_yield_curves(r_path, snapshots_times, maturities, a, lam, sigma, sim_dt)
             plot_yield_curves(yield_curves, maturities)
 
     # --- Show parameters summary ---
