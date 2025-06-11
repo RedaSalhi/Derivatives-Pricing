@@ -847,7 +847,7 @@ with tab6:
     import numpy as np
     import pandas as pd
     from pricing.vanilla_vasicek import price_zero_coupon, price_bond_option
-    from pricing.models.interest_rates.analytical_vasicek import run_ou_estimation
+    from pricing.models.interest_rates.analytical_vasicek import run_ou_estimation, simulate_vasicek_path
     from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc, simulate_vasicek_paths_mc
     from pricing.models.interest_rates.analytical_vasicek import generate_yield_curves, plot_yield_curves
 
@@ -955,7 +955,7 @@ with tab6:
     if c2.button("Plot Simulated Yield Curve"):
         T = 10  # horizon
         sim_dt = 0.1
-        time, r_path = simulate_vasicek_paths_mc(r0, a, lam, sigma, T=T, dt=sim_dt)
+        time, r_path = simulate_vasicek_path(r0, a, lam, sigma, T=T, dt=sim_dt)
         maturities = np.linspace(0.5, 30, 60)
         snapshots = [0, 1, 3, 5]
         yield_curves = generate_yield_curves(r_path, snapshots, maturities, a, lam, sigma, sim_dt)
