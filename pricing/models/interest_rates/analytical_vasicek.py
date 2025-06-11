@@ -144,7 +144,7 @@ def price_coupon_bond(rates, a, lam, sigma, maturity=5, coupon=0.05, face_value=
         coupon_payment = coupon * face_value * dt
         if np.isclose(T, maturity):
             coupon_payment += face_value
-        P = vasicek_zero_coupon_price(rates[0], 0, T, a, lam, sigma, face_value)
+        P = vasicek_zero_coupon_price(rates, 0, T, a, lam, sigma, face_value)
         price += coupon_payment * P
     return price
 
