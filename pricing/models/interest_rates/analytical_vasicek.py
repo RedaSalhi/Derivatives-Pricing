@@ -134,6 +134,21 @@ def plot_yield_curves(yield_curves, maturities):
     plt.tight_layout()
     plt.show()
 
+# ------------------------------------------------------------------------------
+# 5. Price a Coupon Bond Using the Simulated Short Rate Path
+# ------------------------------------------------------------------------------
+def price_coupon_bond(rates, a, lam, sigma, maturity=5, coupon=0.05, face_value=1.0, dt=0.5):
+    cashflow_dates = np.arange(dt, maturity + dt, dt)
+    price = 0
+    for T in cashflow_dates:
+        coupon_payment = coupon * face_value * dt
+        if np.isclose(T, maturity):
+            coupon_payment += face_value
+        P = vasicek_zero_coupon_price(rates[0], 0, T, a, lam, sigma, face_value)
+        price += coupon_payment * P
+    return price
+
+
 def vasicek_bond_option_price(r_t, t, T1, T2, K, a, lam, sigma, face=1.0, option_type='call'):
     P_t_T1 = vasicek_zero_coupon_price(r_t, t, T1, a, lam, sigma)
     P_t_T2 = vasicek_zero_coupon_price(r_t, t, T2, a, lam, sigma)
