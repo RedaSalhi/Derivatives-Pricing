@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pricing.models.interest_rates.vasicek import vasicek_zero_coupon_price
+from pricing.models.interest_rates.analytical_vasicek import vasicek_zero_coupon_price
 
 # ------------------------------------------------------------------------------
 # 3. Generate Yield Curves at Different Snapshot Times
