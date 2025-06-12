@@ -75,7 +75,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 # Tab 1 – Vanilla Options
 # -----------------------------
 with tab1:
-    st.title("Advanced Option Pricing Tool")
+    st.title("Option Pricing Tool")
     st.markdown("Price options using Black-Scholes, Binomial Tree, and Monte Carlo methods")
     
     # Input Parameters Section
