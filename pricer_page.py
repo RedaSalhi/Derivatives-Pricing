@@ -1073,8 +1073,8 @@ with tab6:
             face = st.number_input("Face Value", value=1.0)
     
             if st.button("Price Coupon Bond"):
-                #price = price_coupon_bond(r0, 0, a, lam, sigma, maturity=maturity, face=face, coupon=coupon, dt=dt)
-                price = price_coupon_bond(r0, a, lam, sigma, maturity, face, coupon, dt)
+                price = price_coupon_bond(r0, 0, a, lam, sigma, maturity=maturity, face=face, coupon=coupon, dt=dt)
+                #price = price_coupon_bond(r0, a, lam, sigma, maturity, face, coupon, dt)
 
                 st.success(f"Bond Price: {price:.4f}")
         else:
