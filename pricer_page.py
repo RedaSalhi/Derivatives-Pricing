@@ -1408,7 +1408,17 @@ with tab6:
     
             if model_type == "Monte Carlo":
                 n_paths = st.number_input("Nombre de simulations", 1000, 100000, 10000, step=1000, key="opt_n_paths")
-                dt_mc = st.number_input("Pas de temps (dt)", 0.001, 0.1, 0.01, step=0.001, key="opt_dt")
+                default_dt = round(params['dt'], 3) if 'dt' in params else 0.01
+
+                dt_mc = st.number_input(
+                    "Pas de temps (dt)",
+                    min_value=0.001,
+                    max_value=0.1,
+                    value=default_dt,
+                    step=0.001,
+                    format="%.3f",
+                    key="opt_dt"
+                )
     
             price_option_btn = st.button("💎 Calculer le Prix de l'Option", type="primary", key="opt_btn")
     
