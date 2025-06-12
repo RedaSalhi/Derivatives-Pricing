@@ -13,14 +13,15 @@ st.set_page_config(page_title="Derivatives Pricing App", layout="centered")
 # ✅ Google Analytics (G-KFYG7J821K)
 components.html(
     """
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KFYG7J821K"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-KFYG7J821K', {
-        'page_title': 'Derivatives Pricing App',
         'page_path': '/streamlit-app',
+        'page_title': 'Derivatives Pricing App',
         'page_location': window.location.href
       });
     </script>
