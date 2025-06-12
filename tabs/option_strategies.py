@@ -424,7 +424,7 @@ def _strategy_builder_tab(spot_price, risk_free_rate, dividend_yield, volatility
         
         # Store legs in session state for use in other tabs
         st.session_state.current_legs = legs
-        st.session_state.strategy_exercise = strategy_exercise
+        st.session_state.current_strategy_exercise = strategy_exercise
     
     with col2:
         st.subheader("Strategy Analysis")
@@ -695,7 +695,7 @@ def _sensitivity_analysis_tab(spot_price, risk_free_rate, dividend_yield, volati
         return
     
     legs = st.session_state.current_legs
-    strategy_exercise = st.session_state.get('strategy_exercise', 'european')
+    strategy_exercise = st.session_state.get('current_strategy_exercise', 'european')
     
     st.subheader("Multi-Parameter Sensitivity")
     
