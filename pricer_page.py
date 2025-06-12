@@ -200,9 +200,9 @@ with tab1:
     st.header("Advanced Analysis")
     
     # Create tabs for different analysis types
-    tab1, tab2 = st.tabs(["Parameter Sensitivity", "Greeks Analysis"])
+    t1, t2 = st.tabs(["Parameter Sensitivity", "Greeks Analysis"])
     
-    with tab1:
+    with t1:
         st.subheader("Parameter Sensitivity Analysis")
         sens_col1, sens_col2, sens_col3 = st.columns([1, 1, 2])
         
@@ -275,7 +275,7 @@ with tab1:
             
             st.pyplot(fig)
     
-    with tab2:
+    with t2:
         st.subheader("Greeks Sensitivity Analysis")
         
         greek_sens_col1, greek_sens_col2, greek_sens_col3 = st.columns([1, 1, 2])
