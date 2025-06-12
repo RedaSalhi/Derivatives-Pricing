@@ -5,12 +5,8 @@ import streamlit as st
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
-import streamlit as st
 import streamlit.components.v1 as components
 
-# Injecter Google Analytics (GA4)
-import streamlit as st
-import streamlit.components.v1 as components
 
 # Inject Google Analytics (GA4)
 components.html(
@@ -22,11 +18,7 @@ components.html(
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-KFYG7J821K', {
-        'page_title': 'Derivatives Pricing App',
-        'page_path': '/streamlit-app',
-        'page_location': 'https://derivatives-pricing.streamlit.app'
-      });
+      gtag('config', 'G-KFYG7J821K');
     </script>
     """,
     height=0,
