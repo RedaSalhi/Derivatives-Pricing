@@ -9,6 +9,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
+import plotly.express as px
+from io import BytesIO
 
 from pricing.vanilla_options import price_vanilla_option, plot_option_price_vs_param
 from pricing.forward import *
@@ -652,238 +654,514 @@ from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
 # Tab 3 – Option Strategies
 # -----------------------------
 with tab3:
-    st.header("Option Strategies")
-
-    use_manual = st.checkbox("Build Strategy Manually")
-
-    model_strat = st.selectbox("Pricing Model", ["Black Scholes", "Binomial", "Monte Carlo"], key="strat_model")
-    model_strat = {"Black Scholes": "black-scholes", "Monte Carlo": "monte-carlo"}.get(model_strat, "binomial")
-
-    style_strat = st.selectbox("Exercise Style", ["European", "American"], key="strat_style").lower()
-
-    S_strat = st.number_input("Spot Price (S)", value=100.0, key="strat_S")
-    T_strat = st.number_input("Time to Maturity (T)", value=1.0, key="strat_T")
-    sigma_strat = st.number_input("Volatility (σ)", value=0.2, key="strat_sigma")
-    r_strat = st.number_input("Risk-Free Rate (r)", value=0.05, key="strat_r")
-    q_strat = st.number_input("Dividend Yield (q)", value=0.0, key="strat_q")
-
-    kwargs = {"S": S_strat, "T": T_strat, "sigma": sigma_strat, "r": r_strat, "q": q_strat}
-
-    # -----------------------------
-    # Manual Strategy
-    # -----------------------------
-    if use_manual:
-        st.subheader("➕ Add Legs to Strategy")
-
-        if "custom_legs" not in st.session_state:
-            st.session_state.custom_legs = []
-
-        with st.form("add_leg_form"):
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                opt_type = st.selectbox("Type", ["call", "put"], key="leg_type")
-            with col2:
-                strike = st.number_input("Strike", value=100.0, key="leg_strike")
-            with col3:
-                qty = st.number_input("Quantity", step=1, value=1, key="leg_qty")
-            if st.form_submit_button("Add Leg"):
-                st.session_state.custom_legs.append({"type": opt_type, "strike": strike, "qty": qty})
-
-        if st.session_state.custom_legs:
-            st.markdown("### Strategy Legs")
-            for i, leg in enumerate(st.session_state.custom_legs):
-                st.write(f"Leg {i+1}: {leg['qty']} × {leg['type'].upper()} @ Strike {leg['strike']}")
-
-            if st.button("Price Custom Strategy"):
+    # Main title
+    st.markdown('<h1 class="main-header">Advanced Options Pricing Suite</h1>', unsafe_allow_html=True)
+    
+    # Sidebar for global parameters
+    st.sidebar.header("Global Market Parameters")
+    spot_price = st.sidebar.number_input("Spot Price (S)", value=100.0, min_value=0.1, step=0.1)
+    risk_free_rate = st.sidebar.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
+    dividend_yield = st.sidebar.number_input("Dividend Yield (q)", value=0.0, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
+    volatility = st.sidebar.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, step=0.01, format="%.3f")
+    time_to_expiry = st.sidebar.number_input("Time to Expiry (T)", value=1.0, min_value=0.001, step=0.01, format="%.3f")
+    
+    # Model selection
+    st.sidebar.header("Pricing Model")
+    model = st.sidebar.selectbox("Select Model", ["black-scholes", "binomial", "monte-carlo"])
+    
+    # Additional parameters for specific models
+    if model == "binomial":
+        n_steps = st.sidebar.number_input("Number of Steps (N)", value=100, min_value=1, max_value=1000, step=1)
+    elif model == "monte-carlo":
+        n_simulations = st.sidebar.number_input("Number of Simulations", value=10000, min_value=100, max_value=100000, step=100)
+    
+    # Tab structure
+    tb1, tb2, tb3, tb4, tb5 = st.tabs([
+        "Single Option Pricing", 
+        "Strategy Builder", 
+        "Payoff Analysis", 
+        "Greeks Analysis",
+        "Sensitivity Analysis"
+    ])
+    
+    # Tab 1: Single Option Pricing
+    with tb1:
+        st.markdown('<h2 class="sub-header">Single Option Pricing</h2>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            option_type = st.selectbox("Option Type", ["call", "put"])
+            exercise_style = st.selectbox("Exercise Style", ["european", "american"])
+            strike_price = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, step=0.1)
+            
+            # Price calculation
+            try:
+                kwargs = {
+                    "S": spot_price, "K": strike_price, "T": time_to_expiry,
+                    "r": risk_free_rate, "sigma": volatility, "q": dividend_yield
+                }
+                
+                if model == "binomial":
+                    kwargs["N"] = n_steps
+                elif model == "monte-carlo":
+                    kwargs["n_simulations"] = n_simulations
+                    
+                option_price = price_vanilla_option(
+                    option_type=option_type,
+                    exercise_style=exercise_style,
+                    model=model,
+                    **kwargs
+                )
+                
+                st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                st.metric(
+                    label=f"{exercise_style.title()} {option_type.title()} Option Price",
+                    value=f"${option_price:.4f}",
+                    delta=None
+                )
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+            except Exception as e:
+                st.error(f"Error calculating option price: {str(e)}")
+        
+        with col2:
+            # Interactive parameter sensitivity
+            st.subheader("Parameter Sensitivity")
+            param_to_vary = st.selectbox("Parameter to Vary", ["S", "K", "T", "r", "sigma", "q"])
+            
+            # Get current parameter value and create range
+            current_val = {
+                "S": spot_price, "K": strike_price, "T": time_to_expiry,
+                "r": risk_free_rate, "sigma": volatility, "q": dividend_yield
+            }[param_to_vary]
+            
+            param_min = st.number_input(f"Min {param_to_vary}", value=current_val * 0.5, step=0.01)
+            param_max = st.number_input(f"Max {param_to_vary}", value=current_val * 1.5, step=0.01)
+            
+            if st.button("Generate Sensitivity Plot"):
                 try:
-                    legs = st.session_state.custom_legs
-                    st.session_state["manual_legs"] = legs
-                    result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
-                    st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
-
-                    spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
-                    payoff = compute_strategy_payoff(legs, spot_range)
-
-                    with st.expander("Payoff Plot"):
-                        fig, ax = plt.subplots(figsize=(10, 6))
-                        ax.plot(spot_range, payoff, label="Strategy Payoff", color="blue")
-                        ax.axhline(0, color="black", linestyle="--")
-                        ax.set_xlabel("Spot Price at Maturity (S)")
-                        ax.set_ylabel("Net Payoff")
-                        ax.set_title("Payoff Diagram: Custom Strategy")
-                        ax.grid(True)
-                        ax.legend()
-                        st.pyplot(fig)
+                    fixed_params = {
+                        "S": spot_price, "K": strike_price, "T": time_to_expiry,
+                        "r": risk_free_rate, "sigma": volatility, "q": dividend_yield
+                    }
+                    if model == "binomial":
+                        fixed_params["N"] = n_steps
+                    elif model == "monte-carlo":
+                        fixed_params["n_simulations"] = n_simulations
+                    
+                    fig = plot_option_price_vs_param(
+                        option_type=option_type,
+                        exercise_style=exercise_style,
+                        model=model,
+                        param_name=param_to_vary,
+                        param_range=(param_min, param_max),
+                        fixed_params=fixed_params
+                    )
+                    st.pyplot(fig)
+                    
                 except Exception as e:
-                    st.error(f"Error: {e}")
-
-            if "manual_legs" in st.session_state:
-                st.subheader("Visualize Strategy Price vs Parameter")
-
-                param = st.selectbox("Parameter to Vary", ["S", "T", "r", "sigma", "q"], key="manual_vary")
-                default_val = float(kwargs.get(param, 1.0))
-
-                min_val = st.number_input(f"Min {param}", value=0.0 if param in ["r", "q", "sigma"] else 0.01, key="manual_min")
-                max_val = st.number_input(f"Max {param}", value=default_val * (1.5 if param == "S" else 100), key="manual_max")
-                n_points = st.slider("Resolution", 50, 500, 100, key="manual_n")
-
-                if st.button("Generate Plot for Custom Strategy"):
-                    try:
-                        with st.expander("Strategy Premium vs Parameter"):
-                            fig = plot_strategy_price_vs_param(
-                                legs=st.session_state["manual_legs"],
-                                exercise_style=style_strat,
-                                model=model_strat,
-                                param_name=param,
-                                param_range=(min_val, max_val),
-                                fixed_params=kwargs,
-                                n_points=n_points
-                            )
-                            st.pyplot(fig)
-                    except Exception as e:
-                        st.error(f"Plotting failed: {e}")
-
-                st.subheader("Visualize Strategy Greek vs Spot Price")
-
-                greek = st.selectbox("Select Greek", ["Delta", "Gamma", "Vega", "Theta", "Rho"], key="manual_greek")
-                if greek == "Delta":
-                    greek = "delta"
-                elif greek == "Gamma":
-                    greek = "gamma"
-                elif greek == "Vega":
-                    greek = "vega"
-                elif greek == "Theta":
-                    greek = "theta"
-                elif greek == "Rho":
-                    greek = "rho"
-                S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="manual_greek_smin")
-                S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="manual_greek_smax")
-                greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="manual_greek_n")
-
-                if st.button("Plot Strategy Greek (Manual)"):
-                    try:
-                        with st.expander("Strategy Greek"):
-                            fig = plot_strategy_greek_vs_spot(
-                                greek_name=greek,
-                                legs=st.session_state["manual_legs"],
-                                model=model_strat,
-                                S0=S_strat,
-                                T=T_strat,
-                                r=r_strat,
-                                sigma=sigma_strat,
-                                q=q_strat,
-                                S_range=np.linspace(S_min, S_max, greek_res)
-                            )
-                        st.pyplot(fig)
-                    except Exception as e:
-                        st.error(f"Greek plot failed: {e}")
-
-        if st.button("Clear Strategy Legs"):
-            st.session_state.custom_legs = []
-            st.session_state.pop("manual_legs", None)
-
-    # -----------------------------
-    # Predefined Strategy
-    # -----------------------------
-    else:
-        st.subheader("Predefined Strategy")
-        strategy = st.selectbox("Choose a Strategy", ["Straddle", "Bull call Spread", "Bear put Spread", "Butterfly", "Iron Condor"], key="strat_type")
-
-        strike1 = st.number_input("Strike 1", value=95.0, key="strat_k1")
-        strike2 = strike3 = strike4 = None
-        if strategy in ["Bull call Spread", "Bear put Spread", "Butterfly", "Iron Condor"]:
-            strike2 = st.number_input("Strike 2", value=100.0, key="strat_k2")
-        if strategy in ["Butterfly", "Iron Condor"]:
-            strike3 = st.number_input("Strike 3", value=105.0, key="strat_k3")
-        if strategy == "Iron Condor":
-            strike4 = st.number_input("Strike 4", value=110.0, key="strat_k4")
-
-        if st.button("Price Predefined Strategy"):
-            legs = get_predefined_strategy(strategy, strike1, strike2, strike3, strike4=strike4)
-            if isinstance(legs, str):
+                    st.error(f"Error generating plot: {str(e)}")
+    
+    # Tab 2: Strategy Builder
+    with tb2:
+        st.markdown('<h2 class="sub-header">Option Strategy Builder</h2>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            st.subheader("Strategy Selection")
+            strategy_method = st.radio("Choose Method", ["Predefined Strategy", "Custom Strategy"])
+            
+            if strategy_method == "Predefined Strategy":
+                strategy_name = st.selectbox(
+                    "Select Strategy",
+                    ["straddle", "bull call spread", "bear put spread", "butterfly", "iron condor"]
+                )
+                
+                # Dynamic strike inputs based on strategy
+                if strategy_name == "straddle":
+                    strike1 = st.number_input("Strike Price", value=100.0, key="pred_k1")
+                    legs = get_predefined_strategy(strategy_name, strike1)
+                elif strategy_name in ["bull call spread", "bear put spread"]:
+                    strike1 = st.number_input("Strike 1 (Long)", value=95.0, key="pred_k1")
+                    strike2 = st.number_input("Strike 2 (Short)", value=105.0, key="pred_k2")
+                    legs = get_predefined_strategy(strategy_name, strike1, strike2)
+                elif strategy_name == "butterfly":
+                    strike1 = st.number_input("Lower Strike", value=90.0, key="pred_k1")
+                    strike2 = st.number_input("Middle Strike", value=100.0, key="pred_k2")
+                    strike3 = st.number_input("Upper Strike", value=110.0, key="pred_k3")
+                    legs = get_predefined_strategy(strategy_name, strike1, strike2, strike3)
+                elif strategy_name == "iron condor":
+                    strike1 = st.number_input("Put Long Strike", value=85.0, key="pred_k1")
+                    strike2 = st.number_input("Put Short Strike", value=95.0, key="pred_k2")
+                    strike3 = st.number_input("Call Short Strike", value=105.0, key="pred_k3")
+                    strike4 = st.number_input("Call Long Strike", value=115.0, key="pred_k4")
+                    legs = get_predefined_strategy(strategy_name, strike1, strike2, strike3, strike4)
+                    
+            else:  # Custom Strategy
+                st.subheader("Build Custom Strategy")
+                num_legs = st.number_input("Number of Legs", value=2, min_value=1, max_value=10, step=1)
+                
+                legs = []
+                for i in range(num_legs):
+                    st.write(f"**Leg {i+1}**")
+                    col_type, col_strike, col_qty = st.columns(3)
+                    with col_type:
+                        leg_type = st.selectbox(f"Type", ["call", "put"], key=f"leg_type_{i}")
+                    with col_strike:
+                        leg_strike = st.number_input(f"Strike", value=100.0, key=f"leg_strike_{i}")
+                    with col_qty:
+                        leg_qty = st.number_input(f"Quantity", value=1.0, step=0.1, key=f"leg_qty_{i}")
+                    
+                    legs.append({"type": leg_type, "strike": leg_strike, "qty": leg_qty})
+            
+            # Exercise style for strategy
+            strategy_exercise = st.selectbox("Exercise Style", ["european", "american"], key="strategy_exercise")
+        
+        with col2:
+            st.subheader("Strategy Analysis")
+            
+            if isinstance(legs, str):  # Error message from predefined strategy
                 st.error(legs)
             else:
+                # Display strategy legs
+                strategy_df = pd.DataFrame(legs)
+                st.dataframe(strategy_df, use_container_width=True)
+                
+                # Price the strategy
                 try:
-                    st.session_state["predefined_legs"] = legs
-                    result = price_option_strategy(legs, style_strat, model_strat, **kwargs)
-                    st.success(f"Total Strategy Price: **{result['strategy_price']:.4f}**")
-
-                    spot_range = np.linspace(0.5 * S_strat, 1.5 * S_strat, 500)
-                    payoff = compute_strategy_payoff(legs, spot_range)
-                    with st.expander("Payoff Plot"):
-                        fig, ax = plt.subplots(figsize=(10, 6))
-                        ax.plot(spot_range, payoff, label="Strategy Payoff", color="green")
-                        ax.axhline(0, color="black", linestyle="--")
-                        ax.set_xlabel("Spot Price at Maturity (S)")
-                        ax.set_ylabel("Net Payoff")
-                        ax.set_title(f"Payoff Diagram: {strategy}")
-                        ax.grid(True)
-                        ax.legend()
-                        st.pyplot(fig)
+                    kwargs = {
+                        "S": spot_price, "T": time_to_expiry,
+                        "r": risk_free_rate, "sigma": volatility, "q": dividend_yield
+                    }
+                    
+                    if model == "binomial":
+                        kwargs["N"] = n_steps
+                    elif model == "monte-carlo":
+                        kwargs["n_simulations"] = n_simulations
+                    
+                    strategy_result = price_option_strategy(
+                        legs=legs,
+                        exercise_style=strategy_exercise,
+                        model=model,
+                        **kwargs
+                    )
+                    
+                    col_price1, col_price2 = st.columns(2)
+                    with col_price1:
+                        st.metric("Total Strategy Price", f"${strategy_result['strategy_price']:.4f}")
+                    with col_price2:
+                        net_premium = strategy_result['strategy_price']
+                        strategy_type = "Credit" if net_premium < 0 else "Debit"
+                        st.metric("Strategy Type", strategy_type, f"${abs(net_premium):.4f}")
+                    
+                    # Individual leg prices
+                    st.subheader("Individual Leg Prices")
+                    for i, (leg, price) in enumerate(zip(legs, strategy_result['individual_prices'])):
+                        position = "Long" if leg['qty'] > 0 else "Short"
+                        st.write(f"**Leg {i+1}:** {position} {abs(leg['qty'])} {leg['type'].title()} @ {leg['strike']} = ${price:.4f}")
+                    
                 except Exception as e:
-                    st.error(f"Error: {e}")
-
-        if "predefined_legs" in st.session_state:
-            st.subheader("Visualize Strategy Price vs Parameter")
-
-            param = st.selectbox("Parameter to Vary", ["S", "T", "r", "sigma", "q"], key="predef_vary")
-            default_val = float(kwargs.get(param, 1.0))
-
-            min_val = st.number_input(f"Min {param}", value=0.0 if param in ["r", "q", "sigma"] else 0.01, key="predef_min")
-            max_val = st.number_input(f"Max {param}", value=default_val * (1.5 if param == "S" else 100), key="predef_max")
-            n_points = st.slider("Resolution", 50, 500, 100, key="predef_n")
-
-            if st.button("Generate Plot for Predefined Strategy"):
-                try:
-                    with st.expander("Strategy Premium vs Parameter"):
-                        fig = plot_strategy_price_vs_param(
-                            legs=st.session_state["predefined_legs"],
-                            exercise_style=style_strat,
-                            model=model_strat,
-                            param_name=param,
-                            param_range=(min_val, max_val),
-                            fixed_params=kwargs,
-                            n_points=n_points
+                    st.error(f"Error pricing strategy: {str(e)}")
+    
+    # Tab 3: Payoff Analysis
+    with tb3:
+        st.markdown('<h2 class="sub-header">Strategy Payoff Analysis</h2>', unsafe_allow_html=True)
+        
+        if 'legs' in locals() and not isinstance(legs, str):
+            # Spot price range for payoff calculation
+            col1, col2 = st.columns([1, 3])
+            
+            with col1:
+                st.subheader("Payoff Parameters")
+                strikes = [leg['strike'] for leg in legs]
+                min_strike, max_strike = min(strikes), max(strikes)
+                
+                spot_min = st.number_input("Min Spot Price", value=min_strike * 0.7, step=1.0)
+                spot_max = st.number_input("Max Spot Price", value=max_strike * 1.3, step=1.0)
+                n_points = st.slider("Number of Points", 50, 500, 200)
+                
+                show_breakeven = st.checkbox("Show Breakeven Points", value=True)
+                show_profit_loss = st.checkbox("Include Premium Cost", value=True)
+            
+            with col2:
+                # Calculate payoff
+                spot_range = np.linspace(spot_min, spot_max, n_points)
+                payoffs = compute_strategy_payoff(legs, spot_range)
+                
+                # Create interactive plotly chart
+                fig = go.Figure()
+                
+                # Payoff at expiration
+                fig.add_trace(go.Scatter(
+                    x=spot_range,
+                    y=payoffs,
+                    mode='lines',
+                    name='Payoff at Expiration',
+                    line=dict(color='blue', width=3)
+                ))
+                
+                # Add profit/loss line if premium is included
+                if show_profit_loss and 'strategy_result' in locals():
+                    pnl = payoffs - strategy_result['strategy_price']
+                    fig.add_trace(go.Scatter(
+                        x=spot_range,
+                        y=pnl,
+                        mode='lines',
+                        name='Profit/Loss (incl. premium)',
+                        line=dict(color='red', width=2, dash='dash')
+                    ))
+                
+                # Add strike lines
+                for i, leg in enumerate(legs):
+                    fig.add_vline(
+                        x=leg['strike'],
+                        line_dash="dot",
+                        line_color="gray",
+                        annotation_text=f"K{i+1}: {leg['strike']}"
+                    )
+                
+                # Add current spot line
+                fig.add_vline(
+                    x=spot_price,
+                    line_dash="dash",
+                    line_color="green",
+                    annotation_text=f"Current Spot: {spot_price}"
+                )
+                
+                # Breakeven analysis
+                if show_breakeven and show_profit_loss and 'strategy_result' in locals():
+                    pnl = payoffs - strategy_result['strategy_price']
+                    # Find breakeven points (where PnL crosses zero)
+                    zero_crossings = []
+                    for i in range(len(pnl)-1):
+                        if pnl[i] * pnl[i+1] < 0:  # Sign change
+                            # Linear interpolation to find exact crossing
+                            x_cross = spot_range[i] + (spot_range[i+1] - spot_range[i]) * (-pnl[i] / (pnl[i+1] - pnl[i]))
+                            zero_crossings.append(x_cross)
+                    
+                    for i, breakeven in enumerate(zero_crossings):
+                        fig.add_vline(
+                            x=breakeven,
+                            line_color="orange",
+                            line_width=2,
+                            annotation_text=f"Breakeven: {breakeven:.2f}"
                         )
-                        st.pyplot(fig)
-                except Exception as e:
-                    st.error(f"Plotting failed: {e}")
-
-            st.subheader("Visualize Strategy Greek vs Spot Price")
-
-            greek = st.selectbox("Select Greek", ["Delta", "Gamma", "Vega", "Theta", "Rho"], key="manual_greek")
-            if greek == "Delta":
-                greek = "delta"
-            elif greek == "Gamma":
-                greek = "gamma"
-            elif greek == "Vega":
-                greek = "vega"
-            elif greek == "Theta":
-                greek = "theta"
-            elif greek == "Rho":
-                greek = "rho"
-            S_min = st.number_input("Min Spot (S)", value=0.5 * S_strat, key="predef_greek_smin")
-            S_max = st.number_input("Max Spot (S)", value=1.5 * S_strat, key="predef_greek_smax")
-            greek_res = st.slider("Greek Plot Resolution", 50, 1000, 300, key="predef_greek_n")
-
-            if st.button("Plot Strategy Greek (Predefined)"):
+                
+                fig.update_layout(
+                    title="Strategy Payoff Diagram",
+                    xaxis_title="Spot Price at Expiration",
+                    yaxis_title="Payoff ($)",
+                    hovermode='x unified',
+                    height=500
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Summary statistics
+                st.subheader("Payoff Statistics")
+                col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+                
+                with col_stat1:
+                    st.metric("Max Payoff", f"${np.max(payoffs):.2f}")
+                with col_stat2:
+                    st.metric("Min Payoff", f"${np.min(payoffs):.2f}")
+                with col_stat3:
+                    if show_profit_loss and 'strategy_result' in locals():
+                        max_profit = np.max(payoffs - strategy_result['strategy_price'])
+                        st.metric("Max Profit", f"${max_profit:.2f}")
+                    else:
+                        st.metric("Max Profit", "N/A")
+                with col_stat4:
+                    if show_profit_loss and 'strategy_result' in locals():
+                        max_loss = np.min(payoffs - strategy_result['strategy_price'])
+                        st.metric("Max Loss", f"${max_loss:.2f}")
+                    else:
+                        st.metric("Max Loss", "N/A")
+    
+    # Tab 4: Greeks Analysis
+    with tb4:
+        st.markdown('<h2 class="sub-header">Greeks Analysis</h2>', unsafe_allow_html=True)
+        
+        if 'legs' in locals() and not isinstance(legs, str):
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                st.subheader("Greeks Parameters")
+                greek_name = st.selectbox("Select Greek", ["delta", "gamma", "vega", "theta", "rho"])
+                
+                # Spot range for Greeks
+                strikes = [leg['strike'] for leg in legs]
+                min_strike, max_strike = min(strikes), max(strikes)
+                
+                greek_spot_min = st.number_input("Min Spot for Greeks", value=min_strike * 0.8, step=1.0)
+                greek_spot_max = st.number_input("Max Spot for Greeks", value=max_strike * 1.2, step=1.0)
+                greek_points = st.slider("Number of Points for Greeks", 50, 300, 150)
+            
+            with col2:
+                st.subheader(f"Strategy {greek_name.title()} vs Spot Price")
+                
                 try:
-                    with st.expander("Strategy Greek"):
-                        fig = plot_strategy_greek_vs_spot(
-                            greek_name=greek,
-                            legs=st.session_state["predefined_legs"],
-                            model=model_strat,
-                            S0=S_strat,
-                            T=T_strat,
-                            r=r_strat,
-                            sigma=sigma_strat,
-                            q=q_strat,
-                            S_range=np.linspace(S_min, S_max, greek_res)
-                        )
-                        st.pyplot(fig)
+                    # Generate Greeks plot
+                    fig = plot_strategy_greek_vs_spot(
+                        greek_name=greek_name,
+                        legs=legs,
+                        model=model,
+                        S0=spot_price,
+                        T=time_to_expiry,
+                        r=risk_free_rate,
+                        sigma=volatility,
+                        q=dividend_yield,
+                        S_range=np.linspace(greek_spot_min, greek_spot_max, greek_points),
+                        n_points=greek_points
+                    )
+                    st.pyplot(fig)
+                    
+                    # Greeks explanation
+                    greek_explanations = {
+                        "delta": "Measures price sensitivity to underlying price changes",
+                        "gamma": "Measures the rate of change of delta",
+                        "vega": "Measures sensitivity to volatility changes",
+                        "theta": "Measures time decay (typically negative)",
+                        "rho": "Measures sensitivity to interest rate changes"
+                    }
+                    
+                    st.info(f"**{greek_name.title()}**: {greek_explanations[greek_name]}")
+                    
                 except Exception as e:
-                    st.error(f"Greek plot failed: {e}")
-
+                    st.error(f"Error calculating Greeks: {str(e)}")
+                    st.info("Greeks analysis requires the Greeks computation module to be properly implemented.")
+    
+    # Tab 5: Sensitivity Analysis
+    with tb5:
+        st.markdown('<h2 class="sub-header">Advanced Sensitivity Analysis</h2>', unsafe_allow_html=True)
+        
+        if 'legs' in locals() and not isinstance(legs, str):
+            st.subheader("Multi-Parameter Sensitivity")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Parameter 1
+                param1 = st.selectbox("First Parameter", ["S", "T", "r", "sigma", "q"], key="param1")
+                param1_range = st.slider(
+                    f"{param1} Range (%)",
+                    -50, 100, (-20, 20),
+                    step=5,
+                    key="param1_range"
+                )
+                
+                # Parameter 2
+                param2 = st.selectbox("Second Parameter", ["S", "T", "r", "sigma", "q"], key="param2")
+                param2_range = st.slider(
+                    f"{param2} Range (%)",
+                    -50, 100, (-20, 20),
+                    step=5,
+                    key="param2_range"
+                )
+            
+            with col2:
+                resolution = st.slider("Grid Resolution", 10, 50, 20)
+                
+                if st.button("Generate Sensitivity Heatmap", type="primary"):
+                    try:
+                        # Get base values
+                        base_values = {
+                            "S": spot_price, "T": time_to_expiry, "r": risk_free_rate,
+                            "sigma": volatility, "q": dividend_yield
+                        }
+                        
+                        # Create parameter grids
+                        param1_vals = np.linspace(
+                            base_values[param1] * (1 + param1_range[0]/100),
+                            base_values[param1] * (1 + param1_range[1]/100),
+                            resolution
+                        )
+                        param2_vals = np.linspace(
+                            base_values[param2] * (1 + param2_range[0]/100),
+                            base_values[param2] * (1 + param2_range[1]/100),
+                            resolution
+                        )
+                        
+                        # Calculate strategy prices for each combination
+                        price_grid = np.zeros((len(param2_vals), len(param1_vals)))
+                        
+                        progress_bar = st.progress(0)
+                        total_iterations = len(param1_vals) * len(param2_vals)
+                        iteration = 0
+                        
+                        for i, p1_val in enumerate(param1_vals):
+                            for j, p2_val in enumerate(param2_vals):
+                                kwargs = base_values.copy()
+                                kwargs[param1] = p1_val
+                                kwargs[param2] = p2_val
+                                
+                                if model == "binomial":
+                                    kwargs["N"] = n_steps
+                                elif model == "monte-carlo":
+                                    kwargs["n_simulations"] = min(n_simulations, 1000)  # Reduce for speed
+                                
+                                try:
+                                    result = price_option_strategy(
+                                        legs=legs,
+                                        exercise_style=strategy_exercise,
+                                        model=model,
+                                        **kwargs
+                                    )
+                                    price_grid[j, i] = result["strategy_price"]
+                                except:
+                                    price_grid[j, i] = np.nan
+                                
+                                iteration += 1
+                                progress_bar.progress(iteration / total_iterations)
+                        
+                        # Create heatmap
+                        fig = go.Figure(data=go.Heatmap(
+                            z=price_grid,
+                            x=param1_vals,
+                            y=param2_vals,
+                            colorscale='RdYlBu_r',
+                            colorbar=dict(title="Strategy Price")
+                        ))
+                        
+                        fig.update_layout(
+                            title=f"Strategy Price Sensitivity: {param1} vs {param2}",
+                            xaxis_title=param1,
+                            yaxis_title=param2,
+                            height=500
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                    except Exception as e:
+                        st.error(f"Error generating sensitivity analysis: {str(e)}")
+    
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; color: #666; font-size: 0.9rem;'>
+        <p>Advanced Options Pricing Suite | Built with Streamlit & Python</p>
+        <p>⚠️ For educational purposes only. Not financial advice.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Sidebar info
+    st.sidebar.markdown("---")
+    st.sidebar.info("""
+    **Tips:**
+    - Adjust global parameters in this sidebar
+    - Use tabs to navigate different analyses
+    - Hover over plots for detailed information
+    - Download plots using the camera icon
+    """)
+    
+    # Error handling and warnings
+    if model == "black-scholes" and any(leg.get('qty', 1) != int(leg.get('qty', 1)) for leg in locals().get('legs', [])):
+        st.sidebar.warning("⚠️ Black-Scholes assumes integer quantities")
+    
+    if model == "monte-carlo" and 'n_simulations' in locals() and n_simulations < 1000:
+        st.sidebar.warning("⚠️ Low simulation count may affect accuracy")
 
 
 
