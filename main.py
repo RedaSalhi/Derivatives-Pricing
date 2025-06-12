@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 st.set_page_config(page_title="Derivatives Pricing App", layout="centered")
 
 
-# Inject Google Analytics (GA4)
+# Google Analytics
 components.html(
     """
     <!-- Google tag (gtag.js) -->
@@ -19,12 +19,12 @@ components.html(
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-KFYG7J821K');
     </script>
     """,
-    height=0,
+    height=0
 )
+
 
 st.title("Derivatives Pricing App")
 st.caption("Built for students, quants, and finance enthusiasts")
