@@ -11,4 +11,5 @@ plotly
 streamlit
 seaborn
 streamlit_option_menu
+psutil
 datetime
