@@ -1403,16 +1403,16 @@ with tab3:
 
 
 with tab4: 
-    st.title("🎯 Advanced Options Pricing & Greeks Analysis Suite")
+    st.title("Exotic Options Pricing & Greeks Analysis Suite")
     st.markdown("---")
     
     # Navigation tabs
     tabb1, tabb2, tabb3, tabb4, tabb5 = st.tabs([
-        "🥇 Asian Options", 
-        "🚧 Barrier Options", 
-        "💻 Digital Options", 
-        "👀 Lookback Options",
-        "📊 Portfolio Analysis"
+        "Asian Options", 
+        "Barrier Options", 
+        "Digital Options", 
+        "Lookback Options",
+        "Portfolio Analysis"
     ])
 
     with tabb1:
@@ -1421,7 +1421,7 @@ with tab4:
         col1, col2, col3 = st.columns([2, 2, 2])
         
         with col1:
-            st.subheader("📋 Parameters")
+            st.subheader("Parameters")
             S0 = st.number_input("Initial Price (S₀)", value=100.0, min_value=0.1)
             K = st.number_input("Strike Price (K)", value=100.0, min_value=0.1)
             T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=5.0)
@@ -1429,7 +1429,7 @@ with tab4:
             sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, format="%.4f")
         
         with col2:
-            st.subheader("⚙️ Model Settings")
+            st.subheader("Model Settings")
             option_type = st.selectbox("Option Type", ["call", "put"], key="asian_option_type")
             asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="asian_type")
 
@@ -1437,7 +1437,7 @@ with tab4:
             n_paths = st.slider("MC Paths", 1000, 50000, 10000, step=1000)
         
         with col3:
-            st.subheader("📈 Results")
+            st.subheader("Results")
             if st.button("Calculate Asian Option", key="asian_calc"):
                 with st.spinner("Calculating..."):
                     greeks = calculate_greeks_asian(S0, K, T, r, sigma, n_steps, n_paths, option_type, asian_type)
@@ -1456,7 +1456,7 @@ with tab4:
                     st.dataframe(results_df, use_container_width=True)
         
         # Visualization section
-        st.subheader("📊 Visualizations")
+        st.subheader("Visualizations")
         
         viz_col1, viz_col2 = st.columns(2)
         
@@ -1471,7 +1471,7 @@ with tab4:
                 plot_monte_carlo_paths(paths)
         
         # Sensitivity Analysis
-        st.subheader("🔍 Sensitivity Analysis")
+        st.subheader("Sensitivity Analysis")
         
         sens_param = st.selectbox("Parameter to Analyze", ["S0", "sigma", "T", "r"], key="asian_sens")
         
@@ -1500,7 +1500,7 @@ with tab4:
         col1, col2, col3 = st.columns([2, 2, 2])
         
         with col1:
-            st.subheader("📋 Parameters")
+            st.subheader("Parameters")
             S_barrier = st.number_input("Spot Price (S)", value=100.0, min_value=0.1, key="barrier_s")
             K_barrier = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="barrier_k")
             H_barrier = st.number_input("Barrier Level (H)", value=120.0, min_value=0.1, key="barrier_h")
@@ -1509,14 +1509,14 @@ with tab4:
             sigma_barrier = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, format="%.4f", key="barrier_sigma")
         
         with col2:
-            st.subheader("⚙️ Model Settings")
+            st.subheader("Model Settings")
             option_type_barrier = st.selectbox("Option Type", ["call", "put"], key="barrier_option_type")
             barrier_type = st.selectbox("Barrier Type", ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], key="barrier_type_select")
             n_sims = st.slider("MC Simulations", 1000, 100000, 10000, step=1000)
             n_steps_barrier = st.slider("Time Steps", 50, 500, 100, key="barrier_steps")
         
         with col3:
-            st.subheader("📈 Results")
+            st.subheader("Results")
             if st.button("Calculate Barrier Option", key="barrier_calc"):
                 with st.spinner("Calculating..."):
                     price, paths = price_barrier_option(
@@ -1540,7 +1540,7 @@ with tab4:
         col1, col2, col3 = st.columns([2, 2, 2])
         
         with col1:
-            st.subheader("📋 Parameters")
+            st.subheader("Parameters")
             S_digital = st.number_input("Spot Price (S)", value=100.0, min_value=0.1, key="digital_s")
             K_digital = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="digital_k")
             T_digital = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, key="digital_t")
@@ -1549,13 +1549,13 @@ with tab4:
             Q_digital = st.number_input("Payout Amount (Q)", value=1.0, min_value=0.1, key="digital_q")
         
         with col2:
-            st.subheader("⚙️ Model Settings")
+            st.subheader("Model Settings")
             option_type_digital = st.selectbox("Option Type", ["call", "put"], key="digital_option_type")
             style_digital = st.selectbox("Digital Style", ["cash", "asset"], key="digital_style")
 
         
         with col3:
-            st.subheader("📈 Results")
+            st.subheader("Results")
             if st.button("Calculate Digital Option", key="digital_calc"):
                 with st.spinner("Calculating..."):
                     greeks_digital = calculate_greeks_digital(
@@ -1598,7 +1598,7 @@ with tab4:
         col1, col2, col3 = st.columns([2, 2, 2])
         
         with col1:
-            st.subheader("📋 Parameters")
+            st.subheader("Parameters")
             S0_lookback = st.number_input("Initial Price (S₀)", value=100.0, min_value=0.1, key="lookback_s0")
             K_lookback = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="lookback_k")
             T_lookback = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, key="lookback_t")
@@ -1606,14 +1606,14 @@ with tab4:
             sigma_lookback = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, format="%.4f", key="lookback_sigma")
         
         with col2:
-            st.subheader("⚙️ Model Settings")
+            st.subheader("Model Settings")
             option_type_lookback = st.selectbox("Option Type", ["call", "put"], key="lookback_option_type")
             floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
-            n_paths_lookback = st.slider("MC Paths", 1000, 100000, 10000, step=1000, key="lookback_paths")
+            n_paths_lookback = st.slider("MC Paths", 1000, 100000, 10000, step=1000, key="lookback_paths_1")
             n_steps_lookback = st.slider("Time Steps", 50, 500, 252, key="lookback_steps")
         
         with col3:
-            st.subheader("📈 Results")
+            st.subheader("Results")
             if st.button("Calculate Lookback Option", key="lookback_calc"):
                 with st.spinner("Calculating..."):
                     if floating_strike:
@@ -1641,7 +1641,7 @@ with tab4:
                 st.pyplot(fig)
         
         with viz_col2:
-            if st.button("Show Sample Paths", key="lookback_paths"):
+            if st.button("Show Sample Paths", key="lookback_paths_2"):
                 fig = plot_paths(S0_lookback, r_lookback, sigma_lookback, T_lookback, min(20, n_paths_lookback), n_steps_lookback)
                 st.pyplot(fig)
         
@@ -1653,7 +1653,7 @@ with tab4:
     with tabb5:
         st.header("Portfolio Analysis & Comparison")
         
-        st.subheader("📊 Multi-Option Comparison")
+        st.subheader("Multi-Option Comparison")
         
         # Base parameters for comparison
         col1, col2 = st.columns(2)
@@ -1703,7 +1703,7 @@ with tab4:
                 st.plotly_chart(fig, use_container_width=True)
         
         # Volatility smile analysis
-        st.subheader("📈 Volatility Smile Analysis")
+        st.subheader("Volatility Smile Analysis")
         if st.button("Generate Volatility Smile", key="vol_smile"):
             strike_range = np.linspace(S_common * 0.6, S_common * 1.4, 25)
             vol_smile_data = []
