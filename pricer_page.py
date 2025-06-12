@@ -676,7 +676,8 @@ with tab3:
         n_simulations = st.sidebar.number_input("Number of Simulations", value=10000, min_value=100, max_value=100000, step=100, key="global_n_sims")
     
     # Tab structure
-    taa1, taa2, taa3, taa4, taa5 = st.tabs([
+    taa0, taa1, taa2, taa3, taa4, taa5 = st.tabs([
+        "Setup & Parameters",
         "Single Option Pricing", 
         "Strategy Builder", 
         "Payoff Analysis", 
@@ -684,8 +685,203 @@ with tab3:
         "Sensitivity Analysis"
     ])
     
+    with taa0:
+        st.markdown('<h2 class="sub-header">Welcome to the Options Pricing Suite!</h2>', unsafe_allow_html=True)
+        
+        # Tips and Instructions
+        st.markdown("""
+        ### 📚 **Quick Start Guide**
+        
+        Welcome to your comprehensive options pricing toolkit! This application provides advanced analytics for:
+        - **Single Option Pricing** with multiple models (Black-Scholes, Binomial Trees, Monte Carlo)
+        - **Multi-leg Strategy Construction** with predefined and custom strategies
+        - **Interactive Payoff Diagrams** with breakeven analysis
+        - **Greeks Visualization** across different market conditions  
+        - **Advanced Sensitivity Analysis** with multi-parameter heatmaps
+        
+        ### ⚠️ **Important Notes:**
+        - All parameters below are **required** before accessing other tabs
+        - Your settings will be saved throughout your session
+        - Use realistic market parameters for accurate results
+        - For educational purposes only - not financial advice
+        """)
+        
+        st.markdown("---")
+        
+        # Global Parameters Section
+        st.markdown('<h3 class="sub-header">🔧 Global Market Parameters</h3>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**🏷️ Asset & Market Parameters**")
+            spot_price = st.number_input(
+                "Spot Price (S) 💰", 
+                value=st.session_state.global_params['spot_price'], 
+                min_value=0.1, 
+                step=0.1, 
+                key="setup_spot",
+                help="Current price of the underlying asset"
+            )
+            
+            risk_free_rate = st.number_input(
+                "Risk-free Rate (r) 📈", 
+                value=st.session_state.global_params['risk_free_rate'], 
+                min_value=0.0, 
+                max_value=1.0, 
+                step=0.001, 
+                format="%.3f", 
+                key="setup_rate",
+                help="Annual risk-free interest rate (e.g., 0.05 = 5%)"
+            )
+            
+            dividend_yield = st.number_input(
+                "Dividend Yield (q) 💎", 
+                value=st.session_state.global_params['dividend_yield'], 
+                min_value=0.0, 
+                max_value=1.0, 
+                step=0.001, 
+                format="%.3f", 
+                key="setup_dividend",
+                help="Annual dividend yield (e.g., 0.02 = 2%)"
+            )
+        
+        with col2:
+            st.markdown("**📊 Option Parameters**")
+            volatility = st.number_input(
+                "Volatility (σ) 📉", 
+                value=st.session_state.global_params['volatility'], 
+                min_value=0.01, 
+                max_value=2.0, 
+                step=0.01, 
+                format="%.3f", 
+                key="setup_vol",
+                help="Annual volatility (e.g., 0.20 = 20%)"
+            )
+            
+            time_to_expiry = st.number_input(
+                "Time to Expiry (T) ⏰", 
+                value=st.session_state.global_params['time_to_expiry'], 
+                min_value=0.001, 
+                step=0.01, 
+                format="%.3f", 
+                key="setup_time",
+                help="Time to expiration in years (e.g., 0.25 = 3 months)"
+            )
+        
+        st.markdown("---")
+        
+        # Model Selection
+        st.markdown('<h3 class="sub-header">🧮 Pricing Model Configuration</h3>', unsafe_allow_html=True)
+        
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            model = st.selectbox(
+                "Select Pricing Model 🎯", 
+                ["black-scholes", "binomial", "monte-carlo"],
+                index=["black-scholes", "binomial", "monte-carlo"].index(st.session_state.global_params['model']),
+                key="setup_model",
+                help="Choose the mathematical model for option pricing"
+            )
+            
+            # Model descriptions
+            model_descriptions = {
+                "black-scholes": "🎓 **Black-Scholes**: Analytical solution for European options. Fast and precise.",
+                "binomial": "🌳 **Binomial Tree**: Discrete model supporting American options. Flexible but slower.",
+                "monte-carlo": "🎲 **Monte Carlo**: Simulation-based approach. Handles complex payoffs."
+            }
+            
+            st.info(model_descriptions[model])
+        
+        with col4:
+            # Additional parameters for specific models
+            if model == "binomial":
+                n_steps = st.number_input(
+                    "Number of Steps (N) 🪜", 
+                    value=st.session_state.global_params['n_steps'], 
+                    min_value=1, 
+                    max_value=1000, 
+                    step=1, 
+                    key="setup_n_steps",
+                    help="More steps = higher accuracy but slower computation"
+                )
+            elif model == "monte-carlo":
+                n_simulations = st.number_input(
+                    "Number of Simulations 🔢", 
+                    value=st.session_state.global_params['n_simulations'], 
+                    min_value=100, 
+                    max_value=100000, 
+                    step=100, 
+                    key="setup_n_sims",
+                    help="More simulations = higher accuracy but slower computation"
+                )
+        
+        st.markdown("---")
+        
+        # Parameter Summary
+        st.markdown('<h3 class="sub-header">📋 Parameter Summary</h3>', unsafe_allow_html=True)
+        
+        summary_col1, summary_col2, summary_col3 = st.columns(3)
+        
+        with summary_col1:
+            st.metric("Spot Price", f"${spot_price:.2f}")
+            st.metric("Strike Price Range", f"${spot_price*0.8:.0f} - ${spot_price*1.2:.0f}")
+        
+        with summary_col2:
+            st.metric("Volatility", f"{volatility*100:.1f}%")
+            st.metric("Risk-free Rate", f"{risk_free_rate*100:.2f}%")
+        
+        with summary_col3:
+            st.metric("Time to Expiry", f"{time_to_expiry:.3f} years")
+            st.metric("Model", model.title())
+        
+        # Setup completion button
+        st.markdown("---")
+        
+        col_button1, col_button2, col_button3 = st.columns([1, 2, 1])
+        
+        with col_button2:
+            if st.button("🚀 **Complete Setup & Start Analysis**", type="primary", use_container_width=True):
+                # Update session state with all parameters
+                st.session_state.global_params.update({
+                    'spot_price': spot_price,
+                    'risk_free_rate': risk_free_rate,
+                    'dividend_yield': dividend_yield,
+                    'volatility': volatility,
+                    'time_to_expiry': time_to_expiry,
+                    'model': model,
+                    'n_steps': n_steps if model == "binomial" else st.session_state.global_params['n_steps'],
+                    'n_simulations': n_simulations if model == "monte-carlo" else st.session_state.global_params['n_simulations']
+                })
+                
+                st.session_state.setup_completed = True
+                st.success("✅ Setup completed successfully! You can now access all analysis tabs.")
+                st.balloons()
+        
+        if not st.session_state.setup_completed:
+            st.warning("⚠️ Please complete the setup above to unlock all analysis features!")
+    
+    # Extract parameters for other tabs
+    if st.session_state.setup_completed:
+        spot_price = st.session_state.global_params['spot_price']
+        risk_free_rate = st.session_state.global_params['risk_free_rate']
+        dividend_yield = st.session_state.global_params['dividend_yield']
+        volatility = st.session_state.global_params['volatility']
+        time_to_expiry = st.session_state.global_params['time_to_expiry']
+        model = st.session_state.global_params['model']
+        n_steps = st.session_state.global_params['n_steps']
+        n_simulations = st.session_state.global_params['n_simulations']
+
+
+
+    
     # Tab 1: Single Option Pricing
     with taa1:
+        if not st.session_state.setup_completed:
+            st.warning("⚠️ Please complete the setup in the 'Setup & Parameters' tab first!")
+            st.stop()
+        
         st.markdown('<h2 class="sub-header">Single Option Pricing</h2>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
@@ -765,6 +961,10 @@ with tab3:
     
     #  Tab 2: Strategy Builder
     with taa2:
+        if not st.session_state.setup_completed:
+            st.warning("⚠️ Please complete the setup in the 'Setup & Parameters' tab first!")
+            st.stop()
+            
         st.markdown('<h2 class="sub-header">Option Strategy Builder</h2>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([1, 2])
@@ -867,6 +1067,10 @@ with tab3:
     
     # Tab 3: Payoff Analysis
     with taa3:
+        if not st.session_state.setup_completed:
+            st.warning("⚠️ Please complete the setup in the 'Setup & Parameters' tab first!")
+            st.stop()
+        
         st.markdown('<h2 class="sub-header">Strategy Payoff Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
@@ -982,6 +1186,10 @@ with tab3:
     
     # Tab 4: Greeks Analysis
     with taa4:
+        if not st.session_state.setup_completed:
+            st.warning("⚠️ Please complete the setup in the 'Setup & Parameters' tab first!")
+            st.stop()
+
         st.markdown('<h2 class="sub-header">Greeks Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
@@ -1035,6 +1243,10 @@ with tab3:
     
     # Tab 5: Sensitivity Analysis
     with taa5:
+        if not st.session_state.setup_completed:
+            st.warning("⚠️ Please complete the setup in the 'Setup & Parameters' tab first!")
+            st.stop()
+            
         st.markdown('<h2 class="sub-header">Advanced Sensitivity Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
