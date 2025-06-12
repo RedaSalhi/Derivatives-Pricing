@@ -117,7 +117,8 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 with tab1:
     st.markdown('<h1 class="main-header">Vanilla Option Pricing Tool</h1>', 
                 unsafe_allow_html=True)
-    
+
+    st.markdown("---")
     # Input Parameters Section
     st.header("Option Parameters")
     
@@ -417,6 +418,7 @@ with tab1:
 with tab2:
     st.markdown('<h1 class="main-header">Forward Contract Pricing & Analysis</h1>', 
                 unsafe_allow_html=True)
+    st.markdown("---")
     
     # Parameter input section
     st.markdown('<div class="parameter-section">', unsafe_allow_html=True)
@@ -695,7 +697,7 @@ with tab3:
     # Main title
     st.markdown('<h1 class="main-header">Options Pricing Suite</h1>', unsafe_allow_html=True)
 
-    
+    st.markdown("---")
     # Initialize session state for setup completion
     if 'setup_completed' not in st.session_state:
         st.session_state.setup_completed = False
@@ -1760,6 +1762,8 @@ from pricing.models.swaps.ois_fx import (
 with tab5:
     st.markdown('<h1 class="main-header">Swap Pricer (In Progress)</h1>', 
                 unsafe_allow_html=True)
+    st.markdown("---")
+    
     swap_type = st.selectbox("Swap Type", ["IRS", "Currency", "Equity"])
     model = st.selectbox("Model", {
         "IRS": ["DCF", "LMM"],
