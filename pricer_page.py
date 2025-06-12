@@ -36,25 +36,6 @@ from pricing.utils.greeks_vasicek import *
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
-
-import streamlit.components.v1 as components
-
-# Injecter Google Analytics (GA4)
-components.html(
-    """
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KFYG7J821K"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      // Enregistre une vue de page personnalisée
-      gtag('config', 'G-KFYG7J821K');
-    </script>
-    """,
-    height=0,
-)
     
 
 
