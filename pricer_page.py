@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
 import streamlit as st
 import numpy as np
+import pandas as pd
 
 from pricing.vanilla_options import price_vanilla_option, plot_option_price_vs_param
 from pricing.forward import (
@@ -182,42 +183,50 @@ from pricing.utils.greeks_vanilla.plot_single_greek import plot_single_greek_vs_
                 st.error(f"Greek plot failed: {e}")"""
 
 with tab1:
-    st.title("Vanilla Option Pricing Tool")
+    st.title("🚀 Advanced Option Pricing Tool")
     st.markdown("Price options using Black-Scholes, Binomial Tree, and Monte Carlo methods")
     
-    # Sidebar for inputs
-    st.sidebar.header("Option Parameters")
+    # Input Parameters Section
+    st.header("📊 Option Parameters")
     
-    # Basic option parameters
-    option_type = st.sidebar.selectbox("Option Type", ["Call", "Put"])
-    exercise_style = st.sidebar.selectbox("Exercise Style", ["European", "American"])
+    # Create columns for input parameters
+    param_col1, param_col2, param_col3 = st.columns(3)
     
-    # Financial parameters
-    st.sidebar.subheader("Market Parameters")
-    S = st.sidebar.number_input("Current Stock Price (S)", value=100.0, min_value=0.01, step=1.0)
-    K = st.sidebar.number_input("Strike Price (K)", value=100.0, min_value=0.01, step=1.0)
-    T = st.sidebar.number_input("Time to Maturity (T) in years", value=1.0, min_value=0.01, max_value=10.0, step=0.01)
-    r = st.sidebar.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
-    sigma = st.sidebar.number_input("Volatility (σ)", value=0.2, min_value=0.001, max_value=2.0, step=0.01, format="%.3f")
-    q = st.sidebar.number_input("Dividend Yield (q)", value=0.0, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
-    
-    # Model-specific parameters
-    st.sidebar.subheader("Model Parameters")
-    N = st.sidebar.number_input("Binomial Steps (N)", value=100, min_value=10, max_value=1000, step=10)
-    n_simulations = st.sidebar.number_input("Monte Carlo Simulations", value=100000, min_value=1000, max_value=1000000, step=1000)
-    
-    # Main content area
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.header("Option Pricing Results")
+    with param_col1:
+        st.subheader("Option Details")
+        option_type = st.selectbox("Option Type", ["Call", "Put"])
+        exercise_style = st.selectbox("Exercise Style", ["European", "American"])
         
-        # Model selection
+        st.subheader("Market Parameters")
+        S = st.number_input("Current Stock Price (S)", value=100.0, min_value=0.01, step=1.0)
+        K = st.number_input("Strike Price (K)", value=100.0, min_value=0.01, step=1.0)
+    
+    with param_col2:
+        st.subheader("Time & Risk")
+        T = st.number_input("Time to Maturity (T) in years", value=1.0, min_value=0.01, max_value=10.0, step=0.01)
+        r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
+        sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.001, max_value=2.0, step=0.01, format="%.3f")
+        q = st.number_input("Dividend Yield (q)", value=0.0, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
+    
+    with param_col3:
+        st.subheader("Model Parameters")
+        N = st.number_input("Binomial Steps (N)", value=100, min_value=10, max_value=1000, step=10)
+        n_simulations = st.number_input("Monte Carlo Simulations", value=100000, min_value=1000, max_value=1000000, step=1000)
+        
+        st.subheader("Model Selection")
         models = st.multiselect(
             "Select Pricing Models", 
             ["Black-Scholes", "Binomial", "Monte-Carlo"],
             default=["Black-Scholes", "Binomial"]
         )
+    
+    st.divider()
+    
+    # Main content area
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
+        st.header("💰 Pricing Results")
         
         if models:
             results = {}
@@ -276,22 +285,43 @@ with tab1:
                     st.pyplot(fig)
     
     with col2:
-        st.header("Analysis Tools")
+        st.header("📈 Analysis & Information")
         
-        # Sensitivity Analysis
-        st.subheader("Sensitivity Analysis")
+        # Option Information
+        st.subheader("Option Metrics")
+        moneyness = S / K
+        time_value = max(results.get("Black-Scholes", 0) - max(S - K, 0) if option_type.lower() == "call" 
+                        else results.get("Black-Scholes", 0) - max(K - S, 0), 0) if "Black-Scholes" in results and results.get("Black-Scholes") else 0
         
+        # Create metrics in a clean layout
+        metric_col1, metric_col2 = st.columns(2)
+        with metric_col1:
+            st.metric("Moneyness (S/K)", f"{moneyness:.4f}")
+            st.metric("Days to Expiry", f"{T * 365:.0f}")
+        with metric_col2:
+            st.metric("Intrinsic Value", f"{max(S - K, 0) if option_type.lower() == 'call' else max(K - S, 0):.4f}")
+            st.metric("Time Value", f"{time_value:.4f}" if "Black-Scholes" in results and results.get("Black-Scholes") else "N/A")
+    
+    # Sensitivity Analysis Section
+    st.divider()
+    st.header("📊 Sensitivity Analysis")
+    
+    sens_col1, sens_col2, sens_col3 = st.columns([1, 1, 2])
+    
+    with sens_col1:
         param_to_analyze = st.selectbox(
             "Parameter to vary:",
             ["S", "K", "T", "r", "sigma"]
         )
-        
+    
+    with sens_col2:
         model_for_analysis = st.selectbox(
             "Model for analysis:",
             ["Black-Scholes", "Binomial", "Monte-Carlo"]
         )
-        
-        if st.button("Run Sensitivity Analysis"):
+    
+    with sens_col3:
+        run_analysis = st.button("🔍 Run Sensitivity Analysis", use_container_width=True)
             # Define parameter ranges
             param_ranges = {
                 "S": (S * 0.5, S * 1.5),
