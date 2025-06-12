@@ -9,25 +9,29 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # Injecter Google Analytics (GA4)
+import streamlit as st
+import streamlit.components.v1 as components
+
+# Inject Google Analytics (GA4)
 components.html(
     """
-    <!-- Google Analytics -->
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-D7MTVEVGH0"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      // Enregistre une vue de page personnalisée
       gtag('config', 'G-D7MTVEVGH0', {
-        'page_location': 'https://derivatives-pricing.streamlit.app/',
+        'page_title': 'Derivatives Pricing App',
         'page_path': '/streamlit-app',
-        'page_title': 'Derivatives Pricing App'
+        'page_location': 'https://derivatives-pricing.streamlit.app'
       });
     </script>
     """,
     height=0,
 )
+
     
 
 
