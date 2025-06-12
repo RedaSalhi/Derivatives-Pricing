@@ -196,7 +196,7 @@ with tab1:
         
         # Greeks Section
         st.subheader("Greeks")
-        greek_model = st.selectbox("Model for Greeks:", ["Black-Scholes", "Binomial", "Monte-Carlo"], key="greek_model")
+        greek_model_option = st.selectbox("Model for Greeks:", ["Black-Scholes", "Binomial", "Monte-Carlo"], key="greek_model_option")
         
         if st.button("Calculate Greeks"):
             try:
@@ -208,7 +208,7 @@ with tab1:
                     try:
                         greek_val = compute_greek(
                             greek_name=greek,
-                            model=greek_model,
+                            model=greek_model_option,
                             option_type=option_type,
                             S_values=[S],  # Single value for current calculation
                             K=K, T=T, r=r, sigma=sigma, q=q
