@@ -512,7 +512,8 @@ with tab2:
         # Detailed breakdown
         with st.expander("Calculation Breakdown"):
             net_carry = interest_rate + storage_cost - dividend_yield
-            forward_price = spot_price * np.exp(net_carry * time_to_maturity)
+            exp_factor = np.exp(net_carry * time_to_maturity)
+            forward_price = spot_price * exp_factor
             #st.write(f"**Net Carry Rate:** {interest_rate*100:.2f}% + {storage_cost*100:.2f}% - {dividend_yield*100:.2f}% = {net_carry*100:.2f}%")
             #st.write(f"**Exponential Factor:** e^({net_carry*100:.2f}% × {time_to_maturity:.4f}) = {np.exp(net_carry * time_to_maturity):.6f}")
             #st.write(f"**Forward Price:** ${spot_price:.2f} × {np.exp(net_carry * time_to_maturity):.6f} = **${forward_price:.2f}**")
