@@ -1429,7 +1429,7 @@ with tab4:
     ])
     
     # Tab 1: Asian Options
-    with tab1:
+    with tabb1:
         st.markdown('<div class="sub-header">Asian Options Pricing</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([1, 2])
