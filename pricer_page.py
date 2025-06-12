@@ -916,7 +916,9 @@ with tab6:
         # --- Yield Curve Plot Button ---
         yield_curve = st.checkbox("Simulate Yield Curve?")
         plot_paths = st.checkbox("Plot Monte Carlo Paths and Rate Distribution at T?")
-        greeks = st.checkbox("Visualize Greeks/Option Price? (only for bond options)")
+        if instrument == "Bond Option (European)":
+            greeks = st.checkbox("Visualize Greeks/Option Price? (only for bond options)")
+
         if yield_curve:
             T = st.slider("Simulation horizon (years)", min_value=1, max_value=30, value=10, step=1)
             time, r_path = simulate_vasicek_path(r0, a, lam, sigma, T=T, dt=dt)
