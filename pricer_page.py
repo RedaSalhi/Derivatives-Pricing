@@ -1403,9 +1403,6 @@ with tab4:
     # Main title
     st.markdown('<div class="main-header">Exotic Options Pricing Toolkit</div>', unsafe_allow_html=True)
     
-    if not MODULES_LOADED:
-        st.stop()
-    
     # Introduction
     st.markdown("""
     <div class="info-box">
