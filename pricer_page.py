@@ -1358,15 +1358,7 @@ with tab3:
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar info
-    st.sidebar.markdown("---")
-    st.sidebar.info("""
-    **Tips:**
-    - Adjust global parameters in this sidebar
-    - Use tabs to navigate different analyses
-    - Hover over plots for detailed information
-    - Download plots using the camera icon
-    """)
+    
     
     # Error handling and warnings
     if model == "black-scholes" and any(leg.get('qty', 1) != int(leg.get('qty', 1)) for leg in locals().get('legs', [])):
