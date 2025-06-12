@@ -909,13 +909,14 @@ with tab6:
             option_type = st.radio("Option Type", ["Call", "Put"]).lower()
             face = st.number_input("Face Value", value=1.0)
             n_paths = st.number_input("Monte Carlo Paths", value=1000, step=1000)
-            greeks = st.checkbox("Visualize Greeks/Option Price?")
+            
     
         st.markdown("---")
 
         # --- Yield Curve Plot Button ---
         yield_curve = st.checkbox("Simulate Yield Curve?")
         plot_paths = st.checkbox("Plot Monte Carlo Paths and Rate Distribution at T?")
+        greeks = st.checkbox("Visualize Greeks/Option Price? (only for bond options)")
         if yield_curve:
             T = st.slider("Simulation horizon (years)", min_value=1, max_value=30, value=10, step=1)
             time, r_path = simulate_vasicek_path(r0, a, lam, sigma, T=T, dt=dt)
@@ -944,9 +945,6 @@ with tab6:
                 model = st.selectbox("Select Model", [ "Analytical", "Monte Carlo"])
                 if model == "Monte Carlo":
                     st.warning("Monte Carlo is not working properly at the moment.")
-
-        else: 
-            break
  
             
     
