@@ -962,14 +962,14 @@ with tab6:
             elif instrument == "Bond Option (European)":
                 if T2 <= T1:
                     st.error("Invalid maturity: T2 must be > T1")
+                
                 method = st.radio("Choose The Pricing Method", ["Analytical", "Monte Carlo"])
+                if method == "Analytical":
+                    price = vasicek_bond_option_price(r0, 0, T1, T2, K, a, lam, sigma, face=face_value, option_type)
                 else:
-                    if method == "Analytical":
-                        price = vasicek_bond_option_price(r0, 0, T1, T2, K, a, lam, sigma, face=face_value, option_type)
-                    else:
-                        price, std = vasicek_bond_option_price_mc(r0, a, lam, sigma, T1, T2, K, dt, n_paths, face=face_value, option_type)
-                        st.info(f"Monte Carlo Std Error: {std:.6f}")
-                    st.success(f"Bond Option Price ({option_type}): {price:.6f}")
+                    price, std = vasicek_bond_option_price_mc(r0, a, lam, sigma, T1, T2, K, dt, n_paths, face=face_value, option_type)
+                    st.info(f"Monte Carlo Std Error: {std:.6f}")
+                st.success(f"Bond Option Price ({option_type}): {price:.6f}")
     
             else:
                 st.warning("This instrument is not yet implemented.")
