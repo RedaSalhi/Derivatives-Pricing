@@ -655,7 +655,7 @@ from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
 # -----------------------------
 with tab3:
     # Main title
-    st.markdown('<h1 class="main-header">🎯 Advanced Options Pricing Suite</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">Advanced Options Pricing Suite</h1>', unsafe_allow_html=True)
     
     # Sidebar for global parameters
     st.sidebar.header("🔧 Global Market Parameters")
@@ -666,7 +666,7 @@ with tab3:
     time_to_expiry = st.sidebar.number_input("Time to Expiry (T)", value=1.0, min_value=0.001, step=0.01, format="%.3f", key="global_time")
     
     # Model selection
-    st.sidebar.header("🧮 Pricing Model")
+    st.sidebar.header("Pricing Model")
     model = st.sidebar.selectbox("Select Model", ["black-scholes", "binomial", "monte-carlo"])
     
     # Additional parameters for specific models
@@ -676,16 +676,16 @@ with tab3:
         n_simulations = st.sidebar.number_input("Number of Simulations", value=10000, min_value=100, max_value=100000, step=100, key="global_n_sims")
     
     # Tab structure
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "🎯 Single Option Pricing", 
-        "🔗 Strategy Builder", 
-        "📊 Payoff Analysis", 
-        "📈 Greeks Analysis",
-        "🧪 Sensitivity Analysis"
+    taa1, taa2, taa3, taa4, taa5 = st.tabs([
+        "Single Option Pricing", 
+        "Strategy Builder", 
+        "Payoff Analysis", 
+        "Greeks Analysis",
+        "Sensitivity Analysis"
     ])
     
     # Tab 1: Single Option Pricing
-    with tab1:
+    with taa1:
         st.markdown('<h2 class="sub-header">Single Option Pricing</h2>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
@@ -763,8 +763,8 @@ with tab3:
                 except Exception as e:
                     st.error(f"Error generating plot: {str(e)}")
     
-    # Tab 2: Strategy Builder
-    with tab2:
+    #  Tab 2: Strategy Builder
+    with taa2:
         st.markdown('<h2 class="sub-header">Option Strategy Builder</h2>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([1, 2])
@@ -866,7 +866,7 @@ with tab3:
                     st.error(f"Error pricing strategy: {str(e)}")
     
     # Tab 3: Payoff Analysis
-    with tab3:
+    with taa3:
         st.markdown('<h2 class="sub-header">Strategy Payoff Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
@@ -981,7 +981,7 @@ with tab3:
                         st.metric("Max Loss", "N/A")
     
     # Tab 4: Greeks Analysis
-    with tab4:
+    with taa4:
         st.markdown('<h2 class="sub-header">Greeks Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
@@ -1034,7 +1034,7 @@ with tab3:
                     st.info("Greeks analysis requires the Greeks computation module to be properly implemented.")
     
     # Tab 5: Sensitivity Analysis
-    with tab5:
+    with taa5:
         st.markdown('<h2 class="sub-header">Advanced Sensitivity Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
