@@ -1017,9 +1017,6 @@ with tab6:
 
     model = st.selectbox("Choose Interest Rate Model", ["Vasicek", "Hull-White (Planned)"], index=0)
     if model == "Vasicek":
-        # Initialize parameters to None
-        a = lam = sigma = r0 = dt = None
-
         st.markdown("### 🔧 Parameter Setup")
         param_mode = st.radio("How to set parameters?", ["Manual input", "Calibrate from market data (FRED/Yahoo)"])
     
