@@ -1007,7 +1007,6 @@ with tab6:
     from pricing.models.interest_rates.analytical_vasicek import *
     from pricing.models.interest_rates.monte_carlo_vasicek import *
     from pricing.utils.greeks_vasicek import *
-    from pricing.vanilla_vasicek import *
     
     st.title("📈 Modèle de Vasicek - Pricing d'Obligations et Taux d'intérêt")
     st.markdown("---")
