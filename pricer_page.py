@@ -2183,7 +2183,7 @@ with tab4:
         fig_comp = go.Figure()
         
         if plot_type == "Price vs Strike":
-            x_values = np.linspace(base_spot * 0.01, base_spot * 1.4, 20)
+            x_values = np.linspace(base_spot * 0, base_spot * 1.5, 20)
             x_label = "Strike Price"
             
             if show_vanilla:
@@ -2260,7 +2260,7 @@ with tab4:
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Lookback Call', line=dict(color='purple')))
         
         elif plot_type == "Price vs Spot":
-            x_values = np.linspace(base_spot * 0.01, base_spot * 1.4, 20)
+            x_values = np.linspace(base_spot * 0, base_spot * 1.5, 20)
             x_label = "Spot Price"
             
             if show_vanilla:
@@ -2353,7 +2353,7 @@ with tab4:
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
         
         elif plot_type == "Greeks vs Spot":
-            x_values = np.linspace(base_spot * 0.01, base_spot * 1.4, 20)
+            x_values = np.linspace(base_spot * 0, base_spot * 1.5, 20)
             x_label = "Spot Price"
             
             if show_vanilla:
