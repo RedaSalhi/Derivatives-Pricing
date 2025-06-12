@@ -1110,7 +1110,7 @@ with tab6:
                 st.success(f"Zero-Coupon Bond Price: {price:.4f}")
 
             elif instrument == "Coupon Bond":
-                price = price_coupon_bond(r0=r0, t=t, a=a, lam=lam, sigma=sigma, T=maturity, coupon=coupon, face=face_value, dt=dt)
+                price = price_coupon_bond(r0=r0, t=t, a=a, lam=lam, sigma=sigma, T=maturity, coupon, face=face_value, dt=dt)
                 st.success(f"Coupon Bond Price: {price:.4f}")
 
             elif instrument == "Bond Option (European)":
