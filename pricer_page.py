@@ -586,7 +586,7 @@ with tab2:
         
         # Original matplotlib chart
         st.markdown("### 📊 Original Chart (Matplotlib)")
-        plot_forward_mark_to_market(
+        plot_forward_mark_to_market_plotly(
             strike_price, time_to_maturity, interest_rate, 
             storage_cost, dividend_yield, position.lower()
         )
