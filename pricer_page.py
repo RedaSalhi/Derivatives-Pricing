@@ -1982,44 +1982,145 @@ with tab4:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("🔥 Implied Volatility Surface")
+        st.subheader("🔥 Interactive Implied Volatility Surface")
         
-        # Generate sample implied volatility surface
-        strikes = np.linspace(80, 120, 9)
-        maturities = np.linspace(0.1, 2, 8)
+        # User controls for volatility surface
+        st.write("**Surface Parameters:**")
+        vol_base = st.slider("Base Volatility", 0.1, 0.4, 0.2, 0.01, key="vol_base")
+        vol_smile = st.slider("Smile Intensity", 0.0, 0.1, 0.05, 0.01, key="vol_smile")
+        vol_term = st.slider("Term Structure", -0.05, 0.05, 0.02, 0.01, key="vol_term")
+        vol_noise = st.slider("Market Noise", 0.0, 0.02, 0.01, 0.001, key="vol_noise")
         
-        # Create a realistic volatility surface
+        # Generate implied volatility surface
+        strikes = np.linspace(80, 120, 15)
+        maturities = np.linspace(0.1, 2, 10)
+        
         K_grid, T_grid = np.meshgrid(strikes, maturities)
         
-        # Sample volatility surface with smile and term structure
-        base_vol = 0.2
-        smile_factor = 0.05
-        term_factor = 0.02
+        # Create realistic volatility surface
+        moneyness = (K_grid - 100) / 100  # Moneyness relative to spot=100
         
-        vol_surface = (base_vol + 
-                      smile_factor * ((K_grid - 100) / 100) ** 2 +
-                      term_factor * np.sqrt(T_grid) +
-                      0.01 * np.random.normal(0, 1, K_grid.shape))
+        # Volatility smile (parabolic in moneyness)
+        smile_component = vol_smile * (moneyness ** 2)
+        
+        # Term structure (square root of time)
+        term_component = vol_term * np.sqrt(T_grid)
+        
+        # Market noise
+        np.random.seed(42)  # For reproducible results
+        noise_component = vol_noise * np.random.normal(0, 1, K_grid.shape)
+        
+        # Combine all components
+        vol_surface = vol_base + smile_component + term_component + noise_component
+        
+        # Ensure volatilities are positive
+        vol_surface = np.maximum(vol_surface, 0.05)
         
         fig_vol = go.Figure(data=[go.Surface(
             z=vol_surface,
             x=K_grid,
             y=T_grid,
-            colorscale='Viridis',
-            name="Implied Volatility"
+            colorscale='RdYlBu_r',
+            name="Implied Volatility",
+            hovertemplate='<b>Strike</b>: %{x:.0f}<br><b>Maturity</b>: %{y:.2f}<br><b>Impl Vol</b>: %{z:.1%}<extra></extra>'
         )])
         
         fig_vol.update_layout(
             title="Implied Volatility Surface",
             scene=dict(
                 xaxis_title="Strike Price",
-                yaxis_title="Time to Maturity",
-                zaxis_title="Implied Volatility"
+                yaxis_title="Time to Maturity (Years)",
+                zaxis_title="Implied Volatility",
+                camera=dict(eye=dict(x=1.5, y=1.5, z=1.5))
             ),
             height=500
         )
         
         st.plotly_chart(fig_vol, use_container_width=True)
+        
+        # Educational content about volatility surface
+        with st.expander("📚 Understanding Volatility Surfaces"):
+            st.markdown("""
+            ### What is an Implied Volatility Surface?
+            
+            The **Implied Volatility Surface** shows how market-implied volatility varies across:
+            - **Strike Prices** (horizontal axis): Different moneyness levels
+            - **Time to Maturity** (depth axis): Different expiration dates
+            
+            ### Key Components You Can Control:
+            
+            **Base Volatility**: The fundamental volatility level for at-the-money options
+            
+            **Smile Intensity**: Controls the "volatility smile" or "smirk"
+            - Higher values create more pronounced curves
+            - Real markets often show higher volatility for out-of-the-money options
+            
+            **Term Structure**: How volatility changes with time
+            - Positive values: Longer-term options have higher volatility
+            - Negative values: Short-term volatility is higher (volatility term structure inversion)
+            
+            **Market Noise**: Random variations representing bid-ask spreads and market inefficiencies
+            
+            ### Market Phenomena:
+            - **Volatility Smile**: U-shaped pattern across strikes
+            - **Volatility Skew**: Asymmetric pattern (more common in equity markets)
+            - **Term Structure**: How volatility evolves over time
+            """)
+        
+        # Volatility cross-sections
+        st.subheader("📊 Volatility Cross-Sections")
+        
+        # Select maturity for strike cross-section
+        selected_maturity = st.selectbox("Select Maturity for Strike Cross-Section", 
+                                       [0.25, 0.5, 1.0, 1.5, 2.0], 
+                                       index=2, key="sel_maturity")
+        
+        # Find closest maturity index
+        maturity_idx = np.argmin(np.abs(maturities - selected_maturity))
+        
+        # Plot volatility smile
+        fig_smile = go.Figure()
+        fig_smile.add_trace(go.Scatter(
+            x=strikes, 
+            y=vol_surface[maturity_idx, :] * 100,
+            mode='lines+markers',
+            name=f'Volatility Smile (T={selected_maturity}Y)',
+            line=dict(color='red', width=3)
+        ))
+        
+        fig_smile.update_layout(
+            title=f"Volatility Smile - {selected_maturity} Year Maturity",
+            xaxis_title="Strike Price",
+            yaxis_title="Implied Volatility (%)",
+            height=300
+        )
+        
+        st.plotly_chart(fig_smile, use_container_width=True)
+        
+        # Term structure
+        selected_strike = st.selectbox("Select Strike for Term Structure", 
+                                     [85, 90, 95, 100, 105, 110, 115], 
+                                     index=3, key="sel_strike")
+        
+        strike_idx = np.argmin(np.abs(strikes - selected_strike))
+        
+        fig_term = go.Figure()
+        fig_term.add_trace(go.Scatter(
+            x=maturities, 
+            y=vol_surface[:, strike_idx] * 100,
+            mode='lines+markers',
+            name=f'Term Structure (K={selected_strike})',
+            line=dict(color='blue', width=3)
+        ))
+        
+        fig_term.update_layout(
+            title=f"Volatility Term Structure - Strike {selected_strike}",
+            xaxis_title="Time to Maturity (Years)",
+            yaxis_title="Implied Volatility (%)",
+            height=300
+        )
+        
+        st.plotly_chart(fig_term, use_container_width=True)
     
     with col2:
         st.subheader("📈 Interactive Options Analysis")
@@ -2261,11 +2362,164 @@ with tab4:
                 y_values = []
                 for S in x_values:
                     try:
-                        greeks = calculate_greeks_digital(S, base_strike, base_time, base_rate, base_vol, "call", "cash", 1.0)
-                        y_values.append(greeks[greek_type])
-                    except:
-                        y_values.append(0)
+                        if MODULES_LOADED:
+                            greeks = calculate_greeks_digital(S, base_strike, base_time, base_rate, base_vol, "call", "cash", 1.0)
+                            y_values.append(greeks[greek_type])
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        # Digital Greeks analytical formulas
+                        from scipy.stats import norm
+                        d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                        d2 = d1 - base_vol*np.sqrt(base_time)
+                        
+                        if greek_type == "Delta":
+                            greek_val = np.exp(-base_rate*base_time) * norm.pdf(d2) / (S * base_vol * np.sqrt(base_time))
+                        elif greek_type == "Gamma":
+                            greek_val = -np.exp(-base_rate*base_time) * norm.pdf(d2) * d1 / (S**2 * base_vol**2 * base_time)
+                        elif greek_type == "Theta":
+                            greek_val = -np.exp(-base_rate*base_time) * (base_rate * norm.cdf(d2) + 
+                                       norm.pdf(d2) * (np.log(S/base_strike) + (base_rate - 0.5*base_vol**2)*base_time) / (base_vol * np.sqrt(base_time)))
+                        elif greek_type == "Vega":
+                            greek_val = -np.exp(-base_rate*base_time) * norm.pdf(d2) * d1 / (base_vol**2 * np.sqrt(base_time))
+                        elif greek_type == "Rho":
+                            greek_val = base_time * np.exp(-base_rate*base_time) * norm.cdf(d2) + np.exp(-base_rate*base_time) * norm.pdf(d2) / (base_vol * np.sqrt(base_time))
+                        else:
+                            greek_val = 0
+                        
+                        y_values.append(greek_val)
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Digital {greek_type}', line=dict(color='green')))
+            
+            if show_asian:
+                y_values = []
+                for S in x_values:
+                    # Asian Greeks approximation using finite differences
+                    h = 0.01 * S
+                    try:
+                        if MODULES_LOADED:
+                            price_up = price_asian_option(S+h, base_strike, base_time, base_rate, base_vol, 30, 500, "monte_carlo", "call", "average_price")
+                            price_down = price_asian_option(S-h, base_strike, base_time, base_rate, base_vol, 30, 500, "monte_carlo", "call", "average_price")
+                            price_base = price_asian_option(S, base_strike, base_time, base_rate, base_vol, 30, 500, "monte_carlo", "call", "average_price")
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        # Fallback to analytical approximation
+                        from scipy.stats import norm
+                        adj_vol = base_vol * np.sqrt(2/3)
+                        
+                        # Price calculations
+                        d1_up = (np.log((S+h)/base_strike) + (base_rate + 0.5*adj_vol**2)*base_time) / (adj_vol*np.sqrt(base_time))
+                        d2_up = d1_up - adj_vol*np.sqrt(base_time)
+                        price_up = (S+h)*norm.cdf(d1_up) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2_up)
+                        
+                        d1_down = (np.log((S-h)/base_strike) + (base_rate + 0.5*adj_vol**2)*base_time) / (adj_vol*np.sqrt(base_time))
+                        d2_down = d1_down - adj_vol*np.sqrt(base_time)
+                        price_down = (S-h)*norm.cdf(d1_down) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2_down)
+                        
+                        d1_base = (np.log(S/base_strike) + (base_rate + 0.5*adj_vol**2)*base_time) / (adj_vol*np.sqrt(base_time))
+                        d2_base = d1_base - adj_vol*np.sqrt(base_time)
+                        price_base = S*norm.cdf(d1_base) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2_base)
+                    
+                    # Calculate Greeks using finite differences
+                    if greek_type == "Delta":
+                        greek_val = (price_up - price_down) / (2 * h)
+                    elif greek_type == "Gamma":
+                        greek_val = (price_up - 2*price_base + price_down) / (h**2)
+                    elif greek_type == "Theta":
+                        # Approximate theta using scaled delta
+                        delta_approx = (price_up - price_down) / (2 * h)
+                        greek_val = -delta_approx * 0.1  # Rough approximation
+                    elif greek_type == "Vega":
+                        # Approximate vega as 0.8 times vanilla vega
+                        from scipy.stats import norm
+                        d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                        vanilla_vega = S * np.sqrt(base_time) * norm.pdf(d1)
+                        greek_val = vanilla_vega * 0.8
+                    elif greek_type == "Rho":
+                        greek_val = (price_up - price_down) / (2 * h) * 0.5  # Rough approximation
+                    else:
+                        greek_val = 0
+                    
+                    y_values.append(greek_val)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Asian {greek_type}', line=dict(color='red')))
+            
+            if show_barrier:
+                y_values = []
+                barrier_level = base_strike * 1.2
+                for S in x_values:
+                    # Barrier Greeks approximation
+                    try:
+                        if S >= barrier_level:
+                            greek_val = 0  # Option is knocked out
+                        else:
+                            # Approximate using vanilla Greeks with barrier adjustment
+                            from scipy.stats import norm
+                            d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                            d2 = d1 - base_vol*np.sqrt(base_time)
+                            
+                            # Barrier survival probability
+                            barrier_prob = norm.cdf((np.log(barrier_level/S) - (base_rate - 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time)))
+                            survival_prob = 1 - barrier_prob
+                            
+                            if greek_type == "Delta":
+                                vanilla_delta = norm.cdf(d1)
+                                greek_val = vanilla_delta * survival_prob
+                            elif greek_type == "Gamma":
+                                vanilla_gamma = norm.pdf(d1) / (S * base_vol * np.sqrt(base_time))
+                                greek_val = vanilla_gamma * survival_prob
+                            elif greek_type == "Theta":
+                                vanilla_theta = -(S * norm.pdf(d1) * base_vol / (2 * np.sqrt(base_time)) + 
+                                               base_rate * base_strike * np.exp(-base_rate * base_time) * norm.cdf(d2))
+                                greek_val = vanilla_theta * survival_prob
+                            elif greek_type == "Vega":
+                                vanilla_vega = S * np.sqrt(base_time) * norm.pdf(d1)
+                                greek_val = vanilla_vega * survival_prob * 0.7  # Reduced vega due to barrier
+                            elif greek_type == "Rho":
+                                vanilla_rho = base_strike * base_time * np.exp(-base_rate * base_time) * norm.cdf(d2)
+                                greek_val = vanilla_rho * survival_prob
+                            else:
+                                greek_val = 0
+                    except:
+                        greek_val = 0
+                    
+                    y_values.append(greek_val)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Barrier {greek_type}', line=dict(color='orange')))
+            
+            if show_lookback:
+                y_values = []
+                for S in x_values:
+                    # Lookback Greeks approximation
+                    try:
+                        from scipy.stats import norm
+                        d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                        d2 = d1 - base_vol*np.sqrt(base_time)
+                        
+                        # Lookback premium factor
+                        lookback_factor = 1 + (base_vol * np.sqrt(base_time) * 0.4)
+                        
+                        if greek_type == "Delta":
+                            vanilla_delta = norm.cdf(d1)
+                            greek_val = vanilla_delta * lookback_factor
+                        elif greek_type == "Gamma":
+                            vanilla_gamma = norm.pdf(d1) / (S * base_vol * np.sqrt(base_time))
+                            greek_val = vanilla_gamma * lookback_factor
+                        elif greek_type == "Theta":
+                            vanilla_theta = -(S * norm.pdf(d1) * base_vol / (2 * np.sqrt(base_time)) + 
+                                           base_rate * base_strike * np.exp(-base_rate * base_time) * norm.cdf(d2))
+                            greek_val = vanilla_theta * lookback_factor
+                        elif greek_type == "Vega":
+                            vanilla_vega = S * np.sqrt(base_time) * norm.pdf(d1)
+                            greek_val = vanilla_vega * lookback_factor * 1.2  # Higher vega for lookback
+                        elif greek_type == "Rho":
+                            vanilla_rho = base_strike * base_time * np.exp(-base_rate * base_time) * norm.cdf(d2)
+                            greek_val = vanilla_rho * lookback_factor
+                        else:
+                            greek_val = 0
+                    except:
+                        greek_val = 0
+                    
+                    y_values.append(greek_val)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Lookback {greek_type}', line=dict(color='purple')))
         
         elif plot_type == "Price vs Volatility":
             x_values = np.linspace(0.1, 0.6, 20)
