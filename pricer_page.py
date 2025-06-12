@@ -476,6 +476,8 @@ with tab1:
                 st.error(f"Error calculating {greek_to_analyze}: {str(e)}")
 
 
+
+
 # -----------------------------
 # Tab 2 – Forward Contracts
 # -----------------------------
