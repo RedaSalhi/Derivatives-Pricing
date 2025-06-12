@@ -8,9 +8,9 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 # Import your pricing functions
-from pricing.vanilla_options import price_vanilla_option
-from pricing.option_strategies import price_option_strategy, compute_strategy_payoff, get_predefined_strategy
-from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
+from pricing.vanilla_options import *
+from pricing.option_strategies import *
+from pricing.utils.option_strategies_greeks import *
 
 
 def option_strategies_tab():
