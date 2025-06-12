@@ -655,7 +655,7 @@ from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
 # -----------------------------
 with tab3:
     # Main title
-    st.markdown('<h1 class="main-header">Advanced Options Pricing Suite</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">Options Pricing Suite</h1>', unsafe_allow_html=True)
 
     
     # Initialize session state for setup completion
@@ -690,14 +690,14 @@ with tab3:
         
         # Tips and Instructions
         st.markdown("""
-        ### 📚 **Quick Start Guide**
+        ### **Quick Start Guide**
         
         Welcome to your comprehensive options pricing toolkit! This application provides advanced analytics for:
         - **Single Option Pricing** with multiple models (Black-Scholes, Binomial Trees, Monte Carlo)
         - **Multi-leg Strategy Construction** with predefined and custom strategies
         - **Interactive Payoff Diagrams** with breakeven analysis
-        - **Greeks Visualization** across different market conditions  
-        - **Advanced Sensitivity Analysis** with multi-parameter heatmaps
+        - **Greeks Visualization** across different market conditions
+        - **Sensitivity Analysis** with multi-parameter heatmaps
         
         ### ⚠️ **Important Notes:**
         - All parameters below are **required** before accessing other tabs
@@ -709,14 +709,14 @@ with tab3:
         st.markdown("---")
         
         # Global Parameters Section
-        st.markdown('<h3 class="sub-header">🔧 Global Market Parameters</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 class="sub-header">Global Market Parameters</h3>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("**🏷️ Asset & Market Parameters**")
+            st.markdown("**Asset & Market Parameters**")
             spot_price = st.number_input(
-                "Spot Price (S) 💰", 
+                "Spot Price (S)", 
                 value=st.session_state.global_params['spot_price'], 
                 min_value=0.1, 
                 step=0.1, 
@@ -725,7 +725,7 @@ with tab3:
             )
             
             risk_free_rate = st.number_input(
-                "Risk-free Rate (r) 📈", 
+                "Risk-free Rate (r)", 
                 value=st.session_state.global_params['risk_free_rate'], 
                 min_value=0.0, 
                 max_value=1.0, 
@@ -736,7 +736,7 @@ with tab3:
             )
             
             dividend_yield = st.number_input(
-                "Dividend Yield (q) 💎", 
+                "Dividend Yield (q)", 
                 value=st.session_state.global_params['dividend_yield'], 
                 min_value=0.0, 
                 max_value=1.0, 
@@ -747,9 +747,9 @@ with tab3:
             )
         
         with col2:
-            st.markdown("**📊 Option Parameters**")
+            st.markdown("**Option Parameters**")
             volatility = st.number_input(
-                "Volatility (σ) 📉", 
+                "Volatility (σ)", 
                 value=st.session_state.global_params['volatility'], 
                 min_value=0.01, 
                 max_value=2.0, 
@@ -760,7 +760,7 @@ with tab3:
             )
             
             time_to_expiry = st.number_input(
-                "Time to Expiry (T) ⏰", 
+                "Time to Expiry (T)", 
                 value=st.session_state.global_params['time_to_expiry'], 
                 min_value=0.001, 
                 step=0.01, 
@@ -772,13 +772,13 @@ with tab3:
         st.markdown("---")
         
         # Model Selection
-        st.markdown('<h3 class="sub-header">🧮 Pricing Model Configuration</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 class="sub-header">Pricing Model Configuration</h3>', unsafe_allow_html=True)
         
         col3, col4 = st.columns(2)
         
         with col3:
             model = st.selectbox(
-                "Select Pricing Model 🎯", 
+                "Select Pricing Model", 
                 ["black-scholes", "binomial", "monte-carlo"],
                 index=["black-scholes", "binomial", "monte-carlo"].index(st.session_state.global_params['model']),
                 key="setup_model",
@@ -787,9 +787,9 @@ with tab3:
             
             # Model descriptions
             model_descriptions = {
-                "black-scholes": "🎓 **Black-Scholes**: Analytical solution for European options. Fast and precise.",
-                "binomial": "🌳 **Binomial Tree**: Discrete model supporting American options. Flexible but slower.",
-                "monte-carlo": "🎲 **Monte Carlo**: Simulation-based approach. Handles complex payoffs."
+                "black-scholes": "**Black-Scholes**: We compute the analytical solution for European options. Fast and precise.",
+                "binomial": "**Binomial Tree**: Discrete model supporting American options. Flexible but slower.",
+                "monte-carlo": "**Monte Carlo**: Simulation-based approach. Handles complex payoffs."
             }
             
             st.info(model_descriptions[model])
@@ -798,7 +798,7 @@ with tab3:
             # Additional parameters for specific models
             if model == "binomial":
                 n_steps = st.number_input(
-                    "Number of Steps (N) 🪜", 
+                    "Number of Steps (N)", 
                     value=st.session_state.global_params['n_steps'], 
                     min_value=1, 
                     max_value=1000, 
@@ -808,7 +808,7 @@ with tab3:
                 )
             elif model == "monte-carlo":
                 n_simulations = st.number_input(
-                    "Number of Simulations 🔢", 
+                    "Number of Simulations", 
                     value=st.session_state.global_params['n_simulations'], 
                     min_value=100, 
                     max_value=100000, 
@@ -820,7 +820,7 @@ with tab3:
         st.markdown("---")
         
         # Parameter Summary
-        st.markdown('<h3 class="sub-header">📋 Parameter Summary</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 class="sub-header">Parameter Summary</h3>', unsafe_allow_html=True)
         
         summary_col1, summary_col2, summary_col3 = st.columns(3)
         
@@ -842,7 +842,7 @@ with tab3:
         col_button1, col_button2, col_button3 = st.columns([1, 2, 1])
         
         with col_button2:
-            if st.button("🚀 **Complete Setup & Start Analysis**", type="primary", use_container_width=True):
+            if st.button("**Complete Setup & Start Analysis**", type="primary", use_container_width=True):
                 # Update session state with all parameters
                 st.session_state.global_params.update({
                     'spot_price': spot_price,
