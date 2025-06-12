@@ -1870,8 +1870,8 @@ with tab4:
                             # Hedging suggestions
                             st.subheader("🛡️ Hedging Suggestions")
                             st.info("""
-                            **Portfolio Hedging Strategies:**
-                            - **Delta Hedging**: Regularly adjust underlying position to maintain
+                                **Portfolio Hedging Strategies:**
+                                - **Delta Hedging**: Regularly adjust underlying position to maintain""")
 
     
 
