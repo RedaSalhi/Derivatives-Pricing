@@ -87,13 +87,14 @@ def compute_greek_vs_spot(greek: str, t, T1, T2, K, a, lam, sigma, face, option_
         y_min, y_max = 0, 1  # fallback to a default range
 
 
-    plt.figure(figsize=(8, 5))
-    plt.plot(bond_vals, greek_vals)
-    plt.title(f"{greek.capitalize()} vs Bond Price")
-    plt.xlabel("Zero-Coupon Bond Price P(t,T1)")
-    plt.ylabel(greek.capitalize())
-    plt.grid(True)
-    plt.xlim(x_min, x_max)
-    plt.ylim(y_min, y_max)  # limit based on x-domain filtered values
-    plt.tight_layout()
-    plt.show()
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(bond_vals, greek_vals)
+    ax.set_title(f"{greek.capitalize()} vs Bond Price")
+    ax.set_xlabel("Zero-Coupon Bond Price P(t,T1)")
+    ax.set_ylabel(greek.capitalize())
+    ax.grid(True)
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    fig.tight_layout()
+
+    return fig
