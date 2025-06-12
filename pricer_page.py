@@ -101,7 +101,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 # Tab 1 – Vanilla Options
 # -----------------------------
 with tab1:
-    st.markdown('<h1 class="main-header">Vanilla Option Pricing Tool</h1>', 
+    st.markdown('<div class="main-header">Vanilla Option Pricing Tool</div>', 
                 unsafe_allow_html=True)
 
     st.markdown("---")
@@ -402,7 +402,7 @@ with tab1:
 # -----------------------------
 
 with tab2:
-    st.markdown('<h1 class="main-header">Forward Contract Pricing & Analysis</h1>', 
+    st.markdown('<div class="main-header">Forward Contract Pricing & Analysis</div>', 
                 unsafe_allow_html=True)
     st.markdown("---")
     
@@ -681,7 +681,7 @@ from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
 # -----------------------------
 with tab3:
     # Main title
-    st.markdown('<h1 class="main-header">Options Pricing Suite</h1>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Options Pricing Suite</div>', unsafe_allow_html=True)
 
     st.markdown("---")
     # Initialize session state for setup completion
@@ -1402,6 +1402,8 @@ with tab3:
 with tab4:
     # Main title
     st.markdown('<div class="main-header">Exotic Options Pricing Toolkit</div>', unsafe_allow_html=True)
+
+    st.markdown("---")
     
     # Introduction
     st.markdown("""
@@ -2852,7 +2854,7 @@ from pricing.models.swaps.ois_fx import (
 )
 
 with tab5:
-    st.markdown('<h1 class="main-header">Swap Pricer (In Progress)</h1>', 
+    st.markdown('<div class="main-header">Swap Pricer (In Progress)</div>', 
                 unsafe_allow_html=True)
     st.markdown("---")
     
@@ -2973,7 +2975,7 @@ with tab5:
 
 with tab6:
     # Add model selection info box
-    st.markdown('<h1 class="main-header">Interest Rate Model Selector</h1>', 
+    st.markdown('<div class="main-header">Interest Rate Model Selector</div>', 
                 unsafe_allow_html=True)
     st.markdown("---")
     model = st.selectbox(
