@@ -1234,7 +1234,17 @@ with tab6:
                             st.info(f"📈 Rendement à l’échéance (YTM) : **{ytm:.4f} ({ytm*100:.2f}%)**")
     
                         else:
-                            def price_coupon_bond(*, r0, t, a, lam, sigma, maturity=5, face=1.0, coupon=0.05, dt=0.5):
+                            price = price_coupon_bond(
+                                r0=r_current,
+                                t=t_current,
+                                a=params['a'],
+                                lam=params['lambda'],
+                                sigma=params['sigma'],
+                                maturity=maturity,
+                                face=face_value,
+                                coupon=coupon_rate,
+                                dt=dt_coupon
+                            )
                             st.success(f"💰 Prix de l'obligation à coupons : **{price:.2f}**")
                             st.info(f"📊 Coupon : {coupon_rate*100:.2f}% ({freq})")
     
