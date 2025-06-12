@@ -22,8 +22,8 @@ def exotic_options_tab():
     st.markdown("---")
     
     # Introduction
-    st.markdown('<div class="info-box">', unsafe_allow_html=True)
     st.markdown("""
+    <div class="info-box">
     <strong>Welcome to the Exotic Options Pricing Toolkit!</strong><br>
     This comprehensive application allows you to price and analyze various exotic options including:
     <ul>
@@ -32,8 +32,8 @@ def exotic_options_tab():
     <li><strong>Digital Options</strong> - Binary payoff options</li>
     <li><strong>Lookback Options</strong> - Options based on extrema</li>
     </ul>
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
     
     # Create tabs for different option types
     tabb1, tabb2, tabb3, tabb4, tabb5 = st.tabs([
