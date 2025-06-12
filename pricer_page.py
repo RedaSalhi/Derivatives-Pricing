@@ -1020,7 +1020,9 @@ with tab6:
         st.markdown("### 🔧 Parameter Setup")
         param_mode = st.radio("How to set parameters?", ["Manual input", "Calibrate from market data (FRED/Yahoo)"])
 
-        # --- Parameter Inputs ---
+        # --- Common Model Variables ---
+        a = sigma = lam = dt = r0 = 0.0
+
         if param_mode == "Manual input":
             col1, col2, col3, col4 = st.columns(4)
             with col1:
@@ -1039,7 +1041,16 @@ with tab6:
                 a, lam, sigma, dt, r0 = run_ou_estimation(ticker, start=start_date.strftime('%Y-%m-%d'))
                 st.success(f"✔️ Calibrated: a={a:.4f}, λ={lam:.4f}, σ={sigma:.4f}, r₀={r0:.4f}, dt={dt:.4f}")
 
-        # --- Instrument Selection ---
+        # --- Common Instrument Inputs ---
+        maturity = 5.0
+        coupon = 0.05
+        t = 0.0
+        face_value = 1.0
+        T1, T2 = 3.0, 5.0
+        K = 0.85
+        option_type = "call"
+        n_paths = 1000
+
         st.markdown("### 📈 Select Instrument to Price")
         instrument = st.selectbox("Instrument", [
             "Zero-Coupon Bond",
@@ -1050,8 +1061,7 @@ with tab6:
             "Swaption (Planned)"
         ])
 
-        maturity = coupon = T1 = T2 = face_value = K = None
-
+        # --- Instrument-Specific Inputs ---
         if instrument == "Zero-Coupon Bond":
             maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
             t = st.slider("Elapsed time t (years)", min_value=0.0, max_value=maturity, value=0.0, step=0.25)
@@ -1076,25 +1086,23 @@ with tab6:
 
         st.markdown("---")
 
-        # --- Simulation/Plotting Options ---
+        # --- Plotting & Sim Options ---
         yield_curve = st.checkbox("Simulate Yield Curve?")
         plot_paths = st.checkbox("Plot Monte Carlo Paths and Rate Distribution at T?")
         greeks = st.checkbox("Visualize Greeks/Option Price?")
 
-        # --- Yield Curve Setup ---
         if yield_curve:
             T = st.slider("Simulation horizon (years)", 1, 30, 10, step=1)
             time, r_path = simulate_vasicek_path(r0, a, lam, sigma, T=T, dt=dt)
             maturities = np.linspace(0.5, T, 60)
-            possible_snapshots = list(np.round(np.arange(0, T + dt, 0.5), 2))
             snapshot_times = st.multiselect(
                 "Select snapshot times (in years):",
-                options=possible_snapshots,
+                options=list(np.round(np.arange(0, T + dt, 0.5), 2)),
                 default=[0, 1, 3, 5]
             )
 
         if plot_paths:
-            T_plot = maturity if maturity else T2 if T2 else 10
+            T_plot = max(maturity, T2) if instrument == "Bond Option (European)" else maturity
             T_vec, r_paths = simulate_vasicek_paths(a, lam, sigma, r0, T_plot, dt, n_paths)
 
         if greeks and instrument == "Bond Option (European)":
@@ -1106,7 +1114,7 @@ with tab6:
                 if greek_model == "Monte Carlo":
                     st.warning("Monte Carlo Greeks not yet stable.")
 
-        # --- Pricing Execution ---
+        # --- Run Pricing ---
         if st.button("Run Pricing"):
             if instrument == "Zero-Coupon Bond":
                 price = price_zero_coupon(r0, t, maturity, a, lam, sigma, face_value)
@@ -1114,11 +1122,9 @@ with tab6:
 
             elif instrument == "Coupon Bond":
                 price = price_coupon_bond(
-                    r0, t, a, lam, sigma,
-                    maturity=maturity,
-                    face=face_value,
-                    coupon=coupon,
-                    dt=dt
+                    r0=r0, t=t, a=a, lam=lam, sigma=sigma,
+                    maturity=maturity, face=face_value,
+                    coupon=coupon, dt=dt
                 )
                 st.success(f"💰 Coupon Bond Price: {price:.4f}")
 
@@ -1128,16 +1134,23 @@ with tab6:
                 else:
                     method = st.radio("Choose Pricing Method", ["Analytical", "Monte Carlo"])
                     if method == "Analytical":
-                        price = vasicek_bond_option_price(r0, 0, T1, T2, K, a, lam, sigma, face=face_value, option_type=option_type)
+                        price = vasicek_bond_option_price(
+                            r0=r0, t=0, T1=T1, T2=T2, K=K, a=a,
+                            lam=lam, sigma=sigma, face=face_value, option_type=option_type
+                        )
                         st.success(f"💰 Option Price ({option_type}): {price:.6f}")
                     else:
-                        price, std = vasicek_bond_option_price_mc(r0, a, lam, sigma, T1, T2, K, dt, n_paths, face=face_value, option_type=option_type)
+                        price, std = vasicek_bond_option_price_mc(
+                            r0=r0, a=a, lam=lam, sigma=sigma,
+                            T1=T1, T2=T2, K=K, dt=dt, n_paths=n_paths,
+                            face=face_value, option_type=option_type
+                        )
                         st.success(f"💰 Option Price ({option_type}): {price:.6f}")
                         st.info(f"Monte Carlo Std Error: {std:.6f}")
             else:
                 st.warning("This instrument is not yet implemented.")
 
-            # Yield curve plot
+            # --- Yield Curve ---
             if yield_curve and snapshot_times:
                 with st.expander("📉 Yield Curve:"):
                     yield_curves = generate_yield_curves(r_path, snapshot_times, maturities, a, lam, sigma, dt)
@@ -1153,7 +1166,10 @@ with tab6:
 
             if greeks and instrument == "Bond Option (European)":
                 with st.expander(f"{greek} Visualization"):
-                    compute_greek_vs_spot(greek.lower(), 0, T1, T2, K, a, lam, sigma, face_value,
-                                          option_type=option_type, n_paths=n_paths, model=greek_model)
+                    compute_greek_vs_spot(
+                        greek.lower(), 0, T1, T2, K, a, lam, sigma, face_value,
+                        option_type=option_type, n_paths=n_paths, model=greek_model
+                    )
     else:
         st.warning("Only the Vasicek model is currently implemented.")
+
