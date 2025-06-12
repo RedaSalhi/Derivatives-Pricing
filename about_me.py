@@ -1,4 +1,10 @@
 import streamlit as st
+import sys
+import os
+
+# Allow importing from the pricing directory
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
+
 
 # ----------------------
 # Header
