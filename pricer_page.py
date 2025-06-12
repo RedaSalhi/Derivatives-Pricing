@@ -115,8 +115,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 # Tab 1 – Vanilla Options
 # -----------------------------
 with tab1:
-    st.title("Option Pricing Tool")
-    st.markdown('<h1 class="main-header">Price options using Black-Scholes, Binomial Tree, and Monte Carlo methods</h1>', 
+    st.markdown('<h1 class="main-header">Vanilla Option Pricing Tool</h1>', 
                 unsafe_allow_html=True)
     
     # Input Parameters Section
