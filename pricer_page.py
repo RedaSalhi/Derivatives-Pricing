@@ -2015,56 +2015,221 @@ with tab4:
         st.plotly_chart(fig_vol, use_container_width=True)
     
     with col2:
-        st.subheader("📈 Options Pricing Comparison")
+        st.subheader("📈 Interactive Options Analysis")
         
-        # Interactive pricing comparison
-        comp_spot = st.slider("Spot Price", 80, 120, 100, key="comp_spot")
-        comp_vol = st.slider("Volatility", 0.1, 0.5, 0.2, key="comp_vol")
+        # User controls for what to plot
+        plot_type = st.selectbox(
+            "Choose Analysis Type", 
+            ["Price vs Strike", "Price vs Spot", "Greeks vs Spot", "Price vs Volatility", "Price vs Time"],
+            key="plot_type"
+        )
         
-        # Calculate prices for comparison
-        strikes_comp = np.arange(90, 111, 2)
-        vanilla_prices = []
-        asian_prices = []
+        # Base parameters
+        base_spot = st.slider("Base Spot Price", 80, 120, 100, key="base_spot")
+        base_strike = st.slider("Base Strike Price", 80, 120, 100, key="base_strike") 
+        base_vol = st.slider("Base Volatility", 0.1, 0.5, 0.2, key="base_vol")
+        base_time = st.slider("Base Time to Maturity", 0.1, 2.0, 1.0, key="base_time")
+        base_rate = st.slider("Base Risk-free Rate", 0.0, 0.1, 0.05, key="base_rate")
         
-        for K in strikes_comp:
-            # Vanilla Black-Scholes
-            from scipy.stats import norm
-            d1 = (np.log(comp_spot/K) + (0.05 + 0.5*comp_vol**2)*1.0) / (comp_vol*np.sqrt(1.0))
-            d2 = d1 - comp_vol*np.sqrt(1.0)
-            vanilla_price = comp_spot*norm.cdf(d1) - K*np.exp(-0.05*1.0)*norm.cdf(d2)
-            vanilla_prices.append(vanilla_price)
-            
-            # Asian (approximation for speed)
-            asian_price = vanilla_price * 0.85  # Asian options typically cheaper
-            asian_prices.append(asian_price)
+        # Option types to include
+        st.write("**Select Options to Compare:**")
+        col_opt1, col_opt2, col_opt3 = st.columns(3)
+        with col_opt1:
+            show_vanilla = st.checkbox("Vanilla", value=True, key="show_vanilla")
+            show_asian = st.checkbox("Asian", value=True, key="show_asian")
+        with col_opt2:
+            show_digital = st.checkbox("Digital", value=False, key="show_digital")
+            show_barrier = st.checkbox("Barrier", value=False, key="show_barrier")
+        with col_opt3:
+            show_lookback = st.checkbox("Lookback", value=False, key="show_lookback")
         
-        # Plot comparison
+        # Greek selection (when applicable)
+        if plot_type == "Greeks vs Spot":
+            greek_type = st.selectbox(
+                "Select Greek", 
+                ["Delta", "Gamma", "Theta", "Vega", "Rho"],
+                key="greek_type"
+            )
+        
+        # Generate the plot based on user selection
         fig_comp = go.Figure()
         
-        fig_comp.add_trace(go.Scatter(
-            x=strikes_comp, 
-            y=vanilla_prices,
-            mode='lines+markers',
-            name='Vanilla Call',
-            line=dict(color='blue')
-        ))
+        if plot_type == "Price vs Strike":
+            x_values = np.linspace(base_spot * 0.8, base_spot * 1.2, 20)
+            x_label = "Strike Price"
+            
+            if show_vanilla:
+                y_values = []
+                for K in x_values:
+                    from scipy.stats import norm
+                    d1 = (np.log(base_spot/K) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                    d2 = d1 - base_vol*np.sqrt(base_time)
+                    price = base_spot*norm.cdf(d1) - K*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                    y_values.append(max(price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Vanilla Call', line=dict(color='blue')))
+            
+            if show_asian:
+                y_values = []
+                for K in x_values:
+                    try:
+                        price = price_asian_option(base_spot, K, base_time, base_rate, base_vol, 100, 5000, "monte_carlo", "call", "average_price")
+                        y_values.append(price)
+                    except:
+                        # Fallback approximation
+                        from scipy.stats import norm
+                        d1 = (np.log(base_spot/K) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                        d2 = d1 - base_vol*np.sqrt(base_time)
+                        vanilla_price = base_spot*norm.cdf(d1) - K*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        y_values.append(max(vanilla_price * 0.85, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Asian Call', line=dict(color='red')))
+            
+            if show_digital:
+                y_values = []
+                for K in x_values:
+                    price = price_digital_option("black_scholes", "call", "cash", base_spot, K, base_time, base_rate, base_vol, 1.0)
+                    y_values.append(price)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
         
-        fig_comp.add_trace(go.Scatter(
-            x=strikes_comp,
-            y=asian_prices, 
-            mode='lines+markers',
-            name='Asian Call',
-            line=dict(color='red')
-        ))
+        elif plot_type == "Price vs Spot":
+            x_values = np.linspace(base_spot * 0.7, base_spot * 1.3, 20)
+            x_label = "Spot Price"
+            
+            if show_vanilla:
+                y_values = []
+                for S in x_values:
+                    from scipy.stats import norm
+                    d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                    d2 = d1 - base_vol*np.sqrt(base_time)
+                    price = S*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                    y_values.append(max(price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Vanilla Call', line=dict(color='blue')))
+            
+            if show_asian:
+                y_values = []
+                for S in x_values:
+                    try:
+                        price = price_asian_option(S, base_strike, base_time, base_rate, base_vol, 100, 5000, "monte_carlo", "call", "average_price")
+                        y_values.append(price)
+                    except:
+                        from scipy.stats import norm
+                        d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                        d2 = d1 - base_vol*np.sqrt(base_time)
+                        vanilla_price = S*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        y_values.append(max(vanilla_price * 0.85, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Asian Call', line=dict(color='red')))
+            
+            if show_digital:
+                y_values = []
+                for S in x_values:
+                    price = price_digital_option("black_scholes", "call", "cash", S, base_strike, base_time, base_rate, base_vol, 1.0)
+                    y_values.append(price)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
+        
+        elif plot_type == "Greeks vs Spot":
+            x_values = np.linspace(base_spot * 0.7, base_spot * 1.3, 20)
+            x_label = "Spot Price"
+            
+            if show_vanilla:
+                y_values = []
+                for S in x_values:
+                    from scipy.stats import norm
+                    d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                    d2 = d1 - base_vol*np.sqrt(base_time)
+                    
+                    if greek_type == "Delta":
+                        greek_val = norm.cdf(d1)
+                    elif greek_type == "Gamma":
+                        greek_val = norm.pdf(d1) / (S * base_vol * np.sqrt(base_time))
+                    elif greek_type == "Theta":
+                        greek_val = -(S * norm.pdf(d1) * base_vol / (2 * np.sqrt(base_time)) + 
+                                    base_rate * base_strike * np.exp(-base_rate * base_time) * norm.cdf(d2))
+                    elif greek_type == "Vega":
+                        greek_val = S * np.sqrt(base_time) * norm.pdf(d1)
+                    elif greek_type == "Rho":
+                        greek_val = base_strike * base_time * np.exp(-base_rate * base_time) * norm.cdf(d2)
+                    
+                    y_values.append(greek_val)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Vanilla {greek_type}', line=dict(color='blue')))
+            
+            if show_digital:
+                y_values = []
+                for S in x_values:
+                    try:
+                        greeks = calculate_greeks_digital(S, base_strike, base_time, base_rate, base_vol, "call", "cash", 1.0)
+                        y_values.append(greeks[greek_type])
+                    except:
+                        y_values.append(0)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Digital {greek_type}', line=dict(color='green')))
+        
+        elif plot_type == "Price vs Volatility":
+            x_values = np.linspace(0.1, 0.6, 20)
+            x_label = "Volatility"
+            
+            if show_vanilla:
+                y_values = []
+                for vol in x_values:
+                    from scipy.stats import norm
+                    d1 = (np.log(base_spot/base_strike) + (base_rate + 0.5*vol**2)*base_time) / (vol*np.sqrt(base_time))
+                    d2 = d1 - vol*np.sqrt(base_time)
+                    price = base_spot*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                    y_values.append(max(price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Vanilla Call', line=dict(color='blue')))
+            
+            if show_digital:
+                y_values = []
+                for vol in x_values:
+                    price = price_digital_option("black_scholes", "call", "cash", base_spot, base_strike, base_time, base_rate, vol, 1.0)
+                    y_values.append(price)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
+        
+        elif plot_type == "Price vs Time":
+            x_values = np.linspace(0.1, 2.0, 20)
+            x_label = "Time to Maturity"
+            
+            if show_vanilla:
+                y_values = []
+                for T in x_values:
+                    from scipy.stats import norm
+                    d1 = (np.log(base_spot/base_strike) + (base_rate + 0.5*base_vol**2)*T) / (base_vol*np.sqrt(T))
+                    d2 = d1 - base_vol*np.sqrt(T)
+                    price = base_spot*norm.cdf(d1) - base_strike*np.exp(-base_rate*T)*norm.cdf(d2)
+                    y_values.append(max(price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Vanilla Call', line=dict(color='blue')))
+            
+            if show_digital:
+                y_values = []
+                for T in x_values:
+                    price = price_digital_option("black_scholes", "call", "cash", base_spot, base_strike, T, base_rate, base_vol, 1.0)
+                    y_values.append(price)
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
+        
+        # Update layout
+        y_label = "Option Price" if plot_type != "Greeks vs Spot" else greek_type if plot_type == "Greeks vs Spot" else "Option Price"
         
         fig_comp.update_layout(
-            title="Option Prices vs Strike",
-            xaxis_title="Strike Price",
-            yaxis_title="Option Price",
-            height=400
+            title=f"{plot_type}",
+            xaxis_title=x_label,
+            yaxis_title=y_label,
+            height=400,
+            hovermode='x unified'
         )
         
         st.plotly_chart(fig_comp, use_container_width=True)
+        
+        # Add insights based on plot type
+        if plot_type == "Greeks vs Spot":
+            st.info(f"""
+            **{greek_type} Insights:**
+            - **Delta**: Rate of change of option price with respect to underlying price
+            - **Gamma**: Rate of change of delta (convexity measure)
+            - **Theta**: Time decay - how much option loses value per day
+            - **Vega**: Sensitivity to volatility changes
+            - **Rho**: Sensitivity to interest rate changes
+            """)
+        elif plot_type == "Price vs Volatility":
+            st.info("**Volatility Impact**: Higher volatility increases option values due to increased probability of favorable outcomes.")
+        elif plot_type == "Price vs Time":
+            st.info("**Time Value**: Longer time to expiration generally increases option value (more opportunities for favorable moves).")
     
     # Educational Resources
     st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
