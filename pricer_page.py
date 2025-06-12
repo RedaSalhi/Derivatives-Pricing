@@ -393,6 +393,14 @@ with tab2:
             help="Current price of the underlying asset"
         )
         
+        strike_price = st.number_input(
+            "Strike Price ($)", 
+            min_value=0.01, 
+            value=105.0, 
+            step=1.0,
+            help="Agreed delivery price at maturity"
+        )
+        
     
     with col2:
         interest_rate = st.number_input(
