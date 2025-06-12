@@ -1377,7 +1377,7 @@ with tab6:
 
     #
     # =============================================
-    # TAB 4: OPTIONS SUR OBLIGATIONS
+    # TAB 4: OPTIONS SUR OBLIGATIONS (CORRIGÉ AVEC `key`)
     # =============================================
     with tab4:
         st.header("📈 Pricing d'Options sur Obligations")
@@ -1388,7 +1388,6 @@ with tab6:
     
         params = st.session_state.vasicek_params
     
-        # Pour éviter conflit de nom
         from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option_price as analytical_option_price
         from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc as mc_option_price
     
@@ -1397,21 +1396,21 @@ with tab6:
         with col1:
             st.subheader("📝 Paramètres de l'Option")
     
-            option_type = st.radio("Type d'option", ["Call", "Put"])
-            model_type = st.radio("Méthode de calcul", ["Analytique", "Monte Carlo"])
+            option_type = st.radio("Type d'option", ["Call", "Put"], key="opt_type")
+            model_type = st.radio("Méthode de calcul", ["Analytique", "Monte Carlo"], key="opt_model")
     
-            r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f")
-            T1 = st.number_input("Échéance de l'option (T₁)", 0.1, 10.0, 1.0, step=0.1)
-            T2 = st.number_input("Maturité de l'obligation (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1)
+            r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="opt_r")
+            T1 = st.number_input("Échéance de l'option (T₁)", 0.1, 10.0, 1.0, step=0.1, key="opt_T1")
+            T2 = st.number_input("Maturité de l'obligation (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="opt_T2")
     
-            K = st.number_input("Prix d'exercice (K)", 0.1, 2.0, 0.8, step=0.01)
-            face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100)
+            K = st.number_input("Prix d'exercice (K)", 0.1, 2.0, 0.8, step=0.01, key="opt_K")
+            face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100, key="opt_face")
     
             if model_type == "Monte Carlo":
-                n_paths = st.number_input("Nombre de simulations", 1000, 100000, 10000, step=1000)
-                dt_mc = st.number_input("Pas de temps (dt)", 0.001, 0.1, 0.01, step=0.001)
+                n_paths = st.number_input("Nombre de simulations", 1000, 100000, 10000, step=1000, key="opt_n_paths")
+                dt_mc = st.number_input("Pas de temps (dt)", 0.001, 0.1, 0.01, step=0.001, key="opt_dt")
     
-            price_option_btn = st.button("💎 Calculer le Prix de l'Option", type="primary")
+            price_option_btn = st.button("💎 Calculer le Prix de l'Option", type="primary", key="opt_btn")
     
         with col2:
             if price_option_btn:
@@ -1436,7 +1435,7 @@ with tab6:
                             )
                             st.success(f"💎 Prix de l'option {option_type} (analytique) : **{price:.4f}**")
     
-                        else:  # Monte Carlo
+                        else:
                             price, std = mc_option_price(
                                 r0=r_current,
                                 a=params['a'],
@@ -1453,7 +1452,6 @@ with tab6:
                             st.success(f"💎 Prix de l'option {option_type} (MC) : **{price:.4f} ± {std:.4f}**")
                             st.info(f"📊 Intervalle de confiance 95% : [{price - 1.96*std:.4f}, {price + 1.96*std:.4f}]")
     
-                        # Résumé des paramètres
                         st.subheader("📋 Récapitulatif")
                         df_params = pd.DataFrame({
                             "Paramètre": [
