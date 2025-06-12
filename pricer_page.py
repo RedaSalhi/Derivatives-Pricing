@@ -656,25 +656,25 @@ from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
 with tab3:
     # Main title
     st.markdown('<h1 class="main-header">Advanced Options Pricing Suite</h1>', unsafe_allow_html=True)
+
     
-    # Sidebar for global parameters
-    st.sidebar.header("🔧 Global Market Parameters")
-    spot_price = st.sidebar.number_input("Spot Price (S)", value=100.0, min_value=0.1, step=0.1, key="global_spot")
-    risk_free_rate = st.sidebar.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, step=0.001, format="%.3f", key="global_rate")
-    dividend_yield = st.sidebar.number_input("Dividend Yield (q)", value=0.0, min_value=0.0, max_value=1.0, step=0.001, format="%.3f", key="global_dividend")
-    volatility = st.sidebar.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, step=0.01, format="%.3f", key="global_vol")
-    time_to_expiry = st.sidebar.number_input("Time to Expiry (T)", value=1.0, min_value=0.001, step=0.01, format="%.3f", key="global_time")
+    # Initialize session state for setup completion
+    if 'setup_completed' not in st.session_state:
+        st.session_state.setup_completed = False
     
-    # Model selection
-    st.sidebar.header("Pricing Model")
-    model = st.sidebar.selectbox("Select Model", ["black-scholes", "binomial", "monte-carlo"])
-    
-    # Additional parameters for specific models
-    if model == "binomial":
-        n_steps = st.sidebar.number_input("Number of Steps (N)", value=100, min_value=1, max_value=1000, step=1, key="global_n_steps")
-    elif model == "monte-carlo":
-        n_simulations = st.sidebar.number_input("Number of Simulations", value=10000, min_value=100, max_value=100000, step=100, key="global_n_sims")
-    
+    # Initialize session state for parameters
+    if 'global_params' not in st.session_state:
+        st.session_state.global_params = {
+            'spot_price': 100.0,
+            'risk_free_rate': 0.05,
+            'dividend_yield': 0.0,
+            'volatility': 0.2,
+            'time_to_expiry': 1.0,
+            'model': 'black-scholes',
+            'n_steps': 100,
+            'n_simulations': 10000
+        }
+
     # Tab structure
     taa0, taa1, taa2, taa3, taa4, taa5 = st.tabs([
         "Setup & Parameters",
