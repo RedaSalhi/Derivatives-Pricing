@@ -4,6 +4,28 @@ import runpy
 import streamlit as st
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
+
+import streamlit as st
+import streamlit.components.v1 as components
+
+# Inject Google Analytics script
+components.html(
+    """
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D7MTVEVGH0"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-D7MTVEVGH0',  {
+        'page_location': 'https://derivatives-pricing.streamlit.app',
+        'page_title': 'Derivatives Pricing App'
+      });
+    </script>
+    """,
+    height=0,
+)
+
     
 
 
