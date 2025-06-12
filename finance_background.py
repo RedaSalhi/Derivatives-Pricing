@@ -12,11 +12,7 @@ components.html(
       gtag('js', new Date());
 
       // Enregistre une vue de page personnalisée
-      gtag('config', 'G-KFYG7J821K', {
-        'page_location': 'https://derivatives-pricing.streamlit.app/',
-        'page_path': '/streamlit-app',
-        'page_title': 'Finance Background & Methodology'
-      });
+      gtag('config', 'G-KFYG7J821K');
     </script>
     """,
     height=0,
