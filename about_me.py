@@ -10,8 +10,7 @@ st.caption("Financial Engineering Student | Quant Researcher")
 st.markdown("""
 **SALHI Reda**  
 🎓 Engineering student at **Centrale Méditerranée**  
-📈 Passionate about **mathematics**, **financial markets**, and **economic research**  
-🌍 International backpacking experience: France, Germany, Switzerland, Czech Republic, Spain, Malta, Portugal, United Kingdom, etc.   
+📈 Passionate about **mathematics**, **financial markets**, and **economic research**     
 """)
 
 # ----------------------
@@ -47,49 +46,6 @@ st.subheader("🔗 Links")
 st.markdown("""
 - [LinkedIn](https://www.linkedin.com/in/reda-salhi-195297290/)
 - [GitHub](https://github.com/RedaSalhi)
-""")
-
-# ----------------------
-# Future Enhancements
-# ----------------------
-
-
-st.markdown("---")
-st.subheader("📈 Future Enhancements for Derivatives-Pricing Platform")
-
-st.markdown("""
-This platform is an ongoing project designed to evolve into a multi-asset, model-rich educational and professional toolkit. Future enhancements include:
-
-#### Core Features
-- **Exotic Greeks Engine**: Compute Greeks for exotic options using Monte Carlo and analytical methods.
-- **Strategy Optimizer**: Build a new tab to construct and optimize option strategies under cost/risk/return constraints.
-
-#### Advanced Analytics & Visualization
-- **Stress Testing Suite**: Automate multi-parameter stress tests (e.g., spot, rate, vol) with exportable results.
-
-#### Fixed Income & Credit Products
-- **Interest Rate Swaps (IRS)**: Price using **discounted cash flows**, with discounting from **OIS curves** and forecasting from **forward LIBOR/SOFR curves**.
-- **Currency Swaps**: Implement dual-currency valuation with **FX forward curves** and **cross-currency basis adjustments**.
-- **Equity Swaps**: Model synthetic total return swaps via **forward replication** and dividend assumptions.
-- **Caps & Floors**: Price using **Black’s model** (caplets/floorlets) and **Hull-White** for term structure consistency.
-- **Swaptions**: Add models including **Black lognormal**, **Hull-White**, and the **LIBOR Market Model (LMM)** for more realistic term volatility.
-
-#### Credit Derivatives & Structured Products
-- **Credit Default Swaps (CDS)**: Implement pricing with **reduced-form (Jarrow-Turnbull)** and **structural models (Merton)**.
-- **Collateralized Debt Obligations (CDOs)**: Integrate **copula models** (e.g., Gaussian copula) for tranche-level pricing and correlation stress.
-
-#### Complex & Embedded Options
-- **Convertible Bonds**: Decompose into bond + option; price via **binomial trees**, **Monte Carlo**, or **finite difference PDE solvers**.
-- **Swaptions with Smile Adjustment**: Add SABR or LMM-based volatility surfaces for realistic implied smiles.
-
-#### Volatility & Real Options
-- **Variance & Volatility Swaps**: Use replication via portfolios of options and model-free estimators.
-- **Real Options Analysis**: Extend the pricing engine to include corporate finance applications (e.g., delay, abandon, expand projects) via binomial/MC models.
-
-
----
-
-Each enhancement supports the broader vision: building a transparent, research-grade platform where students, quants, and educators can learn, simulate, and experiment with derivative pricing across markets.
 """)
 
 
