@@ -1327,7 +1327,7 @@ with tab6:
     # =============================================
     # TAB 4: OPTIONS SUR OBLIGATIONS
     # =============================================
-    with tab4
+    with tab4:
         st.header("📈 Pricing d'Options sur Obligations")
         
         if not st.session_state.vasicek_params:
