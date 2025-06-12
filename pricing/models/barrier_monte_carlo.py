@@ -1,4 +1,4 @@
-pricing/models/barrier_monte_carlo.py
+#pricing/models/barrier_monte_carlo.py
 
 import numpy as np
 
