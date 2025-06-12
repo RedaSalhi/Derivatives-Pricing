@@ -928,8 +928,6 @@ with tab6:
             )
             if not snapshot_times:
                 st.warning("Please select at least one snapshot time.")
-            else:
-                continue
 
         if plot_paths:
             if not instrument == "Bond Option (European)":
