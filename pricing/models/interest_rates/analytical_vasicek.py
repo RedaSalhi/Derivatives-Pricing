@@ -168,7 +168,7 @@ def plot_yield_curves(yield_curves, maturities): #need extraction from pricing.m
 # ------------------------------------------------------------------------------
 # Price a Coupon Bond Using the Simulated Short Rate Path
 # ------------------------------------------------------------------------------https://github.com/RedaSalhi/Derivatives-Pricing/blob/main/pricing/models/interest_rates/analytical_vasicek.py
-def price_coupon_bond(r0, t, a, lam, sigma, maturity=5, coupon=0.05, face=1.0, dt=0.5): #need extraction from pricing.models.interest_rates.analytical_vasicek import price_coupon_bond
+def price_coupon_bond(r0, t, a, lam, sigma, maturity=5, face=1.0, dt=0.5): #need extraction from pricing.models.interest_rates.analytical_vasicek import price_coupon_bond
     cashflow_dates = np.arange(t+dt, maturity + 1e-6, dt)
     price = 0
     coupon_payment = face * coupon * dt
