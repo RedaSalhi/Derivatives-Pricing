@@ -946,7 +946,7 @@ with tab6:
                     st.warning("Monte Carlo is not working properly at the moment.")
 
         else: 
-            continue
+            break
  
             
     
