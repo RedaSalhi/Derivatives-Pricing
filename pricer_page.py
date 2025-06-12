@@ -854,25 +854,25 @@ with tab6:
     from pricing.utils.greeks_vasicek import *
 
     # Add model selection info box
-    st.markdown("### 📬 Interest Rate Model Selector")
+    st.header("### Interest Rate Model Selector")
     model = st.selectbox(
         "Choose a model to explore:",
-        ["📈 Vasicek Model", "🌀 Hull-White Model (Coming Soon)", "📚 More models coming..."],
+        ["Vasicek Model", "Hull-White Model (Coming Soon)", "More models coming..."],
         index=0,
         help="Select the interest rate model you want to explore."
     )
 
-    if model != "📈 Vasicek Model":
+    if model != "Vasicek Model":
         st.warning("🚧 This model is not yet available. Stay tuned!")
         st.stop()  # Exit until Vasicek is selected
 
         # Proceed with Vasicek UI if selected...
     else:
-        st.title("📈 Modèle de Vasicek - Pricing d'Obligations et Taux d'intérêt")
+        st.subheader("Modèle de Vasicek - Pricing d'Obligations et Taux d'intérêt")
         st.markdown("---")
     
         tab1, tab2, tab3, tab4, tab5 = st.tabs(
-            ["🔧 Estimation des Paramètres", "📊 Simulation et Courbes", "💰 Pricing d'Obligations", "📈 Options sur Obligations", "🔍 Analyse des Grecques"]
+            ["Estimation des Paramètres", "Simulation et Courbes", "Pricing d'Obligations", "Options sur Obligations", "Analyse des Grecques"]
         )
         
         # Session state pour stocker les paramètres estimés
@@ -883,7 +883,7 @@ with tab6:
         # TAB 1: ESTIMATION DES PARAMÈTRES
         # =============================================
         with tab1:
-            st.header("🔧 Estimation des Paramètres du Modèle de Vasicek")
+            st.header("Estimation des Paramètres du Modèle de Vasicek")
         
             col1, col2 = st.columns([1, 1])
         
@@ -908,7 +908,7 @@ with tab6:
                 freq = st.selectbox("Fréquence", ["ME", "QE", "YE"], index=0)
         
                 # Lancement estimation
-                if st.button("📊 Estimer les Paramètres", type="primary"):
+                if st.button("Estimer les Paramètres", type="primary"):
                     if start_date >= end_date:
                         st.error("❌ La date de début doit être antérieure à la date de fin.")
                     else:
