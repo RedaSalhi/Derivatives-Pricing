@@ -1883,7 +1883,7 @@ with tab4:
 # Tab 5 – Swaps
 # -----------------------------
 
-from pricing.swaps import price_swap
+from pricing.swaps import *
 from pricing.models.swaps.ois_fx import (
     build_flat_discount_curve,
     build_flat_fx_forward_curve
