@@ -1403,333 +1403,549 @@ with tab3:
 
 
 with tab4: 
-    # Header
-    st.title("Advanced Options Pricing & Greeks Analysis Suite")
-    st.markdown("---")
+    # Main header
+    st.markdown('<h1 class="main-header">Exotic Options Pricing Suite (In Progress)</h1>', unsafe_allow_html=True)
     
     # Navigation tabs
-    tabb1, tabb2, tabb3, tabb4, tabb5 = st.tabs([
-        "Asian Options", 
-        "Barrier Options", 
-        "Digital Options", 
-        "Lookback Options",
-        "Portfolio Analysis"
-    ])
-
+    #tabs = st.tabs(["Asian Options", "Barrier Options", "Digital Options", "Lookback Options", "Comparison Tool"])
     
-    with tabb1:
+    tabs = st.tabs(["Asian Options", "Barrier Options", "Digital Options"])
+    
+    
+    # ===========================================
+    # ASIAN OPTIONS TAB
+    # ===========================================
+    with tabs[0]:
         st.header("Asian Options Pricing & Analysis")
         
-        col1, col2, col3 = st.columns([2, 2, 2])
+        # Create columns for parameters
+        col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
-            st.subheader("Parameters")
-            S0 = st.number_input("Initial Price (S₀)", value=100.0, min_value=0.1)
-            K = st.number_input("Strike Price (K)", value=100.0, min_value=0.1)
-            T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=5.0)
-            r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=0.5, format="%.4f")
-            sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, format="%.4f")
+            st.subheader("Market Parameters")
+            asian_S0 = st.number_input("Initial Price (S₀)", value=100.0, min_value=1.0, step=1.0, key="asian_s0")
+            asian_K = st.number_input("Strike Price (K)", value=100.0, min_value=1.0, step=1.0, key="asian_k")
+            asian_T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=5.0, step=0.1, key="asian_t")
+            asian_r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=0.5, step=0.01, key="asian_r")
+            asian_sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, step=0.01, key="asian_sigma")
         
         with col2:
-            st.subheader("Model Settings")
-            option_type = st.selectbox("Option Type", ["call", "put"], key="asian_option_type")
+            st.subheader("Option Parameters")
+            asian_option_type = st.selectbox("Option Type", ["call", "put"], key="asian_option_type")
             asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="asian_type")
-
-            n_steps = st.slider("Time Steps", 50, 500, 252)
-            n_paths = st.slider("MC Paths", 1000, 50000, 10000, step=1000)
+            asian_n_steps = st.number_input("Time Steps", value=252, min_value=10, max_value=1000, step=10, key="asian_steps")
+            asian_n_paths = st.number_input("Monte Carlo Paths", value=10000, min_value=1000, max_value=100000, step=1000, key="asian_paths")
         
         with col3:
-            st.subheader("Results")
-            if st.button("Calculate Asian Option", key="asian_calc"):
-                with st.spinner("Calculating..."):
-                    greeks = calculate_greeks_asian(S0, K, T, r, sigma, n_steps, n_paths, option_type, asian_type)
-                    
-                    # Display results in a nice format
-                    results_df = pd.DataFrame({
-                        'Metric': ['Price', 'Delta (Δ)', 'Gamma (Γ)', 'Theta (Θ)', 'Vega (ν)', 'Rho (ρ)'],
-                        'Value': [f"{greeks['Price']:.4f}", f"{greeks['Delta']:.4f}", 
-                                f"{greeks['Gamma']:.4f}", f"{greeks['Theta']:.4f}", 
-                                f"{greeks['Vega']:.4f}", f"{greeks['Rho']:.4f}"],
-                        'Description': ['Option premium', 'Price sensitivity to spot', 
-                                      'Delta sensitivity to spot', 'Time decay', 
-                                      'Volatility sensitivity', 'Rate sensitivity']
-                    })
-                    
-                    st.dataframe(results_df, use_container_width=True)
+            st.subheader("Advanced Features")
+            show_asian_greeks = st.checkbox("Calculate Greeks", value=True, key="asian_greeks")
+            show_asian_sensitivity = st.checkbox("Sensitivity Analysis", value=False, key="asian_sensitivity")
+            show_asian_paths = st.checkbox("Show Monte Carlo Paths", value=False, key="asian_paths_viz")
+            asian_real_time = st.checkbox("Real-time Updates", value=False, key="asian_realtime")
+        
+        # Price calculation
+        with st.spinner("Calculating Asian option price..."):
+            asian_price = price_asian_option(
+                asian_S0, asian_K, asian_T, asian_r, asian_sigma,
+                asian_n_steps, asian_n_paths, "monte_carlo",
+                asian_option_type, asian_type
+            )
+        
+        # Display results
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Option Price</h3>
+                <h2>${asian_price:.4f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            moneyness = asian_S0 / asian_K
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Moneyness</h3>
+                <h2>{moneyness:.3f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            time_value = max(0, asian_price - max(0, asian_S0 - asian_K))
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Time Value</h3>
+                <h2>${time_value:.4f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Greeks calculation
+        if show_asian_greeks:
+            st.subheader("Greeks Analysis")
+            with st.spinner("Calculating Greeks..."):
+                asian_greeks = calculate_greeks_asian(
+                    asian_S0, asian_K, asian_T, asian_r, asian_sigma,
+                    asian_n_steps, asian_n_paths//2, asian_option_type, asian_type
+                )
+            
+            greeks_df = pd.DataFrame([asian_greeks]).T
+            greeks_df.columns = ['Value']
+            greeks_df = greeks_df.drop('Price')
+            
+            # Create interactive Greeks chart
+            fig_greeks = go.Figure()
+            fig_greeks.add_trace(go.Bar(
+                x=greeks_df.index,
+                y=greeks_df['Value'],
+                marker_color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
+            ))
+            fig_greeks.update_layout(
+                title="Greeks Values",
+                xaxis_title="Greeks",
+                yaxis_title="Value",
+                height=400
+            )
+            st.plotly_chart(fig_greeks, use_container_width=True)
         
         # Visualization section
-        st.subheader("Visualizations")
-        
-        viz_col1, viz_col2 = st.columns(2)
-        
-        with viz_col1:
-            if st.button("Show Payoff Diagram", key="asian_payoff"):
-                st.pyplot(plot_asian_option_payoff(K, option_type, asian_type))
-        
-        with viz_col2:
-            if st.button("Show Monte Carlo Paths", key="asian_paths"):
-                from pricing.models.asian_monte_carlo import simulate_asian_paths
-                paths = simulate_asian_paths(S0, T, r, sigma, n_steps, min(n_paths, 100), option_type, asian_type)
-                plot_monte_carlo_paths(paths)
-        
-        # Sensitivity Analysis
-        st.subheader("Sensitivity Analysis")
-        
-        sens_param = st.selectbox("Parameter to Analyze", ["S0", "sigma", "T", "r"], key="asian_sens")
-        
-        if st.button("Generate Sensitivity Analysis", key="asian_sens_btn"):
-            base_params = {
-                'S0': S0, 'K': K, 'T': T, 'r': r, 'sigma': sigma,
-                'n_steps': n_steps, 'n_paths': n_paths,
-                'option_type': option_type, 'asian_type': asian_type
-            }
-            
-            if sens_param == "S0":
-                param_range = np.linspace(S0 * 0.5, S0 * 1.5, 20)
-            elif sens_param == "sigma":
-                param_range = np.linspace(0.1, 0.5, 20)
-            elif sens_param == "T":
-                param_range = np.linspace(0.1, 2.0, 20)
-            else:  # r
-                param_range = np.linspace(0.01, 0.15, 20)
-            
-            fig = plot_sensitivity_analysis(option_type, base_params, sens_param, param_range, "asian")
-            st.plotly_chart(fig, use_container_width=True)
-    
-    with tabb2:
-        st.header("Barrier Options Pricing & Analysis")
-        
-        col1, col2, col3 = st.columns([2, 2, 2])
-        
-        with col1:
-            st.subheader("Parameters")
-            S_barrier = st.number_input("Spot Price (S)", value=100.0, min_value=0.1, key="barrier_s")
-            K_barrier = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="barrier_k")
-            H_barrier = st.number_input("Barrier Level (H)", value=120.0, min_value=0.1, key="barrier_h")
-            T_barrier = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, key="barrier_t")
-            r_barrier = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, format="%.4f", key="barrier_r")
-            sigma_barrier = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, format="%.4f", key="barrier_sigma")
-        
-        with col2:
-            st.subheader("Model Settings")
-            option_type_barrier = st.selectbox("Option Type", ["call", "put"], key="barrier_option_type")
-            barrier_type = st.selectbox("Barrier Type", ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], key="barrier_type_select")
-            n_sims = st.slider("MC Simulations", 1000, 100000, 10000, step=1000)
-            n_steps_barrier = st.slider("Time Steps", 50, 500, 100, key="barrier_steps")
-        
-        with col3:
-            st.subheader("Results")
-            if st.button("Calculate Barrier Option", key="barrier_calc"):
-                with st.spinner("Calculating..."):
-                    price, paths = price_barrier_option(
-                        S_barrier, K_barrier, H_barrier, T_barrier, r_barrier, sigma_barrier,
-                        option_type_barrier, barrier_type, "monte_carlo", n_sims, n_steps_barrier
-                    )
-                    
-                    st.metric("Option Price", f"{price:.4f}")
-                    
-                    # Show some sample paths
-                    if st.checkbox("Show Sample Paths", key="barrier_paths_check"):
-                        plot_sample_paths_barrier(paths[:20], K_barrier, H_barrier, option_type_barrier, barrier_type)
-        
-        # Payoff visualization
-        if st.button("Show Payoff Diagram", key="barrier_payoff"):
-            plot_barrier_payoff(K_barrier, H_barrier, option_type_barrier, barrier_type)
-    
-    with tabb3:
-        st.header("Digital Options Pricing & Analysis")
-        
-        col1, col2, col3 = st.columns([2, 2, 2])
-        
-        with col1:
-            st.subheader("Parameters")
-            S_digital = st.number_input("Spot Price (S)", value=100.0, min_value=0.1, key="digital_s")
-            K_digital = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="digital_k")
-            T_digital = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, key="digital_t")
-            r_digital = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, format="%.4f", key="digital_r")
-            sigma_digital = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, format="%.4f", key="digital_sigma")
-            Q_digital = st.number_input("Payout Amount (Q)", value=1.0, min_value=0.1, key="digital_q")
-        
-        with col2:
-            st.subheader("Model Settings")
-            option_type_digital = st.selectbox("Option Type", ["call", "put"], key="digital_option_type")
-            style_digital = st.selectbox("Digital Style", ["cash", "asset"], key="digital_style")
-        
-        with col3:
-            st.subheader("Results")
-            if st.button("Calculate Digital Option", key="digital_calc"):
-                with st.spinner("Calculating..."):
-                    greeks_digital = calculate_greeks_digital(
-                        S_digital, K_digital, T_digital, r_digital, sigma_digital,
-                        option_type_digital, style_digital, Q_digital
-                    )
-                    
-                    # Display results
-                    results_df = pd.DataFrame({
-                        'Metric': ['Price', 'Delta (Δ)', 'Gamma (Γ)', 'Theta (Θ)', 'Vega (ν)', 'Rho (ρ)'],
-                        'Value': [f"{greeks_digital['Price']:.6f}", f"{greeks_digital['Delta']:.6f}", 
-                                f"{greeks_digital['Gamma']:.6f}", f"{greeks_digital['Theta']:.6f}", 
-                                f"{greeks_digital['Vega']:.6f}", f"{greeks_digital['Rho']:.6f}"]
-                    })
-                    
-                    st.dataframe(results_df, use_container_width=True)
-        
-        # Visualization
-        if st.button("Show Payoff Diagram", key="digital_payoff"):
-            plot_digital_payoff(K_digital, option_type_digital, style_digital, Q_digital)
-        
-        # 3D Surface Plot
-        if st.button("Generate 3D Price Surface", key="digital_3d"):
-            base_params = {
-                'S': S_digital, 'K': K_digital, 'T': T_digital, 'r': r_digital, 'sigma': sigma_digital,
-                'option_type': option_type_digital, 'style': style_digital, 'Q': Q_digital
-            }
-            
-            s_range = np.linspace(S_digital * 0.7, S_digital * 1.3, 15)
-            sigma_range = np.linspace(0.1, 0.5, 15)
-            
-            fig_3d = create_3d_surface_plot(
-                option_type_digital, base_params, 'S', s_range, 'sigma', sigma_range, "digital"
-            )
-            st.plotly_chart(fig_3d, use_container_width=True)
-    
-    with tabb4:
-        st.header("Lookback Options Pricing & Analysis")
-        
-        col1, col2, col3 = st.columns([2, 2, 2])
-        
-        with col1:
-            st.subheader("Parameters")
-            S0_lookback = st.number_input("Initial Price (S₀)", value=100.0, min_value=0.1, key="lookback_s0")
-            K_lookback = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="lookback_k")
-            T_lookback = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, key="lookback_t")
-            r_lookback = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, format="%.4f", key="lookback_r")
-            sigma_lookback = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, format="%.4f", key="lookback_sigma")
-        
-        with col2:
-            st.subheader("Model Settings")
-            option_type_lookback = st.selectbox("Option Type", ["call", "put"], key="lookback_option_type")
-            floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
-            n_paths_lookback = st.slider("MC Paths", 1000, 100000, 10000, step=1000, key="lookback_paths_1")
-            n_steps_lookback = st.slider("Time Steps", 50, 500, 252, key="lookback_steps")
-        
-        with col3:
-            st.subheader("Results")
-            if st.button("Calculate Lookback Option", key="lookback_calc"):
-                with st.spinner("Calculating..."):
-                    if floating_strike:
-                        price, stderr = price_lookback_option(
-                            S0_lookback, None, r_lookback, sigma_lookback, T_lookback,
-                            "monte_carlo", option_type_lookback, floating_strike,
-                            n_paths_lookback, n_steps_lookback
-                        )
-                    else:
-                        price, stderr = price_lookback_option(
-                            S0_lookback, K_lookback, r_lookback, sigma_lookback, T_lookback,
-                            "monte_carlo", option_type_lookback, floating_strike,
-                            n_paths_lookback, n_steps_lookback
-                        )
-                    
-                    st.metric("Option Price", f"{price:.4f}")
-                    st.metric("Standard Error", f"{stderr:.4f}")
-        
-        # Visualizations
-        viz_col1, viz_col2 = st.columns(2)
-        
-        with viz_col1:
-            if st.button("Show Payoff Function", key="lookback_payoff"):
-                fig = plot_payoff(S0_lookback, option_type_lookback, K_lookback if not floating_strike else None, floating_strike)
-                st.pyplot(fig)
-        
-        with viz_col2:
-            if st.button("Show Sample Paths", key="lookback_paths_2"):
-                fig = plot_paths(S0_lookback, r_lookback, sigma_lookback, T_lookback, min(20, n_paths_lookback), n_steps_lookback)
-                st.pyplot(fig)
-        
-        # Price distribution
-        if st.button("Show Price Distribution", key="lookback_dist"):
-            fig = plot_price_distribution(S0_lookback, r_lookback, sigma_lookback, T_lookback, option_type_lookback, floating_strike)
-            st.pyplot(fig)
-    
-    with tabb5:
-        st.header("Portfolio Analysis & Comparison")
-        
-        st.subheader("Multi-Option Comparison")
-        
-        # Base parameters for comparison
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("Common Parameters")
-            S_common = st.number_input("Spot Price", value=100.0, key="common_s")
-            K_common = st.number_input("Strike Price", value=100.0, key="common_k")
-            T_common = st.number_input("Time to Maturity", value=1.0, key="common_t")
-            r_common = st.number_input("Risk-free Rate", value=0.05, format="%.4f", key="common_r")
-            sigma_common = st.number_input("Volatility", value=0.2, format="%.4f", key="common_sigma")
+            st.subheader("Payoff Diagram")
+            plot_asian_option_payoff(asian_K, asian_option_type, asian_type)
         
         with col2:
-            st.subheader("Options to Compare")
-            compare_asian = st.checkbox("Asian Option", value=True)
-            compare_digital = st.checkbox("Digital Option", value=True)
-            compare_lookback = st.checkbox("Lookback Option", value=True)
+            if show_asian_paths:
+                st.subheader("Monte Carlo Paths")
+                from pricing.models.asian_monte_carlo import simulate_asian_paths
+                paths = simulate_asian_paths(
+                    asian_S0, asian_T, asian_r, asian_sigma,
+                    asian_n_steps, min(50, asian_n_paths),
+                    asian_option_type, asian_type
+                )
+                plot_monte_carlo_paths(paths)
         
-        if st.button("Generate Comparison", key="portfolio_compare"):
-            results = []
+        # Sensitivity Analysis
+        if show_asian_sensitivity:
+            st.subheader("Sensitivity Analysis")
             
-            if compare_asian:
-                asian_price = price_asian_option(S_common, K_common, T_common, r_common, sigma_common, 
-                                               252, 10000, "monte_carlo", "call", "average_price")
-                results.append({"Option Type": "Asian (Average Price)", "Price": asian_price})
+            sensitivity_param = st.selectbox(
+                "Select Parameter for Analysis",
+                ["S0", "K", "T", "r", "sigma"],
+                key="asian_sensitivity_param"
+            )
             
-            if compare_digital:
-                digital_price = price_digital_option("black_scholes", "call", "cash", 
-                                                   S_common, K_common, T_common, r_common, sigma_common)
-                results.append({"Option Type": "Digital (Cash)", "Price": digital_price})
+            base_params = {
+                'S0': asian_S0, 'K': asian_K, 'T': asian_T,
+                'r': asian_r, 'sigma': asian_sigma,
+                'n_steps': asian_n_steps, 'n_paths': asian_n_paths//3
+            }
             
-            if compare_lookback:
-                lookback_price, _ = price_lookback_option(S_common, None, r_common, sigma_common, T_common,
-                                                        "monte_carlo", "call", True, 10000, 252)
-                results.append({"Option Type": "Lookback (Floating)", "Price": lookback_price})
+            if sensitivity_param == "S0":
+                param_range = np.linspace(asian_S0 * 0.7, asian_S0 * 1.3, 20)
+            elif sensitivity_param == "K":
+                param_range = np.linspace(asian_K * 0.7, asian_K * 1.3, 20)
+            elif sensitivity_param == "T":
+                param_range = np.linspace(0.1, 2.0, 20)
+            elif sensitivity_param == "r":
+                param_range = np.linspace(0.0, 0.15, 20)
+            else:  # sigma
+                param_range = np.linspace(0.05, 0.5, 20)
             
-            if results:
-                comparison_df = pd.DataFrame(results)
-                
-                # Display table
-                st.dataframe(comparison_df, use_container_width=True)
-                
-                # Create comparison chart
-                fig = px.bar(comparison_df, x="Option Type", y="Price", 
-                           title="Option Price Comparison",
-                           color="Option Type")
-                st.plotly_chart(fig, use_container_width=True)
+            sensitivity_fig = plot_sensitivity_analysis(
+                asian_option_type, base_params, sensitivity_param, param_range,
+                "asian", option_type=asian_option_type, asian_type=asian_type
+            )
+            st.plotly_chart(sensitivity_fig, use_container_width=True)
+    
+    # ===========================================
+    # BARRIER OPTIONS TAB
+    # ===========================================
+    with tabs[1]:
+        st.header("Barrier Options Pricing & Analysis")
         
-        # Volatility smile analysis
-        st.subheader("Volatility Smile Analysis")
-        if st.button("Generate Volatility Smile", key="vol_smile"):
-                strike_range = np.linspace(S_common * 0.6, S_common * 1.4, 25)
-                vol_smile_data = []
-
-                for K_val in strike_range:
-                    # Pricing a digital option as an example
-                    price = price_digital_option(
-                        model="black_scholes",
-                        option_type="call",
-                        style="cash",
-                        S=S_common,
-                        K=K_val,
-                        T=T_common,
-                        r=r_common,
-                        sigma=sigma_common
-                    )
-                    vol_smile_data.append((K_val, price))
-
-                smile_df = pd.DataFrame(vol_smile_data, columns=["Strike", "Option Price"])
-
-                fig_smile = px.line(smile_df, x="Strike", y="Option Price",
-                                    title="Volatility Smile (Digital Option)",
-                                    markers=True)
-                st.plotly_chart(fig_smile, use_container_width=True)
-                         
+        col1, col2, col3 = st.columns([1, 1, 1])
+        
+        with col1:
+            st.subheader("Market Parameters")
+            barrier_S = st.number_input("Current Price (S)", value=100.0, min_value=1.0, step=1.0, key="barrier_s")
+            barrier_K = st.number_input("Strike Price (K)", value=100.0, min_value=1.0, step=1.0, key="barrier_k")
+            barrier_H = st.number_input("Barrier Level (H)", value=120.0, min_value=1.0, step=1.0, key="barrier_h")
+            barrier_T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=5.0, step=0.1, key="barrier_t")
+            barrier_r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=0.5, step=0.01, key="barrier_r")
+            barrier_sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, step=0.01, key="barrier_sigma")
+        
+        with col2:
+            st.subheader("Option Parameters")
+            barrier_option_type = st.selectbox("Option Type", ["call", "put"], key="barrier_option_type")
+            barrier_type = st.selectbox("Barrier Type", ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], key="barrier_type")
+            barrier_n_sims = st.number_input("Simulations", value=50000, min_value=1000, max_value=100000, step=1000, key="barrier_sims")
+            barrier_n_steps = st.number_input("Time Steps", value=252, min_value=10, max_value=1000, step=10, key="barrier_steps")
+        
+        with col3:
+            st.subheader("Advanced Features")
+            show_barrier_paths = st.checkbox("Show Sample Paths", value=False, key="barrier_paths")
+            show_barrier_stats = st.checkbox("Show Statistics", value=True, key="barrier_stats")
+            barrier_confidence = st.slider("Confidence Level", 0.90, 0.99, 0.95, 0.01, key="barrier_conf")
+        
+        # Price calculation
+        with st.spinner("Calculating Barrier option price..."):
+            barrier_price, barrier_paths = price_barrier_option(
+                barrier_S, barrier_K, barrier_H, barrier_T, barrier_r, barrier_sigma,
+                barrier_option_type, barrier_type, "monte_carlo",
+                barrier_n_sims, barrier_n_steps
+            )
+        
+        # Display results
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Option Price</h3>
+                <h2>${barrier_price:.4f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            barrier_prob = np.mean(barrier_paths.max(axis=1) >= barrier_H) if "up" in barrier_type else np.mean(barrier_paths.min(axis=1) <= barrier_H)
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Barrier Hit Prob</h3>
+                <h2>{barrier_prob:.2%}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            std_error = np.std([barrier_price]) / np.sqrt(barrier_n_sims) if barrier_n_sims > 1 else 0
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Std Error</h3>
+                <h2>{std_error:.6f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Statistics
+        if show_barrier_stats:
+            st.subheader("Simulation Statistics")
+            
+            # Calculate final prices and payoffs
+            final_prices = barrier_paths[:, -1]
+            
+            # Determine barrier hits
+            if "up" in barrier_type:
+                barrier_hits = barrier_paths.max(axis=1) >= barrier_H
+            else:
+                barrier_hits = barrier_paths.min(axis=1) <= barrier_H
+            
+            # Calculate payoffs
+            if barrier_option_type == "call":
+                intrinsic_values = np.maximum(final_prices - barrier_K, 0)
+            else:
+                intrinsic_values = np.maximum(barrier_K - final_prices, 0)
+            
+            if "out" in barrier_type:
+                payoffs = np.where(barrier_hits, 0, intrinsic_values)
+            else:  # "in"
+                payoffs = np.where(barrier_hits, intrinsic_values, 0)
+            
+            # Create histogram
+            fig_hist = go.Figure()
+            fig_hist.add_trace(go.Histogram(
+                x=payoffs,
+                nbinsx=50,
+                name="Payoff Distribution",
+                marker_color='lightblue'
+            ))
+            fig_hist.update_layout(
+                title="Distribution of Option Payoffs",
+                xaxis_title="Payoff",
+                yaxis_title="Frequency",
+                height=400
+            )
+            st.plotly_chart(fig_hist, use_container_width=True)
+        
+        # Visualization
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Payoff Diagram")
+            plot_barrier_payoff(barrier_K, barrier_H, barrier_option_type, barrier_type)
+        
+        with col2:
+            if show_barrier_paths:
+                st.subheader("Sample Paths")
+                plot_sample_paths_barrier(barrier_paths[:20], barrier_K, barrier_H, barrier_option_type, barrier_type)
+    
+    # ===========================================
+    # DIGITAL OPTIONS TAB
+    # ===========================================
+    with tabs[2]:
+        st.header("Digital Options Pricing & Analysis")
+        
+        col1, col2, col3 = st.columns([1, 1, 1])
+        
+        with col1:
+            st.subheader("Market Parameters")
+            digital_S = st.number_input("Current Price (S)", value=100.0, min_value=1.0, step=1.0, key="digital_s")
+            digital_K = st.number_input("Strike Price (K)", value=100.0, min_value=1.0, step=1.0, key="digital_k")
+            digital_T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=5.0, step=0.1, key="digital_t")
+            digital_r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=0.5, step=0.01, key="digital_r")
+            digital_sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, step=0.01, key="digital_sigma")
+        
+        with col2:
+            st.subheader("Option Parameters")
+            digital_option_type = st.selectbox("Option Type", ["call", "put"], key="digital_option_type")
+            digital_style = st.selectbox("Digital Style", ["cash", "asset"], key="digital_style")
+            digital_Q = st.number_input("Payout Amount (Q)", value=1.0, min_value=0.01, step=0.1, key="digital_q") if digital_style == "cash" else 1.0
+        
+        with col3:
+            st.subheader("Advanced Features")
+            show_digital_greeks = st.checkbox("Calculate Greeks", value=True, key="digital_greeks")
+            show_digital_3d = st.checkbox("3D Surface Plot", value=False, key="digital_3d")
+            digital_comparison = st.checkbox("Compare Cash vs Asset", value=False, key="digital_compare")
+        
+        # Price calculation
+        digital_price = price_digital_option(
+            "black_scholes", digital_option_type, digital_style,
+            digital_S, digital_K, digital_T, digital_r, digital_sigma, digital_Q
+        )
+        
+        # Display results
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Option Price</h3>
+                <h2>${digital_price:.4f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            # Calculate implied probability
+            d2 = (np.log(digital_S / digital_K) + (digital_r - 0.5 * digital_sigma**2) * digital_T) / (digital_sigma * np.sqrt(digital_T))
+            implied_prob = norm.cdf(d2) if digital_option_type == "call" else norm.cdf(-d2)
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Implied Probability</h3>
+                <h2>{implied_prob:.2%}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            # Calculate risk-neutral drift
+            risk_neutral_drift = digital_r - 0.5 * digital_sigma**2
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Risk-Neutral Drift</h3>
+                <h2>{risk_neutral_drift:.4f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Greeks calculation
+        if show_digital_greeks:
+            st.subheader("📊 Greeks Analysis")
+            digital_greeks = calculate_greeks_digital(
+                digital_S, digital_K, digital_T, digital_r, digital_sigma,
+                digital_option_type, digital_style, digital_Q
+            )
+            
+            greeks_df = pd.DataFrame([digital_greeks]).T
+            greeks_df.columns = ['Value']
+            greeks_df = greeks_df.drop('Price')
+            
+            # Create interactive Greeks chart
+            fig_greeks = go.Figure()
+            fig_greeks.add_trace(go.Bar(
+                x=greeks_df.index,
+                y=greeks_df['Value'],
+                marker_color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
+            ))
+            fig_greeks.update_layout(
+                title="Greeks Values",
+                xaxis_title="Greeks",
+                yaxis_title="Value",
+                height=400
+            )
+            st.plotly_chart(fig_greeks, use_container_width=True)
+        
+        # Comparison feature
+        if digital_comparison:
+            st.subheader("Cash vs Asset Comparison")
+            
+            cash_price = price_digital_option("black_scholes", digital_option_type, "cash", 
+                                            digital_S, digital_K, digital_T, digital_r, digital_sigma, digital_Q)
+            asset_price = price_digital_option("black_scholes", digital_option_type, "asset",
+                                             digital_S, digital_K, digital_T, digital_r, digital_sigma)
+            
+            comparison_df = pd.DataFrame({
+                'Option Type': ['Cash-or-Nothing', 'Asset-or-Nothing'],
+                'Price': [cash_price, asset_price],
+                'Payout': [digital_Q, digital_S]
+            })
+            
+            fig_comparison = px.bar(comparison_df, x='Option Type', y='Price', 
+                                   title="Cash vs Asset Digital Options",
+                                   color='Option Type')
+            st.plotly_chart(fig_comparison, use_container_width=True)
+        
+        # 3D Surface Plot
+        if show_digital_3d:
+            st.subheader("3D Price Surface")
+            
+            base_params = {
+                'S': digital_S, 'K': digital_K, 'T': digital_T,
+                'r': digital_r, 'sigma': digital_sigma,
+                'option_type': digital_option_type, 'style': digital_style, 'Q': digital_Q
+            }
+            
+            S_range = np.linspace(digital_S * 0.7, digital_S * 1.3, 15)
+            sigma_range = np.linspace(0.1, 0.4, 15)
+            
+            surface_fig = create_3d_surface_plot(
+                digital_option_type, base_params, 'S', S_range, 'sigma', sigma_range,
+                "digital", option_type=digital_option_type, style=digital_style, Q=digital_Q
+            )
+            st.plotly_chart(surface_fig, use_container_width=True)
+        
+        # Visualization
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Payoff Diagram")
+            plot_digital_payoff(digital_K, digital_option_type, digital_style, digital_Q)
+        
+        with col2:
+            st.subheader("Price Evolution")
+            
+            # Create time series of option prices
+            time_steps = np.linspace(0.01, digital_T, 50)
+            prices_over_time = []
+            
+            for t in time_steps:
+                price_t = price_digital_option(
+                    "black_scholes", digital_option_type, digital_style,
+                    digital_S, digital_K, t, digital_r, digital_sigma, digital_Q
+                )
+                prices_over_time.append(price_t)
+            
+            fig_time = go.Figure()
+            fig_time.add_trace(go.Scatter(
+                x=time_steps,
+                y=prices_over_time,
+                mode='lines+markers',
+                name='Option Price'
+            ))
+            fig_time.update_layout(
+                title="Option Price vs Time to Maturity",
+                xaxis_title="Time to Maturity",
+                yaxis_title="Option Price",
+                height=400
+            )
+            st.plotly_chart(fig_time, use_container_width=True)
+    
+    # ===========================================
+    # LOOKBACK OPTIONS TAB
+    # ===========================================
+    """with tabs[3]:
+        st.header("Lookback Options Pricing & Analysis")
+        
+        col1, col2, col3 = st.columns([1, 1, 1])
+        
+        with col1:
+            st.subheader("Market Parameters")
+            lookback_S0 = st.number_input("Initial Price (S₀)", value=100.0, min_value=1.0, step=1.0, key="lookback_s0")
+            lookback_K = st.number_input("Strike Price (K)", value=100.0, min_value=1.0, step=1.0, key="lookback_k")
+            lookback_T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=5.0, step=0.1, key="lookback_t")
+            lookback_r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=0.5, step=0.01, key="lookback_r")
+            lookback_sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, step=0.01, key="lookback_sigma")
+        
+        with col2:
+            st.subheader("Option Parameters")
+            lookback_option_type = st.selectbox("Option Type", ["call", "put"], key="lookback_option_type")
+            lookback_floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
+            lookback_n_paths = st.number_input("Monte Carlo Paths", value=50000, min_value=1000, max_value=100000, step=1000, key="lookback_paths")
+            lookback_n_steps = st.number_input("Time Steps", value=252, min_value=10, max_value=1000, step=10, key="lookback_steps")
+        
+        with col3:
+            st.subheader("Advanced Features")
+            show_lookback_paths = st.checkbox("Show Sample Paths", value=False, key="lookback_paths_viz")
+            show_lookback_dist = st.checkbox("Show Distribution", value=True, key="lookback_dist")
+            lookback_real_time = st.checkbox("Real-time Updates", value=False, key="lookback_realtime")
+        
+        # Price calculation
+        with st.spinner("Calculating Lookback option price..."):
+            lookback_price, lookback_stderr = price_lookback_option(
+                lookback_S0, lookback_K if not lookback_floating_strike else None,
+                lookback_r, lookback_sigma, lookback_T, "monte_carlo",
+                lookback_option_type, lookback_floating_strike,
+                lookback_n_paths, lookback_n_steps
+            )
+        
+        # Display results
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Option Price</h3>
+                <h2>${lookback_price:.4f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>Standard Error</h3>
+                <h2>{lookback_stderr:.4f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            confidence_interval = 1.96 * lookback_stderr
+            st.markdown(f"""
+            <div class="metric-container">
+                <h3>95% CI</h3>
+                <h2>±{confidence_interval:.4f}</h2>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Visualization
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Payoff Function")
+            fig_payoff = plot_payoff(lookback_S0, lookback_option_type, lookback_K, lookback_floating_strike)
+            st.pyplot(fig_payoff)
+        
+        with col2:
+            if show_lookback_paths:
+                st.subheader("Sample Paths")
+                fig_paths = plot_paths(lookback_S0, lookback_r, lookback_sigma, lookback_T, min(20, lookback_n_paths))
+                st.pyplot(fig_paths)
+        
+        # Distribution analysis
+        if show_lookback_dist:
+            st.subheader("Payoff Distribution")
+            fig_dist = plot_price_distribution(
+                lookback_S0, lookback_r, lookback_sigma, lookback_T,
+                lookback_option_type, lookback_floating_strike,
+                min(10000, lookback_n_paths), lookback_n_steps
+            )
+            st.pyplot(fig_dist)
+        
+        # Convergence analysis
+        st.subheader("Monte Carlo Convergence")
+        
+        path_sizes = [1000, 5000, 10000, 25000, 50000]
+        convergence_prices = []
+        convergence_errors = []
+        
+        for n_paths in path_sizes:
+            if n_"""
+                             
 
 
 
