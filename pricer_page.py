@@ -1201,7 +1201,7 @@ with tab6:
             r_current = st.number_input("Taux actuel (r)", min_value=0.0, max_value=0.20, value=params['r0'], step=0.001, format="%.4f")
             t_current = st.number_input("Temps actuel (t)", min_value=0.0, max_value=30.0, value=0.0, step=0.1)
             maturity = st.number_input("Maturité (T)", min_value=t_current + 0.1, max_value=30.0, value=5.0, step=0.1)
-            face_value = st.number_input("Valeur nominale", min_value=100, max_value=10000, value=1000, step=100)
+            face_value = st.number_input("Valeur nominale", min_value=100, max_value=10000, value=100, step=10)
     
             if bond_type == "Avec Coupons":
                 coupon_rate = st.number_input("Taux de coupon (%)", min_value=0.0, max_value=20.0, value=5.0, step=0.1) / 100
