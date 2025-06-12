@@ -2163,7 +2163,7 @@ with tab4:
         fig_comp = go.Figure()
         
         if plot_type == "Price vs Strike":
-            x_values = np.linspace(base_spot * 0, base_spot * 1.4, 80)
+            x_values = np.linspace(base_spot * 0, base_spot * 1.4, 20)
             x_label = "Strike Price"
             
             if show_vanilla:
@@ -2240,7 +2240,7 @@ with tab4:
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Lookback Call', line=dict(color='purple')))
         
         elif plot_type == "Price vs Spot":
-            x_values = np.linspace(base_spot * 0.7, base_spot * 1.3, 20)
+            x_values = np.linspace(base_spot * 0, base_spot * 1.4, 20)
             x_label = "Spot Price"
             
             if show_vanilla:
@@ -2333,7 +2333,7 @@ with tab4:
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
         
         elif plot_type == "Greeks vs Spot":
-            x_values = np.linspace(base_spot * 0.7, base_spot * 1.3, 20)
+            x_values = np.linspace(base_spot * 0, base_spot * 1.4, 20)
             x_label = "Spot Price"
             
             if show_vanilla:
@@ -2522,7 +2522,7 @@ with tab4:
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Lookback {greek_type}', line=dict(color='purple')))
         
         elif plot_type == "Price vs Volatility":
-            x_values = np.linspace(0.1, 0.6, 20)
+            x_values = np.linspace(0, 1.0, 20)
             x_label = "Volatility"
             
             if show_vanilla:
@@ -2610,7 +2610,7 @@ with tab4:
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Lookback Call', line=dict(color='purple')))
         
         elif plot_type == "Price vs Time":
-            x_values = np.linspace(0.1, 2.0, 20)
+            x_values = np.linspace(0.1, 5.0, 20)
             x_label = "Time to Maturity"
             
             if show_vanilla:
