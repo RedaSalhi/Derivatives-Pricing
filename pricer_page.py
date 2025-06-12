@@ -1234,15 +1234,15 @@ with tab6:
     
                         else:
                             price = price_coupon_bond(
-                                r_current,
-                                t_current,
-                                params['a'],
-                                params['lambda'],
-                                params['sigma'],
-                                maturity,
-                                face_value,
-                                coupon_rate,
-                                dt_coupon
+                                r0=r_current,
+                                t=t_current,
+                                a=params['a'],
+                                lam=params['lambda'],
+                                sigma=params['sigma'],
+                                maturity=maturity,
+                                face=face_value,
+                                coupon=coupon_rate,
+                                dt=dt_coupon
                             )
                             st.success(f"💰 Prix de l'obligation à coupons : **{price:.2f}**")
                             st.info(f"📊 Coupon : {coupon_rate*100:.2f}% ({freq})")
