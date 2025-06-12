@@ -1025,63 +1025,65 @@ with tab6:
     # =============================================
     with tab1:
         st.header("🔧 Estimation des Paramètres du Modèle de Vasicek")
-        
+    
         col1, col2 = st.columns([1, 1])
-        
+    
         with col1:
             st.subheader("Configuration des Données")
-            ticker = st.selectbox(
-                "Choisir un ticker de taux d'intérêt",
-                ["DGS10", "DGS5", "DGS2", "DGS3MO", "DFF"],
-                help="DGS10=Taux 10ans US, DGS5=5ans, DGS2=2ans, DGS3MO=3mois, DFF=Fed Funds"
+    
+            # Ticker libre
+            ticker = st.text_input(
+                "Entrer un ticker FRED ou Yahoo (ex: DGS10, DFF, ^IRX)",
+                value="DGS10",
+                help="Exemples : DGS10 (US 10Y), DGS2 (2Y), DFF (Fed Funds), ^IRX (T-Bill 13W Yahoo)"
             )
-            
-            start_date = st.date_input("Date de début", date(1990, 1, 1))
-            end_date = st.date_input("Date de fin", date.today())
-            
+    
+            # Dates récentes (par défaut : 5 dernières années)
+            today = date.today()
+            default_start = today.replace(year=today.year - 5)
+    
+            start_date = st.date_input("Date de début", default_start)
+            end_date = st.date_input("Date de fin", today)
+    
+            # Fréquence de resampling
             freq = st.selectbox("Fréquence", ["ME", "QE", "YE"], index=0)
-            
+    
+            # Lancement estimation
             if st.button("📊 Estimer les Paramètres", type="primary"):
-                with st.spinner("Chargement des données et estimation..."):
-                    try:
-                        # Tu devras décommenter cette ligne avec tes imports
-                        a, lam, sigma, dt, r0 = run_ou_estimation(ticker, str(start_date), str(end_date), freq)
-                        
-                        # Simulation temporaire pour la démonstration
-                        #np.random.seed(42)
-                        #a = np.random.uniform(0.1, 0.5)
-                        #lam = np.random.uniform(0.02, 0.08)
-                        #sigma = np.random.uniform(0.01, 0.03)
-                        #dt = 1/12  # mensuel
-                        #r0 = np.random.uniform(0.01, 0.06)
-                        
-                        st.session_state.vasicek_params = {
-                            'a': a, 'lambda': lam, 'sigma': sigma, 'dt': dt, 'r0': r0, 'ticker': ticker
-                        }
-                        st.success("✅ Paramètres estimés avec succès!")
-                        
-                    except Exception as e:
-                        st.error(f"❌ Erreur lors de l'estimation: {str(e)}")
-        
+                if start_date >= end_date:
+                    st.error("❌ La date de début doit être antérieure à la date de fin.")
+                else:
+                    with st.spinner("Chargement des données et estimation..."):
+                        try:
+                            a, lam, sigma, dt, r0 = run_ou_estimation(ticker, str(start_date), str(end_date), freq)
+    
+                            st.session_state.vasicek_params = {
+                                'a': a, 'lambda': lam, 'sigma': sigma, 'dt': dt, 'r0': r0, 'ticker': ticker
+                            }
+                            st.success("✅ Paramètres estimés avec succès!")
+    
+                        except Exception as e:
+                            import traceback
+                            st.error(f"❌ Erreur lors de l'estimation :\n\n```\n{traceback.format_exc()}\n```")
+    
         with col2:
             st.subheader("Paramètres Estimés")
             if st.session_state.vasicek_params:
                 params = st.session_state.vasicek_params
-                
-                # Affichage des paramètres dans des métriques
+    
                 col_a, col_lam, col_sig = st.columns(3)
-                
                 with col_a:
                     st.metric("Vitesse de retour à la moyenne (a)", f"{params['a']:.4f}")
                 with col_lam:
                     st.metric("Niveau moyen long terme (λ)", f"{params['lambda']:.4f}")
                 with col_sig:
                     st.metric("Volatilité (σ)", f"{params['sigma']:.4f}")
-                
+    
                 st.metric("Taux initial (r₀)", f"{params['r0']:.4f}")
-                st.info(f"📊 Ticker utilisé: **{params['ticker']}** | Δt: {params['dt']:.4f}")
+                st.info(f"📊 Ticker utilisé : **{params['ticker']}** | Δt: {params['dt']:.4f}")
             else:
                 st.info("👆 Cliquez sur 'Estimer les Paramètres' pour commencer")
+
     
     # =============================================
     # TAB 2: SIMULATION ET COURBES
