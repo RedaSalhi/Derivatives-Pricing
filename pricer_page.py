@@ -1073,7 +1073,9 @@ with tab6:
             face = st.number_input("Face Value", value=1.0)
     
             if st.button("Price Coupon Bond"):
-                price = price_coupon_bond(r0, 0, a, lam, sigma, maturity=maturity, coupon=coupon, face=face, dt=dt)
+                #price = price_coupon_bond(r0, 0, a, lam, sigma, maturity=maturity, face=face, coupon=coupon, dt=dt)
+                price = price_coupon_bond(r0, a, lam, sigma, maturity, face, coupon, dt)
+
                 st.success(f"Bond Price: {price:.4f}")
         else:
             st.warning("Please estimate parameters in Tab 1 first.")
