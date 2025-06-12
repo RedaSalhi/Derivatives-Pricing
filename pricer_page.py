@@ -863,7 +863,7 @@ with tab6:
         if param_mode == "Manual input":
             col1, col2, col3, col4 = st.columns(4)
             with col1:
-                a = st.slider("Mean Reversion Speed (a)", 0.01, 2.0, 0,5 )
+                a = st.slider("Mean Reversion Speed (a)", 0.01, 2.0, 0.5 )
             with col2:
                 sigma = st.slider("Volatility (σ)", 0.001, 1.0, 0.01)
             with col3:
