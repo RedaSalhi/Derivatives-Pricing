@@ -1488,7 +1488,7 @@ with tab6:
     # =============================================
     # TAB 5: ANALYSE DES GRECQUES
     # =============================================
-    with tab5:
+    """with tab5:
         st.header("🔍 Analyse des Grecques pour Options sur Obligations")
         
         if not st.session_state.vasicek_params:
@@ -1568,4 +1568,70 @@ with tab6:
     
     # Footer
     st.markdown("---")
-    st.markdown("*Modèle de Vasicek - Interface développée avec Streamlit*")
+    st.markdown("*Modèle de Vasicek - Interface développée avec Streamlit*")"""
+    # =============================================
+    # TAB 5: ANALYSE DES GRECQUES
+    # =============================================
+    with tab5:
+        st.header("🔍 Analyse des Grecques pour Options sur Obligations")
+    
+        if not st.session_state.vasicek_params:
+            st.warning("⚠️ Veuillez d'abord estimer les paramètres dans l'onglet précédent.")
+            st.stop()
+    
+        params = st.session_state.vasicek_params
+    
+        # Import réel des grecques
+        from pricing.utils.greeks_vasicek import compute_greek_vs_spot
+    
+        col1, col2 = st.columns([1, 2])
+    
+        with col1:
+            st.subheader("📋 Configuration")
+    
+            greek_type = st.selectbox("Grecque à analyser", ["price", "delta", "vega", "rho"], key="greek_type")
+            option_type = st.radio("Type d'option", ["call", "put"], key="greek_opt_type")
+            model_type = st.radio("Méthode", ["Analytical", "Monte Carlo"], key="greek_model")
+    
+            T1 = st.number_input("Échéance option (T₁)", 0.1, 10.0, 1.0, step=0.1, key="greek_T1")
+            T2 = st.number_input("Maturité obligation (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="greek_T2")
+    
+            K = st.number_input("Prix d'exercice (K)", 0.1, 2.0, 0.8, step=0.01, key="greek_K")
+            face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100, key="greek_face")
+    
+            # Suggérer le dt de Tab 1
+            default_dt = round(params['dt'], 3) if 'dt' in params else 0.01
+    
+            if model_type == "Monte Carlo":
+                n_paths = st.number_input("Nombre de simulations MC", 1000, 50000, 5000, step=1000, key="greek_npaths")
+                dt = st.number_input("Pas de temps MC (dt)", 0.001, 0.1, default_dt, step=0.001, format="%.3f", key="greek_dt")
+            else:
+                dt = default_dt
+                n_paths = 10000  # valeur par défaut pour analytique, ignorée
+    
+            compute_btn = st.button("📊 Calculer les Grecques", type="primary", key="greek_btn")
+    
+        with col2:
+            if compute_btn:
+                with st.spinner("Calcul des grecques en cours..."):
+    
+                    try:
+                        compute_greek_vs_spot(
+                            greek=greek_type,
+                            t=0,
+                            T1=T1,
+                            T2=T2,
+                            K=K,
+                            a=params['a'],
+                            lam=params['lambda'],
+                            sigma=params['sigma'],
+                            face=face_value,
+                            option_type=option_type,
+                            n_paths=n_paths,
+                            model=model_type,
+                        )
+    
+                    except Exception as e:
+                        import traceback
+                        st.error(f"❌ Erreur :\n\n```\n{traceback.format_exc()}\n```")
+
