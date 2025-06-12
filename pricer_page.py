@@ -3,25 +3,56 @@
 import sys
 import os
 import matplotlib.pyplot as plt
-# Allow importing from the pricing directory
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
-
 import streamlit as st
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from datetime import datetime, timedelta
 
 from pricing.vanilla_options import price_vanilla_option, plot_option_price_vs_param
-from pricing.forward import (
-    price_forward_contract,
-    plot_forward_mark_to_market,
-    plot_forward_payout_and_value
-)
-from pricing.option_strategies import (
-    get_predefined_strategy,
-    price_option_strategy,
-    compute_strategy_payoff,
-    plot_strategy_price_vs_param  
-)
+from pricing.forward import *
+from pricing.option_strategies import *
+from pricing.utils.greeks_vanilla.plot_single_greek import plot_single_greek_vs_spot
+from pricing.utils.greeks_vanilla.greeks_interface import *
+
+# Allow importing from the pricing directory
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
+
+
+
+# Custom CSS for better styling
+st.markdown("""
+<style>
+    .main-header {
+        font-size: 2.5rem;
+        color: #1f77b4;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .metric-card {
+        background-color: #f0f2f6;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #1f77b4;
+        margin-bottom: 1rem;
+    }
+    .parameter-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    .info-box {
+        background-color: #e8f4fd;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #bee5eb;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
 
 st.header("Derivatives Pricer")
 
@@ -38,8 +69,7 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 ])
 
 
-from pricing.utils.greeks_vanilla.plot_single_greek import plot_single_greek_vs_spot
-from pricing.utils.greeks_vanilla.greeks_interface import *
+
 
 # -----------------------------
 # Tab 1 – Vanilla Options
@@ -343,6 +373,7 @@ with tab1:
 # -----------------------------
 # Tab 2 – Forward Contracts
 # -----------------------------
+"""
 with tab2:
     st.header("Forward Contract Pricing")
 
@@ -383,6 +414,269 @@ with tab2:
                 dividend_yield=dividend_yield,
                 position=position
             )
+"""
+
+
+with tab2:
+    st.markdown('<h1 class="main-header">📈 Forward Contract Pricing & Analysis</h1>', 
+                unsafe_allow_html=True)
+    
+    # Parameter input section
+    st.markdown('<div class="parameter-section">', unsafe_allow_html=True)
+    st.markdown("## 🔧 Contract Parameters")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        spot_price = st.number_input(
+            "Spot Price ($)", 
+            min_value=0.01, 
+            value=100.0, 
+            step=1.0,
+            help="Current price of the underlying asset"
+        )
+        
+        strike_price = st.number_input(
+            "Strike Price ($)", 
+            min_value=0.01, 
+            value=105.0, 
+            step=1.0,
+            help="Agreed delivery price at maturity"
+        )
+    
+    with col2:
+        interest_rate = st.number_input(
+            "Risk-free Rate (%)", 
+            min_value=0.0, 
+            value=5.0, 
+            step=0.1
+        ) / 100
+        
+        time_input_method = st.selectbox(
+            "Time Input Method",
+            ["Years", "Days", "Calendar Date"]
+        )
+    
+    with col3:
+        storage_cost = st.number_input(
+            "Storage Cost Rate (%)", 
+            min_value=0.0, 
+            value=0.0, 
+            step=0.1
+        ) / 100
+        
+        dividend_yield = st.number_input(
+            "Dividend Yield (%)", 
+            min_value=0.0, 
+            value=0.0, 
+            step=0.1
+        ) / 100
+    
+    # Time to maturity calculation
+    if time_input_method == "Years":
+        time_to_maturity = st.number_input(
+            "Time to Maturity (years)", 
+            min_value=0.01, 
+            value=1.0, 
+            step=0.1
+        )
+    elif time_input_method == "Days":
+        days_to_maturity = st.number_input(
+            "Days to Maturity", 
+            min_value=1, 
+            value=365, 
+            step=1
+        )
+        time_to_maturity = days_to_maturity / 365.25
+    else:  # Calendar Date
+        maturity_date = st.date_input(
+            "Maturity Date",
+            value=datetime.now().date() + timedelta(days=365)
+        )
+        days_to_maturity = (maturity_date - datetime.now().date()).days
+        time_to_maturity = max(days_to_maturity / 365.25, 0.01)
+    
+    position = st.selectbox("Position", ["Long", "Short"])
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Calculate forward price
+    forward_price = price_forward_contract(
+        spot_price, interest_rate, time_to_maturity, storage_cost, dividend_yield
+    )
+    
+    # Main tabs
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Pricing Results", "📈 Mark-to-Market", "💰 Payout Analysis", "🔬 Sensitivity"])
+    
+    with tab1:
+        st.markdown("## Forward Contract Pricing Results")
+        
+        # Key metrics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Forward Price", f"${forward_price:.2f}")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col2:
+            basis = forward_price - spot_price
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Basis", f"${basis:.2f}")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col3:
+            carry_cost = (interest_rate + storage_cost - dividend_yield) * time_to_maturity
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Carry Cost", f"{carry_cost*100:.2f}%")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col4:
+            total_return = forward_price / spot_price - 1
+            st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+            st.metric("Total Return", f"{total_return*100:.2f}%")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Pricing formula
+        st.markdown("### 📝 Cost of Carry Model")
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.latex(r"F = S_0 \cdot e^{(r + c - q) \cdot T}")
+        st.markdown("""
+        **Where:**
+        - **F** = Forward Price = ${:.2f}
+        - **S₀** = Current Spot Price = ${:.2f}
+        - **r** = Risk-free Interest Rate = {:.2f}%
+        - **c** = Storage Cost Rate = {:.2f}%
+        - **q** = Dividend Yield = {:.2f}%
+        - **T** = Time to Maturity = {:.4f} years
+        """.format(forward_price, spot_price, interest_rate*100, storage_cost*100, dividend_yield*100, time_to_maturity))
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Detailed breakdown
+        with st.expander("🧮 Calculation Breakdown"):
+            net_carry = interest_rate + storage_cost - dividend_yield
+            st.write(f"**Net Carry Rate:** {interest_rate*100:.2f}% + {storage_cost*100:.2f}% - {dividend_yield*100:.2f}% = {net_carry*100:.2f}%")
+            st.write(f"**Exponential Factor:** e^({net_carry*100:.2f}% × {time_to_maturity:.4f}) = {np.exp(net_carry * time_to_maturity):.6f}")
+            st.write(f"**Forward Price:** ${spot_price:.2f} × {np.exp(net_carry * time_to_maturity):.6f} = **${forward_price:.2f}**")
+    
+    with tab2:
+        st.markdown("## Mark-to-Market Analysis")
+        st.markdown("*Contract value before maturity (t < T)*")
+        
+        # Interactive Plotly chart
+        fig_mtm = create_plotly_mtm_chart(
+            strike_price, time_to_maturity, interest_rate, 
+            storage_cost, dividend_yield, position.lower()
+        )
+        st.plotly_chart(fig_mtm, use_container_width=True)
+        
+        # Current contract value
+        current_value = spot_price * np.exp((interest_rate + storage_cost - dividend_yield) * time_to_maturity) - strike_price * np.exp(-interest_rate * time_to_maturity)
+        if position.lower() == "short":
+            current_value = -current_value
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Current Contract Value", f"${current_value:.2f}")
+        with col2:
+            breakeven = strike_price * np.exp(-interest_rate * time_to_maturity) / np.exp((interest_rate + storage_cost - dividend_yield) * time_to_maturity)
+            st.metric("Breakeven Spot Price", f"${breakeven:.2f}")
+        with col3:
+            st.metric("Time to Maturity", f"{time_to_maturity:.3f} years")
+        
+        # Original matplotlib chart
+        st.markdown("### 📊 Original Chart (Matplotlib)")
+        plot_forward_mark_to_market(
+            strike_price, time_to_maturity, interest_rate, 
+            storage_cost, dividend_yield, position.lower()
+        )
+    
+    with tab3:
+        st.markdown("## Payout Analysis at Maturity")
+        st.markdown("*Profit/Loss when contract expires (t = T)*")
+        
+        # Interactive Plotly payout chart
+        fig_payout = create_plotly_payout_chart(strike_price, position.lower())
+        st.plotly_chart(fig_payout, use_container_width=True)
+        
+        # Scenario analysis
+        st.markdown("### 📋 Payout Scenarios")
+        spot_scenarios = [strike_price * mult for mult in [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]]
+        
+        scenarios_data = []
+        for spot in spot_scenarios:
+            long_payout = spot - strike_price
+            short_payout = strike_price - spot
+            scenarios_data.append({
+                'Spot Price at Maturity': f"${spot:.2f}",
+                'Long Position Payout': f"${long_payout:.2f}",
+                'Short Position Payout': f"${short_payout:.2f}",
+                'Current Position Payout': f"${long_payout if position.lower() == 'long' else short_payout:.2f}"
+            })
+        
+        scenarios_df = pd.DataFrame(scenarios_data)
+        st.dataframe(scenarios_df, use_container_width=True)
+        
+        # Original matplotlib chart
+        st.markdown("### 📊 Original Chart (Matplotlib)")
+        plot_forward_payout_and_value(strike_price, position.lower())
+    
+    with tab4:
+        st.markdown("## Sensitivity Analysis")
+        st.markdown("*How forward prices respond to parameter changes*")
+        
+        # Sensitivity analysis
+        base_params = {
+            'spot_price': spot_price,
+            'interest_rate': interest_rate,
+            'time_to_maturity': time_to_maturity,
+            'storage_cost': storage_cost,
+            'dividend_yield': dividend_yield,
+            'base_forward': forward_price
+        }
+        
+        fig_sensitivity = create_sensitivity_analysis(base_params)
+        st.plotly_chart(fig_sensitivity, use_container_width=True)
+        
+        # Risk metrics
+        st.markdown("### 📈 Risk Sensitivities")
+        
+        # Calculate numerical derivatives
+        delta_s = 0.01 * spot_price
+        delta_r = 0.0001
+        delta_t = 0.01
+        
+        # Spot sensitivity (Delta equivalent)
+        spot_up = price_forward_contract(spot_price + delta_s, interest_rate, time_to_maturity, storage_cost, dividend_yield)
+        spot_sensitivity = (spot_up - forward_price) / delta_s
+        
+        # Rate sensitivity (Rho equivalent)
+        rate_up = price_forward_contract(spot_price, interest_rate + delta_r, time_to_maturity, storage_cost, dividend_yield)
+        rate_sensitivity = (rate_up - forward_price) / delta_r
+        
+        # Time sensitivity (Theta equivalent)
+        time_up = price_forward_contract(spot_price, interest_rate, time_to_maturity + delta_t, storage_cost, dividend_yield)
+        time_sensitivity = (time_up - forward_price) / delta_t
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Spot Sensitivity", f"{spot_sensitivity:.4f}", 
+                     help="Forward price change per $1 change in spot price")
+        with col2:
+            st.metric("Rate Sensitivity", f"{rate_sensitivity:.2f}", 
+                     help="Forward price change per 1bp change in interest rate")
+        with col3:
+            st.metric("Time Sensitivity", f"{time_sensitivity:.4f}", 
+                     help="Forward price change per 1% change in time to maturity")
+    
+    # Footer
+    st.markdown("---")
+    st.markdown("*Forward Contract Pricing & Analysis • Built with Streamlit*")
+
+
+
+
+
 
 
 from pricing.option_strategies import price_option_strategy, compute_strategy_payoff, get_predefined_strategy, plot_strategy_price_vs_param
