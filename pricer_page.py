@@ -867,7 +867,7 @@ with tab6:
         st.stop()  # Exit until Vasicek is selected
 
         # Proceed with Vasicek UI if selected...
-        
+    else:
         st.title("📈 Modèle de Vasicek - Pricing d'Obligations et Taux d'intérêt")
         st.markdown("---")
     
