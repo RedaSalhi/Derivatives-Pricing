@@ -854,7 +854,7 @@ with tab6:
     from pricing.utils.greeks_vasicek import *
 
     # Add model selection info box
-    st.header("### Interest Rate Model Selector")
+    st.markdown("### Interest Rate Model Selector")
     model = st.selectbox(
         "Choose a model to explore:",
         ["Vasicek Model", "Hull-White Model (Coming Soon)", "More models coming..."],
