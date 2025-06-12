@@ -1616,7 +1616,7 @@ with tab6:
                 with st.spinner("Calcul des grecques en cours..."):
     
                     try:
-                        compute_greek_vs_spot(
+                        fig = compute_greek_vs_spot(
                             greek=greek_type,
                             t=0,
                             T1=T1,
@@ -1630,6 +1630,9 @@ with tab6:
                             n_paths=n_paths,
                             model=model_type,
                         )
+                        
+                        st.pyplot(fig)
+
     
                     except Exception as e:
                         import traceback
