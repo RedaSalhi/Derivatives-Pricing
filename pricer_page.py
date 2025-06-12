@@ -42,27 +42,29 @@ st.markdown("""
         font-size: 3rem;
         font-weight: bold;
         text-align: center;
-        background: linear-gradient(90deg, #1f77b4, #ff7f0e);
+        background: linear-gradient(90deg, #00d4aa, #00a8cc);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 2rem;
     }
     
     .metric-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1rem;
-        border-radius: 10px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
         color: white;
         text-align: center;
         margin: 0.5rem 0;
+        border: 1px solid #00d4aa;
     }
     
     .info-box {
-        background: #f0f2f6;
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid #1f77b4;
+        background: #0f0f23;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border-left: 4px solid #00d4aa;
         margin: 1rem 0;
+        color: #e0e0e0;
     }
     
     .stTabs [data-baseweb="tab-list"] {
@@ -72,10 +74,11 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         height: 3rem;
         padding: 0 1.5rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #00d4aa;
         border-radius: 8px;
         font-weight: bold;
+        border: 1px solid #00d4aa;
     }
 </style>
 """, unsafe_allow_html=True)
