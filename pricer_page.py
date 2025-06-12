@@ -855,7 +855,7 @@ with tab6:
 
     # Add model selection info box
     st.markdown("### 📬 Interest Rate Model Selector")
-    model = st.radio(
+    model = st.selectbox(
         "Choose a model to explore:",
         ["📈 Vasicek Model", "🌀 Hull-White Model (Coming Soon)", "📚 More models coming..."],
         index=0,
