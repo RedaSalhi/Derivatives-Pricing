@@ -1445,7 +1445,7 @@ with tab4:
             asian_n_steps = st.number_input("Number of Steps", value=252, min_value=10, max_value=1000, key="asian_steps")
             asian_n_paths = st.number_input("Number of Paths", value=10000, min_value=1000, max_value=100000, key="asian_paths")
             
-            asian_option_type = st.selectbox("Option Type", ["call", "put"], key="asian_option_type")
+            asian_option_type = st.selectbox("Option Type", ["call", "put"], key="asian_option_type_1")
             asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="asian_type")
             
             calculate_asian = st.button("🔢 Calculate Asian Option", key="calc_asian")
