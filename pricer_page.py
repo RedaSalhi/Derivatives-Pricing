@@ -868,90 +868,91 @@ with tab6:
 
         # Proceed with Vasicek UI if selected...
     else:
-        st.subheader("Modèle de Vasicek - Pricing d'Obligations et Taux d'intérêt")
+        st.subheader("Vasicek Model – Bond Pricing and Interest Rates")
         st.markdown("---")
-    
+        
         tab1, tab2, tab3, tab4, tab5 = st.tabs(
-            ["Estimation des Paramètres", "Simulation et Courbes", "Pricing d'Obligations", "Options sur Obligations", "Analyse des Grecques"]
+            ["Parameter Estimation", "Simulation & Yield Curves", "Bond Pricing", "Bond Options", "Greeks Analysis"]
         )
         
-        # Session state pour stocker les paramètres estimés
+        # Session state to store estimated parameters
         if 'vasicek_params' not in st.session_state:
             st.session_state.vasicek_params = None
         
         # =============================================
-        # TAB 1: ESTIMATION DES PARAMÈTRES
+        # TAB 1: PARAMETER ESTIMATION
         # =============================================
         with tab1:
-            st.header("Estimation des Paramètres du Modèle de Vasicek")
+            st.header("Vasicek Model Parameter Estimation")
         
             col1, col2 = st.columns([1, 1])
         
             with col1:
-                st.subheader("Configuration des Données")
+                st.subheader("Data Configuration")
         
-                # Ticker libre
+                # Ticker input
                 ticker = st.text_input(
-                    "Entrer un ticker FRED ou Yahoo (ex: DGS10, DFF, ^IRX)",
+                    "Enter a FRED or Yahoo ticker (e.g., DGS10, DFF, ^IRX)",
                     value="DGS10",
-                    help="Exemples : DGS10 (US 10Y), DGS2 (2Y), DFF (Fed Funds), ^IRX (T-Bill 13W Yahoo)"
+                    help="Examples: DGS10 (US 10Y), DGS2 (2Y), DFF (Fed Funds), ^IRX (Yahoo 13W T-Bill)"
                 )
         
-                # Dates récentes (par défaut : 5 dernières années)
+                # Default to the last 5 years
                 today = date.today()
                 default_start = today.replace(year=today.year - 5)
         
-                start_date = st.date_input("Date de début", default_start)
-                end_date = st.date_input("Date de fin", today)
+                start_date = st.date_input("Start date", default_start)
+                end_date = st.date_input("End date", today)
         
-                # Fréquence de resampling
-                freq = st.selectbox("Fréquence", ["ME", "QE", "YE"], index=0)
+                # Resampling frequency
+                freq = st.selectbox("Resampling frequency", ["ME", "QE", "YE"], index=0)
         
-                # Lancement estimation
-                if st.button("Estimer les Paramètres", type="primary"):
+                # Trigger estimation
+                if st.button("Estimate Parameters", type="primary"):
                     if start_date >= end_date:
-                        st.error("❌ La date de début doit être antérieure à la date de fin.")
+                        st.error("❌ Start date must be before end date.")
                     else:
-                        with st.spinner("Chargement des données et estimation..."):
+                        with st.spinner("Loading data and estimating..."):
                             try:
                                 a, lam, sigma, dt, r0 = run_ou_estimation(ticker, str(start_date), str(end_date), freq)
         
                                 st.session_state.vasicek_params = {
                                     'a': a, 'lambda': lam, 'sigma': sigma, 'dt': dt, 'r0': r0, 'ticker': ticker
                                 }
-                                st.success("✅ Paramètres estimés avec succès!")
+                                st.success("✅ Parameters successfully estimated!")
         
                             except Exception as e:
                                 import traceback
-                                st.error(f"❌ Erreur lors de l'estimation :\n\n```\n{traceback.format_exc()}\n```")
+                                st.error(f"❌ Error during estimation:\n\n```\n{traceback.format_exc()}\n```")
         
             with col2:
-                st.subheader("Paramètres Estimés")
+                st.subheader("Estimated Parameters")
                 if st.session_state.vasicek_params:
                     params = st.session_state.vasicek_params
         
                     col_a, col_lam, col_sig = st.columns(3)
                     with col_a:
-                        st.metric("Vitesse de retour à la moyenne (a)", f"{params['a']:.4f}")
+                        st.metric("Speed of mean reversion (a)", f"{params['a']:.4f}")
                     with col_lam:
-                        st.metric("Niveau moyen long terme (λ)", f"{params['lambda']:.4f}")
+                        st.metric("Long-term mean level (λ)", f"{params['lambda']:.4f}")
                     with col_sig:
-                        st.metric("Volatilité (σ)", f"{params['sigma']:.4f}")
+                        st.metric("Volatility (σ)", f"{params['sigma']:.4f}")
         
-                    st.metric("Taux initial (r₀)", f"{params['r0']:.4f}")
-                    st.info(f"📊 Ticker utilisé : **{params['ticker']}** | Δt: {params['dt']:.4f}")
+                    st.metric("Initial rate (r₀)", f"{params['r0']:.4f}")
+                    st.info(f"Ticker used: **{params['ticker']}** | Δt: {params['dt']:.4f}")
                 else:
-                    st.info("👆 Cliquez sur 'Estimer les Paramètres' pour commencer")
+                    st.info("Click 'Estimate Parameters' to get started")
+
     
         
         # =============================================
-        # TAB 2: SIMULATION ET COURBES
+        # TAB 2: SIMULATION AND YIELD CURVES
         # =============================================
         with tab2:
-            st.header("📊 Simulation de Trajectoires et Courbes de Taux (Vasicek)")
+            st.header("Simulation of Rate Paths and Yield Curves (Vasicek)")
         
             if not st.session_state.vasicek_params:
-                st.warning("⚠️ Veuillez d'abord estimer les paramètres dans l'onglet précédent.")
+                st.warning("⚠️ Please estimate the parameters in the previous tab first.")
                 st.stop()
         
             params = st.session_state.vasicek_params
@@ -959,39 +960,39 @@ with tab6:
             col1, col2 = st.columns([1, 2])
         
             with col1:
-                st.subheader("⚙️ Paramètres de Simulation")
+                st.subheader("Simulation Parameters")
         
-                T = st.slider("Horizon temporel (années)", min_value=1, max_value=30, value=10)
-                dt = st.slider("Pas de temps (dt)", min_value=0.01, max_value=1.0, value=float(params["dt"]), step=0.01)
-                n_paths = st.slider("Nombre de trajectoires simulées", 100, 10000, 1000, step=100)
+                T = st.slider("Time horizon (years)", min_value=1, max_value=30, value=10)
+                dt = st.slider("Time step (dt)", min_value=0.01, max_value=1.0, value=float(params["dt"]), step=0.01)
+                n_paths = st.slider("Number of simulated paths", 100, 10000, 1000, step=100)
         
-                st.subheader("📐 Configuration des Courbes de Taux")
+                st.subheader("Yield Curve Configuration")
         
                 available_maturities = [0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 30]
                 default_maturities = [m for m in [1, 2, 5, 10] if m <= T]
-                maturities = st.multiselect("Maturités (années)", options=available_maturities, default=default_maturities)
+                maturities = st.multiselect("Maturities (years)", options=available_maturities, default=default_maturities)
         
-                # Générer les snapshots lisibles et valides
+                # Generate readable and valid snapshot times
                 max_snapshots = int(T / dt)
                 raw_snapshots = [round(i * dt, 2) for i in range(max_snapshots + 1)]
-                
-                # Formater pour affichage
-                labelled_snapshots = {f"{s:.2f} ans": s for s in raw_snapshots}
-                
-                # Choix par l'utilisateur (affichage propre, valeurs float)
+        
+                # Format for display
+                labelled_snapshots = {f"{s:.2f} years": s for s in raw_snapshots}
+        
+                # User selection (pretty labels, float values)
                 default_keys = [k for k in labelled_snapshots if float(k.split()[0]) in [0.0, 2.0, 5.0, 10.0]]
-                selected_keys = st.multiselect("Temps de snapshot (années)", options=list(labelled_snapshots.keys()), default=default_keys)
-                
-                # Convertir pour usage technique
+                selected_keys = st.multiselect("Snapshot times (years)", options=list(labelled_snapshots.keys()), default=default_keys)
+        
+                # Convert for technical use
                 snapshot_times = [labelled_snapshots[k] for k in selected_keys]
         
-                simulate_btn = st.button("🚀 Lancer la Simulation", type="primary")
+                simulate_btn = st.button("Run Simulation", type="primary")
         
             with col2:
                 if simulate_btn:
-                    with st.spinner("Simulation en cours..."):
+                    with st.spinner("Running simulation..."):
         
-                        # Lancement de la simulation
+                        # Run the simulation
                         time_vec, r_paths = simulate_vasicek_paths(
                             a=params['a'],
                             lam=params['lambda'],
@@ -1002,7 +1003,7 @@ with tab6:
                             n_paths=n_paths
                         )
         
-                        # ✅ Courbes de taux : moyenne sur les paths
+                        # Yield curves: average over all paths
                         yield_curves = generate_yield_curves(
                             r_path=np.mean(r_paths, axis=1),
                             snapshot_times=snapshot_times,
@@ -1013,39 +1014,40 @@ with tab6:
                             dt=dt
                         )
         
-                        # 📈 Affichage avec Matplotlib (plus rapide pour plusieurs snapshots)
+                        
                         st.pyplot(plot_yield_curves(yield_curves, maturities))
         
-                        # 📉 Distribution du taux final
+                        # 📉 Final short rate distribution
                         r_final = r_paths[-1, :]
                         fig_hist = px.histogram(
                             r_final,
                             nbins=50,
-                            title="Distribution du Taux Court à l'Horizon",
-                            labels={'value': 'Taux', 'count': 'Fréquence'}
+                            title="Final Short Rate Distribution",
+                            labels={'value': 'Rate', 'count': 'Frequency'}
                         )
                         fig_hist.add_vline(x=np.mean(r_final), line_dash="dash", line_color="red",
-                                           annotation_text=f"Moyenne: {np.mean(r_final):.4f}")
+                                           annotation_text=f"Mean: {np.mean(r_final):.4f}")
                         st.plotly_chart(fig_hist, use_container_width=True)
         
-                        # 🧮 Statistiques descriptives
+                        # Descriptive statistics
                         col_stat1, col_stat2, col_stat3 = st.columns(3)
                         with col_stat1:
-                            st.metric("Moyenne finale", f"{np.mean(r_final):.4f}")
+                            st.metric("Final Mean", f"{np.mean(r_final):.4f}")
                         with col_stat2:
-                            st.metric("Écart-type", f"{np.std(r_final):.4f}")
+                            st.metric("Standard Deviation", f"{np.std(r_final):.4f}")
                         with col_stat3:
                             st.metric("Min / Max", f"{np.min(r_final):.4f} / {np.max(r_final):.4f}")
+
     
         
         # =============================================
-        # TAB 3: PRICING D'OBLIGATIONS
+        # TAB 3: BOND PRICING
         # =============================================
         with tab3:
-            st.header("💰 Pricing d'Obligations (Zero-Coupon ou à Coupons)")
+            st.header("Bond Pricing (Zero-Coupon or Coupon Bonds)")
         
             if not st.session_state.vasicek_params:
-                st.warning("⚠️ Veuillez d'abord estimer les paramètres dans l'onglet précédent.")
+                st.warning("⚠️ Please estimate the parameters in the previous tab first.")
                 st.stop()
         
             params = st.session_state.vasicek_params
@@ -1053,28 +1055,28 @@ with tab6:
             col1, col2 = st.columns([1, 2])
         
             with col1:
-                st.subheader("📋 Paramètres de l’Obligation")
+                st.subheader("Bond Parameters")
         
-                bond_type = st.radio("Type d'obligation", ["Zero-Coupon", "Avec Coupons"])
+                bond_type = st.radio("Bond type", ["Zero-Coupon", "With Coupons"])
         
-                r_current = st.number_input("Taux actuel (r)", min_value=0.0, max_value=0.20, value=params['r0'], step=0.001, format="%.4f")
-                t_current = st.number_input("Temps actuel (t)", min_value=0.0, max_value=30.0, value=0.0, step=0.1)
-                maturity = st.number_input("Maturité (T)", min_value=t_current + 0.1, max_value=30.0, value=5.0, step=0.1)
-                face_value = st.number_input("Valeur nominale", min_value=100, max_value=10000, value=100, step=10)
+                r_current = st.number_input("Current interest rate (r)", min_value=0.0, max_value=0.20, value=params['r0'], step=0.001, format="%.4f")
+                t_current = st.number_input("Current time (t)", min_value=0.0, max_value=30.0, value=0.0, step=0.1)
+                maturity = st.number_input("Maturity (T)", min_value=t_current + 0.1, max_value=30.0, value=5.0, step=0.1)
+                face_value = st.number_input("Face value", min_value=100, max_value=10000, value=100, step=10)
         
-                if bond_type == "Avec Coupons":
-                    coupon_rate = st.number_input("Taux de coupon (%)", min_value=0.0, max_value=20.0, value=5.0, step=0.1) / 100
-                    freq = st.selectbox("Fréquence des paiements", ["Annuel", "Semestriel"])
-                    dt_coupon = 1.0 if freq == "Annuel" else 0.5
+                if bond_type == "With Coupons":
+                    coupon_rate = st.number_input("Coupon rate (%)", min_value=0.0, max_value=20.0, value=5.0, step=0.1) / 100
+                    freq = st.selectbox("Payment frequency", ["Annual", "Semi-Annual"])
+                    dt_coupon = 1.0 if freq == "Annual" else 0.5
         
-                st.subheader("🔍 Analyse de Sensibilité")
-                sensitivity_param = st.selectbox("Paramètre à tester", ["Taux actuel (r)", "Maturité (T)", "Volatilité (σ)"])
+                st.subheader("Sensitivity Analysis")
+                sensitivity_param = st.selectbox("Parameter to test", ["Current rate (r)", "Maturity (T)", "Volatility (σ)"])
         
-                price_btn = st.button("💰 Calculer le Prix", type="primary")
+                price_btn = st.button("Compute Price", type="primary")
         
             with col2:
                 if price_btn:
-                    with st.spinner("Calcul en cours..."):
+                    with st.spinner("Calculating..."):
         
                         try:
                             if bond_type == "Zero-Coupon":
@@ -1087,10 +1089,10 @@ with tab6:
                                     sigma=params['sigma'],
                                     face_value=face_value
                                 )
-                                st.success(f"💰 Prix de l'obligation Zero-Coupon : **{price:.2f}**")
+                                st.success(f"Zero-Coupon Bond Price: **{price:.2f}**")
         
                                 ytm = -np.log(price / face_value) / (maturity - t_current)
-                                st.info(f"📈 Rendement à l’échéance (YTM) : **{ytm:.4f} ({ytm*100:.2f}%)**")
+                                st.info(f"Yield to Maturity (YTM): **{ytm:.4f} ({ytm*100:.2f}%)**")
         
                             else:
                                 price = price_coupon_bond(
@@ -1104,15 +1106,15 @@ with tab6:
                                     coupon=coupon_rate,
                                     dt=dt_coupon
                                 )
-                                st.success(f"💰 Prix de l'obligation à coupons : **{price:.2f}**")
-                                st.info(f"📊 Coupon : {coupon_rate*100:.2f}% ({freq})")
+                                st.success(f"Coupon Bond Price: **{price:.2f}**")
+                                st.info(f"Coupon: {coupon_rate*100:.2f}% ({freq})")
         
-                            # -------- Sensibilité --------
-                            st.subheader("📈 Analyse de Sensibilité")
+                            # -------- Sensitivity Analysis --------
+                            st.subheader("Sensitivity Analysis")
         
                             fig = go.Figure()
         
-                            if sensitivity_param == "Taux actuel (r)":
+                            if sensitivity_param == "Current rate (r)":
                                 r_vals = np.linspace(max(0.001, r_current - 0.05), r_current + 0.05, 100)
                                 prices = []
         
@@ -1123,11 +1125,11 @@ with tab6:
                                         p = price_coupon_bond(r, t_current, params['a'], params['lambda'], params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
                                     prices.append(p)
         
-                                fig.add_trace(go.Scatter(x=r_vals * 100, y=prices, mode="lines", name="Prix"))
-                                fig.add_vline(x=r_current * 100, line_dash="dash", line_color="red", annotation_text=f"Taux actuel: {r_current*100:.2f}%")
-                                fig.update_layout(title="Sensibilité du Prix au Taux d’Intérêt", xaxis_title="Taux (%)", yaxis_title="Prix")
+                                fig.add_trace(go.Scatter(x=r_vals * 100, y=prices, mode="lines", name="Price"))
+                                fig.add_vline(x=r_current * 100, line_dash="dash", line_color="red", annotation_text=f"Current rate: {r_current*100:.2f}%")
+                                fig.update_layout(title="Price Sensitivity to Interest Rate", xaxis_title="Rate (%)", yaxis_title="Price")
         
-                            elif sensitivity_param == "Maturité (T)":
+                            elif sensitivity_param == "Maturity (T)":
                                 T_vals = np.linspace(t_current + 0.1, 30, 100)
                                 prices = []
         
@@ -1138,11 +1140,11 @@ with tab6:
                                         p = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], params['sigma'], T_val, face_value, coupon_rate, dt_coupon)
                                     prices.append(p)
         
-                                fig.add_trace(go.Scatter(x=T_vals, y=prices, mode="lines", name="Prix"))
-                                fig.add_vline(x=maturity, line_dash="dash", line_color="red", annotation_text=f"Maturité actuelle: {maturity:.1f} ans")
-                                fig.update_layout(title="Sensibilité du Prix à la Maturité", xaxis_title="Maturité (années)", yaxis_title="Prix")
+                                fig.add_trace(go.Scatter(x=T_vals, y=prices, mode="lines", name="Price"))
+                                fig.add_vline(x=maturity, line_dash="dash", line_color="red", annotation_text=f"Current maturity: {maturity:.1f} years")
+                                fig.update_layout(title="Price Sensitivity to Maturity", xaxis_title="Maturity (years)", yaxis_title="Price")
         
-                            elif sensitivity_param == "Volatilité (σ)":
+                            elif sensitivity_param == "Volatility (σ)":
                                 sigma_vals = np.linspace(0.001, params['sigma'] * 2, 100)
                                 prices = []
         
@@ -1153,25 +1155,26 @@ with tab6:
                                         p = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], sig, maturity, face_value, coupon_rate, dt_coupon)
                                     prices.append(p)
         
-                                fig.add_trace(go.Scatter(x=sigma_vals * 100, y=prices, mode="lines", name="Prix"))
-                                fig.add_vline(x=params['sigma'] * 100, line_dash="dash", line_color="red", annotation_text=f"σ actuel: {params['sigma']*100:.2f}%")
-                                fig.update_layout(title="Sensibilité du Prix à la Volatilité", xaxis_title="Volatilité (%)", yaxis_title="Prix")
+                                fig.add_trace(go.Scatter(x=sigma_vals * 100, y=prices, mode="lines", name="Price"))
+                                fig.add_vline(x=params['sigma'] * 100, line_dash="dash", line_color="red", annotation_text=f"Current σ: {params['sigma']*100:.2f}%")
+                                fig.update_layout(title="Price Sensitivity to Volatility", xaxis_title="Volatility (%)", yaxis_title="Price")
         
                             st.plotly_chart(fig, use_container_width=True)
         
                         except Exception as e:
                             import traceback
-                            st.error(f"❌ Erreur lors du calcul :\n\n```\n{traceback.format_exc()}\n```")
+                            st.error(f"❌ Error during calculation:\n\n```\n{traceback.format_exc()}\n```")
+
     
     
         # =============================================
-        # TAB 4: OPTIONS SUR OBLIGATIONS (CORRIGÉ AVEC `key`)
+        # TAB 4: BOND OPTIONS PRICING
         # =============================================
         with tab4:
-            st.header("📈 Pricing d'Options sur Obligations")
+            st.header("Bond Option Pricing")
         
             if not st.session_state.vasicek_params:
-                st.warning("⚠️ Veuillez d'abord estimer les paramètres dans l'onglet précédent.")
+                st.warning("⚠️ Please estimate the parameters in the previous tab first.")
                 st.stop()
         
             params = st.session_state.vasicek_params
@@ -1182,24 +1185,24 @@ with tab6:
             col1, col2 = st.columns([1, 2])
         
             with col1:
-                st.subheader("📝 Paramètres de l'Option")
+                st.subheader("Option Parameters")
         
-                option_type = st.radio("Type d'option", ["Call", "Put"], key="opt_type")
-                model_type = st.radio("Méthode de calcul", ["Analytique", "Monte Carlo"], key="opt_model")
+                option_type = st.radio("Option type", ["Call", "Put"], key="opt_type")
+                model_type = st.radio("Calculation method", ["Analytical", "Monte Carlo"], key="opt_model")
         
-                r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="opt_r")
-                T1 = st.number_input("Échéance de l'option (T₁)", 0.1, 10.0, 1.0, step=0.1, key="opt_T1")
-                T2 = st.number_input("Maturité de l'obligation (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="opt_T2")
+                r_current = st.number_input("Current rate (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="opt_r")
+                T1 = st.number_input("Option maturity (T₁)", 0.1, 10.0, 1.0, step=0.1, key="opt_T1")
+                T2 = st.number_input("Bond maturity (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="opt_T2")
         
-                K = st.number_input("Prix d'exercice (K)", 0.1, 2.0, 0.8, step=0.01, key="opt_K")
-                face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100, key="opt_face")
+                K = st.number_input("Strike price (K)", 0.1, 2.0, 0.8, step=0.01, key="opt_K")
+                face_value = st.number_input("Face value", 100, 10000, 1000, step=100, key="opt_face")
         
                 if model_type == "Monte Carlo":
-                    n_paths = st.number_input("Nombre de simulations", 1000, 100000, 10000, step=1000, key="opt_n_paths")
+                    n_paths = st.number_input("Number of simulations", 1000, 100000, 10000, step=1000, key="opt_n_paths")
                     default_dt = round(params['dt'], 3) if 'dt' in params else 0.01
-    
+        
                     dt_mc = st.number_input(
-                        "Pas de temps (dt)",
+                        "Time step (dt)",
                         min_value=0.001,
                         max_value=0.1,
                         value=default_dt,
@@ -1208,17 +1211,17 @@ with tab6:
                         key="opt_dt"
                     )
         
-                price_option_btn = st.button("💎 Calculer le Prix de l'Option", type="primary", key="opt_btn")
+                price_option_btn = st.button("Compute Option Price", type="primary", key="opt_btn")
         
             with col2:
                 if price_option_btn:
                     if T2 <= T1:
-                        st.error("⚠️ La maturité de l'obligation (T₂) doit être supérieure à l'échéance de l'option (T₁)")
+                        st.error("⚠️ The bond maturity (T₂) must be greater than the option maturity (T₁).")
                         st.stop()
         
-                    with st.spinner("Calcul du prix de l'option..."):
+                    with st.spinner("Computing option price..."):
                         try:
-                            if model_type == "Analytique":
+                            if model_type == "Analytical":
                                 price = analytical_option_price(
                                     r_t=r_current,
                                     t=0,
@@ -1231,7 +1234,7 @@ with tab6:
                                     face=face_value,
                                     option_type=option_type.lower()
                                 )
-                                st.success(f"💎 Prix de l'option {option_type} (analytique) : **{price:.4f}**")
+                                st.success(f"{option_type} Option Price (Analytical): **{price:.4f}**")
         
                             else:
                                 price, std = mc_option_price(
@@ -1247,21 +1250,21 @@ with tab6:
                                     face=face_value,
                                     option_type=option_type.lower()
                                 )
-                                st.success(f"💎 Prix de l'option {option_type} (MC) : **{price:.4f} ± {std:.4f}**")
-                                st.info(f"📊 Intervalle de confiance 95% : [{price - 1.96*std:.4f}, {price + 1.96*std:.4f}]")
+                                st.success(f"{option_type} Option Price (Monte Carlo): **{price:.4f} ± {std:.4f}**")
+                                st.info(f"95% Confidence Interval: [{price - 1.96*std:.4f}, {price + 1.96*std:.4f}]")
         
-                            st.subheader("📋 Récapitulatif")
+                            st.subheader("Summary")
                             df_params = pd.DataFrame({
-                                "Paramètre": [
-                                    "Type d'option", "Méthode", "Taux actuel (r)", "T₁ (échéance)", "T₂ (maturité)",
-                                    "Prix d'exercice (K)", "Valeur nominale"
+                                "Parameter": [
+                                    "Option Type", "Method", "Current Rate (r)", "T₁ (Option Maturity)", "T₂ (Bond Maturity)",
+                                    "Strike Price (K)", "Face Value"
                                 ],
-                                "Valeur": [
+                                "Value": [
                                     option_type,
                                     model_type,
                                     f"{r_current:.4f}",
-                                    f"{T1:.2f} ans",
-                                    f"{T2:.2f} ans",
+                                    f"{T1:.2f} years",
+                                    f"{T2:.2f} years",
                                     f"{K:.2f}",
                                     f"{face_value}"
                                 ]
@@ -1270,138 +1273,54 @@ with tab6:
         
                         except Exception as e:
                             import traceback
-                            st.error(f"❌ Erreur :\n\n```\n{traceback.format_exc()}\n```")
-    
+                            st.error(f"❌ Error:\n\n```\n{traceback.format_exc()}\n```")
+
         
         # =============================================
-        # TAB 5: ANALYSE DES GRECQUES
-        # =============================================
-        """with tab5:
-            st.header("🔍 Analyse des Grecques pour Options sur Obligations")
-            
-            if not st.session_state.vasicek_params:
-                st.warning("⚠️ Veuillez d'abord estimer les paramètres dans la section 'Estimation des Paramètres'")
-                st.stop()
-            
-            params = st.session_state.vasicek_params
-            
-            col1, col2 = st.columns([1, 2])
-            
-            with col1:
-                st.subheader("Configuration")
-                
-                greek_type = st.selectbox("Grecque à analyser", ["price", "delta", "vega", "rho"])
-                option_type = st.radio("Type d'option", ["call", "put"])
-                model_type = st.radio("Méthode", ["Analytical", "Monte Carlo"])
-                
-                # Paramètres
-                T1 = st.number_input("Échéance option (T₁)", 0.1, 10.0, 1.0, step=0.1, key="greeks_T1")
-                T2 = st.number_input("Maturité obligation (T₂)", 0.1, 30.0, 5.0, step=0.1, key="greeks_T2")
-                K = st.number_input("Strike", 0.1, 2.0, 0.8, step=0.01, key="greeks_K")
-                face_value = st.number_input("Valeur faciale", 100, 10000, 1000, step=100, key="greeks_face_value")
-                
-                if model_type == "Monte Carlo":
-                    n_paths_greeks = st.number_input("Simulations MC", 1000, 50000, 5000, step=1000, key="greeks_n_paths")
-                
-                compute_greeks_btn = st.button("📊 Calculer les Grecques", type="primary")
-            
-            with col2:
-                if compute_greeks_btn:
-                    with st.spinner("Calcul des grecques..."):
-                        # Simulation temporaire des grecques
-                        np.random.seed(42)
-                        bond_prices = np.linspace(0.5, 1.5, 100)
-                        
-                        if greek_type == "price":
-                            greek_values = np.maximum(bond_prices - K, 0) if option_type == "call" else np.maximum(K - bond_prices, 0)
-                        elif greek_type == "delta":
-                            greek_values = np.where(bond_prices > K, 1, 0) if option_type == "call" else np.where(bond_prices < K, -1, 0)
-                        elif greek_type == "vega":
-                            greek_values = bond_prices * 0.1 * np.exp(-(bond_prices - K)**2 / 0.1)
-                        else:  # rho
-                            greek_values = (T1 * bond_prices) * np.exp(-(bond_prices - K)**2 / 0.1)
-                        
-                        # Graphique
-                        fig = go.Figure()
-                        fig.add_trace(go.Scatter(
-                            x=bond_prices,
-                            y=greek_values,
-                            mode='lines',
-                            name=greek_type.capitalize(),
-                            line=dict(width=3)
-                        ))
-                        
-                        fig.add_vline(x=K, line_dash="dash", line_color="red",
-                                     annotation_text=f"Strike: {K}")
-                        
-                        fig.update_layout(
-                            title=f"{greek_type.capitalize()} vs Prix de l'Obligation Sous-jacente",
-                            xaxis_title="Prix de l'Obligation P(t,T₁)",
-                            yaxis_title=greek_type.capitalize(),
-                            height=500
-                        )
-                        
-                        st.plotly_chart(fig, use_container_width=True)
-                        
-                        # Statistiques
-                        st.subheader("📊 Statistiques")
-                        col_stat1, col_stat2, col_stat3 = st.columns(3)
-                        
-                        with col_stat1:
-                            st.metric("Valeur max", f"{np.max(greek_values):.4f}")
-                        with col_stat2:
-                            st.metric("Valeur min", f"{np.min(greek_values):.4f}")
-                        with col_stat3:
-                            st.metric("Moyenne", f"{np.mean(greek_values):.4f}")
-        
-        # Footer
-        st.markdown("---")
-        st.markdown("*Modèle de Vasicek - Interface développée avec Streamlit*")"""
-        # =============================================
-        # TAB 5: ANALYSE DES GRECQUES
+        # TAB 5: GREEKS ANALYSIS
         # =============================================
         with tab5:
-            st.header("🔍 Analyse des Grecques pour Options sur Obligations")
+            st.header("Greeks Analysis for Bond Options")
         
             if not st.session_state.vasicek_params:
-                st.warning("⚠️ Veuillez d'abord estimer les paramètres dans l'onglet précédent.")
+                st.warning("⚠️ Please estimate the parameters in the previous tab first.")
                 st.stop()
         
             params = st.session_state.vasicek_params
         
-            # Import réel des grecques
+            # Actual import of Greeks computation
             from pricing.utils.greeks_vasicek import compute_greek_vs_spot
         
             col1, col2 = st.columns([1, 2])
         
             with col1:
-                st.subheader("📋 Configuration")
+                st.subheader("Configuration")
         
-                greek_type = st.selectbox("Grecque à analyser", ["price", "delta", "vega", "rho"], key="greek_type")
-                option_type = st.radio("Type d'option", ["call", "put"], key="greek_opt_type")
-                model_type = st.radio("Méthode", ["Analytical", "Monte Carlo"], key="greek_model")
+                greek_type = st.selectbox("Greek to analyze", ["price", "delta", "vega", "rho"], key="greek_type")
+                option_type = st.radio("Option type", ["call", "put"], key="greek_opt_type")
+                model_type = st.radio("Calculation method", ["Analytical", "Monte Carlo"], key="greek_model")
         
-                T1 = st.number_input("Échéance option (T₁)", 0.1, 10.0, 1.0, step=0.1, key="greek_T1")
-                T2 = st.number_input("Maturité obligation (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="greek_T2")
+                T1 = st.number_input("Option maturity (T₁)", 0.1, 10.0, 1.0, step=0.1, key="greek_T1")
+                T2 = st.number_input("Bond maturity (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="greek_T2")
         
-                K = st.number_input("Prix d'exercice (K)", 0.1, 2.0, 0.8, step=0.01, key="greek_K")
-                face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100, key="greek_face")
+                K = st.number_input("Strike price (K)", 0.1, 2.0, 0.8, step=0.01, key="greek_K")
+                face_value = st.number_input("Face value", 100, 10000, 1000, step=100, key="greek_face")
         
-                # Suggérer le dt de Tab 1
+                # Suggest dt from Tab 1
                 default_dt = round(params['dt'], 3) if 'dt' in params else 0.01
         
                 if model_type == "Monte Carlo":
-                    n_paths = st.number_input("Nombre de simulations MC", 1000, 50000, 5000, step=1000, key="greek_npaths")
-                    dt = st.number_input("Pas de temps MC (dt)", 0.001, 0.1, default_dt, step=0.001, format="%.3f", key="greek_dt")
+                    n_paths = st.number_input("Number of Monte Carlo simulations", 1000, 50000, 5000, step=1000, key="greek_npaths")
+                    dt = st.number_input("Time step (MC dt)", 0.001, 0.1, default_dt, step=0.001, format="%.3f", key="greek_dt")
                 else:
                     dt = default_dt
-                    n_paths = 10000  # valeur par défaut pour analytique, ignorée
+                    n_paths = 10000  # default value for analytical, ignored
         
-                compute_btn = st.button("📊 Calculer les Grecques", type="primary", key="greek_btn")
+                compute_btn = st.button("Compute Greeks", type="primary", key="greek_btn")
         
             with col2:
                 if compute_btn:
-                    with st.spinner("Calcul des grecques en cours..."):
+                    with st.spinner("Computing Greeks..."):
         
                         try:
                             fig = compute_greek_vs_spot(
@@ -1421,9 +1340,9 @@ with tab6:
                             )
                             
                             st.pyplot(fig)
-    
         
                         except Exception as e:
                             import traceback
-                            st.error(f"❌ Erreur :\n\n```\n{traceback.format_exc()}\n```")
+                            st.error(f"❌ Error:\n\n```\n{traceback.format_exc()}\n```")
+
 
