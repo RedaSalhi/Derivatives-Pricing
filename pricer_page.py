@@ -1594,7 +1594,7 @@ with tab4:
             st.subheader("⚙️ Model Settings")
             option_type_lookback = st.selectbox("Option Type", ["call", "put"], key="lookback_option_type")
             floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
-            n_paths_lookback = st.slider("MC Paths", 1000, 100000, 10000, step=1000, key="lookback_paths")
+            n_paths_lookback = st.slider("MC Paths", 1000, 100000, 10000, step=1000, key="lookback_paths_1")
             n_steps_lookback = st.slider("Time Steps", 50, 500, 252, key="lookback_steps")
         
         with col3:
@@ -1626,7 +1626,7 @@ with tab4:
                 st.pyplot(fig)
         
         with viz_col2:
-            if st.button("Show Sample Paths", key="lookback_paths"):
+            if st.button("Show Sample Paths", key="lookback_paths_2"):
                 fig = plot_paths(S0_lookback, r_lookback, sigma_lookback, T_lookback, min(20, n_paths_lookback), n_steps_lookback)
                 st.pyplot(fig)
         
