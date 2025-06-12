@@ -846,150 +846,152 @@ with tab6:
     import streamlit as st
     import numpy as np
     import pandas as pd
-    from pricing.vanilla_vasicek import price_zero_coupon, price_bond_option, price_coupon_bond
-    from pricing.models.interest_rates.analytical_vasicek import run_ou_estimation, simulate_vasicek_path
-    from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc, simulate_vasicek_paths_mc
-    from pricing.models.interest_rates.analytical_vasicek import generate_yield_curves, plot_yield_curves
+    from pricing.vanilla_vasicek import price_zero_coupon, price_coupon_bond, price_bond_option
+    from pricing.models.interest_rates.monte_carlo_vasicek import simulate_vasicek_paths, plot_vasicek_paths, plot_yield_distribution, vasicek_bond_option_price_mc
+    from pricing.models.interest_rates.analytical_vasicek import run_ou_estimation, simulate_vasicek_path, plot_yield_curves, generate_yield_curves, vasicek_bond_option_price
 
-    # Init session state
-    if 'a' not in st.session_state:
-        st.session_state.a = 0.1
-        st.session_state.lam = 0.05
-        st.session_state.sigma = 0.01
-        st.session_state.r0 = 0.03
-        st.session_state.dt = 0.08
-
-    st.header("Interest Rate Instruments Pricer (Vasicek Model)")
+    st.header("Interest Rate Instruments Pricer")
 
     # --- Model & method ---
-    model = st.selectbox("Choose Interest Rate Model", ["Vasicek"], index=0)
-    method = st.radio("Pricing Method", ["Analytical", "Monte Carlo"])
-
-    st.markdown("### 🔧 Parameter Setup")
-    param_mode = st.radio("How to set parameters?", ["Manual input", "Calibrate from market data (FRED/Yahoo)"])
-
-    if param_mode == "Manual input":
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            a = st.slider("Mean Reversion Speed (a)", 0.01, 1.0, st.session_state.a)
-        with col2:
-            sigma = st.slider("Volatility (σ)", 0.001, 1.0, st.session_state.sigma)
-        with col3:
-            lam = st.number_input("Long-Term Mean Level (λ)", value=st.session_state.lam)
-        with col4:
-            dt = st.number_input("Data frequency (dt)", value=st.session_state.dt)
-
-        r0 = st.number_input("Initial Short Rate r(0)", value=st.session_state.r0, format="%.4f")
-
-        # Update session state
-        st.session_state.a = a
-        st.session_state.lam = lam
-        st.session_state.sigma = sigma
-        st.session_state.r0 = r0
-        st.session_state.dt = dt
-
-    else:
-        ticker = st.text_input("Enter FRED/Yahoo Ticker", value="DGS3MO")
-        start_date = st.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
-
-        if st.button("Calibrate"):
-            a, lam, sigma, dt, r_series = run_ou_estimation(ticker, start=start_date.strftime('%Y-%m-%d'))
-            r0 = float(r_series.iloc[-1])
-            st.session_state.a = a
-            st.session_state.lam = lam
-            st.session_state.sigma = sigma
-            st.session_state.r0 = r0
-            st.session_state.dt = dt
-            st.success(f"✔️ Calibrated: a={a:.4f}, λ={lam:.4f}, σ={sigma:.4f}, r₀={r0:.4f}, dt={dt:.4f}")
-
-    # Use from session
-    a = st.session_state.a
-    lam = st.session_state.lam
-    sigma = st.session_state.sigma
-    r0 = st.session_state.r0
-    dt = st.session_state.dt
-
-    st.markdown("### 📈 Select Instrument to Price")
-    instrument = st.selectbox("Instrument", [
-        "Zero-Coupon Bond",
-        "Coupon Bond",
-        "Bond Option",
-        "Cap (Planned)",
-        "Floor (Planned)",
-        "Swaption (Planned)"
-    ])
-
-    if instrument == "Zero-Coupon Bond":
-        maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
-        face_value = st.number_input("Face Value", value=1.0)
-
-    elif instrument == "Coupon Bond":
-        maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
-        face_value = st.number_input("Face Value", value=1.0)
-        coupon = st.slider("Coupon Rate", 0.0, 1.0, 0.05, step=0.01)
-
-    elif instrument == "Bond Option (European)":
-        T1 = st.slider("Option Expiry T1 (years)", 0.5, 10.0, 3.0, step=0.5)
-        T2 = st.slider("Bond Maturity T2 (years)", T1 + 0.5, 30.0, 5.0, step=0.5)
-        if T2 <= T1:
-            st.error("T2 must be greater than T1")
-        K = st.number_input("Strike Price (P(T1, T2))", value=0.85)
-        option_type = st.radio("Option Type", ["call", "put"])
-        face_value = st.number_input("Face Value", value=1.0)
-        n_paths = st.number_input("Monte Carlo Paths", value=10000, step=1000)
-
-    st.markdown("---")
-    c1, c2 = st.columns(2)
-
-    # --- Pricing Button ---
-    if c1.button("Run Pricing"):
+    model = st.selectbox("Choose Interest Rate Model", ["Vasicek", "Hull-White (Planned)"], index=0)
+    if model == "Vasicek":
+        #method = st.radio("Pricing Method", ["Analytical", "Monte Carlo"])
+        
+        st.markdown("### 🔧 Parameter Setup")
+        param_mode = st.radio("How to set parameters?", ["Manual input", "Calibrate from market data (FRED/Yahoo)"])
+    
+        if param_mode == "Manual input":
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                a = st.slider("Mean Reversion Speed (a)", 0.01, 2.0, 0,5 )
+            with col2:
+                sigma = st.slider("Volatility (σ)", 0.001, 1.0, 0.01)
+            with col3:
+                lam = st.number_input("Long-Term Mean Level (λ)", 0.04)
+            with col4:
+                dt = st.number_input("Data frequency (dt)", 0.08)
+            r0 = st.number_input("Initial Short Rate r(0)", 0.05)
+    
+        else:
+            ticker = st.text_input("Enter FRED/Yahoo Ticker", value="DGS3MO")
+            start_date = st.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
+    
+            if st.button("Calibrate"):
+                a, lam, sigma, dt, r0 = run_ou_estimation(ticker, start=start_date.strftime('%Y-%m-%d'))
+                st.success(f"✔️ Calibrated: a={a:.4f}, λ={lam:.4f}, σ={sigma:.4f}, r₀={r0:.4f}, dt={dt:.4f}")
+    
+        st.markdown("### 📈 Select Instrument to Price")
+        instrument = st.selectbox("Instrument", [
+            "Zero-Coupon Bond",
+            "Coupon Bond",
+            "Bond Option",
+            "Cap (Planned)",
+            "Floor (Planned)",
+            "Swaption (Planned)"
+        ])
+    
         if instrument == "Zero-Coupon Bond":
-            price = price_zero_coupon(r0, 0, maturity, a, lam, sigma, face_value, model=method)
-            st.success(f"Zero-Coupon Bond Price: {price:.6f}")
-
+            maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
+            t = st.slider("Temps écoulé t (années)", min_value=0.0, max_value=maturity, value=0.0, step=0.25)
+            face_value = st.number_input("Face Value", value=1.0)
+    
         elif instrument == "Coupon Bond":
-            price = price_coupon_bond(r0, a, lam, sigma, maturity, coupon, face_value, dt)
-            st.success(f"Coupon Bond Price: {price:.6f}")
-
+            maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
+            coupon = st.slider("Coupon Rate", 0.0, 1.0, 0.05, step=0.01)
+            face_value = st.number_input("Face Value", value=1.0)
+    
         elif instrument == "Bond Option (European)":
+            T1 = st.slider("Option Expiry T1 (years)", 0.5, 10.0, 3.0, step=0.5)
+            T2 = st.slider("Bond Maturity T2 (years)", T1 + 0.5, 30.0, 5.0, step=0.5)
             if T2 <= T1:
-                st.error("Invalid maturity: T2 must be > T1")
-            else:
-                if method == "Analytical":
-                    from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option_price
-                    price = vasicek_bond_option_price(r0, 0, T1, T2, K, a, lam, sigma, face_value, option_type)
+                st.error("T2 must be greater than T1")
+            K = st.number_input("Strike Price (P(T1, T2))", value=0.85)
+            option_type = st.radio("Option Type", ["Call", "Put"]).lower()
+            face = st.number_input("Face Value", value=1.0)
+            n_paths = st.number_input("Monte Carlo Paths", value=1000, step=1000)
+            greeks = st.checkbox("Visualize Greeks/Option Price?")
+    
+        st.markdown("---")
+
+        # --- Yield Curve Plot Button ---
+        yield_curve = st.checkbox("Simulate Yield Curve?")
+        plot_paths = st.checkbox("Plot Monte Carlo Paths and Rate Distribution at T?")
+        if yield_curve:
+            T = st.slider("Simulation horizon (years)", min_value=1, max_value=30, value=10, step=1)
+            time, r_path = simulate_vasicek_path(r0, a, lam, sigma, T=T, dt=dt)
+            maturities = np.linspace(0.5, T, 60)
+            possible_snapshots = list(np.arange(0, T + sim_dt, 0.5))  # 0.0, 0.5, 1.0, ..., 10.0
+            snapshot_times = st.multiselect(
+                "Select snapshot times (in years):",
+                options=possible_snapshots,
+                default=[0, 1, 3, 5]
+            )
+            if not snapshot_times:
+                st.warning("Please select at least one snapshot time.")
+            elif:
+                continue
+
+        if plot_paths:
+            if not instrument == "Bond Option (European)":
+                n_paths = st.number_input("Monte Carlo Paths", value=1000, step=1000)
+                
+            T_vec, r_paths = simulate_vasicek_paths(a, lam, sigma, r0, T, dt, n_paths)
+
+        if greeks:
+            col1, col2 = st.columns(2)
+            with col1:
+                greek = st.selectbox("Select Greek or Price:", [ "Price", "Delta", "Vega", "Rho"])
+                greek_lower = greek.lower()
+            with col2:
+                model = st.selectbox("Select Model", [ "Analytical", "Monte Carlo"])
+                if model == "Monte Carlo":
+                    st.warning("Monte Carlo is not working properly at the moment.")
+ 
+            
+    
+        # --- Pricing Button ---
+        if st.button("Run Pricing"):
+            if instrument == "Zero-Coupon Bond":
+                price = price_zero_coupon(r0, t, maturity, a, lam, sigma, face_value)
+                st.success(f"Zero-Coupon Bond Price: {price:.4f}")
+    
+            elif instrument == "Coupon Bond":
+                price = price_coupon_bond(r0, t, a, lam, sigma, maturity, coupon=coupon, face= face_value, dt=dt)
+                st.success(f"Coupon Bond Price: {price:.4f}")
+    
+            elif instrument == "Bond Option (European)":
+                if T2 <= T1:
+                    st.error("Invalid maturity: T2 must be > T1")
+                method = st.radio("Choose The Pricing Method", ["Analytical", "Monte Carlo"])
                 else:
-                    price, std = vasicek_bond_option_price_mc(r0, a, lam, sigma, T1, T2, K, dt, n_paths, face_value, option_type)
-                    st.info(f"Monte Carlo Std Error: {std:.6f}")
-                st.success(f"Bond Option Price ({option_type}): {price:.6f}")
-
-        else:
-            st.warning("This instrument is not yet implemented.")
-
-    # --- Yield Curve Plot Button ---
-    if c2.button("Plot Simulated Yield Curve"):
-        T = st.slider("Simulation horizon (years)", min_value=1, max_value=30, value=10, step=1)
-        sim_dt = dt
-        time, r_path = simulate_vasicek_path(r0, a, lam, sigma, T=T, dt=sim_dt)
-        maturities = np.linspace(0.5, T, 60)
-        # Possible snapshot points (up to T)
-        possible_snapshots = list(np.arange(0, T + sim_dt, 0.5))  # 0.0, 0.5, 1.0, ..., 10.0
+                    if method == "Analytical":
+                        price = vasicek_bond_option_price(r0, 0, T1, T2, K, a, lam, sigma, face=face_value, option_type)
+                    else:
+                        price, std = vasicek_bond_option_price_mc(r0, a, lam, sigma, T1, T2, K, dt, n_paths, face=face_value, option_type)
+                        st.info(f"Monte Carlo Std Error: {std:.6f}")
+                    st.success(f"Bond Option Price ({option_type}): {price:.6f}")
     
-        snapshot_times = st.multiselect(
-            "Select snapshot times (in years)",
-            options=possible_snapshots,
-            default=[0, 1, 3, 5]
-        )
-    
-        if not snapshot_times:
-            st.warning("Please select at least one snapshot time.")
-        else:
-            yield_curves = generate_yield_curves(r_path, snapshots_times, maturities, a, lam, sigma, sim_dt)
-            plot_yield_curves(yield_curves, maturities)
+            else:
+                st.warning("This instrument is not yet implemented.")
 
-    # --- Show parameters summary ---
-    with st.expander("🔍 Current Parameters"):
-        st.write(f"Speed of mean reversion (a): {a:.4f}")
-        st.write(f"Long-term mean level (λ): {lam:.4f}")
-        st.write(f"Volatility (σ): {sigma:.4f}")
-        st.write(f"Initial short rate (r₀): {r0:.4f}")
+            
+            if yield_curve: 
+                with st.expander("Yield Curve:"):
+                    yield_curves = generate_yield_curves(r_path, snapshots_times, maturities, a, lam, sigma, dt)
+                    plot_yield_curves(yield_curves, maturities)
+
+            if plot_paths:
+                with st.expander("Paths and Yield Distribution:"):
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        plot_vasicek_paths(T_vec, r_paths, lam)
+                    with c2:
+                        plot_yield_distribution(r_paths)
+
+            if greeks:
+                with st.expander(f"{greek} Visualization"):
+                    compute_greek_vs_spot(greek_lower, 0, T1, T2, K, a, lam, sigma, face, option_type=option_type, n_paths=n_paths, model=model)
+
+    
+    else:
+        st.warning("This instrument is not yet implemented.")
