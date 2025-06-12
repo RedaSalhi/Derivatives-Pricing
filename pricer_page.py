@@ -655,37 +655,37 @@ from pricing.utils.option_strategies_greeks import plot_strategy_greek_vs_spot
 # -----------------------------
 with tab3:
     # Main title
-    st.markdown('<h1 class="main-header">Advanced Options Pricing Suite</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🎯 Advanced Options Pricing Suite</h1>', unsafe_allow_html=True)
     
     # Sidebar for global parameters
-    st.sidebar.header("Global Market Parameters")
-    spot_price = st.sidebar.number_input("Spot Price (S)", value=100.0, min_value=0.1, step=0.1)
-    risk_free_rate = st.sidebar.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
-    dividend_yield = st.sidebar.number_input("Dividend Yield (q)", value=0.0, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
-    volatility = st.sidebar.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, step=0.01, format="%.3f")
-    time_to_expiry = st.sidebar.number_input("Time to Expiry (T)", value=1.0, min_value=0.001, step=0.01, format="%.3f")
+    st.sidebar.header("🔧 Global Market Parameters")
+    spot_price = st.sidebar.number_input("Spot Price (S)", value=100.0, min_value=0.1, step=0.1, key="global_spot")
+    risk_free_rate = st.sidebar.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, step=0.001, format="%.3f", key="global_rate")
+    dividend_yield = st.sidebar.number_input("Dividend Yield (q)", value=0.0, min_value=0.0, max_value=1.0, step=0.001, format="%.3f", key="global_dividend")
+    volatility = st.sidebar.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, step=0.01, format="%.3f", key="global_vol")
+    time_to_expiry = st.sidebar.number_input("Time to Expiry (T)", value=1.0, min_value=0.001, step=0.01, format="%.3f", key="global_time")
     
     # Model selection
-    st.sidebar.header("Pricing Model")
+    st.sidebar.header("🧮 Pricing Model")
     model = st.sidebar.selectbox("Select Model", ["black-scholes", "binomial", "monte-carlo"])
     
     # Additional parameters for specific models
     if model == "binomial":
-        n_steps = st.sidebar.number_input("Number of Steps (N)", value=100, min_value=1, max_value=1000, step=1)
+        n_steps = st.sidebar.number_input("Number of Steps (N)", value=100, min_value=1, max_value=1000, step=1, key="global_n_steps")
     elif model == "monte-carlo":
-        n_simulations = st.sidebar.number_input("Number of Simulations", value=10000, min_value=100, max_value=100000, step=100)
+        n_simulations = st.sidebar.number_input("Number of Simulations", value=10000, min_value=100, max_value=100000, step=100, key="global_n_sims")
     
     # Tab structure
-    tb1, tb2, tb3, tb4, tb5 = st.tabs([
-        "Single Option Pricing", 
-        "Strategy Builder", 
-        "Payoff Analysis", 
-        "Greeks Analysis",
-        "Sensitivity Analysis"
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "🎯 Single Option Pricing", 
+        "🔗 Strategy Builder", 
+        "📊 Payoff Analysis", 
+        "📈 Greeks Analysis",
+        "🧪 Sensitivity Analysis"
     ])
     
     # Tab 1: Single Option Pricing
-    with tb1:
+    with tab1:
         st.markdown('<h2 class="sub-header">Single Option Pricing</h2>', unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
@@ -693,7 +693,7 @@ with tab3:
         with col1:
             option_type = st.selectbox("Option Type", ["call", "put"])
             exercise_style = st.selectbox("Exercise Style", ["european", "american"])
-            strike_price = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, step=0.1)
+            strike_price = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, step=0.1, key="single_strike")
             
             # Price calculation
             try:
@@ -736,8 +736,8 @@ with tab3:
                 "r": risk_free_rate, "sigma": volatility, "q": dividend_yield
             }[param_to_vary]
             
-            param_min = st.number_input(f"Min {param_to_vary}", value=current_val * 0.5, step=0.01)
-            param_max = st.number_input(f"Max {param_to_vary}", value=current_val * 1.5, step=0.01)
+            param_min = st.number_input(f"Min {param_to_vary}", value=current_val * 0.5, step=0.01, key="single_param_min")
+            param_max = st.number_input(f"Max {param_to_vary}", value=current_val * 1.5, step=0.01, key="single_param_max")
             
             if st.button("Generate Sensitivity Plot"):
                 try:
@@ -764,7 +764,7 @@ with tab3:
                     st.error(f"Error generating plot: {str(e)}")
     
     # Tab 2: Strategy Builder
-    with tb2:
+    with tab2:
         st.markdown('<h2 class="sub-header">Option Strategy Builder</h2>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([1, 2])
@@ -801,7 +801,7 @@ with tab3:
                     
             else:  # Custom Strategy
                 st.subheader("Build Custom Strategy")
-                num_legs = st.number_input("Number of Legs", value=2, min_value=1, max_value=10, step=1)
+                num_legs = st.number_input("Number of Legs", value=2, min_value=1, max_value=10, step=1, key="custom_num_legs")
                 
                 legs = []
                 for i in range(num_legs):
@@ -866,7 +866,7 @@ with tab3:
                     st.error(f"Error pricing strategy: {str(e)}")
     
     # Tab 3: Payoff Analysis
-    with tb3:
+    with tab3:
         st.markdown('<h2 class="sub-header">Strategy Payoff Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
@@ -878,9 +878,9 @@ with tab3:
                 strikes = [leg['strike'] for leg in legs]
                 min_strike, max_strike = min(strikes), max(strikes)
                 
-                spot_min = st.number_input("Min Spot Price", value=min_strike * 0.7, step=1.0)
-                spot_max = st.number_input("Max Spot Price", value=max_strike * 1.3, step=1.0)
-                n_points = st.slider("Number of Points", 50, 500, 200)
+                spot_min = st.number_input("Min Spot Price", value=min_strike * 0.7, step=1.0, key="payoff_spot_min")
+                spot_max = st.number_input("Max Spot Price", value=max_strike * 1.3, step=1.0, key="payoff_spot_max")
+                n_points = st.slider("Number of Points", 50, 500, 200, key="payoff_n_points")
                 
                 show_breakeven = st.checkbox("Show Breakeven Points", value=True)
                 show_profit_loss = st.checkbox("Include Premium Cost", value=True)
@@ -981,7 +981,7 @@ with tab3:
                         st.metric("Max Loss", "N/A")
     
     # Tab 4: Greeks Analysis
-    with tb4:
+    with tab4:
         st.markdown('<h2 class="sub-header">Greeks Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
@@ -995,9 +995,9 @@ with tab3:
                 strikes = [leg['strike'] for leg in legs]
                 min_strike, max_strike = min(strikes), max(strikes)
                 
-                greek_spot_min = st.number_input("Min Spot for Greeks", value=min_strike * 0.8, step=1.0)
-                greek_spot_max = st.number_input("Max Spot for Greeks", value=max_strike * 1.2, step=1.0)
-                greek_points = st.slider("Number of Points for Greeks", 50, 300, 150)
+                greek_spot_min = st.number_input("Min Spot for Greeks", value=min_strike * 0.8, step=1.0, key="greeks_spot_min")
+                greek_spot_max = st.number_input("Max Spot for Greeks", value=max_strike * 1.2, step=1.0, key="greeks_spot_max")
+                greek_points = st.slider("Number of Points for Greeks", 50, 300, 150, key="greeks_n_points")
             
             with col2:
                 st.subheader(f"Strategy {greek_name.title()} vs Spot Price")
@@ -1034,7 +1034,7 @@ with tab3:
                     st.info("Greeks analysis requires the Greeks computation module to be properly implemented.")
     
     # Tab 5: Sensitivity Analysis
-    with tb5:
+    with tab5:
         st.markdown('<h2 class="sub-header">Advanced Sensitivity Analysis</h2>', unsafe_allow_html=True)
         
         if 'legs' in locals() and not isinstance(legs, str):
@@ -1062,7 +1062,7 @@ with tab3:
                 )
             
             with col2:
-                resolution = st.slider("Grid Resolution", 10, 50, 20)
+                resolution = st.slider("Grid Resolution", 10, 50, 20, key="sensitivity_resolution")
                 
                 if st.button("Generate Sensitivity Heatmap", type="primary"):
                     try:
