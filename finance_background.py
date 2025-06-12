@@ -5,14 +5,14 @@ import streamlit.components.v1 as components
 components.html(
     """
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D7MTVEVGH0"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KFYG7J821K"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
       // Enregistre une vue de page personnalisée
-      gtag('config', 'G-D7MTVEVGH0', {
+      gtag('config', 'G-KFYG7J821K', {
         'page_location': 'https://derivatives-pricing.streamlit.app/',
         'page_path': '/streamlit-app',
         'page_title': 'Finance Background & Methodology'
