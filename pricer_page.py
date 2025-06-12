@@ -1525,7 +1525,7 @@ with tab4:
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            st.subheader("Parameters")
+            st.subheader("📋 Parameters")
             
             barrier_S = st.number_input("Current Stock Price (S)", value=100.0, min_value=0.1, key="barrier_s")
             barrier_K = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="barrier_k")
@@ -1541,8 +1541,8 @@ with tab4:
                                       ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], 
                                       key="barrier_type")
             
-            calculate_barrier = st.button("Calculate Barrier Option", key="calc_barrier")
-            show_paths_barrier = st.checkbox("Show Sample Paths", key="show_paths_barrier")
+            calculate_barrier = st.button("🔢 Calculate Barrier Option", key="calc_barrier")
+            show_paths_barrier = st.checkbox("📈 Show Sample Paths", key="show_paths_barrier")
         
         with col2:
             if calculate_barrier:
@@ -1566,7 +1566,7 @@ with tab4:
                         st.success(f"**Barrier Option Price: ${barrier_price:.4f}**")
                         
                         # Show payoff diagram
-                        st.subheader("Payoff Diagram")
+                        st.subheader("📈 Payoff Diagram")
                         plot_barrier_payoff(
                             barrier_K, barrier_H, barrier_option_type, barrier_type,
                             S_min=barrier_S*0.5, S_max=barrier_S*1.5
@@ -1574,14 +1574,14 @@ with tab4:
                         
                         # Show sample paths if requested
                         if show_paths_barrier and paths is not None:
-                            st.subheader("Sample Monte Carlo Paths")
+                            st.subheader("📊 Sample Monte Carlo Paths")
                             plot_sample_paths_barrier(
                                 paths[:20], barrier_K, barrier_H, 
                                 barrier_option_type, barrier_type
                             )
                         
                         # Market insights
-                        st.subheader("Market Insights")
+                        st.subheader("💡 Market Insights")
                         if "out" in barrier_type:
                             st.info("**Knock-out options** are cheaper than vanilla options as they can expire worthless if the barrier is breached.")
                         else:
@@ -1597,7 +1597,7 @@ with tab4:
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            st.subheader("Parameters")
+            st.subheader("📋 Parameters")
             
             digital_S = st.number_input("Current Stock Price (S)", value=100.0, min_value=0.1, key="digital_s")
             digital_K = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="digital_k")
@@ -1613,8 +1613,8 @@ with tab4:
             else:
                 digital_Q = 1.0
             
-            calculate_digital = st.button("Calculate Digital Option", key="calc_digital")
-            show_greeks_digital = st.checkbox("Show Greeks", key="show_greeks_digital")
+            calculate_digital = st.button("🔢 Calculate Digital Option", key="calc_digital")
+            show_greeks_digital = st.checkbox("📈 Show Greeks", key="show_greeks_digital")
         
         with col2:
             if calculate_digital:
@@ -1648,14 +1648,14 @@ with tab4:
                                 st.metric("Rho (ρ)", f"{greeks['Rho']:.4f}")
                         
                         # Show payoff diagram
-                        st.subheader("Payoff Diagram")
+                        st.subheader("📈 Payoff Diagram")
                         plot_digital_payoff(
                             digital_K, digital_option_type, digital_style, digital_Q,
                             S_min=digital_S*0.5, S_max=digital_S*1.5
                         )
                         
                         # Educational content
-                        st.subheader("Digital Options Explained")
+                        st.subheader("📚 Digital Options Explained")
                         if digital_style == "cash":
                             st.info(f"**Cash-or-Nothing**: Pays ${digital_Q:.2f} if the option finishes in-the-money, nothing otherwise.")
                         else:
@@ -1671,7 +1671,7 @@ with tab4:
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            st.subheader("Parameters")
+            st.subheader("📋 Parameters")
             
             lookback_S0 = st.number_input("Initial Stock Price (S₀)", value=100.0, min_value=0.1, key="lookback_s0")
             
@@ -1690,9 +1690,9 @@ with tab4:
             
             lookback_option_type = st.selectbox("Option Type", ["call", "put"], key="lookback_option_type")
             
-            calculate_lookback = st.button("Calculate Lookback Option", key="calc_lookback")
-            show_paths_lookback = st.checkbox("Show Sample Paths", key="show_paths_lookback")
-            show_distribution = st.checkbox("Show Payoff Distribution", key="show_dist_lookback")
+            calculate_lookback = st.button("🔢 Calculate Lookback Option", key="calc_lookback")
+            show_paths_lookback = st.checkbox("📈 Show Sample Paths", key="show_paths_lookback")
+            show_distribution = st.checkbox("📊 Show Payoff Distribution", key="show_dist_lookback")
         
         with col2:
             if calculate_lookback:
@@ -1721,20 +1721,20 @@ with tab4:
                         st.info(f"**95% Confidence Interval: [${ci_lower:.4f}, ${ci_upper:.4f}]**")
                         
                         # Show payoff diagram
-                        st.subheader("Payoff Function")
+                        st.subheader("📈 Payoff Function")
                         fig_payoff = plot_payoff(lookback_S0, lookback_option_type, lookback_K, lookback_floating)
                         st.pyplot(fig_payoff)
                         
                         # Show sample paths if requested
                         if show_paths_lookback:
-                            st.subheader("Sample Price Paths")
+                            st.subheader("📊 Sample Price Paths")
                             fig_paths = plot_paths(lookback_S0, lookback_r, lookback_sigma, lookback_T, 
                                                  min(10, lookback_n_paths), lookback_n_steps)
                             st.pyplot(fig_paths)
                         
                         # Show payoff distribution if requested
                         if show_distribution:
-                            st.subheader("Payoff Distribution")
+                            st.subheader("📈 Payoff Distribution")
                             fig_dist = plot_price_distribution(
                                 lookback_S0, lookback_r, lookback_sigma, lookback_T,
                                 lookback_option_type, lookback_floating,
@@ -1743,7 +1743,7 @@ with tab4:
                             st.pyplot(fig_dist)
                         
                         # Educational content
-                        st.subheader("Lookback Options Explained")
+                        st.subheader("💡 Lookback Options Explained")
                         if lookback_floating:
                             if lookback_option_type == "call":
                                 st.info("**Floating Strike Call**: Pays S_T - min(S_t), where min(S_t) is the minimum price during the option's life.")
@@ -1762,13 +1762,13 @@ with tab4:
     with tabb5:
         st.markdown('<div class="sub-header">Portfolio Analysis & Comparison</div>', unsafe_allow_html=True)
         
-        st.subheader("Multi-Option Comparison")
+        st.subheader("📊 Multi-Option Comparison")
         
         # Portfolio builder
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            st.subheader("Build Portfolio")
+            st.subheader("🏗️ Build Portfolio")
             
             # Common parameters
             port_S0 = st.number_input("Current Stock Price", value=100.0, key="port_s0")
@@ -1784,7 +1784,7 @@ with tab4:
             include_digital = st.checkbox("Include Digital Option", value=True, key="include_digital")
             include_lookback = st.checkbox("Include Lookback Option", value=True, key="include_lookback")
             
-            analyze_portfolio = st.button("Analyze Portfolio", key="analyze_port")
+            analyze_portfolio = st.button("📈 Analyze Portfolio", key="analyze_port")
         
         with col2:
             if analyze_portfolio:
@@ -1832,7 +1832,7 @@ with tab4:
                             df_results = pd.DataFrame(results)
                             df_results['Price'] = df_results['Price'].round(4)
                             
-                            st.subheader("Portfolio Summary")
+                            st.subheader("💰 Portfolio Summary")
                             st.dataframe(df_results, use_container_width=True)
                             
                             # Total portfolio value
@@ -1846,7 +1846,7 @@ with tab4:
                             st.plotly_chart(fig, use_container_width=True)
                             
                             # Risk analysis
-                            st.subheader("Risk Analysis")
+                            st.subheader("⚠️ Risk Analysis")
                             
                             risk_metrics = []
                             for _, row in df_results.iterrows():
@@ -1867,18 +1867,18 @@ with tab4:
                             st.dataframe(df_risk, use_container_width=True)
                             
                             # Hedging suggestions
-                            st.subheader("Hedging Suggestions")
+                            st.subheader("🛡️ Hedging Suggestions")
                             st.info("""
-                                **Portfolio Hedging Strategies:**
-                                - **Delta Hedging**: Regularly adjust underlying position to maintain delta neutrality
-                                - **Gamma Hedging**: Use options to hedge gamma exposure, especially for digital options
-                                - **Vega Hedging**: Consider volatility swaps for high vega exposure
-                                - **Barrier Monitoring**: Set up real-time alerts for barrier levels
-                                - **Diversification**: Spread risk across different option types and underlyings
-                                """)
-                                
+                            **Portfolio Hedging Strategies:**
+                            - **Delta Hedging**: Regularly adjust underlying position to maintain delta neutrality
+                            - **Gamma Hedging**: Use options to hedge gamma exposure, especially for digital options
+                            - **Vega Hedging**: Consider volatility swaps for high vega exposure
+                            - **Barrier Monitoring**: Set up real-time alerts for barrier levels
+                            - **Diversification**: Spread risk across different option types and underlyings
+                            """)
+                            
                             # Monte Carlo analysis for portfolio
-                            st.subheader("Portfolio Monte Carlo Analysis")
+                            st.subheader("🎲 Portfolio Monte Carlo Analysis")
                             
                             mc_runs = st.slider("Monte Carlo Runs", 1000, 10000, 5000, key="mc_runs")
                             
@@ -1970,10 +1970,28 @@ with tab4:
                     
                     except Exception as e:
                         st.error(f"Error in portfolio analysis: {str(e)}")
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     
