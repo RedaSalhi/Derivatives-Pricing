@@ -30,9 +30,12 @@ def interest_rate_instruments_tab():
     )
 
     if model != "Vasicek Model":
-        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-        st.markdown("🚧 This model is not yet available. Stay tuned!")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="warning-box">
+            <h4>🚧 Coming Soon</h4>
+            <p>This model is not yet available. Stay tuned for future updates!</p>
+        </div>
+        """, unsafe_allow_html=True)
         return
 
     # Vasicek Model Interface
@@ -71,7 +74,11 @@ def _parameter_estimation_tab():
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.subheader("Data Configuration")
+        st.markdown("""
+        <div class="info-box">
+            <h4>📊 Data Configuration</h4>
+        </div>
+        """, unsafe_allow_html=True)
 
         # Ticker input
         ticker = st.text_input(
@@ -93,7 +100,12 @@ def _parameter_estimation_tab():
         # Trigger estimation
         if st.button("Estimate Parameters", type="primary"):
             if start_date >= end_date:
-                st.error("❌ Start date must be before end date.")
+                st.markdown("""
+                <div class="warning-box">
+                    <h4>❌ Invalid Date Range</h4>
+                    <p>Start date must be before end date.</p>
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 with st.spinner("Loading data and estimating..."):
                     try:
@@ -102,42 +114,92 @@ def _parameter_estimation_tab():
                         st.session_state.vasicek_params = {
                             'a': a, 'lambda': lam, 'sigma': sigma, 'dt': dt, 'r0': r0, 'ticker': ticker
                         }
-                        st.success("✅ Parameters successfully estimated!")
+                        st.markdown("""
+                        <div class="info-box">
+                            <h4>✅ Success!</h4>
+                            <p>Parameters successfully estimated!</p>
+                        </div>
+                        """, unsafe_allow_html=True)
 
                     except Exception as e:
                         import traceback
-                        st.error(f"❌ Error during estimation:\n\n```\n{traceback.format_exc()}\n```")
+                        st.markdown(f"""
+                        <div class="warning-box">
+                            <h4>❌ Estimation Error</h4>
+                            <p>Error during estimation:</p>
+                            <pre>{traceback.format_exc()}</pre>
+                        </div>
+                        """, unsafe_allow_html=True)
 
     with col2:
-        st.subheader("Estimated Parameters")
+        st.markdown("""
+        <div class="info-box">
+            <h4>📈 Estimated Parameters</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
         if st.session_state.vasicek_params:
             params = st.session_state.vasicek_params
 
-            col_a, col_lam, col_sig = st.columns(3)
-            with col_a:
-                st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                st.metric("Speed of mean reversion (a)", f"{params['a']:.4f}")
-                st.markdown('</div>', unsafe_allow_html=True)
-            with col_lam:
-                st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                st.metric("Long-term mean level (λ)", f"{params['lambda']:.4f}")
-                st.markdown('</div>', unsafe_allow_html=True)
-            with col_sig:
-                st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                st.metric("Volatility (σ)", f"{params['sigma']:.4f}")
-                st.markdown('</div>', unsafe_allow_html=True)
-
-            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Initial rate (r₀)", f"{params['r0']:.4f}")
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown('<div class="info-box">', unsafe_allow_html=True)
-            st.markdown(f"Ticker used: **{params['ticker']}** | Δt: {params['dt']:.4f}")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="metric-container">
+                <h4>Vasicek Model Parameters</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 8px; font-weight: bold;">Parameter</td>
+                        <td style="padding: 8px; font-weight: bold;">Symbol</td>
+                        <td style="padding: 8px; font-weight: bold;">Value</td>
+                        <td style="padding: 8px; font-weight: bold;">Description</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px;">Speed of Reversion</td>
+                        <td style="padding: 8px;">$$a$$</td>
+                        <td style="padding: 8px; font-family: monospace;">{params['a']:.4f}</td>
+                        <td style="padding: 8px; font-size: 0.9em;">How quickly rates return to mean</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px;">Long-term Mean</td>
+                        <td style="padding: 8px;">$$\\lambda$$</td>
+                        <td style="padding: 8px; font-family: monospace;">{params['lambda']:.4f}</td>
+                        <td style="padding: 8px; font-size: 0.9em;">Target interest rate level</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px;">Volatility</td>
+                        <td style="padding: 8px;">$$\\sigma$$</td>
+                        <td style="padding: 8px; font-family: monospace;">{params['sigma']:.4f}</td>
+                        <td style="padding: 8px; font-size: 0.9em;">Standard deviation of changes</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px;">Initial Rate</td>
+                        <td style="padding: 8px;">$$r_0$$</td>
+                        <td style="padding: 8px; font-family: monospace;">{params['r0']:.4f}</td>
+                        <td style="padding: 8px; font-size: 0.9em;">Starting interest rate</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px;">Time Step</td>
+                        <td style="padding: 8px;">$$\\Delta t$$</td>
+                        <td style="padding: 8px; font-family: monospace;">{params['dt']:.4f}</td>
+                        <td style="padding: 8px; font-size: 0.9em;">Observation frequency</td>
+                    </tr>
+                </table>
+                <br>
+                <p style="text-align: center; font-weight: bold; color: #1f77b4;">
+                    Data Source: {params['ticker']}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.markdown('<div class="info-box">', unsafe_allow_html=True)
-            st.markdown("Click 'Estimate Parameters' to get started")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="info-box">
+                <h4>👆 Get Started</h4>
+                <p>Click <strong>'Estimate Parameters'</strong> to begin analyzing interest rate data.</p>
+                <br>
+                <p><em>The Vasicek model follows the stochastic differential equation:</em></p>
+                <p style="text-align: center; font-size: 1.1em;">
+                    $$dr(t) = a(\\lambda - r(t))dt + \\sigma dW(t)$$
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
 
 def _simulation_yield_curves_tab():
@@ -145,9 +207,12 @@ def _simulation_yield_curves_tab():
     st.markdown('<div class="sub-header">Simulation of Rate Paths and Yield Curves (Vasicek)</div>', unsafe_allow_html=True)
 
     if not st.session_state.vasicek_params:
-        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-        st.markdown("⚠️ Please estimate the parameters in the previous tab first.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="warning-box">
+            <h4>⚠️ Parameters Required</h4>
+            <p>Please estimate the parameters in the <strong>Parameter Estimation</strong> tab first.</p>
+        </div>
+        """, unsafe_allow_html=True)
         return
 
     params = st.session_state.vasicek_params
@@ -155,13 +220,21 @@ def _simulation_yield_curves_tab():
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("Simulation Parameters")
+        st.markdown("""
+        <div class="info-box">
+            <h4>🎛️ Simulation Parameters</h4>
+        </div>
+        """, unsafe_allow_html=True)
 
         T = st.slider("Time horizon (years)", min_value=1, max_value=30, value=10)
-        dt = st.slider("Time step (dt)", min_value=0.01, max_value=1.0, value=float(params["dt"]), step=0.01)
+        dt = st.slider("Time step ($$\\Delta t$$)", min_value=0.01, max_value=1.0, value=float(params["dt"]), step=0.01)
         n_paths = st.slider("Number of simulated paths", 100, 10000, 1000, step=100)
 
-        st.subheader("Yield Curve Configuration")
+        st.markdown("""
+        <div class="info-box">
+            <h4>📊 Yield Curve Configuration</h4>
+        </div>
+        """, unsafe_allow_html=True)
 
         available_maturities = [0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 30]
         default_maturities = [m for m in [1, 2, 5, 10] if m <= T]
@@ -224,19 +297,38 @@ def _simulation_yield_curves_tab():
                 st.plotly_chart(fig_hist, use_container_width=True)
 
                 # Descriptive statistics
-                col_stat1, col_stat2, col_stat3 = st.columns(3)
-                with col_stat1:
-                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                    st.metric("Final Mean", f"{np.mean(r_final):.4f}")
-                    st.markdown('</div>', unsafe_allow_html=True)
-                with col_stat2:
-                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                    st.metric("Standard Deviation", f"{np.std(r_final):.4f}")
-                    st.markdown('</div>', unsafe_allow_html=True)
-                with col_stat3:
-                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                    st.metric("Min / Max", f"{np.min(r_final):.4f} / {np.max(r_final):.4f}")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="metric-container">
+                    <h4>📊 Final Rate Statistics</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <td style="padding: 10px; font-weight: bold;">Statistic</td>
+                            <td style="padding: 10px; font-weight: bold;">Value</td>
+                            <td style="padding: 10px; font-weight: bold;">Formula</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px;">Mean ($$\\bar{{r}}$$)</td>
+                            <td style="padding: 8px; font-family: monospace;">{np.mean(r_final):.4f}</td>
+                            <td style="padding: 8px;">$$\\frac{{1}}{{n}}\\sum_{{i=1}}^{{n}} r_i$$</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px;">Std Dev ($$\\sigma_r$$)</td>
+                            <td style="padding: 8px; font-family: monospace;">{np.std(r_final):.4f}</td>
+                            <td style="padding: 8px;">$$\\sqrt{{\\frac{{1}}{{n-1}}\\sum_{{i=1}}^{{n}} (r_i - \\bar{{r}})^2}}$$</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 8px;">Minimum</td>
+                            <td style="padding: 8px; font-family: monospace;">{np.min(r_final):.4f}</td>
+                            <td style="padding: 8px;">$$\\min(r_1, r_2, ..., r_n)$$</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px;">Maximum</td>
+                            <td style="padding: 8px; font-family: monospace;">{np.max(r_final):.4f}</td>
+                            <td style="padding: 8px;">$$\\max(r_1, r_2, ..., r_n)$$</td>
+                        </tr>
+                    </table>
+                </div>
+                """, unsafe_allow_html=True)
 
 
 def _bond_pricing_tab():
@@ -244,9 +336,12 @@ def _bond_pricing_tab():
     st.markdown('<div class="sub-header">Bond Pricing (Zero-Coupon or Coupon Bonds)</div>', unsafe_allow_html=True)
 
     if not st.session_state.vasicek_params:
-        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-        st.markdown("⚠️ Please estimate the parameters in the previous tab first.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="warning-box">
+            <h4>⚠️ Parameters Required</h4>
+            <p>Please estimate the parameters in the <strong>Parameter Estimation</strong> tab first.</p>
+        </div>
+        """, unsafe_allow_html=True)
         return
 
     params = st.session_state.vasicek_params
@@ -254,13 +349,17 @@ def _bond_pricing_tab():
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("Bond Parameters")
+        st.markdown("""
+        <div class="info-box">
+            <h4>🏦 Bond Parameters</h4>
+        </div>
+        """, unsafe_allow_html=True)
 
         bond_type = st.radio("Bond type", ["Zero-Coupon", "With Coupons"])
 
-        r_current = st.number_input("Current interest rate (r)", min_value=0.0, max_value=0.20, value=params['r0'], step=0.001, format="%.4f")
-        t_current = st.number_input("Current time (t)", min_value=0.0, max_value=30.0, value=0.0, step=0.1)
-        maturity = st.number_input("Maturity (T)", min_value=t_current + 0.1, max_value=30.0, value=5.0, step=0.1)
+        r_current = st.number_input("Current interest rate ($$r$$)", min_value=0.0, max_value=0.20, value=params['r0'], step=0.001, format="%.4f")
+        t_current = st.number_input("Current time ($$t$$)", min_value=0.0, max_value=30.0, value=0.0, step=0.1)
+        maturity = st.number_input("Maturity ($$T$$)", min_value=t_current + 0.1, max_value=30.0, value=5.0, step=0.1)
         face_value = st.number_input("Face value", min_value=100, max_value=10000, value=100, step=10)
 
         if bond_type == "With Coupons":
@@ -268,7 +367,12 @@ def _bond_pricing_tab():
             freq = st.selectbox("Payment frequency", ["Annual", "Semi-Annual"])
             dt_coupon = 1.0 if freq == "Annual" else 0.5
 
-        st.subheader("Sensitivity Analysis")
+        st.markdown("""
+        <div class="info-box">
+            <h4>📈 Sensitivity Analysis</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
         sensitivity_param = st.selectbox("Parameter to test", ["Current rate (r)", "Maturity (T)", "Volatility (σ)"])
 
         price_btn = st.button("Compute Price", type="primary")
@@ -289,14 +393,30 @@ def _bond_pricing_tab():
                             face_value=face_value
                         )
                         
-                        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                        st.success(f"Zero-Coupon Bond Price: **${price:.2f}**")
-                        st.markdown('</div>', unsafe_allow_html=True)
-
                         ytm = -np.log(price / face_value) / (maturity - t_current)
-                        st.markdown('<div class="info-box">', unsafe_allow_html=True)
-                        st.markdown(f"Yield to Maturity (YTM): **{ytm:.4f} ({ytm*100:.2f}%)**")
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        st.markdown(f"""
+                        <div class="metric-container">
+                            <h4>💰 Zero-Coupon Bond Pricing Results</h4>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 10px; font-weight: bold;">Metric</td>
+                                    <td style="padding: 10px; font-weight: bold;">Value</td>
+                                    <td style="padding: 10px; font-weight: bold;">Formula</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 8px;">Bond Price</td>
+                                    <td style="padding: 8px; font-family: monospace; color: #2E8B57; font-weight: bold;">${price:.2f}</td>
+                                    <td style="padding: 8px;">$$P(t,T) = A(t,T) \\cdot e^{{-B(t,T) \\cdot r(t)}}$$</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px;">Yield to Maturity</td>
+                                    <td style="padding: 8px; font-family: monospace; color: #FF6347; font-weight: bold;">{ytm:.4f} ({ytm*100:.2f}%)</td>
+                                    <td style="padding: 8px;">$$YTM = -\\frac{{\\ln(P/F)}}{{T-t}}$$</td>
+                                </tr>
+                            </table>
+                        </div>
+                        """, unsafe_allow_html=True)
 
                     else:
                         price = price_coupon_bond(
@@ -311,16 +431,36 @@ def _bond_pricing_tab():
                             dt=dt_coupon
                         )
                         
-                        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                        st.success(f"Coupon Bond Price: **${price:.2f}**")
-                        st.markdown('</div>', unsafe_allow_html=True)
-                        
-                        st.markdown('<div class="info-box">', unsafe_allow_html=True)
-                        st.markdown(f"Coupon: {coupon_rate*100:.2f}% ({freq})")
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class="metric-container">
+                            <h4>💰 Coupon Bond Pricing Results</h4>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 10px; font-weight: bold;">Metric</td>
+                                    <td style="padding: 10px; font-weight: bold;">Value</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 8px;">Bond Price</td>
+                                    <td style="padding: 8px; font-family: monospace; color: #2E8B57; font-weight: bold;">${price:.2f}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 8px;">Coupon Rate</td>
+                                    <td style="padding: 8px; font-family: monospace;">{coupon_rate*100:.2f}%</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px;">Payment Frequency</td>
+                                    <td style="padding: 8px; font-family: monospace;">{freq}</td>
+                                </tr>
+                            </table>
+                            <br>
+                            <p style="text-align: center; font-style: italic;">
+                                $$P = \\sum_{{i=1}}^{{n}} C \\cdot P(t,T_i) + F \\cdot P(t,T)$$
+                            </p>
+                        </div>
+                        """, unsafe_allow_html=True)
 
                     # Sensitivity Analysis
-                    st.markdown('<div class="sub-header">Sensitivity Analysis</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="sub-header">📊 Sensitivity Analysis</div>', unsafe_allow_html=True)
 
                     fig = go.Figure()
 
@@ -335,9 +475,9 @@ def _bond_pricing_tab():
                                 p = price_coupon_bond(r, t_current, params['a'], params['lambda'], params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
                             prices.append(p)
 
-                        fig.add_trace(go.Scatter(x=r_vals * 100, y=prices, mode="lines", name="Price"))
+                        fig.add_trace(go.Scatter(x=r_vals * 100, y=prices, mode="lines", name="Price", line=dict(width=3)))
                         fig.add_vline(x=r_current * 100, line_dash="dash", line_color="red", annotation_text=f"Current rate: {r_current*100:.2f}%")
-                        fig.update_layout(title="Price Sensitivity to Interest Rate", xaxis_title="Rate (%)", yaxis_title="Price")
+                        fig.update_layout(title="Price Sensitivity to Interest Rate", xaxis_title="Rate (%)", yaxis_title="Price ($)")
 
                     elif sensitivity_param == "Maturity (T)":
                         T_vals = np.linspace(t_current + 0.1, 30, 100)
@@ -350,9 +490,9 @@ def _bond_pricing_tab():
                                 p = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], params['sigma'], T_val, face_value, coupon_rate, dt_coupon)
                             prices.append(p)
 
-                        fig.add_trace(go.Scatter(x=T_vals, y=prices, mode="lines", name="Price"))
+                        fig.add_trace(go.Scatter(x=T_vals, y=prices, mode="lines", name="Price", line=dict(width=3)))
                         fig.add_vline(x=maturity, line_dash="dash", line_color="red", annotation_text=f"Current maturity: {maturity:.1f} years")
-                        fig.update_layout(title="Price Sensitivity to Maturity", xaxis_title="Maturity (years)", yaxis_title="Price")
+                        fig.update_layout(title="Price Sensitivity to Maturity", xaxis_title="Maturity (years)", yaxis_title="Price ($)")
 
                     elif sensitivity_param == "Volatility (σ)":
                         sigma_vals = np.linspace(0.001, params['sigma'] * 2, 100)
@@ -365,15 +505,20 @@ def _bond_pricing_tab():
                                 p = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], sig, maturity, face_value, coupon_rate, dt_coupon)
                             prices.append(p)
 
-                        fig.add_trace(go.Scatter(x=sigma_vals * 100, y=prices, mode="lines", name="Price"))
+                        fig.add_trace(go.Scatter(x=sigma_vals * 100, y=prices, mode="lines", name="Price", line=dict(width=3)))
                         fig.add_vline(x=params['sigma'] * 100, line_dash="dash", line_color="red", annotation_text=f"Current σ: {params['sigma']*100:.2f}%")
-                        fig.update_layout(title="Price Sensitivity to Volatility", xaxis_title="Volatility (%)", yaxis_title="Price")
+                        fig.update_layout(title="Price Sensitivity to Volatility", xaxis_title="Volatility (%)", yaxis_title="Price ($)")
 
                     st.plotly_chart(fig, use_container_width=True)
 
                 except Exception as e:
                     import traceback
-                    st.error(f"❌ Error during calculation:\n\n```\n{traceback.format_exc()}\n```")
+                    st.markdown(f"""
+                    <div class="warning-box">
+                        <h4>❌ Calculation Error</h4>
+                        <pre>{traceback.format_exc()}</pre>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 
 def _bond_options_tab():
@@ -381,9 +526,12 @@ def _bond_options_tab():
     st.markdown('<div class="sub-header">Bond Option Pricing</div>', unsafe_allow_html=True)
 
     if not st.session_state.vasicek_params:
-        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-        st.markdown("⚠️ Please estimate the parameters in the previous tab first.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="warning-box">
+            <h4>⚠️ Parameters Required</h4>
+            <p>Please estimate the parameters in the <strong>Parameter Estimation</strong> tab first.</p>
+        </div>
+        """, unsafe_allow_html=True)
         return
 
     params = st.session_state.vasicek_params
@@ -394,16 +542,20 @@ def _bond_options_tab():
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("Option Parameters")
+        st.markdown("""
+        <div class="info-box">
+            <h4>📋 Option Parameters</h4>
+        </div>
+        """, unsafe_allow_html=True)
 
         option_type = st.radio("Option type", ["Call", "Put"], key="opt_type")
         model_type = st.radio("Calculation method", ["Analytical", "Monte Carlo"], key="opt_model")
 
-        r_current = st.number_input("Current rate (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="opt_r")
-        T1 = st.number_input("Option maturity (T₁)", 0.1, 10.0, 1.0, step=0.1, key="opt_T1")
-        T2 = st.number_input("Bond maturity (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="opt_T2")
+        r_current = st.number_input("Current rate ($$r$$)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="opt_r")
+        T1 = st.number_input("Option maturity ($$T_1$$)", 0.1, 10.0, 1.0, step=0.1, key="opt_T1")
+        T2 = st.number_input("Bond maturity ($$T_2$$)", T1 + 0.1, 30.0, 5.0, step=0.1, key="opt_T2")
 
-        K = st.number_input("Strike price (K)", 0.1, 2.0, 0.8, step=0.01, key="opt_K")
+        K = st.number_input("Strike price ($$K$$)", 0.1, 2.0, 0.8, step=0.01, key="opt_K")
         face_value = st.number_input("Face value", 100, 10000, 1000, step=100, key="opt_face")
 
         if model_type == "Monte Carlo":
@@ -411,7 +563,7 @@ def _bond_options_tab():
             default_dt = round(params['dt'], 3) if 'dt' in params else 0.01
 
             dt_mc = st.number_input(
-                "Time step (dt)",
+                "Time step ($$\\Delta t$$)",
                 min_value=0.001,
                 max_value=0.1,
                 value=default_dt,
@@ -425,9 +577,12 @@ def _bond_options_tab():
     with col2:
         if price_option_btn:
             if T2 <= T1:
-                st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-                st.markdown("⚠️ The bond maturity (T₂) must be greater than the option maturity (T₁).")
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown("""
+                <div class="warning-box">
+                    <h4>⚠️ Invalid Maturity Structure</h4>
+                    <p>The bond maturity ($$T_2$$) must be greater than the option maturity ($$T_1$$).</p>
+                </div>
+                """, unsafe_allow_html=True)
                 return
 
             with st.spinner("Computing option price..."):
@@ -446,9 +601,23 @@ def _bond_options_tab():
                             option_type=option_type.lower()
                         )
                         
-                        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                        st.success(f"{option_type} Option Price (Analytical): **{price:.4f}**")
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class="metric-container">
+                            <h4>💰 {option_type} Option Pricing Results (Analytical)</h4>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 10px; font-weight: bold;">Metric</td>
+                                    <td style="padding: 10px; font-weight: bold;">Value</td>
+                                    <td style="padding: 10px; font-weight: bold;">Formula</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px;">Option Price</td>
+                                    <td style="padding: 8px; font-family: monospace; color: #2E8B57; font-weight: bold;">{price:.4f}</td>
+                                    <td style="padding: 8px;">$P(t,T_1) \\cdot N(d_1) - K \\cdot P(t,T_2) \\cdot N(d_2)$</td>
+                                </tr>
+                            </table>
+                        </div>
+                        """, unsafe_allow_html=True)
 
                     else:
                         price, std = mc_option_price(
@@ -465,35 +634,94 @@ def _bond_options_tab():
                             option_type=option_type.lower()
                         )
                         
-                        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                        st.success(f"{option_type} Option Price (Monte Carlo): **{price:.4f} ± {std:.4f}**")
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        ci_lower = price - 1.96*std
+                        ci_upper = price + 1.96*std
                         
-                        st.markdown('<div class="info-box">', unsafe_allow_html=True)
-                        st.markdown(f"95% Confidence Interval: [{price - 1.96*std:.4f}, {price + 1.96*std:.4f}]")
-                        st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f"""
+                        <div class="metric-container">
+                            <h4>💰 {option_type} Option Pricing Results (Monte Carlo)</h4>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 10px; font-weight: bold;">Metric</td>
+                                    <td style="padding: 10px; font-weight: bold;">Value</td>
+                                    <td style="padding: 10px; font-weight: bold;">Formula</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 8px;">Option Price</td>
+                                    <td style="padding: 8px; font-family: monospace; color: #2E8B57; font-weight: bold;">{price:.4f}</td>
+                                    <td style="padding: 8px;">$\\frac{{1}}{{N}}\\sum_{{i=1}}^{{N}} \\max(S_i - K, 0)$</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 8px;">Standard Error</td>
+                                    <td style="padding: 8px; font-family: monospace;">± {std:.4f}</td>
+                                    <td style="padding: 8px;">$\\frac{{\\sigma}}{{\\sqrt{{N}}}}$</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px;">95% Confidence Interval</td>
+                                    <td style="padding: 8px; font-family: monospace;">[{ci_lower:.4f}, {ci_upper:.4f}]</td>
+                                    <td style="padding: 8px;">$\\bar{{X}} \\pm 1.96 \\cdot SE$</td>
+                                </tr>
+                            </table>
+                        </div>
+                        """, unsafe_allow_html=True)
 
-                    st.markdown('<div class="sub-header">Summary</div>', unsafe_allow_html=True)
-                    df_params = pd.DataFrame({
-                        "Parameter": [
-                            "Option Type", "Method", "Current Rate (r)", "T₁ (Option Maturity)", "T₂ (Bond Maturity)",
-                            "Strike Price (K)", "Face Value"
-                        ],
-                        "Value": [
-                            option_type,
-                            model_type,
-                            f"{r_current:.4f}",
-                            f"{T1:.2f} years",
-                            f"{T2:.2f} years",
-                            f"{K:.2f}",
-                            f"{face_value}"
-                        ]
-                    })
-                    st.table(df_params)
+                    # Summary parameters table
+                    st.markdown(f"""
+                    <div class="info-box">
+                        <h4>📊 Option Summary</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 8px; font-weight: bold;">Parameter</td>
+                                <td style="padding: 8px; font-weight: bold;">Symbol</td>
+                                <td style="padding: 8px; font-weight: bold;">Value</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px;">Option Type</td>
+                                <td style="padding: 8px;">-</td>
+                                <td style="padding: 8px;">{option_type}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px;">Method</td>
+                                <td style="padding: 8px;">-</td>
+                                <td style="padding: 8px;">{model_type}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px;">Current Rate</td>
+                                <td style="padding: 8px;">$r$</td>
+                                <td style="padding: 8px;">{r_current:.4f}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px;">Option Maturity</td>
+                                <td style="padding: 8px;">$T_1$</td>
+                                <td style="padding: 8px;">{T1:.2f} years</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px;">Bond Maturity</td>
+                                <td style="padding: 8px;">$T_2$</td>
+                                <td style="padding: 8px;">{T2:.2f} years</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 8px;">Strike Price</td>
+                                <td style="padding: 8px;">$K$</td>
+                                <td style="padding: 8px;">{K:.2f}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px;">Face Value</td>
+                                <td style="padding: 8px;">$F$</td>
+                                <td style="padding: 8px;">{face_value}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    """, unsafe_allow_html=True)
 
                 except Exception as e:
                     import traceback
-                    st.error(f"❌ Error:\n\n```\n{traceback.format_exc()}\n```")
+                    st.markdown(f"""
+                    <div class="warning-box">
+                        <h4>❌ Calculation Error</h4>
+                        <pre>{traceback.format_exc()}</pre>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 
 def _greeks_analysis_tab():
@@ -501,9 +729,12 @@ def _greeks_analysis_tab():
     st.markdown('<div class="sub-header">Greeks Analysis for Bond Options</div>', unsafe_allow_html=True)
 
     if not st.session_state.vasicek_params:
-        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-        st.markdown("⚠️ Please estimate the parameters in the previous tab first.")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="warning-box">
+            <h4>⚠️ Parameters Required</h4>
+            <p>Please estimate the parameters in the <strong>Parameter Estimation</strong> tab first.</p>
+        </div>
+        """, unsafe_allow_html=True)
         return
 
     params = st.session_state.vasicek_params
@@ -514,16 +745,20 @@ def _greeks_analysis_tab():
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("Configuration")
+        st.markdown("""
+        <div class="info-box">
+            <h4>🎛️ Greeks Configuration</h4>
+        </div>
+        """, unsafe_allow_html=True)
 
         greek_type = st.selectbox("Greek to analyze", ["price", "delta", "vega", "rho"], key="greek_type")
         option_type = st.radio("Option type", ["call", "put"], key="greek_opt_type")
         model_type = st.radio("Calculation method", ["Analytical", "Monte Carlo"], key="greek_model")
 
-        T1 = st.number_input("Option maturity (T₁)", 0.1, 10.0, 1.0, step=0.1, key="greek_T1")
-        T2 = st.number_input("Bond maturity (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="greek_T2")
+        T1 = st.number_input("Option maturity ($T_1$)", 0.1, 10.0, 1.0, step=0.1, key="greek_T1")
+        T2 = st.number_input("Bond maturity ($T_2$)", T1 + 0.1, 30.0, 5.0, step=0.1, key="greek_T2")
 
-        K = st.number_input("Strike price (K)", 0.1, 2.0, 0.8, step=0.01, key="greek_K")
+        K = st.number_input("Strike price ($K$)", 0.1, 2.0, 0.8, step=0.01, key="greek_K")
         face_value = st.number_input("Face value", 100, 10000, 1000, step=100, key="greek_face")
 
         # Suggest dt from Tab 1
@@ -531,7 +766,7 @@ def _greeks_analysis_tab():
 
         if model_type == "Monte Carlo":
             n_paths = st.number_input("Number of Monte Carlo simulations", 1000, 50000, 5000, step=1000, key="greek_npaths")
-            dt = st.number_input("Time step (MC dt)", 0.001, 0.1, default_dt, step=0.001, format="%.3f", key="greek_dt")
+            dt = st.number_input("Time step ($\\Delta t$)", 0.001, 0.1, default_dt, step=0.001, format="%.3f", key="greek_dt")
         else:
             dt = default_dt
             n_paths = 10000  # default value for analytical, ignored
@@ -563,128 +798,162 @@ def _greeks_analysis_tab():
 
                 except Exception as e:
                     import traceback
-                    st.error(f"❌ Error:\n\n```\n{traceback.format_exc()}\n```")
+                    st.markdown(f"""
+                    <div class="warning-box">
+                        <h4>❌ Calculation Error</h4>
+                        <pre>{traceback.format_exc()}</pre>
+                    </div>
+                    """, unsafe_allow_html=True)
     
     # Educational content
     st.markdown("---")
-    st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
     
-    with st.expander("📚 Understanding the Vasicek Model"):
-        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    with st.expander("📊 Understanding the Vasicek Model"):
         st.markdown("""
-        ### The Vasicek Interest Rate Model
-        
-        The Vasicek model is a mathematical model describing the evolution of interest rates. It is a type of "one-factor short-rate model" as it describes interest rate movements as driven by only one source of market risk.
-        
-        **Model Equation:**
-        ```
-        dr(t) = a(λ - r(t))dt + σ dW(t)
-        ```
-        
-        **Parameters:**
-        - **a**: Speed of mean reversion (how quickly rates return to long-term mean)
-        - **λ**: Long-term mean level of interest rates
-        - **σ**: Volatility of interest rate changes
-        - **r(t)**: Short-term interest rate at time t
-        - **dW(t)**: Wiener process (random component)
-        
-        **Key Features:**
-        - **Mean Reversion**: Rates tend to drift back toward the long-term mean
-        - **Analytical Solutions**: Closed-form formulas for bond prices and options
-        - **Negative Rates**: Model allows for negative interest rates
-        - **Normal Distribution**: Rate changes are normally distributed
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
+        <div class="info-box">
+            <h4>The Vasicek Interest Rate Model</h4>
+            
+            <p>The Vasicek model is a mathematical model describing the evolution of interest rates. It is a type of "one-factor short-rate model" as it describes interest rate movements as driven by only one source of market risk.</p>
+            
+            <h5>📐 Model Equation:</h5>
+            <p style="text-align: center; font-size: 1.2em; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                $dr(t) = a(\\lambda - r(t))dt + \\sigma dW(t)$
+            </p>
+            
+            <h5>🔧 Parameters:</h5>
+            <ul>
+                <li><strong>$a$</strong>: Speed of mean reversion (how quickly rates return to long-term mean)</li>
+                <li><strong>$\\lambda$</strong>: Long-term mean level of interest rates</li>
+                <li><strong>$\\sigma$</strong>: Volatility of interest rate changes</li>
+                <li><strong>$r(t)$</strong>: Short-term interest rate at time $t$</li>
+                <li><strong>$dW(t)$</strong>: Wiener process (random component)</li>
+            </ul>
+            
+            <h5>✨ Key Features:</h5>
+            <ul>
+                <li><strong>Mean Reversion</strong>: Rates tend to drift back toward the long-term mean</li>
+                <li><strong>Analytical Solutions</strong>: Closed-form formulas for bond prices and options</li>
+                <li><strong>Negative Rates</strong>: Model allows for negative interest rates</li>
+                <li><strong>Normal Distribution</strong>: Rate changes are normally distributed</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with st.expander("🏦 Bond Pricing Formulas"):
-        st.markdown('<div class="info-box">', unsafe_allow_html=True)
         st.markdown("""
-        ### Vasicek Bond Pricing Formulas
-        
-        **Zero-Coupon Bond Price:**
-        ```
-        P(t,T) = A(t,T) × exp(-B(t,T) × r(t))
-        ```
-        
-        Where:
-        ```
-        B(t,T) = (1 - exp(-a(T-t))) / a
-        A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
-        ```
-        
-        **Coupon Bond Price:**
-        Sum of discounted coupon payments plus principal:
-        ```
-        P = Σ C × P(t,Ti) + Face × P(t,T)
-        ```
-        
-        **Bond Option Price:**
-        Uses the Black-Scholes formula adapted for bonds:
-        ```
-        Call = P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)
-        Put = K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
-        ```
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
+        <div class="info-box">
+            <h4>Vasicek Bond Pricing Formulas</h4>
+            
+            <h5>💰 Zero-Coupon Bond Price:</h5>
+            <p style="text-align: center; font-size: 1.1em; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                $P(t,T) = A(t,T) \\times \\exp(-B(t,T) \\times r(t))$
+            </p>
+            
+            <p><strong>Where:</strong></p>
+            <p style="text-align: center; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                $B(t,T) = \\frac{1 - \\exp(-a(T-t))}{a}$
+            </p>
+            <p style="text-align: center; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                $A(t,T) = \\exp\\left(\\left(\\lambda - \\frac{\\sigma^2}{2a^2}\\right)(B(t,T) - T + t) - \\frac{\\sigma^2 B(t,T)^2}{4a}\\right)$
+            </p>
+            
+            <h5>🎫 Coupon Bond Price:</h5>
+            <p>Sum of discounted coupon payments plus principal:</p>
+            <p style="text-align: center; font-size: 1.1em; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                $P = \\sum_{i=1}^{n} C \\times P(t,T_i) + F \\times P(t,T)$
+            </p>
+            
+            <h5>📈 Bond Option Price:</h5>
+            <p>Uses the Black-Scholes formula adapted for bonds:</p>
+            <p style="text-align: center; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                $\\text{Call} = P(t,T_1) \\times N(d_1) - K \\times P(t,T_2) \\times N(d_2)$
+            </p>
+            <p style="text-align: center; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                $\\text{Put} = K \\times P(t,T_2) \\times N(-d_2) - P(t,T_1) \\times N(-d_1)$
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     
     with st.expander("📊 Greeks for Bond Options"):
-        st.markdown('<div class="info-box">', unsafe_allow_html=True)
         st.markdown("""
-        ### Bond Option Greeks
-        
-        **Delta (Δ)**: Sensitivity to changes in the underlying bond price
-        - Measures how much the option price changes for a $1 change in bond price
-        - Range: 0 to 1 for calls, -1 to 0 for puts
-        
-        **Rho (ρ)**: Sensitivity to changes in interest rates
-        - Measures how much the option price changes for a 1% change in rates
-        - More important for bond options than equity options
-        - **Negative** for calls (higher rates → lower bond prices → lower call values)
-        
-        **Vega (ν)**: Sensitivity to changes in interest rate volatility
-        - Measures how much the option price changes for a 1% change in volatility
-        - **Positive** for both calls and puts (higher volatility → higher option values)
-        
-        **Theta (Θ)**: Time decay
-        - Measures how much the option price changes as time passes
-        - Usually **negative** (options lose value as expiration approaches)
-        
-        **Gamma (Γ)**: Rate of change of delta
-        - Measures the convexity of the option price
-        - Highest for **at-the-money** options near expiration
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
+        <div class="info-box">
+            <h4>Bond Option Greeks</h4>
+            
+            <h5>📈 Delta ($\\Delta$): Sensitivity to Bond Price Changes</h5>
+            <ul>
+                <li>Measures how much the option price changes for a $1 change in bond price</li>
+                <li><strong>Range:</strong> 0 to 1 for calls, -1 to 0 for puts</li>
+                <li><strong>Formula:</strong> $\\Delta = \\frac{\\partial V}{\\partial S}$</li>
+            </ul>
+            
+            <h5>💸 Rho ($\\rho$): Sensitivity to Interest Rate Changes</h5>
+            <ul>
+                <li>Measures how much the option price changes for a 1% change in rates</li>
+                <li>More important for bond options than equity options</li>
+                <li><strong>Negative</strong> for calls (higher rates → lower bond prices → lower call values)</li>
+                <li><strong>Formula:</strong> $\\rho = \\frac{\\partial V}{\\partial r}$</li>
+            </ul>
+            
+            <h5>🌊 Vega ($\\nu$): Sensitivity to Volatility Changes</h5>
+            <ul>
+                <li>Measures how much the option price changes for a 1% change in volatility</li>
+                <li><strong>Positive</strong> for both calls and puts (higher volatility → higher option values)</li>
+                <li><strong>Formula:</strong> $\\nu = \\frac{\\partial V}{\\partial \\sigma}$</li>
+            </ul>
+            
+            <h5>⏰ Theta ($\\Theta$): Time Decay</h5>
+            <ul>
+                <li>Measures how much the option price changes as time passes</li>
+                <li>Usually <strong>negative</strong> (options lose value as expiration approaches)</li>
+                <li><strong>Formula:</strong> $\\Theta = \\frac{\\partial V}{\\partial t}$</li>
+            </ul>
+            
+            <h5>🎯 Gamma ($\\Gamma$): Rate of Change of Delta</h5>
+            <ul>
+                <li>Measures the convexity of the option price</li>
+                <li>Highest for <strong>at-the-money</strong> options near expiration</li>
+                <li><strong>Formula:</strong> $\\Gamma = \\frac{\\partial^2 V}{\\partial S^2}$</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     with st.expander("⚠️ Model Limitations & Considerations"):
-        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
         st.markdown("""
-        ### Vasicek Model Limitations
-        
-        **Theoretical Limitations:**
-        - **Negative Rates**: Model allows unrealistic negative rates (though less problematic now)
-        - **Constant Parameters**: Assumes constant mean reversion speed and volatility
-        - **Normal Distribution**: Real rate changes may have fat tails
-        - **Single Factor**: Ignores multiple sources of interest rate risk
-        
-        **Practical Considerations:**
-        - **Parameter Estimation**: Historical data may not reflect future behavior
-        - **Calibration**: Model may not fit current market prices perfectly
-        - **Volatility Clustering**: Real rates show periods of high/low volatility
-        - **Regime Changes**: Central bank policy changes can break model assumptions
-        
-        **Risk Management:**
-        - Use multiple models for comparison
-        - Regular recalibration with fresh data
-        - Stress testing with extreme scenarios
-        - Consider model uncertainty in risk measures
-        """)
-        st.markdown('</div>', unsafe_allow_html=True)
+        <div class="warning-box">
+            <h4>Vasicek Model Limitations</h4>
+            
+            <h5>🔍 Theoretical Limitations:</h5>
+            <ul>
+                <li><strong>Negative Rates:</strong> Model allows unrealistic negative rates (though less problematic now)</li>
+                <li><strong>Constant Parameters:</strong> Assumes constant mean reversion speed and volatility</li>
+                <li><strong>Normal Distribution:</strong> Real rate changes may have fat tails</li>
+                <li><strong>Single Factor:</strong> Ignores multiple sources of interest rate risk</li>
+            </ul>
+            
+            <h5>⚙️ Practical Considerations:</h5>
+            <ul>
+                <li><strong>Parameter Estimation:</strong> Historical data may not reflect future behavior</li>
+                <li><strong>Calibration:</strong> Model may not fit current market prices perfectly</li>
+                <li><strong>Volatility Clustering:</strong> Real rates show periods of high/low volatility</li>
+                <li><strong>Regime Changes:</strong> Central bank policy changes can break model assumptions</li>
+            </ul>
+            
+            <h5>🛡️ Risk Management:</h5>
+            <ul>
+                <li>Use multiple models for comparison</li>
+                <li>Regular recalibration with fresh data</li>
+                <li>Stress testing with extreme scenarios</li>
+                <li>Consider model uncertainty in risk measures</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Footer
-    st.markdown("---")
     st.markdown("""
-    <div style='text-align: center; color: #666; font-size: 0.9rem;'>
-        <p><strong>Vasicek Interest Rate Model</strong> | Built with Streamlit & Python</p>
-        <p>⚠️ For educational and research purposes only</p>
+    <div style='text-align: center; color: #666; font-size: 0.9rem; margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 10px;'>
+        <p style="margin: 0; font-size: 1.1rem;"><strong>🏦 Vasicek Interest Rate Model</strong></p>
+        <p style="margin: 0.5rem 0;">Built with Streamlit & Python</p>
+        <p style="margin: 0; color: #dc3545;"><strong>⚠️ For educational and research purposes only</strong></p>
     </div>
     """, unsafe_allow_html=True)
