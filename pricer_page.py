@@ -1055,6 +1055,7 @@ with tab6:
 
         elif instrument == "Coupon Bond":
             maturity = st.slider("Maturity (years)", 0.5, 30.0, 5.0, step=0.5)
+            t = st.slider("Temps écoulé t (années)", min_value=0.0, max_value=maturity, value=0.0, step=0.25)
             coupon = st.slider("Coupon Rate", 0.0, 1.0, 0.05, step=0.01)
             face_value = st.number_input("Face Value", value=1.0)
 
