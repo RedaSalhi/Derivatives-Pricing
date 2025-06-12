@@ -944,6 +944,9 @@ with tab6:
                 model = st.selectbox("Select Model", [ "Analytical", "Monte Carlo"])
                 if model == "Monte Carlo":
                     st.warning("Monte Carlo is not working properly at the moment.")
+
+        else: 
+            continue
  
             
     
