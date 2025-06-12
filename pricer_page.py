@@ -42,29 +42,29 @@ st.markdown("""
         font-size: 3rem;
         font-weight: bold;
         text-align: center;
-        background: linear-gradient(90deg, #00d4aa, #00a8cc);
+        background: linear-gradient(90deg, #e74c3c, #3498db);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 2rem;
     }
     
     .metric-container {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
         padding: 1.5rem;
-        border-radius: 12px;
+        border-radius: 15px;
         color: white;
         text-align: center;
         margin: 0.5rem 0;
-        border: 1px solid #00d4aa;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
     .info-box {
-        background: #0f0f23;
+        background: #ecf0f1;
         padding: 1.5rem;
         border-radius: 10px;
-        border-left: 4px solid #00d4aa;
+        border-left: 5px solid #e74c3c;
         margin: 1rem 0;
-        color: #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
     .stTabs [data-baseweb="tab-list"] {
@@ -72,13 +72,18 @@ st.markdown("""
     }
     
     .stTabs [data-baseweb="tab"] {
-        height: 3rem;
-        padding: 0 1.5rem;
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        color: #00d4aa;
-        border-radius: 8px;
+        height: 3.5rem;
+        padding: 0 2rem;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        border-radius: 10px;
         font-weight: bold;
-        border: 1px solid #00d4aa;
+        transition: all 0.3s ease;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 </style>
 """, unsafe_allow_html=True)
