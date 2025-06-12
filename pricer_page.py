@@ -928,7 +928,7 @@ with tab6:
             )
             if not snapshot_times:
                 st.warning("Please select at least one snapshot time.")
-            elif:
+            else:
                 continue
 
         if plot_paths:
