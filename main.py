@@ -16,13 +16,13 @@ import streamlit.components.v1 as components
 components.html(
     """
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D7MTVEVGH0"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KFYG7J821K"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-D7MTVEVGH0', {
+      gtag('config', 'G-KFYG7J821K', {
         'page_title': 'Derivatives Pricing App',
         'page_path': '/streamlit-app',
         'page_location': 'https://derivatives-pricing.streamlit.app'
