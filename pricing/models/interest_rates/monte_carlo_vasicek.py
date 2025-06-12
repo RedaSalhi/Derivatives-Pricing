@@ -21,9 +21,9 @@ def simulate_vasicek_paths(a, lam, sigma, r0, T, dt, n_paths):
         r[t + 1, :] = mu + std * Z
     return np.linspace(0, T, N), r
 
-def plot_vasicek_paths(T_vec, r_paths, lam, std_dt, n_plot=1000):
+def plot_vasicek_paths(T_vec, r_paths, lam, std_dt):
     plt.figure(figsize=(10, 5))
-    plt.plot(T_vec, r_paths[:, :n_plot], lw=0.6, alpha=0.6)
+    plt.plot(T_vec, r_paths, lw=0.6, alpha=0.6)
     plt.axhline(lam, color='red', linestyle='--', label='Mean Reversion Level (λ)')
     plt.axhline(lam + std_dt, color='black', linestyle='--', label='±1 Std Dev')
     plt.axhline(lam - std_dt, color='black', linestyle='--')
