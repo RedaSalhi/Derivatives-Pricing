@@ -1322,7 +1322,7 @@ with tab6:
                 with st.spinner("Calcul du prix de l'option..."):
                     try:
                         if model_type == "Analytique":
-                            Utilisation de la formule analytique
+                            #Utilisation de la formule analytique
                             option_price = vasicek_bond_option_price(r_current, 0, T1, T2, K, 
                                                                    params['a'], params['lambda'], params['sigma'], 
                                                                    face_value, option_type.lower())
