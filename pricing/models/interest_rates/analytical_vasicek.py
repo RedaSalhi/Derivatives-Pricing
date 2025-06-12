@@ -153,7 +153,7 @@ def generate_yield_curves(r_path, snapshot_times, maturities, a, theta, sigma, d
 # ------------------------------------------------------------------------------
 # Plot Yield Curves
 # ------------------------------------------------------------------------------
-def plot_yield_curves(yield_curves, maturities): #need extraction from pricing.models.interest_rates.analytical_vasicek import plot_yield_curves
+"""def plot_yield_curves(yield_curves, maturities): #need extraction from pricing.models.interest_rates.analytical_vasicek import plot_yield_curves
     fig, ax = plt.subplots(figsize=(10, 6))
     for t_snap, yields in yield_curves.items():
         ax.plot(maturities, yields, label=f'Time {t_snap}y')
@@ -164,7 +164,19 @@ def plot_yield_curves(yield_curves, maturities): #need extraction from pricing.m
     ax.grid(True)
     fig.tight_layout()
     plt.show()
-    return fig
+    return fig"""
+
+def plot_yield_curves(yield_curves, maturities):
+    plt.figure(figsize=(10, 6))
+    for t_snap, yields in yield_curves.items():
+        plt.plot(maturities, yields, label=f'Time {t_snap}y')
+    plt.title('Simulated Yield Curves under Vasicek Model')
+    plt.xlabel('Maturity (years)')
+    plt.ylabel('Yield (continuously compounded)')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
 
 # ------------------------------------------------------------------------------
