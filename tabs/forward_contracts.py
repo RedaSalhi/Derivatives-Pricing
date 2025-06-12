@@ -134,16 +134,21 @@ def forward_contracts_tab():
         # Pricing formula
         st.markdown('<div class="sub-header">Cost of Carry Model</div>', unsafe_allow_html=True)
         st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("**Forward Pricing Formula:**")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
         st.latex(r"F = S_0 \cdot e^{(r + c - q) \cdot T}")
-        st.markdown("""
+        
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown(f"""
         **Where:**
-        - **F** = Forward Price = ${:.2f}
-        - **S₀** = Current Spot Price = ${:.2f}
-        - **r** = Risk-free Interest Rate = {:.2f}%
-        - **c** = Storage Cost Rate = {:.2f}%
-        - **q** = Dividend Yield = {:.2f}%
-        - **T** = Time to Maturity = {:.1f} years
-        """.format(forward_price, spot_price, interest_rate*100, storage_cost*100, dividend_yield*100, time_to_maturity))
+        - **F** = Forward Price = ${forward_price:.2f}
+        - **S₀** = Current Spot Price = ${spot_price:.2f}
+        - **r** = Risk-free Interest Rate = {interest_rate*100:.2f}%
+        - **c** = Storage Cost Rate = {storage_cost*100:.2f}%
+        - **q** = Dividend Yield = {dividend_yield*100:.2f}%
+        - **T** = Time to Maturity = {time_to_maturity:.1f} years
+        """)
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Detailed breakdown
@@ -153,10 +158,12 @@ def forward_contracts_tab():
             forward_price_calc = spot_price * exp_factor
             
             st.write(f"**Net Carry Rate:** {interest_rate*100:.2f}% + {storage_cost*100:.2f}% - {dividend_yield*100:.2f}% = {net_carry*100:.2f}%")
-            st.latex(r"\text{Exponential Factor: } e^{(r + c - q) \cdot T}")
-            st.latex(fr"e^{{({net_carry*100:.2f}\% \cdot {time_to_maturity:.4f})}} = {exp_factor:.6f}")
-            st.latex(r"\text{Forward Price: } F = S \cdot e^{(r + c - q) \cdot T}")
-            st.latex(fr"F = {spot_price:.2f} \cdot {exp_factor:.6f} = {forward_price_calc:.2f}")
+            st.markdown("**Exponential Factor:**")
+            st.latex(r"e^{(r + c - q) \cdot T}")
+            st.latex(fr"e^{{({net_carry*100:.2f}\% \times {time_to_maturity:.4f})}} = {exp_factor:.6f}")
+            st.markdown("**Forward Price Calculation:**")
+            st.latex(r"F = S_0 \cdot e^{(r + c - q) \cdot T}")
+            st.latex(fr"F = {spot_price:.2f} \times {exp_factor:.6f} = {forward_price_calc:.2f}")
     
     with ta2:
         st.markdown('<div class="sub-header">Mark-to-Market Analysis</div>', unsafe_allow_html=True)
