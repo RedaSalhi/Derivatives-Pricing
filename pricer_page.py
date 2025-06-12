@@ -373,49 +373,6 @@ with tab1:
 # -----------------------------
 # Tab 2 – Forward Contracts
 # -----------------------------
-"""
-with tab2:
-    st.header("Forward Contract Pricing")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        S_fwd = st.number_input("Spot Price", value=100.0, key="fwd_spot")
-        K_fwd = st.number_input("Strike Price", value=100.0, key="fwd_strike")
-        T_fwd = st.number_input("Time to Maturity (T)", value=1.0, key="fwd_T")
-        r_fwd = st.number_input("Risk-Free Rate (r)", value=0.05, key="fwd_r")
-    with col2:
-        storage_cost = st.number_input("Storage Cost (c)", value=0.0, key="fwd_storage")
-        dividend_yield = st.number_input("Dividend Yield (q)", value=0.0, key="fwd_q")
-        position = st.radio("Position", ["Long", "Short"])
-        if position == "Long":
-            position = "long"
-        elif position == "Short":
-            position = "short"
-
-    if st.button("Price Forward Contract"):
-        F = price_forward_contract(
-            spot_price=S_fwd,
-            interest_rate=r_fwd,
-            time_to_maturity=T_fwd,
-            storage_cost=storage_cost,
-            dividend_yield=dividend_yield
-        )
-        st.success(f"Theoretical Forward Price: **{F:.4f}**")
-
-        with st.expander("Forward Payout at Maturity"):
-            plot_forward_payout_and_value(K_fwd, position)
-
-        with st.expander("Mark-to-Market Value (Before Maturity)"):
-            plot_forward_mark_to_market(
-                strike_price=K_fwd,
-                time_to_maturity=T_fwd,
-                interest_rate=r_fwd,
-                storage_cost=storage_cost,
-                dividend_yield=dividend_yield,
-                position=position
-            )
-"""
-
 
 with tab2:
     st.markdown('<h1 class="main-header">📈 Forward Contract Pricing & Analysis</h1>', 
@@ -506,9 +463,9 @@ with tab2:
     )
     
     # Main tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Pricing Results", "📈 Mark-to-Market", "💰 Payout Analysis", "🔬 Sensitivity"])
+    ta1, ta2, ta3, ta4 = st.tabs(["📊 Pricing Results", "📈 Mark-to-Market", "💰 Payout Analysis", "🔬 Sensitivity"])
     
-    with tab1:
+    with ta1:
         st.markdown("## Forward Contract Pricing Results")
         
         # Key metrics
@@ -559,7 +516,7 @@ with tab2:
             st.write(f"**Exponential Factor:** e^({net_carry*100:.2f}% × {time_to_maturity:.4f}) = {np.exp(net_carry * time_to_maturity):.6f}")
             st.write(f"**Forward Price:** ${spot_price:.2f} × {np.exp(net_carry * time_to_maturity):.6f} = **${forward_price:.2f}**")
     
-    with tab2:
+    with ta2:
         st.markdown("## Mark-to-Market Analysis")
         st.markdown("*Contract value before maturity (t < T)*")
         
@@ -591,7 +548,7 @@ with tab2:
             storage_cost, dividend_yield, position.lower()
         )
     
-    with tab3:
+    with ta3:
         st.markdown("## Payout Analysis at Maturity")
         st.markdown("*Profit/Loss when contract expires (t = T)*")
         
@@ -621,7 +578,7 @@ with tab2:
         st.markdown("### 📊 Original Chart (Matplotlib)")
         plot_forward_payout_and_value(strike_price, position.lower())
     
-    with tab4:
+    with ta4:
         st.markdown("## Sensitivity Analysis")
         st.markdown("*How forward prices respond to parameter changes*")
         
