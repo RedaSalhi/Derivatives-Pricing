@@ -2747,7 +2747,7 @@ with tab4:
     # Educational Resources
     st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
     
-    with st.expander("🎓 Exotic Options Primer"):
+    with st.expander("🎓 Exotic Options"):
         st.markdown("""
         ### Understanding Exotic Options
         
@@ -2798,63 +2798,18 @@ with tab4:
         - Wider bid-ask spreads
         - Limited market makers
         """)
-    
-    with st.expander("🔧 Technical Implementation Notes"):
-        st.markdown("""
-        ### Monte Carlo Simulation Details
-        
-        **Variance Reduction Techniques**
-        - Antithetic variates: Use -Z as well as Z
-        - Control variates: Use correlation with known analytical solutions
-        - Stratified sampling: Ensure representative samples
-        
-        **Convergence Monitoring**
-        - Monitor standard error of estimates
-        - Use confidence intervals
-        - Check convergence plots
-        
-        **Performance Optimization**
-        - Vectorized numpy operations
-        - Just-in-time compilation with numba
-        - Parallel processing for independent paths
-        
-        **Model Validation**
-        - Compare with analytical solutions where available
-        - Cross-validate with market prices
-        - Stress test with extreme parameters
-        """)
+
     
     # Footer
     st.markdown("---")
     st.markdown("""
     <div style="text-align: center; color: #666; padding: 20px;">
-        <p><strong>Exotic Options Pricing Toolkit</strong></p>
+        <p><strong>Exotic Options Pricing Tool</strong></p>
         <p>Built with Streamlit • Educational and Research Purposes Only</p>
-        <p>⚠️ Not for actual trading decisions • Always validate with market data</p>
+        <p>⚠️ Not for actual trading decisions</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Performance metrics for the app
-    if st.checkbox("🔍 Show App Performance Metrics", key="show_perf"):
-        import time
-        import psutil
-        import sys
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("Python Version", f"{sys.version_info.major}.{sys.version_info.minor}")
-        
-        with col2:
-            st.metric("CPU Usage", f"{psutil.cpu_percent():.1f}%")
-        
-        with col3:
-            memory = psutil.virtual_memory()
-            st.metric("Memory Usage", f"{memory.percent:.1f}%")
-        
-        with col4:
-            st.metric("Available Memory", f"{memory.available / (1024**3):.1f} GB")
-
     
 
 
