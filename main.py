@@ -2,10 +2,12 @@ import sys
 import os
 import runpy
 import streamlit as st
+import streamlit.components.v1 as components
+
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
-import streamlit.components.v1 as components
+st.set_page_config(page_title="Derivatives Pricing App", layout="centered")
 
 
 # Inject Google Analytics (GA4)
@@ -24,15 +26,6 @@ components.html(
     height=0,
 )
 
-    
-
-
-
-
-# Allow importing from the pricing directory
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
-
-st.set_page_config(page_title="Derivatives Pricing App", layout="centered")
 st.title("Derivatives Pricing App")
 st.caption("Built for students, quants, and finance enthusiasts")
 
