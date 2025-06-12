@@ -42,7 +42,7 @@ from pricing.utils.greeks_vanilla.plot_single_greek import plot_single_greek_vs_
 # -----------------------------
 # Tab 1 – Vanilla Options
 # -----------------------------
-with tab1:
+"""with tab1:
     st.header("Vanilla Option Pricing")
 
     # Init session state
@@ -179,7 +179,187 @@ with tab1:
                 )
                 st.pyplot(fig_greek)
             except Exception as e:
-                st.error(f"Greek plot failed: {e}")
+                st.error(f"Greek plot failed: {e}")"""
+
+with tab1:
+    st.title("Vanilla Option Pricing Tool")
+    st.markdown("Price options using Black-Scholes, Binomial Tree, and Monte Carlo methods")
+    
+    # Sidebar for inputs
+    st.sidebar.header("Option Parameters")
+    
+    # Basic option parameters
+    option_type = st.sidebar.selectbox("Option Type", ["Call", "Put"])
+    exercise_style = st.sidebar.selectbox("Exercise Style", ["European", "American"])
+    
+    # Financial parameters
+    st.sidebar.subheader("Market Parameters")
+    S = st.sidebar.number_input("Current Stock Price (S)", value=100.0, min_value=0.01, step=1.0)
+    K = st.sidebar.number_input("Strike Price (K)", value=100.0, min_value=0.01, step=1.0)
+    T = st.sidebar.number_input("Time to Maturity (T) in years", value=1.0, min_value=0.01, max_value=10.0, step=0.01)
+    r = st.sidebar.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
+    sigma = st.sidebar.number_input("Volatility (σ)", value=0.2, min_value=0.001, max_value=2.0, step=0.01, format="%.3f")
+    q = st.sidebar.number_input("Dividend Yield (q)", value=0.0, min_value=0.0, max_value=1.0, step=0.001, format="%.3f")
+    
+    # Model-specific parameters
+    st.sidebar.subheader("Model Parameters")
+    N = st.sidebar.number_input("Binomial Steps (N)", value=100, min_value=10, max_value=1000, step=10)
+    n_simulations = st.sidebar.number_input("Monte Carlo Simulations", value=100000, min_value=1000, max_value=1000000, step=1000)
+    
+    # Main content area
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.header("Option Pricing Results")
+        
+        # Model selection
+        models = st.multiselect(
+            "Select Pricing Models", 
+            ["Black-Scholes", "Binomial", "Monte-Carlo"],
+            default=["Black-Scholes", "Binomial"]
+        )
+        
+        if models:
+            results = {}
+            
+            for model in models:
+                try:
+                    # Prepare parameters
+                    params = {
+                        'S': S, 'K': K, 'T': T, 'r': r, 'sigma': sigma, 'q': q
+                    }
+                    
+                    if model == "Binomial":
+                        params['N'] = N
+                    elif model == "Monte-Carlo":
+                        params['n_simulations'] = n_simulations
+                    
+                    # Calculate price
+                    price = price_vanilla_option(
+                        option_type=option_type,
+                        exercise_style=exercise_style,
+                        model=model,
+                        **params
+                    )
+                    
+                    results[model] = price
+                    
+                except Exception as e:
+                    st.error(f"Error calculating {model} price: {str(e)}")
+                    results[model] = None
+            
+            # Display results
+            if results:
+                results_df = pd.DataFrame([results]).T
+                results_df.columns = ['Option Price']
+                results_df = results_df.round(4)
+                
+                st.subheader("Pricing Comparison")
+                st.dataframe(results_df, use_container_width=True)
+                
+                # Visualization
+                if len([v for v in results.values() if v is not None]) > 1:
+                    fig, ax = plt.subplots(figsize=(10, 6))
+                    valid_results = {k: v for k, v in results.items() if v is not None}
+                    
+                    bars = ax.bar(valid_results.keys(), valid_results.values(), 
+                                 color=['#1f77b4', '#ff7f0e', '#2ca02c'][:len(valid_results)])
+                    ax.set_ylabel('Option Price')
+                    ax.set_title(f'{exercise_style} {option_type} Option Pricing Comparison')
+                    ax.grid(True, alpha=0.3)
+                    
+                    # Add value labels on bars
+                    for bar, value in zip(bars, valid_results.values()):
+                        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
+                               f'{value:.4f}', ha='center', va='bottom')
+                    
+                    st.pyplot(fig)
+    
+    with col2:
+        st.header("Analysis Tools")
+        
+        # Sensitivity Analysis
+        st.subheader("Sensitivity Analysis")
+        
+        param_to_analyze = st.selectbox(
+            "Parameter to vary:",
+            ["S", "K", "T", "r", "sigma"]
+        )
+        
+        model_for_analysis = st.selectbox(
+            "Model for analysis:",
+            ["Black-Scholes", "Binomial", "Monte-Carlo"]
+        )
+        
+        if st.button("Run Sensitivity Analysis"):
+            # Define parameter ranges
+            param_ranges = {
+                "S": (S * 0.5, S * 1.5),
+                "K": (K * 0.5, K * 1.5),
+                "T": (0.1, min(2.0, T * 2)),
+                "r": (0.01, min(0.2, r * 3)),
+                "sigma": (sigma * 0.5, min(1.0, sigma * 2))
+            }
+            
+            param_range = param_ranges[param_to_analyze]
+            param_values = np.linspace(param_range[0], param_range[1], 20)
+            prices = []
+            
+            base_params = {'S': S, 'K': K, 'T': T, 'r': r, 'sigma': sigma, 'q': q}
+            
+            for val in param_values:
+                temp_params = base_params.copy()
+                temp_params[param_to_analyze] = val
+                
+                if model_for_analysis == "Binomial":
+                    temp_params['N'] = N
+                elif model_for_analysis == "Monte-Carlo":
+                    temp_params['n_simulations'] = n_simulations
+                
+                try:
+                    price = price_vanilla_option(
+                        option_type=option_type,
+                        exercise_style=exercise_style,
+                        model=model_for_analysis,
+                        **temp_params
+                    )
+                    prices.append(price)
+                except:
+                    prices.append(np.nan)
+            
+            # Plot sensitivity
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.plot(param_values, prices, 'b-', linewidth=2)
+            ax.set_xlabel(param_to_analyze)
+            ax.set_ylabel('Option Price')
+            ax.set_title(f'Sensitivity to {param_to_analyze}')
+            ax.grid(True, alpha=0.3)
+            
+            # Mark current value
+            current_val = base_params[param_to_analyze]
+            current_price = results.get(model_for_analysis, 0)
+            if current_price:
+                ax.axvline(x=current_val, color='red', linestyle='--', alpha=0.7, label='Current')
+                ax.scatter([current_val], [current_price], color='red', s=100, zorder=5)
+                ax.legend()
+            
+            st.pyplot(fig)
+        
+        # Option Information
+        st.subheader("Option Information")
+        moneyness = S / K
+        time_value = max(results.get("Black-Scholes", 0) - max(S - K, 0) if option_type.lower() == "call" 
+                        else results.get("Black-Scholes", 0) - max(K - S, 0), 0) if "Black-Scholes" in results else 0
+        
+        info_data = {
+            "Moneyness (S/K)": f"{moneyness:.4f}",
+            "Days to Expiry": f"{T * 365:.0f}",
+            "Intrinsic Value": f"{max(S - K, 0) if option_type.lower() == 'call' else max(K - S, 0):.4f}",
+            "Time Value": f"{time_value:.4f}" if "Black-Scholes" in results else "N/A"
+        }
+        
+        for key, value in info_data.items():
+            st.metric(key, value)
 
 
 
