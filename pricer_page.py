@@ -375,12 +375,12 @@ with tab1:
 # -----------------------------
 
 with tab2:
-    st.markdown('<h1 class="main-header">📈 Forward Contract Pricing & Analysis</h1>', 
+    st.markdown('<h1 class="main-header">Forward Contract Pricing & Analysis</h1>', 
                 unsafe_allow_html=True)
     
     # Parameter input section
     st.markdown('<div class="parameter-section">', unsafe_allow_html=True)
-    st.markdown("## 🔧 Contract Parameters")
+    st.markdown("## Contract Parameters")
     
     col1, col2, col3 = st.columns(3)
     
@@ -463,7 +463,7 @@ with tab2:
     )
     
     # Main tabs
-    ta1, ta2, ta3, ta4 = st.tabs(["📊 Pricing Results", "📈 Mark-to-Market", "💰 Payout Analysis", "🔬 Sensitivity"])
+    ta1, ta2, ta3, ta4 = st.tabs(["Pricing Results", "Mark-to-Market", "Payout Analysis", "Sensitivity"])
     
     with ta1:
         st.markdown("## Forward Contract Pricing Results")
@@ -495,7 +495,7 @@ with tab2:
             st.markdown('</div>', unsafe_allow_html=True)
         
         # Pricing formula
-        st.markdown("### 📝 Cost of Carry Model")
+        st.markdown("### Cost of Carry Model")
         st.markdown('<div class="info-box">', unsafe_allow_html=True)
         st.latex(r"F = S_0 \cdot e^{(r + c - q) \cdot T}")
         st.markdown("""
@@ -505,16 +505,22 @@ with tab2:
         - **r** = Risk-free Interest Rate = {:.2f}%
         - **c** = Storage Cost Rate = {:.2f}%
         - **q** = Dividend Yield = {:.2f}%
-        - **T** = Time to Maturity = {:.4f} years
+        - **T** = Time to Maturity = {:.1f} years
         """.format(forward_price, spot_price, interest_rate*100, storage_cost*100, dividend_yield*100, time_to_maturity))
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Detailed breakdown
-        with st.expander("🧮 Calculation Breakdown"):
+        with st.expander("Calculation Breakdown"):
             net_carry = interest_rate + storage_cost - dividend_yield
+            #st.write(f"**Net Carry Rate:** {interest_rate*100:.2f}% + {storage_cost*100:.2f}% - {dividend_yield*100:.2f}% = {net_carry*100:.2f}%")
+            #st.write(f"**Exponential Factor:** e^({net_carry*100:.2f}% × {time_to_maturity:.4f}) = {np.exp(net_carry * time_to_maturity):.6f}")
+            #st.write(f"**Forward Price:** ${spot_price:.2f} × {np.exp(net_carry * time_to_maturity):.6f} = **${forward_price:.2f}**")
+            #st.write(f"**Forward Price:** ${spot_price:.2f} × {np.exp(net_carry * time_to_maturity):.6f} = **${forward_price:.2f}**")
             st.write(f"**Net Carry Rate:** {interest_rate*100:.2f}% + {storage_cost*100:.2f}% - {dividend_yield*100:.2f}% = {net_carry*100:.2f}%")
-            st.write(f"**Exponential Factor:** e^({net_carry*100:.2f}% × {time_to_maturity:.4f}) = {np.exp(net_carry * time_to_maturity):.6f}")
-            st.write(f"**Forward Price:** ${spot_price:.2f} × {np.exp(net_carry * time_to_maturity):.6f} = **${forward_price:.2f}**")
+            st.latex(r"\text{Exponential Factor: } e^{(r + c - q) \cdot T}")
+            st.latex(fr"e^{{({net_carry*100:.2f}\% \cdot {time_to_maturity:.4f})}} = {exp_factor:.6f}")
+            st.latex(r"\text{Forward Price: } F = S \cdot e^{(r + c - q) \cdot T}")
+            st.latex(fr"F = {spot_price:.2f} \cdot {exp_factor:.6f} = {forward_price:.2f}")
     
     with ta2:
         st.markdown("## Mark-to-Market Analysis")
@@ -542,8 +548,8 @@ with tab2:
             st.metric("Time to Maturity", f"{time_to_maturity:.3f} years")
         
         # Original matplotlib chart
-        st.markdown("### 📊 Original Chart (Matplotlib)")
-        plot_forward_mark_to_market_plotly(
+        st.markdown("### Original Chart (Matplotlib)")
+        plot_forward_mark_to_market(
             strike_price, time_to_maturity, interest_rate, 
             storage_cost, dividend_yield, position.lower()
         )
@@ -557,7 +563,7 @@ with tab2:
         st.plotly_chart(fig_payout, use_container_width=True)
         
         # Scenario analysis
-        st.markdown("### 📋 Payout Scenarios")
+        st.markdown("### Payout Scenarios")
         spot_scenarios = [strike_price * mult for mult in [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3]]
         
         scenarios_data = []
@@ -575,7 +581,7 @@ with tab2:
         st.dataframe(scenarios_df, use_container_width=True)
         
         # Original matplotlib chart
-        st.markdown("### 📊 Original Chart (Matplotlib)")
+        st.markdown("### Original Chart (Matplotlib)")
         plot_forward_payout_and_value(strike_price, position.lower())
     
     with ta4:
@@ -596,7 +602,7 @@ with tab2:
         st.plotly_chart(fig_sensitivity, use_container_width=True)
         
         # Risk metrics
-        st.markdown("### 📈 Risk Sensitivities")
+        st.markdown("### Risk Sensitivities")
         
         # Calculate numerical derivatives
         delta_s = 0.01 * spot_price
