@@ -10,12 +10,13 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import plotly.express as px
 from io import BytesIO
 import seaborn as sns
 from scipy.stats import norm
 import time
+
 
 
 from pricing.vanilla_options import price_vanilla_option, plot_option_price_vs_param
@@ -28,7 +29,9 @@ from pricing.barrier_option import price_barrier_option, plot_barrier_payoff, pl
 from pricing.digital_option import price_digital_option, plot_digital_payoff
 from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
 from pricing.utils.exotic_utils import *
-
+from pricing.models.interest_rates.analytical_vasicek import *
+from pricing.models.interest_rates.monte_carlo_vasicek import *
+from pricing.utils.greeks_vasicek import *
 
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
@@ -113,7 +116,8 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 # -----------------------------
 with tab1:
     st.title("Option Pricing Tool")
-    st.markdown("Price options using Black-Scholes, Binomial Tree, and Monte Carlo methods")
+    st.markdown('<h1 class="main-header">Price options using Black-Scholes, Binomial Tree, and Monte Carlo methods</h1>', 
+                unsafe_allow_html=True)
     
     # Input Parameters Section
     st.header("Option Parameters")
@@ -1411,7 +1415,8 @@ with tab3:
 
 
 with tab4: 
-    st.title("Exotic Options Pricing & Greeks Analysis Suite")
+    st.markdown('<h1 class="main-header">Exotic Options Pricing & Greeks Analysis Suite</h1>', 
+                unsafe_allow_html=True)
     st.markdown("---")
     
     # Navigation tabs
@@ -1754,8 +1759,8 @@ from pricing.models.swaps.ois_fx import (
 )
 
 with tab5:
-    st.header("Swap Pricer (In Progress)")
-
+    st.markdown('<h1 class="main-header">Swap Pricer (In Progress)</h1>', 
+                unsafe_allow_html=True)
     swap_type = st.selectbox("Swap Type", ["IRS", "Currency", "Equity"])
     model = st.selectbox("Model", {
         "IRS": ["DCF", "LMM"],
@@ -1872,17 +1877,10 @@ with tab5:
 
 
 with tab6:
-    import matplotlib.pyplot as plt
-    import plotly.graph_objects as go
-    import plotly.express as px
-    from datetime import datetime, date
-
-    from pricing.models.interest_rates.analytical_vasicek import *
-    from pricing.models.interest_rates.monte_carlo_vasicek import *
-    from pricing.utils.greeks_vasicek import *
-
     # Add model selection info box
-    st.markdown("### Interest Rate Model Selector")
+    st.markdown('<h1 class="main-header">Interest Rate Model Selector</h1>', 
+                unsafe_allow_html=True)
+    st.markdown("---")
     model = st.selectbox(
         "Choose a model to explore:",
         ["Vasicek Model", "Hull-White Model (Coming Soon)", "Cox-Ingersoll-Ross (CIR) (Coming Soon)"],
