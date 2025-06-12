@@ -965,9 +965,9 @@ with tab6:
                 
                 method = st.radio("Choose The Pricing Method", ["Analytical", "Monte Carlo"])
                 if method == "Analytical":
-                    price = vasicek_bond_option_price(r0, 0, T1, T2, K, a, lam, sigma, face=face_value, option_type)
+                    price = vasicek_bond_option_price(r0, 0, T1, T2, K, a, lam, sigma, face=face_value, option_type=option_type)
                 else:
-                    price, std = vasicek_bond_option_price_mc(r0, a, lam, sigma, T1, T2, K, dt, n_paths, face=face_value, option_type)
+                    price, std = vasicek_bond_option_price_mc(r0, a, lam, sigma, T1, T2, K, dt, n_paths, face=face_value, option_type=option_type)
                     st.info(f"Monte Carlo Std Error: {std:.6f}")
                 st.success(f"Bond Option Price ({option_type}): {price:.6f}")
     
