@@ -857,7 +857,7 @@ with tab6:
     st.markdown("### Interest Rate Model Selector")
     model = st.selectbox(
         "Choose a model to explore:",
-        ["Vasicek Model", "Hull-White Model (Coming Soon)", "More models coming..."],
+        ["Vasicek Model", "Hull-White Model (Coming Soon)", "Cox-Ingersoll-Ross (CIR) (Coming Soon)"],
         index=0,
         help="Select the interest rate model you want to explore."
     )
