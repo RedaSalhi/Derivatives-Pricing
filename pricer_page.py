@@ -999,29 +999,15 @@ with tab6:
 
 
 with tab6:
-    import streamlit as st
-    import numpy as np
-    import pandas as pd
-    from pricing.vanilla_vasicek import price_zero_coupon, price_coupon_bond, price_bond_option
-    from pricing.models.interest_rates.monte_carlo_vasicek import (
-        simulate_vasicek_paths, plot_vasicek_paths,
-        plot_yield_distribution, vasicek_bond_option_price_mc
-    )
-    from pricing.models.interest_rates.analytical_vasicek import (
-        run_ou_estimation, simulate_vasicek_path,
-        plot_yield_curves, generate_yield_curves,
-        vasicek_bond_option_price
-    )
     import matplotlib.pyplot as plt
     import plotly.graph_objects as go
     import plotly.express as px
     from datetime import datetime, date
-    
-    # Tu devras importer tes modules ici
-    # from pricing.models.interest_rates.analytical_vasicek import *
-    # from pricing.models.interest_rates.monte_carlo_vasicek import *
-    # from pricing.utils.greeks_vasicek import *
-    # from pricing.vanilla_vasicek import *
+
+    from pricing.models.interest_rates.analytical_vasicek import *
+    from pricing.models.interest_rates.monte_carlo_vasicek import *
+    from pricing.utils.greeks_vasicek import *
+    from pricing.vanilla_vasicek import *
     
     st.title("📈 Modèle de Vasicek - Pricing d'Obligations et Taux d'intérêt")
     st.markdown("---")
