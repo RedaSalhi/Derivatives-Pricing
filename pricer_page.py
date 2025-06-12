@@ -1307,7 +1307,7 @@ with tab6:
     # =============================================
     # TAB 4: OPTIONS SUR OBLIGATIONS
     # =============================================
-    with tab4:
+    """with tab4:
         st.header("📈 Pricing d'Options sur Obligations")
         
         if not st.session_state.vasicek_params:
@@ -1373,7 +1373,109 @@ with tab6:
                         st.table(param_df)
                         
                     except Exception as e:
-                        st.error(f"❌ Erreur lors du calcul: {str(e)}")
+                        st.error(f"❌ Erreur lors du calcul: {str(e)}")"""
+
+    #
+    # =============================================
+    # TAB 4: OPTIONS SUR OBLIGATIONS
+    # =============================================
+    with tab4:
+        st.header("📈 Pricing d'Options sur Obligations")
+    
+        if not st.session_state.vasicek_params:
+            st.warning("⚠️ Veuillez d'abord estimer les paramètres dans l'onglet précédent.")
+            st.stop()
+    
+        params = st.session_state.vasicek_params
+    
+        # Pour éviter conflit de nom
+        from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option_price as analytical_option_price
+        from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc as mc_option_price
+    
+        col1, col2 = st.columns([1, 2])
+    
+        with col1:
+            st.subheader("📝 Paramètres de l'Option")
+    
+            option_type = st.radio("Type d'option", ["Call", "Put"])
+            model_type = st.radio("Méthode de calcul", ["Analytique", "Monte Carlo"])
+    
+            r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f")
+            T1 = st.number_input("Échéance de l'option (T₁)", 0.1, 10.0, 1.0, step=0.1)
+            T2 = st.number_input("Maturité de l'obligation (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1)
+    
+            K = st.number_input("Prix d'exercice (K)", 0.1, 2.0, 0.8, step=0.01)
+            face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100)
+    
+            if model_type == "Monte Carlo":
+                n_paths = st.number_input("Nombre de simulations", 1000, 100000, 10000, step=1000)
+                dt_mc = st.number_input("Pas de temps (dt)", 0.001, 0.1, 0.01, step=0.001)
+    
+            price_option_btn = st.button("💎 Calculer le Prix de l'Option", type="primary")
+    
+        with col2:
+            if price_option_btn:
+                if T2 <= T1:
+                    st.error("⚠️ La maturité de l'obligation (T₂) doit être supérieure à l'échéance de l'option (T₁)")
+                    st.stop()
+    
+                with st.spinner("Calcul du prix de l'option..."):
+                    try:
+                        if model_type == "Analytique":
+                            price = analytical_option_price(
+                                r_t=r_current,
+                                t=0,
+                                T1=T1,
+                                T2=T2,
+                                K=K,
+                                a=params['a'],
+                                lam=params['lambda'],
+                                sigma=params['sigma'],
+                                face=face_value,
+                                option_type=option_type.lower()
+                            )
+                            st.success(f"💎 Prix de l'option {option_type} (analytique) : **{price:.4f}**")
+    
+                        else:  # Monte Carlo
+                            price, std = mc_option_price(
+                                r0=r_current,
+                                a=params['a'],
+                                lam=params['lambda'],
+                                sigma=params['sigma'],
+                                T1=T1,
+                                T2=T2,
+                                K=K,
+                                dt=dt_mc,
+                                n_paths=int(n_paths),
+                                face=face_value,
+                                option_type=option_type.lower()
+                            )
+                            st.success(f"💎 Prix de l'option {option_type} (MC) : **{price:.4f} ± {std:.4f}**")
+                            st.info(f"📊 Intervalle de confiance 95% : [{price - 1.96*std:.4f}, {price + 1.96*std:.4f}]")
+    
+                        # Résumé des paramètres
+                        st.subheader("📋 Récapitulatif")
+                        df_params = pd.DataFrame({
+                            "Paramètre": [
+                                "Type d'option", "Méthode", "Taux actuel (r)", "T₁ (échéance)", "T₂ (maturité)",
+                                "Prix d'exercice (K)", "Valeur nominale"
+                            ],
+                            "Valeur": [
+                                option_type,
+                                model_type,
+                                f"{r_current:.4f}",
+                                f"{T1:.2f} ans",
+                                f"{T2:.2f} ans",
+                                f"{K:.2f}",
+                                f"{face_value}"
+                            ]
+                        })
+                        st.table(df_params)
+    
+                    except Exception as e:
+                        import traceback
+                        st.error(f"❌ Erreur :\n\n```\n{traceback.format_exc()}\n```")
+
     
     # =============================================
     # TAB 5: ANALYSE DES GRECQUES
