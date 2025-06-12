@@ -1112,16 +1112,19 @@ with tab6:
             default_maturities = [m for m in [1, 2, 5, 10] if m <= T]
             maturities = st.multiselect("Maturités (années)", options=available_maturities, default=default_maturities)
     
-            snapshot_times_all = [round(x * dt, 2) for x in range(0, int(T / dt) + 1)]
+            # Générer les snapshots lisibles et valides
+            max_snapshots = int(T / dt)
+            raw_snapshots = [round(i * dt, 2) for i in range(max_snapshots + 1)]
             
-            # Convertir les valeurs par défaut à float arrondies à 2 décimales
-            default_snapshots = [round(float(t), 2) for t in [0, 2, 5, 10] if round(float(t), 2) in snapshot_times_all]
+            # Formater pour affichage
+            labelled_snapshots = {f"{s:.2f} ans": s for s in raw_snapshots}
             
-            snapshot_times = st.multiselect(
-                "Temps de snapshot",
-                options=snapshot_times_all,
-                default=default_snapshots
-            )
+            # Choix par l'utilisateur (affichage propre, valeurs float)
+            default_keys = [k for k in labelled_snapshots if float(k.split()[0]) in [0.0, 2.0, 5.0, 10.0]]
+            selected_keys = st.multiselect("Temps de snapshot (années)", options=list(labelled_snapshots.keys()), default=default_keys)
+            
+            # Convertir pour usage technique
+            snapshot_times = [labelled_snapshots[k] for k in selected_keys]
     
             simulate_btn = st.button("🚀 Lancer la Simulation", type="primary")
     
