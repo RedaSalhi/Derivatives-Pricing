@@ -1969,6 +1969,13 @@ with tab4:
                     except Exception as e:
                         st.error(f"Error in portfolio analysis: {str(e)}")
     
+    
+    
+    
+    
+    
+    
+    
     # Market Data Section
     st.markdown('<div class="sub-header">📊 Market Data & Volatility Analysis</div>', unsafe_allow_html=True)
     
@@ -2072,23 +2079,64 @@ with tab4:
                 y_values = []
                 for K in x_values:
                     try:
-                        price = price_asian_option(base_spot, K, base_time, base_rate, base_vol, 100, 5000, "monte_carlo", "call", "average_price")
-                        y_values.append(price)
-                    except:
-                        # Fallback approximation
+                        if MODULES_LOADED:
+                            price = price_asian_option(base_spot, K, base_time, base_rate, base_vol, 50, 1000, "monte_carlo", "call", "average_price")
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        # More accurate approximation for Asian options
+                        from scipy.stats import norm
+                        # Asian option adjustment factor (typically 0.8-0.9 of vanilla)
+                        adj_vol = base_vol * np.sqrt(2/3)  # Volatility adjustment for averaging
+                        d1 = (np.log(base_spot/K) + (base_rate + 0.5*adj_vol**2)*base_time) / (adj_vol*np.sqrt(base_time))
+                        d2 = d1 - adj_vol*np.sqrt(base_time)
+                        asian_price = base_spot*norm.cdf(d1) - K*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        y_values.append(max(asian_price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Asian Call', line=dict(color='red')))
+            
+            
+            if show_barrier:
+                y_values = []
+                barrier_level = base_spot * 1.2  # Set barrier 20% above current spot
+                for K in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price, _ = price_barrier_option(base_spot, K, barrier_level, base_time, base_rate, base_vol, "call", "up-and-out", "monte_carlo", 1000, 50)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        # Barrier option approximation (typically 60-80% of vanilla for out options)
                         from scipy.stats import norm
                         d1 = (np.log(base_spot/K) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
                         d2 = d1 - base_vol*np.sqrt(base_time)
                         vanilla_price = base_spot*norm.cdf(d1) - K*np.exp(-base_rate*base_time)*norm.cdf(d2)
-                        y_values.append(max(vanilla_price * 0.85, 0))
-                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Asian Call', line=dict(color='red')))
+                        # Apply barrier discount based on probability of hitting barrier
+                        barrier_prob = norm.cdf((np.log(barrier_level/base_spot) - (base_rate - 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time)))
+                        barrier_discount = 1 - barrier_prob * 0.7  # Rough approximation
+                        y_values.append(max(vanilla_price * barrier_discount, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Barrier Call (H={barrier_level:.0f})', line=dict(color='orange')))
             
-            if show_digital:
+            if show_lookback:
                 y_values = []
                 for K in x_values:
-                    price = price_digital_option("black_scholes", "call", "cash", base_spot, K, base_time, base_rate, base_vol, 1.0)
-                    y_values.append(price)
-                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
+                    try:
+                        if MODULES_LOADED:
+                            price, _ = price_lookback_option(base_spot, K, base_rate, base_vol, base_time, "monte_carlo", "call", False, 1000, 50)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        # Lookback approximation (typically 20-40% premium over vanilla)
+                        from scipy.stats import norm
+                        d1 = (np.log(base_spot/K) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                        d2 = d1 - base_vol*np.sqrt(base_time)
+                        vanilla_price = base_spot*norm.cdf(d1) - K*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        # Lookback premium based on volatility and time
+                        lookback_premium = 1 + (base_vol * np.sqrt(base_time) * 0.3)
+                        y_values.append(max(vanilla_price * lookback_premium, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Lookback Call', line=dict(color='purple')))
         
         elif plot_type == "Price vs Spot":
             x_values = np.linspace(base_spot * 0.7, base_spot * 1.3, 20)
@@ -2108,21 +2156,79 @@ with tab4:
                 y_values = []
                 for S in x_values:
                     try:
-                        price = price_asian_option(S, base_strike, base_time, base_rate, base_vol, 100, 5000, "monte_carlo", "call", "average_price")
-                        y_values.append(price)
-                    except:
+                        if MODULES_LOADED:
+                            price = price_asian_option(S, base_strike, base_time, base_rate, base_vol, 50, 1000, "monte_carlo", "call", "average_price")
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        # Asian option approximation
+                        from scipy.stats import norm
+                        adj_vol = base_vol * np.sqrt(2/3)
+                        d1 = (np.log(S/base_strike) + (base_rate + 0.5*adj_vol**2)*base_time) / (adj_vol*np.sqrt(base_time))
+                        d2 = d1 - adj_vol*np.sqrt(base_time)
+                        asian_price = S*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        y_values.append(max(asian_price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Asian Call', line=dict(color='red')))
+            
+            if show_barrier:
+                y_values = []
+                barrier_level = base_strike * 1.2
+                for S in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price, _ = price_barrier_option(S, base_strike, barrier_level, base_time, base_rate, base_vol, "call", "up-and-out", "monte_carlo", 1000, 50)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        # Barrier approximation
                         from scipy.stats import norm
                         d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
                         d2 = d1 - base_vol*np.sqrt(base_time)
                         vanilla_price = S*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
-                        y_values.append(max(vanilla_price * 0.85, 0))
-                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Asian Call', line=dict(color='red')))
+                        # Barrier probability calculation
+                        if S >= barrier_level:
+                            barrier_price = 0  # Already knocked out
+                        else:
+                            barrier_prob = norm.cdf((np.log(barrier_level/S) - (base_rate - 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time)))
+                            barrier_price = vanilla_price * (1 - barrier_prob * 0.8)
+                        y_values.append(max(barrier_price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Barrier Call (H={barrier_level:.0f})', line=dict(color='orange')))
+            
+            if show_lookback:
+                y_values = []
+                for S in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price, _ = price_lookback_option(S, base_strike, base_rate, base_vol, base_time, "monte_carlo", "call", False, 1000, 50)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        # Lookback approximation
+                        from scipy.stats import norm
+                        d1 = (np.log(S/base_strike) + (base_rate + 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                        d2 = d1 - base_vol*np.sqrt(base_time)
+                        vanilla_price = S*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        lookback_premium = 1 + (base_vol * np.sqrt(base_time) * 0.4)
+                        y_values.append(max(vanilla_price * lookback_premium, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Lookback Call', line=dict(color='purple')))
             
             if show_digital:
                 y_values = []
                 for S in x_values:
-                    price = price_digital_option("black_scholes", "call", "cash", S, base_strike, base_time, base_rate, base_vol, 1.0)
-                    y_values.append(price)
+                    try:
+                        if MODULES_LOADED:
+                            price = price_digital_option("black_scholes", "call", "cash", S, base_strike, base_time, base_rate, base_vol, 1.0)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        d2 = (np.log(S/base_strike) + (base_rate - 0.5*base_vol**2)*base_time) / (base_vol*np.sqrt(base_time))
+                        price = np.exp(-base_rate*base_time) * norm.cdf(d2)
+                        y_values.append(price)
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
         
         elif plot_type == "Greeks vs Spot":
@@ -2178,9 +2284,76 @@ with tab4:
             if show_digital:
                 y_values = []
                 for vol in x_values:
-                    price = price_digital_option("black_scholes", "call", "cash", base_spot, base_strike, base_time, base_rate, vol, 1.0)
-                    y_values.append(price)
+                    try:
+                        if MODULES_LOADED:
+                            price = price_digital_option("black_scholes", "call", "cash", base_spot, base_strike, base_time, base_rate, vol, 1.0)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        d2 = (np.log(base_spot/base_strike) + (base_rate - 0.5*vol**2)*base_time) / (vol*np.sqrt(base_time))
+                        price = np.exp(-base_rate*base_time) * norm.cdf(d2)
+                        y_values.append(price)
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
+            
+            if show_asian:
+                y_values = []
+                for vol in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price = price_asian_option(base_spot, base_strike, base_time, base_rate, vol, 50, 1000, "monte_carlo", "call", "average_price")
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        adj_vol = vol * np.sqrt(2/3)
+                        d1 = (np.log(base_spot/base_strike) + (base_rate + 0.5*adj_vol**2)*base_time) / (adj_vol*np.sqrt(base_time))
+                        d2 = d1 - adj_vol*np.sqrt(base_time)
+                        asian_price = base_spot*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        y_values.append(max(asian_price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Asian Call', line=dict(color='red')))
+            
+            if show_barrier:
+                y_values = []
+                barrier_level = base_strike * 1.2
+                for vol in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price, _ = price_barrier_option(base_spot, base_strike, barrier_level, base_time, base_rate, vol, "call", "up-and-out", "monte_carlo", 1000, 50)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        d1 = (np.log(base_spot/base_strike) + (base_rate + 0.5*vol**2)*base_time) / (vol*np.sqrt(base_time))
+                        d2 = d1 - vol*np.sqrt(base_time)
+                        vanilla_price = base_spot*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        # Higher volatility increases barrier hit probability
+                        barrier_prob = norm.cdf((np.log(barrier_level/base_spot) - (base_rate - 0.5*vol**2)*base_time) / (vol*np.sqrt(base_time)))
+                        barrier_price = vanilla_price * (1 - barrier_prob * 0.8)
+                        y_values.append(max(barrier_price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Barrier Call (H={barrier_level:.0f})', line=dict(color='orange')))
+            
+            if show_lookback:
+                y_values = []
+                for vol in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price, _ = price_lookback_option(base_spot, base_strike, base_rate, vol, base_time, "monte_carlo", "call", False, 1000, 50)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        d1 = (np.log(base_spot/base_strike) + (base_rate + 0.5*vol**2)*base_time) / (vol*np.sqrt(base_time))
+                        d2 = d1 - vol*np.sqrt(base_time)
+                        vanilla_price = base_spot*norm.cdf(d1) - base_strike*np.exp(-base_rate*base_time)*norm.cdf(d2)
+                        # Lookback premium increases with volatility
+                        lookback_premium = 1 + (vol * np.sqrt(base_time) * 0.5)
+                        y_values.append(max(vanilla_price * lookback_premium, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Lookback Call', line=dict(color='purple')))
         
         elif plot_type == "Price vs Time":
             x_values = np.linspace(0.1, 2.0, 20)
@@ -2199,9 +2372,75 @@ with tab4:
             if show_digital:
                 y_values = []
                 for T in x_values:
-                    price = price_digital_option("black_scholes", "call", "cash", base_spot, base_strike, T, base_rate, base_vol, 1.0)
-                    y_values.append(price)
+                    try:
+                        if MODULES_LOADED:
+                            price = price_digital_option("black_scholes", "call", "cash", base_spot, base_strike, T, base_rate, base_vol, 1.0)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        d2 = (np.log(base_spot/base_strike) + (base_rate - 0.5*base_vol**2)*T) / (base_vol*np.sqrt(T))
+                        price = np.exp(-base_rate*T) * norm.cdf(d2)
+                        y_values.append(price)
                 fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Digital Call', line=dict(color='green')))
+            
+            if show_asian:
+                y_values = []
+                for T in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price = price_asian_option(base_spot, base_strike, T, base_rate, base_vol, 50, 1000, "monte_carlo", "call", "average_price")
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        adj_vol = base_vol * np.sqrt(2/3)
+                        d1 = (np.log(base_spot/base_strike) + (base_rate + 0.5*adj_vol**2)*T) / (adj_vol*np.sqrt(T))
+                        d2 = d1 - adj_vol*np.sqrt(T)
+                        asian_price = base_spot*norm.cdf(d1) - base_strike*np.exp(-base_rate*T)*norm.cdf(d2)
+                        y_values.append(max(asian_price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Asian Call', line=dict(color='red')))
+            
+            if show_barrier:
+                y_values = []
+                barrier_level = base_strike * 1.2
+                for T in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price, _ = price_barrier_option(base_spot, base_strike, barrier_level, T, base_rate, base_vol, "call", "up-and-out", "monte_carlo", 1000, 50)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        d1 = (np.log(base_spot/base_strike) + (base_rate + 0.5*base_vol**2)*T) / (base_vol*np.sqrt(T))
+                        d2 = d1 - base_vol*np.sqrt(T)
+                        vanilla_price = base_spot*norm.cdf(d1) - base_strike*np.exp(-base_rate*T)*norm.cdf(d2)
+                        # Longer time increases barrier hit probability
+                        barrier_prob = norm.cdf((np.log(barrier_level/base_spot) - (base_rate - 0.5*base_vol**2)*T) / (base_vol*np.sqrt(T)))
+                        barrier_price = vanilla_price * (1 - barrier_prob * 0.7)
+                        y_values.append(max(barrier_price, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name=f'Barrier Call (H={barrier_level:.0f})', line=dict(color='orange')))
+            
+            if show_lookback:
+                y_values = []
+                for T in x_values:
+                    try:
+                        if MODULES_LOADED:
+                            price, _ = price_lookback_option(base_spot, base_strike, base_rate, base_vol, T, "monte_carlo", "call", False, 1000, 50)
+                            y_values.append(price)
+                        else:
+                            raise Exception("Modules not loaded")
+                    except Exception as e:
+                        from scipy.stats import norm
+                        d1 = (np.log(base_spot/base_strike) + (base_rate + 0.5*base_vol**2)*T) / (base_vol*np.sqrt(T))
+                        d2 = d1 - base_vol*np.sqrt(T)
+                        vanilla_price = base_spot*norm.cdf(d1) - base_strike*np.exp(-base_rate*T)*norm.cdf(d2)
+                        lookback_premium = 1 + (base_vol * np.sqrt(T) * 0.4)
+                        y_values.append(max(vanilla_price * lookback_premium, 0))
+                fig_comp.add_trace(go.Scatter(x=x_values, y=y_values, name='Lookback Call', line=dict(color='purple')))
         
         # Update layout
         y_label = "Option Price" if plot_type != "Greeks vs Spot" else greek_type if plot_type == "Greeks vs Spot" else "Option Price"
