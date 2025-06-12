@@ -154,16 +154,18 @@ def generate_yield_curves(r_path, snapshot_times, maturities, a, theta, sigma, d
 # Plot Yield Curves
 # ------------------------------------------------------------------------------
 def plot_yield_curves(yield_curves, maturities): #need extraction from pricing.models.interest_rates.analytical_vasicek import plot_yield_curves
-    plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     for t_snap, yields in yield_curves.items():
-        plt.plot(maturities, yields, label=f'Time {t_snap}y')
-    plt.title('Simulated Yield Curves under Vasicek Model')
-    plt.xlabel('Maturity (years)')
-    plt.ylabel('Yield (continuously compounded)')
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
+        ax.plot(maturities, yields, label=f'Time {t_snap}y')
+    ax.set_title('Simulated Yield Curves under Vasicek Model')
+    ax.set_xlabel('Maturity (years)')
+    ax.set_ylabel('Yield (continuously compounded)')
+    ax.legend()
+    ax.grid(True)
+    fig.tight_layout()
     plt.show()
+    return fig
+
 
 # ------------------------------------------------------------------------------
 # Price a Coupon Bond Using the Simulated Short Rate Path
