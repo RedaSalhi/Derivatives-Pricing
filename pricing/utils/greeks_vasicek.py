@@ -10,7 +10,7 @@ from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option
 from scipy.optimize import bisect
 
 
-def compute_greek_vs_spot(greek: str, t, T1, T2, K, a, lam, sigma, face, option_type='call', n_paths=10000, model="Analytical"):
+def compute_greek_vs_spot(greek: str, t, T1, T2, K, a, lam, sigma, face, dt, option_type='call', n_paths=10000, model="Analytical"):
 
     def find_r_for_price(target_price, t, T, a, lam, sigma, face, direction='low'):
         """Find the short rate r such that P(t, T) ≈ target_price"""
