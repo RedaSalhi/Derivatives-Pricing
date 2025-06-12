@@ -1051,7 +1051,7 @@ with tab6:
             a, lam, sigma, dt, r0 = st.session_state["vasicek_params"]
     
             T = st.slider("Simulation Horizon (Years)", 1, 30, 10)
-            snapshots = st.multiselect("Snapshot Times", options=list(range(1, T)), default=[1, 5, 10])
+            snapshots = st.multiselect("Snapshot Times", options=list(range(1, T + 1)), default=[1, 5, 10])
             maturities = st.multiselect("Maturities", options=list(range(1, 31)), default=[1, 2, 5, 10, 20, 30])
     
             if st.button("Run Simulation"):
