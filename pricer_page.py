@@ -1088,7 +1088,7 @@ with tab6:
     # =============================================
     # TAB 2: SIMULATION ET COURBES
     # =============================================
-    with tab2:
+    """with tab2:
         st.header("📊 Simulation de Trajectoires et Courbes de Taux (Vasicek)")
     
         if not st.session_state.vasicek_params:
@@ -1176,7 +1176,97 @@ with tab6:
                     with col_stat2:
                         st.metric("Écart-type", f"{np.std(r_final):.4f}")
                     with col_stat3:
+                        st.metric("Min / Max", f"{np.min(r_final):.4f} / {np.max(r_final):.4f}")"""
+    # =============================================
+    # TAB 2: SIMULATION ET COURBES DE TAUX (CORRIGÉ)
+    # =============================================
+    with tab2:
+        st.header("📊 Simulation de Trajectoires et Courbes de Taux (Vasicek)")
+    
+        if not st.session_state.vasicek_params:
+            st.warning("⚠️ Veuillez d'abord estimer les paramètres dans l'onglet précédent.")
+            st.stop()
+    
+        params = st.session_state.vasicek_params
+    
+        col1, col2 = st.columns([1, 2])
+    
+        with col1:
+            st.subheader("⚙️ Paramètres de Simulation")
+    
+            T = st.slider("Horizon temporel (années)", min_value=1, max_value=30, value=10)
+            dt = st.slider("Pas de temps (dt)", min_value=0.01, max_value=1.0, value=float(params["dt"]), step=0.01)
+            n_paths = st.slider("Nombre de trajectoires simulées", 100, 10000, 1000, step=100)
+    
+            st.subheader("📐 Configuration des Courbes de Taux")
+    
+            available_maturities = [0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 30]
+            default_maturities = [m for m in [1, 2, 5, 10] if m <= T]
+            maturities = st.multiselect("Maturités (années)", options=available_maturities, default=default_maturities)
+    
+            # Snapshots lisibles
+            max_snapshots = int(T / dt)
+            raw_snapshots = [round(i * dt, 2) for i in range(max_snapshots + 1)]
+            labelled_snapshots = {f"{s:.2f} ans": s for s in raw_snapshots}
+            default_keys = [k for k in labelled_snapshots if float(k.split()[0]) in [0.0, 2.0, 5.0, 10.0]]
+            selected_keys = st.multiselect("Temps de snapshot (années)", options=list(labelled_snapshots.keys()), default=default_keys)
+            snapshot_times = [labelled_snapshots[k] for k in selected_keys]
+    
+            simulate_btn = st.button("🚀 Lancer la Simulation", type="primary")
+    
+        with col2:
+            if simulate_btn:
+                with st.spinner("Simulation en cours..."):
+    
+                    # Lancement de la simulation
+                    time_vec, r_paths = simulate_vasicek_paths(
+                        a=params['a'],
+                        lam=params['lambda'],
+                        sigma=params['sigma'],
+                        r0=params['r0'],
+                        T=T,
+                        dt=dt,
+                        n_paths=n_paths
+                    )
+    
+                    # Courbes de taux : moyenne des paths
+                    r_mean_path = np.mean(r_paths, axis=1)
+    
+                    yield_curves = generate_yield_curves(
+                        r_path=r_mean_path,
+                        snapshot_times=snapshot_times,
+                        maturities=maturities,
+                        a=params['a'],
+                        theta=params['lambda'],
+                        sigma=params['sigma'],
+                        dt=dt
+                    )
+    
+                    # ✅ Correction ici : figure explicite
+                    fig = plot_yield_curves(yield_curves, maturities)
+                    st.pyplot(fig)
+    
+                    # 📉 Distribution du taux final
+                    r_final = r_paths[-1, :]
+                    fig_hist = px.histogram(
+                        r_final,
+                        nbins=50,
+                        title="Distribution du Taux Court à l'Horizon",
+                        labels={'value': 'Taux', 'count': 'Fréquence'}
+                    )
+                    fig_hist.add_vline(x=np.mean(r_final), line_dash="dash", line_color="red",
+                                       annotation_text=f"Moyenne: {np.mean(r_final):.4f}")
+                    st.plotly_chart(fig_hist, use_container_width=True)
+    
+                    # 🧮 Statistiques descriptives
+                    col_stat1, col_stat2, col_stat3 = st.columns(3)
+                    with col_stat1:
+                        st.metric("Moyenne finale", f"{np.mean(r_final):.4f}")
+                    with col_stat2:
+                        st.metric("Écart-type", f"{np.std(r_final):.4f}")
+                    with col_stat3:
                         st.metric("Min / Max", f"{np.min(r_final):.4f} / {np.max(r_final):.4f}")
+
 
     
     # =============================================
