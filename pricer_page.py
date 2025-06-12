@@ -183,11 +183,11 @@ from pricing.utils.greeks_vanilla.plot_single_greek import plot_single_greek_vs_
                 st.error(f"Greek plot failed: {e}")"""
 
 with tab1:
-    st.title("🚀 Advanced Option Pricing Tool")
+    st.title("Advanced Option Pricing Tool")
     st.markdown("Price options using Black-Scholes, Binomial Tree, and Monte Carlo methods")
     
     # Input Parameters Section
-    st.header("📊 Option Parameters")
+    st.header("Option Parameters")
     
     # Create columns for input parameters
     param_col1, param_col2, param_col3 = st.columns(3)
@@ -226,7 +226,7 @@ with tab1:
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.header("💰 Pricing Results")
+        st.header("Pricing Results")
         
         if models:
             results = {}
@@ -285,7 +285,7 @@ with tab1:
                     st.pyplot(fig)
     
     with col2:
-        st.header("📈 Analysis & Information")
+        st.header("Analysis & Information")
         
         # Option Information
         st.subheader("Option Metrics")
@@ -301,81 +301,179 @@ with tab1:
         with metric_col2:
             st.metric("Intrinsic Value", f"{max(S - K, 0) if option_type.lower() == 'call' else max(K - S, 0):.4f}")
             st.metric("Time Value", f"{time_value:.4f}" if "Black-Scholes" in results and results.get("Black-Scholes") else "N/A")
+        
+        # Greeks Section
+        st.subheader("Greeks")
+        greek_model = st.selectbox("Model for Greeks:", ["Black-Scholes", "Binomial", "Monte-Carlo"], key="greek_model")
+        
+        if st.button("Calculate Greeks"):
+            try:
+                # Calculate Greeks for current spot price
+                greeks_list = ["delta", "gamma", "theta", "vega", "rho"]
+                greeks_values = {}
+                
+                for greek in greeks_list:
+                    try:
+                        greek_val = compute_greek(
+                            greek_name=greek,
+                            model=greek_model,
+                            option_type=option_type,
+                            S_values=[S],  # Single value for current calculation
+                            K=K, T=T, r=r, sigma=sigma, q=q
+                        )[0]  # Get first (and only) value
+                        greeks_values[greek.capitalize()] = greek_val
+                    except Exception as e:
+                        greeks_values[greek.capitalize()] = f"Error: {str(e)}"
+                
+                # Display Greeks in a nice format
+                greeks_df = pd.DataFrame([greeks_values]).T
+                greeks_df.columns = ['Value']
+                st.dataframe(greeks_df, use_container_width=True)
+                
+            except Exception as e:
+                st.error(f"Error calculating Greeks: {str(e)}")
     
     # Sensitivity Analysis Section
     st.divider()
-    st.header("📊 Sensitivity Analysis")
+    st.header("Advanced Analysis")
     
-    sens_col1, sens_col2, sens_col3 = st.columns([1, 1, 2])
+    # Create tabs for different analysis types
+    tab1, tab2 = st.tabs(["Parameter Sensitivity", "Greeks Analysis"])
     
-    with sens_col1:
-        param_to_analyze = st.selectbox(
-            "Parameter to vary:",
-            ["S", "K", "T", "r", "sigma"]
-        )
-    
-    with sens_col2:
-        model_for_analysis = st.selectbox(
-            "Model for analysis:",
-            ["Black-Scholes", "Binomial", "Monte-Carlo"]
-        )
-    
-    with sens_col3:
-        run_analysis = st.button("🔍 Run Sensitivity Analysis", use_container_width=True)
-    
-    if run_analysis:
-        # Define parameter ranges
-        param_ranges = {
-            "S": (S * 0.5, S * 1.5),
-            "K": (K * 0.5, K * 1.5),
-            "T": (0.1, min(2.0, T * 2)),
-            "r": (0.01, min(0.2, r * 3)),
-            "sigma": (sigma * 0.5, min(1.0, sigma * 2))
-        }
+    with tab1:
+        st.subheader("Parameter Sensitivity Analysis")
+        sens_col1, sens_col2, sens_col3 = st.columns([1, 1, 2])
         
-        param_range = param_ranges[param_to_analyze]
-        param_values = np.linspace(param_range[0], param_range[1], 20)
-        prices = []
+        with sens_col1:
+            param_to_analyze = st.selectbox(
+                "Parameter to vary:",
+                ["S", "K", "T", "r", "sigma"]
+            )
         
-        base_params = {'S': S, 'K': K, 'T': T, 'r': r, 'sigma': sigma, 'q': q}
+        with sens_col2:
+            model_for_analysis = st.selectbox(
+                "Model for analysis:",
+                ["Black-Scholes", "Binomial", "Monte-Carlo"]
+            )
         
-        for val in param_values:
-            temp_params = base_params.copy()
-            temp_params[param_to_analyze] = val
+        with sens_col3:
+            run_analysis = st.button("Run Parameter Sensitivity", use_container_width=True)
+        
+        if run_analysis:
+            # Define parameter ranges
+            param_ranges = {
+                "S": (S * 0.5, S * 1.5),
+                "K": (K * 0.5, K * 1.5),
+                "T": (0.1, min(2.0, T * 2)),
+                "r": (0.01, min(0.2, r * 3)),
+                "sigma": (sigma * 0.5, min(1.0, sigma * 2))
+            }
             
-            if model_for_analysis == "Binomial":
-                temp_params['N'] = N
-            elif model_for_analysis == "Monte-Carlo":
-                temp_params['n_simulations'] = n_simulations
+            param_range = param_ranges[param_to_analyze]
+            param_values = np.linspace(param_range[0], param_range[1], 20)
+            prices = []
+            
+            base_params = {'S': S, 'K': K, 'T': T, 'r': r, 'sigma': sigma, 'q': q}
+            
+            for val in param_values:
+                temp_params = base_params.copy()
+                temp_params[param_to_analyze] = val
+                
+                if model_for_analysis == "Binomial":
+                    temp_params['N'] = N
+                elif model_for_analysis == "Monte-Carlo":
+                    temp_params['n_simulations'] = n_simulations
+                
+                try:
+                    price = price_vanilla_option(
+                        option_type=option_type,
+                        exercise_style=exercise_style,
+                        model=model_for_analysis,
+                        **temp_params
+                    )
+                    prices.append(price)
+                except:
+                    prices.append(np.nan)
+            
+            # Plot sensitivity
+            fig, ax = plt.subplots(figsize=(12, 6))
+            ax.plot(param_values, prices, 'b-', linewidth=2)
+            ax.set_xlabel(param_to_analyze)
+            ax.set_ylabel('Option Price')
+            ax.set_title(f'Option Price Sensitivity to {param_to_analyze}')
+            ax.grid(True, alpha=0.3)
+            
+            # Mark current value
+            current_val = base_params[param_to_analyze]
+            current_price = results.get(model_for_analysis, 0) if 'results' in locals() else 0
+            if current_price:
+                ax.axvline(x=current_val, color='red', linestyle='--', alpha=0.7, label='Current')
+                ax.scatter([current_val], [current_price], color='red', s=100, zorder=5)
+                ax.legend()
+            
+            st.pyplot(fig)
+    
+    with tab2:
+        st.subheader("Greeks Sensitivity Analysis")
+        
+        greek_sens_col1, greek_sens_col2, greek_sens_col3 = st.columns([1, 1, 2])
+        
+        with greek_sens_col1:
+            greek_to_analyze = st.selectbox(
+                "Greek to analyze:",
+                ["Delta", "Gamma", "Theta", "Vega", "Rho"]
+            )
+        
+        with greek_sens_col2:
+            greek_model_analysis = st.selectbox(
+                "Model for Greeks:",
+                ["Black-Scholes", "Binomial", "Monte-Carlo"],
+                key="greek_model_analysis"
+            )
+        
+        with greek_sens_col3:
+            run_greek_analysis = st.button("Run Greeks Analysis", use_container_width=True)
+        
+        if run_greek_analysis:
+            # Analyze Greek vs Spot Price
+            spot_range = np.linspace(S * 0.7, S * 1.3, 30)
             
             try:
-                price = price_vanilla_option(
+                greek_values = compute_greek(
+                    greek_name=greek_to_analyze.lower(),
+                    model=greek_model_analysis,
                     option_type=option_type,
-                    exercise_style=exercise_style,
-                    model=model_for_analysis,
-                    **temp_params
+                    S_values=spot_range,
+                    K=K, T=T, r=r, sigma=sigma, q=q
                 )
-                prices.append(price)
-            except:
-                prices.append(np.nan)
-        
-        # Plot sensitivity
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(param_values, prices, 'b-', linewidth=2)
-        ax.set_xlabel(param_to_analyze)
-        ax.set_ylabel('Option Price')
-        ax.set_title(f'Sensitivity to {param_to_analyze}')
-        ax.grid(True, alpha=0.3)
-        
-        # Mark current value
-        current_val = base_params[param_to_analyze]
-        current_price = results.get(model_for_analysis, 0) if 'results' in locals() else 0
-        if current_price:
-            ax.axvline(x=current_val, color='red', linestyle='--', alpha=0.7, label='Current')
-            ax.scatter([current_val], [current_price], color='red', s=100, zorder=5)
-            ax.legend()
-        
-        st.pyplot(fig)
+                
+                # Plot Greek sensitivity
+                fig, ax = plt.subplots(figsize=(12, 6))
+                ax.plot(spot_range, greek_values, 'g-', linewidth=2)
+                ax.set_xlabel('Spot Price (S)')
+                ax.set_ylabel(f'{greek_to_analyze}')
+                ax.set_title(f'{greek_to_analyze} vs Spot Price ({greek_model_analysis})')
+                ax.grid(True, alpha=0.3)
+                
+                # Mark current spot price
+                ax.axvline(x=S, color='red', linestyle='--', alpha=0.7, label='Current S')
+                current_greek = compute_greek(
+                    greek_name=greek_to_analyze.lower(),
+                    model=greek_model_analysis,
+                    option_type=option_type,
+                    S_values=[S],
+                    K=K, T=T, r=r, sigma=sigma, q=q
+                )[0]
+                ax.scatter([S], [current_greek], color='red', s=100, zorder=5)
+                ax.legend()
+                
+                st.pyplot(fig)
+                
+                # Show current Greek value
+                st.info(f"Current {greek_to_analyze} value: {current_greek:.6f}")
+                
+            except Exception as e:
+                st.error(f"Error calculating {greek_to_analyze}: {str(e)}")
 
 
 # -----------------------------
