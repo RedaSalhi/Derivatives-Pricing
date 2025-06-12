@@ -916,6 +916,7 @@ with tab6:
         # --- Yield Curve Plot Button ---
         yield_curve = st.checkbox("Simulate Yield Curve?")
         plot_paths = st.checkbox("Plot Monte Carlo Paths and Rate Distribution at T?")
+        
         if instrument == "Bond Option (European)":
             greeks = st.checkbox("Visualize Greeks/Option Price? (only for bond options)")
 
@@ -938,15 +939,16 @@ with tab6:
                 
             T_vec, r_paths = simulate_vasicek_paths(a, lam, sigma, r0, T, dt, n_paths)
 
-        if greeks:
-            col1, col2 = st.columns(2)
-            with col1:
-                greek = st.selectbox("Select Greek or Price:", [ "Price", "Delta", "Vega", "Rho"])
-                greek_lower = greek.lower()
-            with col2:
-                model = st.selectbox("Select Model", [ "Analytical", "Monte Carlo"])
-                if model == "Monte Carlo":
-                    st.warning("Monte Carlo is not working properly at the moment.")
+        if instrument == "Bond Option (European)":
+            if st.checkbox("Visualize Greeks/Option Price? (only for bond options)"):
+                col1, col2 = st.columns(2)
+                with col1:
+                    greek = st.selectbox("Select Greek or Price:", [ "Price", "Delta", "Vega", "Rho"])
+                    greek_lower = greek.lower()
+                with col2:
+                    model = st.selectbox("Select Model", [ "Analytical", "Monte Carlo"])
+                    if model == "Monte Carlo":
+                        st.warning("Monte Carlo is not working properly at the moment.")
  
             
     
