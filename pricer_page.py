@@ -1183,89 +1183,127 @@ with tab6:
     # TAB 3: PRICING D'OBLIGATIONS
     # =============================================
     with tab3:
-        st.header("💰 Pricing d'Obligations Zero-Coupon et à Coupons")
-        
+        st.header("💰 Pricing d'Obligations (Zero-Coupon ou à Coupons)")
+    
         if not st.session_state.vasicek_params:
-            st.warning("⚠️ Veuillez d'abord estimer les paramètres dans la section 'Estimation des Paramètres'")
+            st.warning("⚠️ Veuillez d'abord estimer les paramètres dans l'onglet précédent.")
             st.stop()
-        
+    
         params = st.session_state.vasicek_params
-        
+    
         col1, col2 = st.columns([1, 2])
-        
+    
         with col1:
-            st.subheader("Configuration du Pricing")
-            
+            st.subheader("📋 Paramètres de l’Obligation")
+    
             bond_type = st.radio("Type d'obligation", ["Zero-Coupon", "Avec Coupons"])
-            
-            # Paramètres communs
-            r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="bond_r_current")
-            t_current = st.number_input("Temps actuel (t)", 0.0, 10.0, 0.0, step=0.1, key="bond_t_current")
-            maturity = st.number_input("Maturité (T)", 0.1, 30.0, 5.0, step=0.1, key="bond_maturity")
-            face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100, key="bond_face_value")
-            
+    
+            r_current = st.number_input("Taux actuel (r)", min_value=0.0, max_value=0.20, value=params['r0'], step=0.001, format="%.4f")
+            t_current = st.number_input("Temps actuel (t)", min_value=0.0, max_value=30.0, value=0.0, step=0.1)
+            maturity = st.number_input("Maturité (T)", min_value=t_current + 0.1, max_value=30.0, value=5.0, step=0.1)
+            face_value = st.number_input("Valeur nominale", min_value=100, max_value=10000, value=1000, step=100)
+    
             if bond_type == "Avec Coupons":
-                coupon_rate = st.number_input("Taux de coupon (%)", 0.0, 20.0, 5.0, step=0.1, key="bond_coupon_rate") / 100
-                payment_freq = st.selectbox("Fréquence de paiement", ["Semestriel", "Annuel"], index=0, key="bond_payment_freq")
-                dt_coupon = 0.5 if payment_freq == "Semestriel" else 1.0
-            
-            # Analyse de sensibilité
-            st.subheader("Analyse de Sensibilité")
-            sensitivity_param = st.selectbox(
-                "Paramètre à analyser",
-                ["Taux actuel (r)", "Maturité (T)", "Volatilité (σ)"]
-            )
-            
-            calculate_btn = st.button("💰 Calculer le Prix", type="primary")
-        
+                coupon_rate = st.number_input("Taux de coupon (%)", min_value=0.0, max_value=20.0, value=5.0, step=0.1) / 100
+                freq = st.selectbox("Fréquence des paiements", ["Annuel", "Semestriel"])
+                dt_coupon = 1.0 if freq == "Annuel" else 0.5
+    
+            st.subheader("🔍 Analyse de Sensibilité")
+            sensitivity_param = st.selectbox("Paramètre à tester", ["Taux actuel (r)", "Maturité (T)", "Volatilité (σ)"])
+    
+            price_btn = st.button("💰 Calculer le Prix", type="primary")
+    
         with col2:
-            if calculate_btn:
+            if price_btn:
                 with st.spinner("Calcul en cours..."):
-                    # Calcul du prix (tu devras utiliser tes vraies fonctions)
-                    if bond_type == "Zero-Coupon":
-                        price = vasicek_zero_coupon_price(r_current, t_current, maturity, 
-                                                        params['a'], params['lambda'], params['sigma'], face_value)
-                        
-                        st.success(f"💰 **Prix de l'obligation Zero-Coupon: {price:.2f}**")
-                        yield_to_maturity = -np.log(price / face_value) / (maturity - t_current)
-                        st.info(f"📊 Rendement à l'échéance: {yield_to_maturity:.4f} ({yield_to_maturity*100:.2f}%)")
-                    
-                    else:  # Avec coupons
-                        price = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], 
-                                                params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
-        
-                        
-                        st.success(f"💰 **Prix de l'obligation à coupons: {price:.2f}**")
-                        st.info(f"📊 Coupon: {coupon_rate*100:.2f}% ({payment_freq})")
-                    
-                    # Analyse de sensibilité
-                    st.subheader("📈 Analyse de Sensibilité")
-                    
-                    if sensitivity_param == "Taux actuel (r)":
-                        r_range = np.linspace(max(0.001, r_current - 0.05), r_current + 0.05, 100)
-                        prices = []
-                        
-                        for r in r_range:
-                            if bond_type == "Zero-Coupon":
-                                B = (1 - np.exp(-params['a'] * (maturity - t_current))) / params['a']
-                                A = np.exp((params['lambda'] - params['sigma']**2 / (2 * params['a']**2)) * (B - (maturity - t_current))
-                                          - (params['sigma']**2 / (4 * params['a'])) * B**2)
-                                p = face_value * A * np.exp(-B * r)
-                            else:
-                                # Calcul simplifié pour les coupons
-                                p = price * np.exp(-(r - r_current) * (maturity - t_current))
-                            prices.append(p)
-                        
+    
+                    try:
+                        if bond_type == "Zero-Coupon":
+                            price = vasicek_zero_coupon_price(
+                                r_t=r_current,
+                                t=t_current,
+                                T=maturity,
+                                a=params['a'],
+                                lam=params['lambda'],
+                                sigma=params['sigma'],
+                                face_value=face_value
+                            )
+                            st.success(f"💰 Prix de l'obligation Zero-Coupon : **{price:.2f}**")
+    
+                            ytm = -np.log(price / face_value) / (maturity - t_current)
+                            st.info(f"📈 Rendement à l’échéance (YTM) : **{ytm:.4f} ({ytm*100:.2f}%)**")
+    
+                        else:
+                            price = price_coupon_bond(
+                                r0=r_current,
+                                t=t_current,
+                                a=params['a'],
+                                lam=params['lambda'],
+                                sigma=params['sigma'],
+                                maturity=maturity,
+                                face=face_value,
+                                coupon=coupon_rate,
+                                dt=dt_coupon
+                            )
+                            st.success(f"💰 Prix de l'obligation à coupons : **{price:.2f}**")
+                            st.info(f"📊 Coupon : {coupon_rate*100:.2f}% ({freq})")
+    
+                        # -------- Sensibilité --------
+                        st.subheader("📈 Analyse de Sensibilité")
+    
                         fig = go.Figure()
-                        fig.add_trace(go.Scatter(x=r_range*100, y=prices, mode='lines', name='Prix'))
-                        fig.add_vline(x=r_current*100, line_dash="dash", line_color="red",
-                                     annotation_text=f"Taux actuel: {r_current*100:.2f}%")
-                        fig.update_layout(
-                            title="Sensibilité du Prix au Taux d'Intérêt",
-                            xaxis_title="Taux d'intérêt (%)",
-                            yaxis_title="Prix de l'obligation"
-                        )
+    
+                        if sensitivity_param == "Taux actuel (r)":
+                            r_vals = np.linspace(max(0.001, r_current - 0.05), r_current + 0.05, 100)
+                            prices = []
+    
+                            for r in r_vals:
+                                if bond_type == "Zero-Coupon":
+                                    p = vasicek_zero_coupon_price(r, t_current, maturity, params['a'], params['lambda'], params['sigma'], face_value)
+                                else:
+                                    p = price_coupon_bond(r, t_current, params['a'], params['lambda'], params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
+                                prices.append(p)
+    
+                            fig.add_trace(go.Scatter(x=r_vals * 100, y=prices, mode="lines", name="Prix"))
+                            fig.add_vline(x=r_current * 100, line_dash="dash", line_color="red", annotation_text=f"Taux actuel: {r_current*100:.2f}%")
+                            fig.update_layout(title="Sensibilité du Prix au Taux d’Intérêt", xaxis_title="Taux (%)", yaxis_title="Prix")
+    
+                        elif sensitivity_param == "Maturité (T)":
+                            T_vals = np.linspace(t_current + 0.1, 30, 100)
+                            prices = []
+    
+                            for T_val in T_vals:
+                                if bond_type == "Zero-Coupon":
+                                    p = vasicek_zero_coupon_price(r_current, t_current, T_val, params['a'], params['lambda'], params['sigma'], face_value)
+                                else:
+                                    p = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], params['sigma'], T_val, face_value, coupon_rate, dt_coupon)
+                                prices.append(p)
+    
+                            fig.add_trace(go.Scatter(x=T_vals, y=prices, mode="lines", name="Prix"))
+                            fig.add_vline(x=maturity, line_dash="dash", line_color="red", annotation_text=f"Maturité actuelle: {maturity:.1f} ans")
+                            fig.update_layout(title="Sensibilité du Prix à la Maturité", xaxis_title="Maturité (années)", yaxis_title="Prix")
+    
+                        elif sensitivity_param == "Volatilité (σ)":
+                            sigma_vals = np.linspace(0.001, params['sigma'] * 2, 100)
+                            prices = []
+    
+                            for sig in sigma_vals:
+                                if bond_type == "Zero-Coupon":
+                                    p = vasicek_zero_coupon_price(r_current, t_current, maturity, params['a'], params['lambda'], sig, face_value)
+                                else:
+                                    p = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], sig, maturity, face_value, coupon_rate, dt_coupon)
+                                prices.append(p)
+    
+                            fig.add_trace(go.Scatter(x=sigma_vals * 100, y=prices, mode="lines", name="Prix"))
+                            fig.add_vline(x=params['sigma'] * 100, line_dash="dash", line_color="red", annotation_text=f"σ actuel: {params['sigma']*100:.2f}%")
+                            fig.update_layout(title="Sensibilité du Prix à la Volatilité", xaxis_title="Volatilité (%)", yaxis_title="Prix")
+    
                         st.plotly_chart(fig, use_container_width=True)
+    
+                    except Exception as e:
+                        import traceback
+                        st.error(f"❌ Erreur lors du calcul :\n\n```\n{traceback.format_exc()}\n```")
+
     
     # =============================================
     # TAB 4: OPTIONS SUR OBLIGATIONS
