@@ -1,4 +1,4 @@
-pricing/digital_option.py
+# pricing/digital_option.py
 
 
 from pricing.models.digital_black_scholes import (
