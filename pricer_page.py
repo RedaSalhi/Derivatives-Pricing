@@ -1429,13 +1429,13 @@ with tab4:
     ])
     
     # Tab 1: Asian Options
-    with tabb1:
+    with tab1:
         st.markdown('<div class="sub-header">Asian Options Pricing</div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            st.subheader("Parameters")
+            st.subheader("📋 Parameters")
             
             asian_S0 = st.number_input("Initial Stock Price (S₀)", value=100.0, min_value=0.1, key="asian_s0")
             asian_K = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="asian_k")
@@ -1448,9 +1448,9 @@ with tab4:
             asian_option_type = st.selectbox("Option Type", ["call", "put"], key="asian_option_type")
             asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="asian_type")
             
-            calculate_asian = st.button("Calculate Asian Option", key="calc_asian")
-            show_greeks_asian = st.checkbox("Show Greeks", key="show_greeks_asian")
-            show_sensitivity_asian = st.checkbox("Sensitivity Analysis", key="show_sens_asian")
+            calculate_asian = st.button("🔢 Calculate Asian Option", key="calc_asian")
+            show_greeks_asian = st.checkbox("📈 Show Greeks", key="show_greeks_asian")
+            show_sensitivity_asian = st.checkbox("📊 Sensitivity Analysis", key="show_sens_asian")
         
         with col2:
             if calculate_asian:
@@ -1484,12 +1484,12 @@ with tab4:
                                 st.metric("Rho (ρ)", f"{greeks['Rho']:.4f}")
                         
                         # Show payoff diagram
-                        st.subheader("Payoff Diagram")
+                        st.subheader("📈 Payoff Diagram")
                         plot_asian_option_payoff(asian_K, asian_option_type, asian_type)
                         
                         # Sensitivity analysis
                         if show_sensitivity_asian:
-                            st.subheader("Sensitivity Analysis")
+                            st.subheader("📊 Sensitivity Analysis")
                             
                             # Parameter ranges for sensitivity
                             s_range = np.linspace(asian_S0 * 0.7, asian_S0 * 1.3, 20)
