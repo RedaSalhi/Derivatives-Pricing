@@ -106,3 +106,9 @@ Most Important Quant Models ♥️♥️
 1. Finite Difference Methods (FDM) – Solve Black-Scholes PDEs numerically
  
 2. Crank-Nicolson Scheme – Stable numerical scheme for pricing European/American options
+
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
