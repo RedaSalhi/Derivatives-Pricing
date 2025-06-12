@@ -26,6 +26,7 @@ from pricing.asian_option import price_asian_option, plot_asian_option_payoff, p
 from pricing.barrier_option import price_barrier_option, plot_barrier_payoff, plot_sample_paths_barrier
 from pricing.digital_option import price_digital_option, plot_digital_payoff
 from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
+from pricing.utils.exotic_utils import *
 
 
 # Allow importing from the pricing directory
@@ -1383,248 +1384,6 @@ with tab3:
 # -----------------------------
 # Tab 4 – Exotic Options
 # -----------------------------
-"""from pricing.digital_option import price_digital_option, plot_digital_payoff
-from pricing.barrier_option import price_barrier_option, plot_barrier_payoff, plot_sample_paths_barrier
-from pricing.asian_option import price_asian_option, plot_asian_option_payoff, plot_monte_carlo_paths
-from pricing.models.asian_monte_carlo import simulate_asian_paths
-from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
-
-with tab4:
-    st.header("Exotic Option Pricing (In Progress)")
-
-    exotic_type = st.selectbox("Select Exotic Option Type", ["Digital", "Barrier", "Asian", "Lookback"])
-
-    # ===========================
-    # Digital Option Interface
-    # ===========================
-    if exotic_type == "Digital":
-        st.subheader("Digital Option")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            option_type = st.selectbox("Option Type", ["Call", "Put"], key="dig_type")
-            if option_type == "Call":
-                option_type = "call"
-            elif option_type == "Put":
-                option_type = "put"
-            style = st.selectbox("Digital Style", ["cash", "asset"], key="dig_style")
-            model = st.selectbox("Model", ["Black Scholes"], key="dig_model")
-            if model == "Black Scholes":
-                model = "black_scholes"
-        with col2:
-            S = st.number_input("Spot Price (S)", value=100.0, key="dig_S")
-            K = st.number_input("Strike Price (K)", value=100.0, key="dig_K")
-            T = st.number_input("Time to Maturity (T)", value=1.0, key="dig_T")
-            sigma = st.number_input("Volatility (σ)", value=0.2, key="dig_sigma")
-            r = st.number_input("Risk-Free Rate (r)", value=0.05, key="dig_r")
-            Q = st.number_input("Payout (Q)", value=10.0, key="dig_Q")
-
-        if st.button("Compute Digital Option Price"):
-            try:
-                price = price_digital_option(
-                    model=model,
-                    option_type=option_type,
-                    style=style,
-                    S=S,
-                    K=K,
-                    T=T,
-                    r=r,
-                    sigma=sigma,
-                    Q=Q
-                )
-                st.success(f"The {style} digital {option_type} is worth: **{price:.4f}**")
-                with st.expander("Payoff at Maturity"):
-                    plot_digital_payoff(K=K, option_type=option_type, style=style, Q=Q)
-
-            except Exception as e:
-                st.error(f"Error: {e}")
-
-    # ===========================
-    # Barrier Option Interface
-    # ===========================
-    elif exotic_type == "Barrier":
-        st.subheader("Barrier Option")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            option_type = st.selectbox("Option Type", ["Call", "Put"], key="bar_type")
-            if option_type == "Call":
-                option_type = "call"
-            elif option_type == "Put":
-                option_type = "put"
-            barrier_type = st.selectbox("Barrier Type", ["Up and Out", "Up and In", "Down and Out", "Down and In"], key="bar_style")
-            if barrier_type == "Up and Out":
-                barrier_type = "up-and-out"
-            elif barrier_type == "Up and In":
-                barrier_type = "up-and-in"
-            elif barrier_type == "Down and Out":
-                barrier_type = "down-and-out"
-            elif barrier_type == "Down and In":
-                barrier_type = "down-and-in"
-            model = st.selectbox("Model", ["Monte Carlo"], key="bar_model")
-            if model == "Monte Carlo":
-                model = "monte_carlo"
-        with col2:
-            S = st.number_input("Spot Price (S)", value=100.0, key="bar_S")
-            K = st.number_input("Strike Price (K)", value=100.0, key="bar_K")
-            H = st.number_input("Barrier Level (H)", value=120.0, key="bar_H")
-            T = st.number_input("Time to Maturity (T)", value=1.0, key="bar_T")
-            sigma = st.number_input("Volatility (σ)", value=0.2, key="bar_sigma")
-            r = st.number_input("Risk-Free Rate (r)", value=0.05, key="bar_r")
-
-        # Sliders appear only if Monte Carlo is selected
-        if model == "monte_carlo":
-            n_sim = st.slider("Number of Simulations", min_value=10, max_value=10000, step=10, value=1000)
-            n_steps = st.slider("Steps per Path", min_value=10, max_value=300, step=2, value=252)
-        else:
-            n_sim = None
-            n_steps = None
-
-        if st.button("Compute Barrier Option Price"):
-            st.markdown("<small>Wait a few seconds for the plots !</small>", unsafe_allow_html=True)
-            try:
-                kwargs = dict(
-                    model=model,
-                    option_type=option_type,
-                    barrier_type=barrier_type,
-                    S=S,
-                    K=K,
-                    H=H,
-                    T=T,
-                    r=r,
-                    sigma=sigma
-                )
-        
-                if model == "monte_carlo":
-                    kwargs["n_simulations"] = n_sim
-                    kwargs["n_steps"] = n_steps
-                    price, paths = price_barrier_option(**kwargs)
-        
-                st.success(f"The {barrier_type} {option_type} option is worth: **{price:.4f}**")
-        
-                if model == "monte_carlo":
-                    with st.expander("Payoff at Maturity"):
-                        plot_barrier_payoff(K=K, H=H, option_type=option_type, barrier_type=barrier_type)
-                    with st.expander("Monte Carlo Sample Paths"):
-                        plot_sample_paths_barrier(paths, K=K, H=H, option_type=option_type, barrier_type=barrier_type)
-                    
-        
-            except Exception as e:
-                st.error(f"Error: {e}")
-    # ===========================
-    # Asian Option Interface
-    # ===========================
-    elif exotic_type == "Asian":
-        st.subheader("Asian Option")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            method = st.selectbox("Pricing Method", ["Monte Carlo"], key="asian_method")
-            if method == "Monte Carlo":
-                method = "monte_carlo"
-            option_type = st.selectbox("Option Type", ["Call", "Put"], key="asian_type")
-            if option_type == "Call":
-                option_type = "call"
-            elif option_type == "Put":
-                option_type = "put"
-            asian_type = st.selectbox("Asian Type", ["Average Price", "Average Strike"], key="asian_style")
-            if asian_type == "Average Price":
-                asian_type = "average_price"
-            elif asian_type == "Average Strike":
-                asian_type = "average_strike"
-        with col2:
-            S = st.number_input("Spot Price (S)", value=100.0, key="asian_S")
-            K = st.number_input("Strike Price (K)", value=100.0, key="asian_K")
-            T = st.number_input("Time to Maturity (T)", value=1.0, key="asian_T")
-            sigma = st.number_input("Volatility (σ)", value=0.2, key="asian_sigma")
-            r = st.number_input("Risk-Free Rate (r)", value=0.05, key="asian_r")
-
-        if method == "monte_carlo":
-            n_paths = st.slider("Monte Carlo Simulations", 10, 10000, step=10, value=10000)
-            n_steps = st.slider("Steps per Path", 10, 300, step=2, value=252)
-
-        if st.button("Compute Asian Option Price"):
-            st.markdown("<small>Wait a few seconds for the plots !</small>", unsafe_allow_html=True)
-            try:
-                price = price_asian_option(
-                    S0=S, K=K, T=T, r=r, sigma=sigma,
-                    n_steps=n_steps,
-                    n_paths=n_paths or 10000,
-                    method=method,
-                    option_type=option_type,
-                    asian_type=asian_type
-                )
-
-                st.success(f"The {asian_type.replace('_', ' ')} Asian {option_type} is worth: **{price:.4f}**")
-
-                with st.expander("Payoff at Maturity"):    
-                    plot_asian_option_payoff(K=K, option_type=option_type, asian_type=asian_type)
-
-                if method == "monte_carlo":
-                    paths = simulate_asian_paths(S0=S, T=T, r=r, sigma=sigma,
-                                                 n_steps=n_steps, n_paths=n_paths,
-                                                 option_type=option_type, asian_type=asian_type)
-                    with st.expander("Monte Carlo Sample Paths"):
-                        plot_monte_carlo_paths(paths)
-
-            except Exception as e:
-                st.error(f"Error: {e}")
-    # ===========================
-    # Lookback Option Interface
-    # ===========================
-    elif exotic_type == "Lookback":
-        st.subheader("Lookback Option")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            model = st.selectbox("Pricing Model", ["Monte Carlo"], key="lookback_model")
-            if model == "Monte Carlo":
-                model = "monte_carlo"
-            option_type = st.selectbox("Option Type", ["Call", "Put"], key="lookback_type")
-            if option_type == "Call":
-                option_type = "call"
-            elif option_type == "Put":
-                option_type = "put"
-            floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
-        with col2:
-            S0 = st.number_input("Spot Price (S₀)", value=100.0, key="lookback_S")
-            K = st.number_input("Strike Price (K)", value=100.0, key="lookback_K")
-            T = st.number_input("Time to Maturity (T)", value=1.0, key="lookback_T")
-            sigma = st.number_input("Volatility (σ)", value=0.2, key="lookback_sigma")
-            r = st.number_input("Risk-Free Rate (r)", value=0.05, key="lookback_r")
-    
-        if model == "monte_carlo":
-            n_paths = st.slider("Monte Carlo Simulations", 10, 10000, step=10, value=1000, key="lookback_paths")
-            n_steps = st.slider("Steps per Path", 10, 300, step=2, value=252, key="lookback_steps")
-    
-        if st.button("Compute Lookback Option Price"):
-            st.markdown("<small>Wait a few seconds for the plots !</small>", unsafe_allow_html=True)
-            from pricing.lookback_option import price_lookback_option, plot_payoff, plot_paths, plot_price_distribution
-    
-            try:
-                price, stderr = price_lookback_option(
-                    S0=S0, K=K if not floating_strike else None, r=r, sigma=sigma, T=T,
-                    model=model, option_type=option_type,
-                    floating_strike=floating_strike,
-                    n_paths=n_paths if model == "monte_carlo" else None,
-                    n_steps=n_steps if model == "monte_carlo" else None
-                )
-    
-                if stderr is not None:
-                    st.success(f"Monte Carlo Price: **{price:.4f}**")
-    
-                with st.expander("Payoff Function"):
-                    st.pyplot(plot_payoff(S0, option_type, K, floating_strike))
-    
-                with st.expander("Simulated Asset Paths"):
-                    st.pyplot(plot_paths(S0, r, sigma, T, n_paths, n_steps))
-    
-                if model == "monte_carlo":
-                    with st.expander("Distribution of Discounted Payoffs"):
-                        st.pyplot(plot_price_distribution(S0, r, sigma, T, option_type, floating_strike, n_paths, n_steps))
-    
-            except Exception as e:
-                st.error(f"Error: {e}")"""
 
 
 with tab4: 
@@ -1633,21 +1392,14 @@ with tab4:
     st.markdown("---")
     
     # Navigation tabs
-    """
     tabb1, tabb2, tabb3, tabb4, tabb5 = st.tabs([
         "🥇 Asian Options", 
         "🚧 Barrier Options", 
         "💻 Digital Options", 
         "👀 Lookback Options",
         "📊 Portfolio Analysis"
-    ])"""
-
-    tabb1, tabb2, tabb3, tabb4 = st.tabs([
-        "🥇 Asian Options", 
-        "🚧 Barrier Options", 
-        "💻 Digital Options", 
-        "👀 Lookback Options"
     ])
+
     
     with tabb1:
         st.header("Asian Options Pricing & Analysis")
@@ -1664,8 +1416,9 @@ with tab4:
         
         with col2:
             st.subheader("⚙️ Model Settings")
-            option_type = st.selectbox("Option Type", ["call", "put"])
-            asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"])
+            option_type = st.selectbox("Option Type", ["call", "put"], key="asian_option_type")
+            asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="asian_type")
+
             n_steps = st.slider("Time Steps", 50, 500, 252)
             n_paths = st.slider("MC Paths", 1000, 50000, 10000, step=1000)
         
@@ -1743,8 +1496,8 @@ with tab4:
         
         with col2:
             st.subheader("⚙️ Model Settings")
-            option_type_barrier = st.selectbox("Option Type", ["call", "put"], key="barrier_type")
-            barrier_type = st.selectbox("Barrier Type", ["up-and-out", "down-and-out", "up-and-in", "down-and-in"])
+            option_type_barrier = st.selectbox("Option Type", ["call", "put"], key="barrier_option_type")
+            barrier_type = st.selectbox("Barrier Type", ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], key="barrier_type_select")
             n_sims = st.slider("MC Simulations", 1000, 100000, 10000, step=1000)
             n_steps_barrier = st.slider("Time Steps", 50, 500, 100, key="barrier_steps")
         
@@ -1783,8 +1536,8 @@ with tab4:
         
         with col2:
             st.subheader("⚙️ Model Settings")
-            option_type_digital = st.selectbox("Option Type", ["call", "put"], key="digital_type")
-            style_digital = st.selectbox("Digital Style", ["cash", "asset"])
+            option_type_digital = st.selectbox("Option Type", ["call", "put"], key="digital_option_type")
+            style_digital = st.selectbox("Digital Style", ["cash", "asset"], key="digital_style")
         
         with col3:
             st.subheader("📈 Results")
@@ -1839,7 +1592,7 @@ with tab4:
         
         with col2:
             st.subheader("⚙️ Model Settings")
-            option_type_lookback = st.selectbox("Option Type", ["call", "put"], key="lookback_type")
+            option_type_lookback = st.selectbox("Option Type", ["call", "put"], key="lookback_option_type")
             floating_strike = st.checkbox("Floating Strike", value=True, key="lookback_floating")
             n_paths_lookback = st.slider("MC Paths", 1000, 100000, 10000, step=1000, key="lookback_paths")
             n_steps_lookback = st.slider("Time Steps", 50, 500, 252, key="lookback_steps")
@@ -1882,7 +1635,7 @@ with tab4:
             fig = plot_price_distribution(S0_lookback, r_lookback, sigma_lookback, T_lookback, option_type_lookback, floating_strike)
             st.pyplot(fig)
     
-    """with tabb5:
+    with tabb5:
         st.header("Portfolio Analysis & Comparison")
         
         st.subheader("📊 Multi-Option Comparison")
@@ -1936,9 +1689,30 @@ with tab4:
         
         # Volatility smile analysis
         st.subheader("📈 Volatility Smile Analysis")
-        
-        if st.button("Generate Volatility Smile"""
+        if st.button("Generate Volatility Smile", key="vol_smile"):
+                strike_range = np.linspace(S_common * 0.6, S_common * 1.4, 25)
+                vol_smile_data = []
 
+                for K_val in strike_range:
+                    # Pricing a digital option as an example
+                    price = price_digital_option(
+                        model="black_scholes",
+                        option_type="call",
+                        style="cash",
+                        S=S_common,
+                        K=K_val,
+                        T=T_common,
+                        r=r_common,
+                        sigma=sigma_common
+                    )
+                    vol_smile_data.append((K_val, price))
+
+                smile_df = pd.DataFrame(vol_smile_data, columns=["Strike", "Option Price"])
+
+                fig_smile = px.line(smile_df, x="Strike", y="Option Price",
+                                    title="Volatility Smile (Digital Option)",
+                                    markers=True)
+                st.plotly_chart(fig_smile, use_container_width=True)
                          
 
 
