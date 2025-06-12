@@ -25,8 +25,6 @@ def plot_vasicek_paths(T_vec, r_paths, lam, std_dt):
     plt.figure(figsize=(10, 5))
     plt.plot(T_vec, r_paths, lw=0.6, alpha=0.6)
     plt.axhline(lam, color='red', linestyle='--', label='Mean Reversion Level (λ)')
-    plt.axhline(lam + std_dt, color='black', linestyle='--', label='±1 Std Dev')
-    plt.axhline(lam - std_dt, color='black', linestyle='--')
     plt.title("Vasicek Sample Paths")
     plt.xlabel("Time (Years)")
     plt.ylabel("Short Rate")
