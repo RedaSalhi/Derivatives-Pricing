@@ -1011,7 +1011,7 @@ with tab6:
     
     st.title("📈 Modèle de Vasicek - Pricing d'Obligations et Taux d'intérêt")
     st.markdown("---")
-    
+
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
         ["🔧 Estimation des Paramètres", "📊 Simulation et Courbes", "💰 Pricing d'Obligations", "📈 Options sur Obligations", "🔍 Analyse des Grecques"]
     )
@@ -1045,15 +1045,15 @@ with tab6:
                 with st.spinner("Chargement des données et estimation..."):
                     try:
                         # Tu devras décommenter cette ligne avec tes imports
-                        # a, lam, sigma, dt, r0 = run_ou_estimation(ticker, str(start_date), str(end_date), freq)
+                        a, lam, sigma, dt, r0 = run_ou_estimation(ticker, str(start_date), str(end_date), freq)
                         
                         # Simulation temporaire pour la démonstration
-                        np.random.seed(42)
-                        a = np.random.uniform(0.1, 0.5)
-                        lam = np.random.uniform(0.02, 0.08)
-                        sigma = np.random.uniform(0.01, 0.03)
-                        dt = 1/12  # mensuel
-                        r0 = np.random.uniform(0.01, 0.06)
+                        #np.random.seed(42)
+                        #a = np.random.uniform(0.1, 0.5)
+                        #lam = np.random.uniform(0.02, 0.08)
+                        #sigma = np.random.uniform(0.01, 0.03)
+                        #dt = 1/12  # mensuel
+                        #r0 = np.random.uniform(0.01, 0.06)
                         
                         st.session_state.vasicek_params = {
                             'a': a, 'lambda': lam, 'sigma': sigma, 'dt': dt, 'r0': r0, 'ticker': ticker
@@ -1124,15 +1124,7 @@ with tab6:
             if simulate_btn:
                 with st.spinner("Simulation en cours..."):
                     # Simulation (tu devras utiliser tes vraies fonctions)
-                    # time_vec, r_paths = simulate_vasicek_paths(params['a'], params['lambda'], 
-                    #                                          params['sigma'], params['r0'], T, dt, n_paths)
-                    
-                    # Simulation temporaire
-                    np.random.seed(42)
-                    N = int(T / dt) + 1
-                    time_vec = np.linspace(0, T, N)
-                    r_paths = np.zeros((N, n_paths))
-                    r_paths[0, :] = params['r0']
+                    time_vec, r_paths = simulate_vasicek_paths(params['a'], params['lambda'], params['sigma'], params['r0'], T, dt, n_paths)
                     
                     for t in range(1, N):
                         Z = np.random.normal(0, 1, n_paths)
@@ -1219,14 +1211,14 @@ with tab6:
             bond_type = st.radio("Type d'obligation", ["Zero-Coupon", "Avec Coupons"])
             
             # Paramètres communs
-            r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f")
-            t_current = st.number_input("Temps actuel (t)", 0.0, 10.0, 0.0, step=0.1)
-            maturity = st.number_input("Maturité (T)", 0.1, 30.0, 5.0, step=0.1)
-            face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100)
+            r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="bond_r_current")
+            t_current = st.number_input("Temps actuel (t)", 0.0, 10.0, 0.0, step=0.1, key="bond_t_current")
+            maturity = st.number_input("Maturité (T)", 0.1, 30.0, 5.0, step=0.1, key="bond_maturity")
+            face_value = st.number_input("Valeur nominale", 100, 10000, 1000, step=100, key="bond_face_value")
             
             if bond_type == "Avec Coupons":
-                coupon_rate = st.number_input("Taux de coupon (%)", 0.0, 20.0, 5.0, step=0.1) / 100
-                payment_freq = st.selectbox("Fréquence de paiement", ["Semestriel", "Annuel"], index=0)
+                coupon_rate = st.number_input("Taux de coupon (%)", 0.0, 20.0, 5.0, step=0.1, key="bond_coupon_rate") / 100
+                payment_freq = st.selectbox("Fréquence de paiement", ["Semestriel", "Annuel"], index=0, key="bond_payment_freq")
                 dt_coupon = 0.5 if payment_freq == "Semestriel" else 1.0
             
             # Analyse de sensibilité
@@ -1243,40 +1235,17 @@ with tab6:
                 with st.spinner("Calcul en cours..."):
                     # Calcul du prix (tu devras utiliser tes vraies fonctions)
                     if bond_type == "Zero-Coupon":
-                        # price = vasicek_zero_coupon_price(r_current, t_current, maturity, 
-                        #                                 params['a'], params['lambda'], params['sigma'], face_value)
-                        
-                        # Calcul temporaire
-                        B = (1 - np.exp(-params['a'] * (maturity - t_current))) / params['a']
-                        A = np.exp((params['lambda'] - params['sigma']**2 / (2 * params['a']**2)) * (B - (maturity - t_current)) 
-                                  - (params['sigma']**2 / (4 * params['a'])) * B**2)
-                        price = face_value * A * np.exp(-B * r_current)
+                        price = vasicek_zero_coupon_price(r_current, t_current, maturity, 
+                                                        params['a'], params['lambda'], params['sigma'], face_value)
                         
                         st.success(f"💰 **Prix de l'obligation Zero-Coupon: {price:.2f}**")
                         yield_to_maturity = -np.log(price / face_value) / (maturity - t_current)
                         st.info(f"📊 Rendement à l'échéance: {yield_to_maturity:.4f} ({yield_to_maturity*100:.2f}%)")
                     
                     else:  # Avec coupons
-                        # price = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], 
-                        #                         params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
-                        
-                        # Calcul temporaire pour les coupons
-                        cashflow_dates = np.arange(t_current + dt_coupon, maturity + 1e-6, dt_coupon)
-                        price = 0
-                        coupon_payment = face_value * coupon_rate * dt_coupon
-                        
-                        for t_i in cashflow_dates:
-                            B = (1 - np.exp(-params['a'] * (t_i - t_current))) / params['a']
-                            A = np.exp((params['lambda'] - params['sigma']**2 / (2 * params['a']**2)) * (B - (t_i - t_current))
-                                      - (params['sigma']**2 / (4 * params['a'])) * B**2)
-                            P = A * np.exp(-B * r_current)
-                            price += coupon_payment * P
-                        
-                        # Valeur finale
-                        B_final = (1 - np.exp(-params['a'] * (maturity - t_current))) / params['a']
-                        A_final = np.exp((params['lambda'] - params['sigma']**2 / (2 * params['a']**2)) * (B_final - (maturity - t_current))
-                                        - (params['sigma']**2 / (4 * params['a'])) * B_final**2)
-                        price += face_value * A_final * np.exp(-B_final * r_current)
+                        price = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], 
+                                                params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
+        
                         
                         st.success(f"💰 **Prix de l'obligation à coupons: {price:.2f}**")
                         st.info(f"📊 Coupon: {coupon_rate*100:.2f}% ({payment_freq})")
@@ -1331,20 +1300,20 @@ with tab6:
             model_type = st.radio("Méthode de calcul", ["Analytique", "Monte Carlo"])
             
             # Paramètres de l'option
-            r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f")
-            T1 = st.number_input("Échéance de l'option (T₁)", 0.1, 10.0, 1.0, step=0.1)
-            T2 = st.number_input("Maturité de l'obligation (T₂)", 0.1, 30.0, 5.0, step=0.1)
+            r_current = st.number_input("Taux actuel (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="option_r_current")
+            T1 = st.number_input("Échéance de l'option (T₁)", 0.1, 10.0, 1.0, step=0.1, key="option_T1")
+            T2 = st.number_input("Maturité de l'obligation (T₂)", 0.1, 30.0, 5.0, step=0.1, key="option_T2")
             
             if T2 <= T1:
                 st.error("⚠️ La maturité de l'obligation (T₂) doit être supérieure à l'échéance de l'option (T₁)")
                 st.stop()
             
-            K = st.number_input("Prix d'exercice (K)", 0.1, 2.0, 0.8, step=0.01)
-            face_value = st.number_input("Valeur nominale de l'obligation", 100, 10000, 1000, step=100)
+            K = st.number_input("Prix d'exercice (K)", 0.1, 2.0, 0.8, step=0.01, key="option_K")
+            face_value = st.number_input("Valeur nominale de l'obligation", 100, 10000, 1000, step=100, key="option_face_value")
             
             if model_type == "Monte Carlo":
-                n_paths = st.number_input("Nombre de simulations", 1000, 100000, 10000, step=1000)
-                dt_mc = st.number_input("Pas de temps MC", 0.001, 0.1, 0.01, step=0.001)
+                n_paths = st.number_input("Nombre de simulations", 1000, 100000, 10000, step=1000, key="option_n_paths")
+                dt_mc = st.number_input("Pas de temps MC", 0.001, 0.1, 0.01, step=0.001, key="option_dt_mc")
             
             price_option_btn = st.button("💎 Calculer le Prix de l'Option", type="primary")
         
@@ -1353,39 +1322,19 @@ with tab6:
                 with st.spinner("Calcul du prix de l'option..."):
                     try:
                         if model_type == "Analytique":
-                            # Utilisation de la formule analytique
-                            # option_price = vasicek_bond_option_price(r_current, 0, T1, T2, K, 
-                            #                                        params['a'], params['lambda'], params['sigma'], 
-                            #                                        face_value, option_type.lower())
+                            Utilisation de la formule analytique
+                            option_price = vasicek_bond_option_price(r_current, 0, T1, T2, K, 
+                                                                   params['a'], params['lambda'], params['sigma'], 
+                                                                   face_value, option_type.lower())
                             
-                            # Calcul temporaire analytique
-                            P_t_T1 = face_value * np.exp(-r_current * T1)  # Simplifié
-                            P_t_T2 = face_value * np.exp(-r_current * T2)  # Simplifié
-                            
-                            B = (1 - np.exp(-params['a'] * (T2 - T1))) / params['a']
-                            sigma_P_sq = (params['sigma']**2 / (2 * params['a']**3)) * (1 - np.exp(-params['a'] * (T2 - T1)))**2 * (1 - np.exp(-2 * params['a'] * T1))
-                            sigma_P = np.sqrt(sigma_P_sq)
-                            
-                            from scipy.stats import norm
-                            d1 = (np.log(face_value * P_t_T2 / (K * P_t_T1)) / sigma_P) + 0.5 * sigma_P
-                            d2 = d1 - sigma_P
-                            
-                            if option_type.lower() == 'call':
-                                option_price = face_value * P_t_T2 * norm.cdf(d1) - K * P_t_T1 * norm.cdf(d2)
-                            else:
-                                option_price = K * P_t_T1 * norm.cdf(-d2) - face_value * P_t_T2 * norm.cdf(-d1)
                             
                             st.success(f"💎 **Prix de l'option ({option_type}): {option_price:.4f}**")
                             
                         else:  # Monte Carlo
-                            # option_price, option_std = vasicek_bond_option_price_mc(r_current, params['a'], params['lambda'], 
-                            #                                                       params['sigma'], T1, T2, K, dt_mc, 
-                            #                                                       int(n_paths), face_value, option_type.lower())
+                            option_price, option_std = vasicek_bond_option_price_mc(r_current, params['a'], params['lambda'], 
+                                                                                  params['sigma'], T1, T2, K, dt_mc, 
+                                                                                  int(n_paths), face_value, option_type.lower())
                             
-                            # Simulation MC temporaire
-                            np.random.seed(42)
-                            option_price = np.random.uniform(0.01, 0.20)
-                            option_std = option_price * 0.1
                             
                             st.success(f"💎 **Prix de l'option ({option_type}): {option_price:.4f} ± {option_std:.4f}**")
                             st.info(f"📊 Intervalle de confiance 95%: [{option_price - 1.96*option_std:.4f}, {option_price + 1.96*option_std:.4f}]")
@@ -1423,13 +1372,13 @@ with tab6:
             model_type = st.radio("Méthode", ["Analytical", "Monte Carlo"])
             
             # Paramètres
-            T1 = st.number_input("Échéance option (T₁)", 0.1, 10.0, 1.0, step=0.1)
-            T2 = st.number_input("Maturité obligation (T₂)", 0.1, 30.0, 5.0, step=0.1)
-            K = st.number_input("Strike", 0.1, 2.0, 0.8, step=0.01)
-            face_value = st.number_input("Valeur faciale", 100, 10000, 1000, step=100)
+            T1 = st.number_input("Échéance option (T₁)", 0.1, 10.0, 1.0, step=0.1, key="greeks_T1")
+            T2 = st.number_input("Maturité obligation (T₂)", 0.1, 30.0, 5.0, step=0.1, key="greeks_T2")
+            K = st.number_input("Strike", 0.1, 2.0, 0.8, step=0.01, key="greeks_K")
+            face_value = st.number_input("Valeur faciale", 100, 10000, 1000, step=100, key="greeks_face_value")
             
             if model_type == "Monte Carlo":
-                n_paths_greeks = st.number_input("Simulations MC", 1000, 50000, 5000, step=1000)
+                n_paths_greeks = st.number_input("Simulations MC", 1000, 50000, 5000, step=1000, key="greeks_n_paths")
             
             compute_greeks_btn = st.button("📊 Calculer les Grecques", type="primary")
         
