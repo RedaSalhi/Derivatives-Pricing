@@ -1871,7 +1871,314 @@ with tab4:
                             st.subheader("🛡️ Hedging Suggestions")
                             st.info("""
                                 **Portfolio Hedging Strategies:**
-                                - **Delta Hedging**: Regularly adjust underlying position to maintain""")
+                                - **Delta Hedging**: Regularly adjust underlying position to maintain delta neutrality
+                                - **Gamma Hedging**: Use options to hedge gamma exposure, especially for digital options
+                                - **Vega Hedging**: Consider volatility swaps for high vega exposure
+                                - **Barrier Monitoring**: Set up real-time alerts for barrier levels
+                                - **Diversification**: Spread risk across different option types and underlyings
+                                """)
+                                
+                                # Monte Carlo analysis for portfolio
+                                st.subheader("🎲 Portfolio Monte Carlo Analysis")
+                                
+                                mc_runs = st.slider("Monte Carlo Runs", 1000, 10000, 5000, key="mc_runs")
+                                
+                                if st.button("Run Monte Carlo Analysis", key="run_mc"):
+                                    with st.spinner("Running Monte Carlo simulation..."):
+                                        # Simulate price paths
+                                        dt = port_T / 252
+                                        n_sims = mc_runs
+                                        
+                                        # Generate correlated price paths
+                                        Z = np.random.normal(0, 1, (n_sims, 252))
+                                        price_paths = np.zeros((n_sims, 253))
+                                        price_paths[:, 0] = port_S0
+                                        
+                                        for t in range(1, 253):
+                                            price_paths[:, t] = price_paths[:, t-1] * np.exp(
+                                                (port_r - 0.5 * port_sigma**2) * dt + port_sigma * np.sqrt(dt) * Z[:, t-1]
+                                            )
+                                        
+                                        final_prices = price_paths[:, -1]
+                                        
+                                        # Calculate portfolio P&L distribution
+                                        portfolio_pnl = []
+                                        
+                                        for final_price in final_prices:
+                                            pnl = 0
+                                            
+                                            if include_vanilla:
+                                                pnl += max(final_price - port_K, 0) - vanilla_price
+                                            
+                                            # For simplicity, approximate other options' P&L
+                                            # In practice, you'd re-price each option at the final price
+                                            if include_asian:
+                                                approx_asian_pnl = max(final_price - port_K, 0) * 0.8 - asian_price
+                                                pnl += approx_asian_pnl
+                                            
+                                            if include_digital:
+                                                digital_pnl = (1.0 if final_price > port_K else 0.0) - digital_price
+                                                pnl += digital_pnl
+                                            
+                                            portfolio_pnl.append(pnl)
+                                        
+                                        portfolio_pnl = np.array(portfolio_pnl)
+                                        
+                                        # Display Monte Carlo results
+                                        col_mc1, col_mc2, col_mc3 = st.columns(3)
+                                        
+                                        with col_mc1:
+                                            st.metric("Expected P&L", f"${np.mean(portfolio_pnl):.2f}")
+                                            st.metric("P&L Std Dev", f"${np.std(portfolio_pnl):.2f}")
+                                        
+                                        with col_mc2:
+                                            st.metric("VaR (95%)", f"${np.percentile(portfolio_pnl, 5):.2f}")
+                                            st.metric("CVaR (95%)", f"${np.mean(portfolio_pnl[portfolio_pnl <= np.percentile(portfolio_pnl, 5)]):.2f}")
+                                        
+                                        with col_mc3:
+                                            st.metric("Max Loss", f"${np.min(portfolio_pnl):.2f}")
+                                            st.metric("Max Gain", f"${np.max(portfolio_pnl):.2f}")
+                                        
+                                        # P&L distribution plot
+                                        fig_dist = go.Figure()
+                                        fig_dist.add_trace(go.Histogram(
+                                            x=portfolio_pnl, 
+                                            nbinsx=50, 
+                                            name="P&L Distribution",
+                                            opacity=0.7
+                                        ))
+                                        
+                                        # Add VaR line
+                                        var_95 = np.percentile(portfolio_pnl, 5)
+                                        fig_dist.add_vline(
+                                            x=var_95, 
+                                            line_dash="dash", 
+                                            line_color="red",
+                                            annotation_text=f"VaR 95%: ${var_95:.2f}"
+                                        )
+                                        
+                                        fig_dist.update_layout(
+                                            title="Portfolio P&L Distribution",
+                                            xaxis_title="P&L ($)",
+                                            yaxis_title="Frequency",
+                                            height=400
+                                        )
+                                        
+                                        st.plotly_chart(fig_dist, use_container_width=True)
+                            
+                            else:
+                                st.warning("Please select at least one option type to analyze.")
+                        
+                        except Exception as e:
+                            st.error(f"Error in portfolio analysis: {str(e)}")
+        
+        # Market Data Section
+        st.markdown('<div class="sub-header">📊 Market Data & Volatility Analysis</div>', unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("🔥 Implied Volatility Surface")
+            
+            # Generate sample implied volatility surface
+            strikes = np.linspace(80, 120, 9)
+            maturities = np.linspace(0.1, 2, 8)
+            
+            # Create a realistic volatility surface
+            K_grid, T_grid = np.meshgrid(strikes, maturities)
+            
+            # Sample volatility surface with smile and term structure
+            base_vol = 0.2
+            smile_factor = 0.05
+            term_factor = 0.02
+            
+            vol_surface = (base_vol + 
+                          smile_factor * ((K_grid - 100) / 100) ** 2 +
+                          term_factor * np.sqrt(T_grid) +
+                          0.01 * np.random.normal(0, 1, K_grid.shape))
+            
+            fig_vol = go.Figure(data=[go.Surface(
+                z=vol_surface,
+                x=K_grid,
+                y=T_grid,
+                colorscale='Viridis',
+                name="Implied Volatility"
+            )])
+            
+            fig_vol.update_layout(
+                title="Implied Volatility Surface",
+                scene=dict(
+                    xaxis_title="Strike Price",
+                    yaxis_title="Time to Maturity",
+                    zaxis_title="Implied Volatility"
+                ),
+                height=500
+            )
+            
+            st.plotly_chart(fig_vol, use_container_width=True)
+        
+        with col2:
+            st.subheader("📈 Options Pricing Comparison")
+            
+            # Interactive pricing comparison
+            comp_spot = st.slider("Spot Price", 80, 120, 100, key="comp_spot")
+            comp_vol = st.slider("Volatility", 0.1, 0.5, 0.2, key="comp_vol")
+            
+            # Calculate prices for comparison
+            strikes_comp = np.arange(90, 111, 2)
+            vanilla_prices = []
+            asian_prices = []
+            
+            for K in strikes_comp:
+                # Vanilla Black-Scholes
+                from scipy.stats import norm
+                d1 = (np.log(comp_spot/K) + (0.05 + 0.5*comp_vol**2)*1.0) / (comp_vol*np.sqrt(1.0))
+                d2 = d1 - comp_vol*np.sqrt(1.0)
+                vanilla_price = comp_spot*norm.cdf(d1) - K*np.exp(-0.05*1.0)*norm.cdf(d2)
+                vanilla_prices.append(vanilla_price)
+                
+                # Asian (approximation for speed)
+                asian_price = vanilla_price * 0.85  # Asian options typically cheaper
+                asian_prices.append(asian_price)
+            
+            # Plot comparison
+            fig_comp = go.Figure()
+            
+            fig_comp.add_trace(go.Scatter(
+                x=strikes_comp, 
+                y=vanilla_prices,
+                mode='lines+markers',
+                name='Vanilla Call',
+                line=dict(color='blue')
+            ))
+            
+            fig_comp.add_trace(go.Scatter(
+                x=strikes_comp,
+                y=asian_prices, 
+                mode='lines+markers',
+                name='Asian Call',
+                line=dict(color='red')
+            ))
+            
+            fig_comp.update_layout(
+                title="Option Prices vs Strike",
+                xaxis_title="Strike Price",
+                yaxis_title="Option Price",
+                height=400
+            )
+            
+            st.plotly_chart(fig_comp, use_container_width=True)
+        
+        # Educational Resources
+        st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
+        
+        with st.expander("🎓 Exotic Options Primer"):
+            st.markdown("""
+            ### Understanding Exotic Options
+            
+            **Asian Options (Average Options)**
+            - Payoff depends on the average price of the underlying over a specific period
+            - Less volatile than vanilla options due to averaging effect
+            - Popular in commodity markets and FX
+            
+            **Barrier Options**
+            - Payoff depends on whether the underlying crosses a barrier level
+            - Knock-out: Option extinguished if barrier is crossed
+            - Knock-in: Option activated only if barrier is crossed
+            - Cheaper than vanilla options due to additional risk
+            
+            **Digital Options (Binary Options)**
+            - All-or-nothing payoff structure
+            - Either pays a fixed amount or nothing at all
+            - High gamma risk near expiration and strike
+            
+            **Lookback Options**
+            - Payoff based on the maximum or minimum price during the option's life
+            - Floating strike: Strike is set to the optimal level at expiration
+            - Fixed strike: Payoff based on extrema vs. fixed strike
+            - Expensive due to path-dependent nature
+            """)
+        
+        with st.expander("⚠️ Risk Management Guidelines"):
+            st.markdown("""
+            ### Key Risk Considerations
+            
+            **Model Risk**
+            - Monte Carlo simulations have sampling error
+            - Model assumptions may not hold in practice
+            - Calibration to market data is crucial
+            
+            **Market Risk**
+            - Exotic options often have complex Greeks
+            - Path-dependent options require sophisticated hedging
+            - Barrier options have discontinuous payoffs
+            
+            **Operational Risk**
+            - Real-time monitoring of barrier levels
+            - Accurate averaging calculations for Asian options
+            - Proper settlement procedures for digital options
+            
+            **Liquidity Risk**
+            - Exotic options may be harder to trade
+            - Wider bid-ask spreads
+            - Limited market makers
+            """)
+        
+        with st.expander("🔧 Technical Implementation Notes"):
+            st.markdown("""
+            ### Monte Carlo Simulation Details
+            
+            **Variance Reduction Techniques**
+            - Antithetic variates: Use -Z as well as Z
+            - Control variates: Use correlation with known analytical solutions
+            - Stratified sampling: Ensure representative samples
+            
+            **Convergence Monitoring**
+            - Monitor standard error of estimates
+            - Use confidence intervals
+            - Check convergence plots
+            
+            **Performance Optimization**
+            - Vectorized numpy operations
+            - Just-in-time compilation with numba
+            - Parallel processing for independent paths
+            
+            **Model Validation**
+            - Compare with analytical solutions where available
+            - Cross-validate with market prices
+            - Stress test with extreme parameters
+            """)
+        
+        # Footer
+        st.markdown("---")
+        st.markdown("""
+        <div style="text-align: center; color: #666; padding: 20px;">
+            <p><strong>Exotic Options Pricing Toolkit</strong></p>
+            <p>Built with Streamlit • Educational and Research Purposes Only</p>
+            <p>⚠️ Not for actual trading decisions • Always validate with market data</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Performance metrics for the app
+        if st.checkbox("🔍 Show App Performance Metrics", key="show_perf"):
+            import time
+            import psutil
+            import sys
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric("Python Version", f"{sys.version_info.major}.{sys.version_info.minor}")
+            
+            with col2:
+                st.metric("CPU Usage", f"{psutil.cpu_percent():.1f}%")
+            
+            with col3:
+                memory = psutil.virtual_memory()
+                st.metric("Memory Usage", f"{memory.percent:.1f}%")
+            
+            with col4:
+                st.metric("Available Memory", f"{memory.available / (1024**3):.1f} GB")
 
     
 
