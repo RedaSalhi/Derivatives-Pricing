@@ -1626,6 +1626,7 @@ with tab6:
                             lam=params['lambda'],
                             sigma=params['sigma'],
                             face=face_value,
+                            dt=dt
                             option_type=option_type,
                             n_paths=n_paths,
                             model=model_type,
