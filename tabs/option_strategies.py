@@ -1222,12 +1222,6 @@ def display_educational_content():
             color: #ff7f0e;
             margin: 1rem 0;
         }
-        .metric-container {
-            background-color: #f0f2f6;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 0.5rem 0;
-        }
         .info-box {
             background-color: #e8f4f8;
             padding: 1.5rem;
@@ -1249,57 +1243,6 @@ def display_educational_content():
             border-left: 4px solid #28a745;
             margin: 1rem 0;
         }
-        .formula {
-            text-align: center;
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #1f77b4;
-            margin: 15px 0;
-            padding: 15px;
-            background-color: #f0f8ff;
-            border-radius: 8px;
-            border: 1px solid #d0e7ff;
-        }
-        .results-table {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #dee2e6;
-        }
-        .section-title {
-            color: #1f77b4;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        .parameter-box {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border: 1px solid #dee2e6;
-        }
-        .sensitivity-long {
-            background-color: #d4edda;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #28a745;
-        }
-        .sensitivity-short {
-            background-color: #f8d7da;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #dc3545;
-        }
-        .calculation-step {
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 5px 0;
-            font-family: monospace;
-        }
     </style>
     """, unsafe_allow_html=True)
     
@@ -1307,255 +1250,232 @@ def display_educational_content():
     st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
     
     with st.expander("🎓 Options Strategy Fundamentals"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>📊 Core Strategy Categories</h4>
+        st.markdown("### 📊 Core Strategy Categories")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 📈 Directional Strategies")
+            st.markdown("""
+            - **Long Call/Put:** Unlimited profit potential, limited risk
+            - **Bull/Bear Spreads:** Limited risk and reward
+            - **Synthetic Positions:** Replicate stock with options
+            - **Ratio Spreads:** Unequal long/short positions
+            """)
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
-                <div>
-                    <h5 style="color: #1f77b4;">📈 Directional Strategies</h5>
-                    <ul>
-                        <li><strong>Long Call/Put:</strong> Unlimited profit potential, limited risk</li>
-                        <li><strong>Bull/Bear Spreads:</strong> Limited risk and reward</li>
-                        <li><strong>Synthetic Positions:</strong> Replicate stock with options</li>
-                        <li><strong>Ratio Spreads:</strong> Unequal long/short positions</li>
-                    </ul>
-                    
-                    <h5 style="color: #1f77b4;">⚖️ Neutral Strategies</h5>
-                    <ul>
-                        <li><strong>Straddles/Strangles:</strong> Profit from volatility</li>
-                        <li><strong>Iron Condors:</strong> Range-bound profit</li>
-                        <li><strong>Butterflies:</strong> Minimal movement profit</li>
-                        <li><strong>Calendar Spreads:</strong> Time decay profit</li>
-                    </ul>
-                </div>
-                <div>
-                    <h5 style="color: #1f77b4;">🌊 Volatility Strategies</h5>
-                    <ul>
-                        <li><strong>Long Volatility:</strong> Buy straddles/strangles</li>
-                        <li><strong>Short Volatility:</strong> Sell premium strategies</li>
-                        <li><strong>Volatility Arbitrage:</strong> Implied vs realized</li>
-                        <li><strong>Dispersion Trading:</strong> Index vs stocks</li>
-                    </ul>
-                    
-                    <h5 style="color: #1f77b4;">💰 Income Strategies</h5>
-                    <ul>
-                        <li><strong>Covered Calls:</strong> Generate income on holdings</li>
-                        <li><strong>Cash-Secured Puts:</strong> Income while acquiring</li>
-                        <li><strong>Iron Butterflies:</strong> High probability income</li>
-                        <li><strong>Short Strangles:</strong> Range-bound income</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+            st.markdown("#### ⚖️ Neutral Strategies")
+            st.markdown("""
+            - **Straddles/Strangles:** Profit from volatility
+            - **Iron Condors:** Range-bound profit
+            - **Butterflies:** Minimal movement profit
+            - **Calendar Spreads:** Time decay profit
+            """)
+        
+        with col2:
+            st.markdown("#### 🌊 Volatility Strategies")
+            st.markdown("""
+            - **Long Volatility:** Buy straddles/strangles
+            - **Short Volatility:** Sell premium strategies
+            - **Volatility Arbitrage:** Implied vs realized
+            - **Dispersion Trading:** Index vs stocks
+            """)
+            
+            st.markdown("#### 💰 Income Strategies")
+            st.markdown("""
+            - **Covered Calls:** Generate income on holdings
+            - **Cash-Secured Puts:** Income while acquiring
+            - **Iron Butterflies:** High probability income
+            - **Short Strangles:** Range-bound income
+            """)
     
     with st.expander("📊 Understanding the Greeks"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>🎯 The Greeks - Risk Sensitivities Explained</h4>
+        st.markdown("### 🎯 The Greeks - Risk Sensitivities Explained")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 📈 First-Order Greeks")
+            st.markdown("""
+            - **Delta (Δ):** Price sensitivity to underlying moves
+            - **Vega (ν):** Sensitivity to volatility changes  
+            - **Theta (Θ):** Time decay (usually negative)
+            - **Rho (ρ):** Interest rate sensitivity
+            """)
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
-                <div>
-                    <h5 style="color: #1f77b4;">📈 First-Order Greeks</h5>
-                    <ul>
-                        <li><strong>Delta (Δ):</strong> Price sensitivity to underlying moves</li>
-                        <li><strong>Vega (ν):</strong> Sensitivity to volatility changes</li>
-                        <li><strong>Theta (Θ):</strong> Time decay (usually negative)</li>
-                        <li><strong>Rho (ρ):</strong> Interest rate sensitivity</li>
-                    </ul>
-                    
-                    <h5 style="color: #1f77b4;">📋 Greek Ranges</h5>
-                    <ul>
-                        <li><strong>Delta:</strong> -1.0 to +1.0 (calls: 0 to 1, puts: -1 to 0)</li>
-                        <li><strong>Gamma:</strong> 0 to ∞ (highest for ATM options)</li>
-                        <li><strong>Theta:</strong> Usually negative (time decay)</li>
-                        <li><strong>Vega:</strong> Always positive (vol increases price)</li>
-                    </ul>
-                </div>
-                <div>
-                    <h5 style="color: #1f77b4;">🔄 Second-Order Greeks</h5>
-                    <ul>
-                        <li><strong>Gamma (Γ):</strong> Rate of change of delta</li>
-                        <li><strong>Vomma:</strong> Rate of change of vega</li>
-                        <li><strong>Charm:</strong> Rate of change of delta over time</li>
-                        <li><strong>Color:</strong> Rate of change of gamma over time</li>
-                    </ul>
-                    
-                    <h5 style="color: #1f77b4;">💡 Practical Applications</h5>
-                    <ul>
-                        <li><strong>Delta Hedging:</strong> Maintain market neutrality</li>
-                        <li><strong>Gamma Scalping:</strong> Profit from rebalancing</li>
-                        <li><strong>Vega Trading:</strong> Volatility arbitrage</li>
-                        <li><strong>Theta Harvesting:</strong> Time decay strategies</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+            st.markdown("#### 📋 Greek Ranges")
+            st.markdown("""
+            - **Delta:** -1.0 to +1.0 (calls: 0 to 1, puts: -1 to 0)
+            - **Gamma:** 0 to ∞ (highest for ATM options)
+            - **Theta:** Usually negative (time decay)
+            - **Vega:** Always positive (vol increases price)
+            """)
+        
+        with col2:
+            st.markdown("#### 🔄 Second-Order Greeks")
+            st.markdown("""
+            - **Gamma (Γ):** Rate of change of delta
+            - **Vomma:** Rate of change of vega
+            - **Charm:** Rate of change of delta over time
+            - **Color:** Rate of change of gamma over time
+            """)
+            
+            st.markdown("#### 💡 Practical Applications")
+            st.markdown("""
+            - **Delta Hedging:** Maintain market neutrality
+            - **Gamma Scalping:** Profit from rebalancing
+            - **Vega Trading:** Volatility arbitrage
+            - **Theta Harvesting:** Time decay strategies
+            """)
     
     with st.expander("⚠️ Risk Management Best Practices"):
+        st.warning("🛡️ Professional Risk Management Framework")
+        
+        st.markdown("#### 📊 Position Sizing Guidelines")
         st.markdown("""
-        <div class="warning-box">
-            <h4>🛡️ Professional Risk Management Framework</h4>
-            
-            <h5>📊 Position Sizing Guidelines</h5>
-            <ul>
-                <li><strong>Risk Capital:</strong> Never risk more than 1-2% of capital per trade</li>
-                <li><strong>Correlation:</strong> Account for correlation between positions</li>
-                <li><strong>Concentration:</strong> Avoid over-concentration in strategies</li>
-                <li><strong>Volatility Scaling:</strong> Size inversely to expected volatility</li>
-            </ul>
-            
-            <h5>🎯 Greeks Limits Framework</h5>
-            <ul>
-                <li><strong>Portfolio Delta:</strong> Maintain within ±10% of portfolio value</li>
-                <li><strong>Gamma Limits:</strong> Control convexity exposure</li>
-                <li><strong>Vega Limits:</strong> Manage volatility risk across cycles</li>
-                <li><strong>Theta Targets:</strong> Balance decay income vs risk</li>
-            </ul>
-            
-            <h5>🚨 Stop Loss & Risk Controls</h5>
-            <ul>
-                <li><strong>Hard Stops:</strong> Automatic closure at predefined levels</li>
-                <li><strong>Profit Targets:</strong> Take profits at 20-50% of max potential</li>
-                <li><strong>Time Stops:</strong> Close before theta acceleration</li>
-                <li><strong>Volatility Stops:</strong> Exit at volatility extremes</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        - **Risk Capital:** Never risk more than 1-2% of capital per trade
+        - **Correlation:** Account for correlation between positions
+        - **Concentration:** Avoid over-concentration in strategies
+        - **Volatility Scaling:** Size inversely to expected volatility
+        """)
+        
+        st.markdown("#### 🎯 Greeks Limits Framework")
+        st.markdown("""
+        - **Portfolio Delta:** Maintain within ±10% of portfolio value
+        - **Gamma Limits:** Control convexity exposure
+        - **Vega Limits:** Manage volatility risk across cycles
+        - **Theta Targets:** Balance decay income vs risk
+        """)
+        
+        st.markdown("#### 🚨 Stop Loss & Risk Controls")
+        st.markdown("""
+        - **Hard Stops:** Automatic closure at predefined levels
+        - **Profit Targets:** Take profits at 20-50% of max potential
+        - **Time Stops:** Close before theta acceleration
+        - **Volatility Stops:** Exit at volatility extremes
+        """)
     
     with st.expander("🔧 Troubleshooting & Tips"):
+        st.info("💡 Common Issues & Solutions")
+        
+        st.markdown("#### ⚠️ Strategy Configuration")
         st.markdown("""
-        <div class="info-box">
-            <h4>💡 Common Issues & Solutions</h4>
-            
-            <h5>⚠️ Strategy Configuration</h5>
-            <ul>
-                <li><strong>Negative Strikes:</strong> Ensure all strikes are positive</li>
-                <li><strong>Zero Quantities:</strong> Use non-zero option quantities</li>
-                <li><strong>Strike Ordering:</strong> Check ascending order for spreads</li>
-                <li><strong>Extreme Parameters:</strong> Use realistic market values</li>
-            </ul>
-            
-            <h5>📊 Calculation Errors</h5>
-            <ul>
-                <li><strong>Numerical Precision:</strong> Extreme parameters may fail</li>
-                <li><strong>Model Limitations:</strong> Each model has constraints</li>
-                <li><strong>Time to Expiry:</strong> Avoid very small values (< 0.001)</li>
-                <li><strong>Volatility Range:</strong> Keep between 1% and 200%</li>
-            </ul>
-            
-            <h5>✅ Best Practices</h5>
-            <ul>
-                <li><strong>Start Simple:</strong> Begin with basic strategies</li>
-                <li><strong>Validate Results:</strong> Check economic sense</li>
-                <li><strong>Use Realistic Parameters:</strong> Market-observed ranges</li>
-                <li><strong>Document Insights:</strong> Keep track of key findings</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        - **Negative Strikes:** Ensure all strikes are positive
+        - **Zero Quantities:** Use non-zero option quantities
+        - **Strike Ordering:** Check ascending order for spreads
+        - **Extreme Parameters:** Use realistic market values
+        """)
+        
+        st.markdown("#### 📊 Calculation Errors")
+        st.markdown("""
+        - **Numerical Precision:** Extreme parameters may fail
+        - **Model Limitations:** Each model has constraints
+        - **Time to Expiry:** Avoid very small values (< 0.001)
+        - **Volatility Range:** Keep between 1% and 200%
+        """)
+        
+        st.markdown("#### ✅ Best Practices")
+        st.markdown("""
+        - **Start Simple:** Begin with basic strategies
+        - **Validate Results:** Check economic sense
+        - **Use Realistic Parameters:** Market-observed ranges
+        - **Document Insights:** Keep track of key findings
+        """)
     
     with st.expander("📐 Mathematical Formulas & Models"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>🧮 Core Mathematical Foundations</h4>
-            
-            <h5>📊 Black-Scholes Formula</h5>
-            <div class="formula">
-                Call: C = S₀e⁻ᵈᵀN(d₁) - Ke⁻ʳᵀN(d₂)
-                <br>
-                Put: P = Ke⁻ʳᵀN(-d₂) - S₀e⁻ᵈᵀN(-d₁)
-            </div>
-            
-            <div class="parameter-box">
-                <strong>Where:</strong><br>
-                d₁ = [ln(S₀/K) + (r - q + σ²/2)T] / (σ√T)<br>
-                d₂ = d₁ - σ√T<br>
-                N(x) = Cumulative standard normal distribution
-            </div>
-            
-            <h5>📈 The Greeks Formulas</h5>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="sensitivity-long">
-                    <strong>Delta (Δ):</strong><br>
-                    Call: Δ = e⁻ᵈᵀN(d₁)<br>
-                    Put: Δ = e⁻ᵈᵀ[N(d₁) - 1]
-                </div>
-                <div class="sensitivity-short">
-                    <strong>Gamma (Γ):</strong><br>
-                    Γ = e⁻ᵈᵀn(d₁) / (S₀σ√T)<br>
-                    (Same for calls and puts)
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="sensitivity-long">
-                    <strong>Theta (Θ):</strong><br>
-                    Complex formula involving<br>
-                    time decay components
-                </div>
-                <div class="sensitivity-short">
-                    <strong>Vega (ν):</strong><br>
-                    ν = S₀e⁻ᵈᵀn(d₁)√T<br>
-                    (Same for calls and puts)
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("### 🧮 Core Mathematical Foundations")
+        
+        st.markdown("#### 📊 Black-Scholes Formula")
+        st.latex(r'''
+        \text{Call: } C = S_0 e^{-qT} N(d_1) - K e^{-rT} N(d_2)
+        ''')
+        st.latex(r'''
+        \text{Put: } P = K e^{-rT} N(-d_2) - S_0 e^{-qT} N(-d_1)
+        ''')
+        
+        st.markdown("**Where:**")
+        st.latex(r'''
+        d_1 = \frac{\ln(S_0/K) + (r - q + \sigma^2/2)T}{\sigma\sqrt{T}}
+        ''')
+        st.latex(r'''
+        d_2 = d_1 - \sigma\sqrt{T}
+        ''')
+        
+        st.markdown("#### 📈 The Greeks Formulas")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.success("**Delta (Δ):**")
+            st.latex(r'''
+            \text{Call: } \Delta = e^{-qT} N(d_1)
+            ''')
+            st.latex(r'''
+            \text{Put: } \Delta = e^{-qT} [N(d_1) - 1]
+            ''')
+        
+        with col2:
+            st.error("**Gamma (Γ):**")
+            st.latex(r'''
+            \Gamma = \frac{e^{-qT} n(d_1)}{S_0 \sigma \sqrt{T}}
+            ''')
+            st.markdown("*(Same for calls and puts)*")
+        
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            st.success("**Vega (ν):**")
+            st.latex(r'''
+            \nu = S_0 e^{-qT} n(d_1) \sqrt{T}
+            ''')
+            st.markdown("*(Same for calls and puts)*")
+        
+        with col4:
+            st.error("**Theta (Θ):**")
+            st.markdown("Complex formula involving time decay components")
     
     with st.expander("🎯 Strategy Quick Reference"):
+        st.markdown("### 📋 Popular Strategy Combinations")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("#### 🐂 Bullish Strategies")
+            st.markdown("""
+            - Long Call
+            - Bull Call Spread
+            - Bull Put Spread
+            - Covered Call
+            - Protective Put
+            """)
+        
+        with col2:
+            st.markdown("#### 🐻 Bearish Strategies")
+            st.markdown("""
+            - Long Put
+            - Bear Put Spread
+            - Bear Call Spread
+            - Protective Call
+            - Collar (Protective)
+            """)
+        
+        with col3:
+            st.markdown("#### ⚖️ Neutral Strategies")
+            st.markdown("""
+            - Long/Short Straddle
+            - Long/Short Strangle
+            - Iron Condor
+            - Butterfly Spread
+            - Calendar Spread
+            """)
+        
+        st.success("💡 **Strategy Selection Tips**")
         st.markdown("""
-        <div class="info-box">
-            <h4>📋 Popular Strategy Combinations</h4>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
-                <div class="parameter-box">
-                    <h5 style="color: #1f77b4;">🐂 Bullish Strategies</h5>
-                    <ul style="font-size: 0.9em;">
-                        <li>Long Call</li>
-                        <li>Bull Call Spread</li>
-                        <li>Bull Put Spread</li>
-                        <li>Covered Call</li>
-                        <li>Protective Put</li>
-                    </ul>
-                </div>
-                
-                <div class="parameter-box">
-                    <h5 style="color: #dc3545;">🐻 Bearish Strategies</h5>
-                    <ul style="font-size: 0.9em;">
-                        <li>Long Put</li>
-                        <li>Bear Put Spread</li>
-                        <li>Bear Call Spread</li>
-                        <li>Protective Call</li>
-                        <li>Collar (Protective)</li>
-                    </ul>
-                </div>
-                
-                <div class="parameter-box">
-                    <h5 style="color: #6c757d;">⚖️ Neutral Strategies</h5>
-                    <ul style="font-size: 0.9em;">
-                        <li>Long/Short Straddle</li>
-                        <li>Long/Short Strangle</li>
-                        <li>Iron Condor</li>
-                        <li>Butterfly Spread</li>
-                        <li>Calendar Spread</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <h5>💡 Strategy Selection Tips</h5>
-            <div class="success-box">
-                <ul>
-                    <li><strong>High Volatility Expected:</strong> Buy straddles or strangles</li>
-                    <li><strong>Low Volatility Expected:</strong> Sell premium (iron condors, butterflies)</li>
-                    <li><strong>Moderate Directional View:</strong> Use spreads to reduce cost</li>
-                    <li><strong>Strong Directional View:</strong> Long options or synthetic positions</li>
-                    <li><strong>Income Generation:</strong> Covered calls, cash-secured puts</li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        - **High Volatility Expected:** Buy straddles or strangles
+        - **Low Volatility Expected:** Sell premium (iron condors, butterflies)
+        - **Moderate Directional View:** Use spreads to reduce cost
+        - **Strong Directional View:** Long options or synthetic positions
+        - **Income Generation:** Covered calls, cash-secured puts
+        """)
 
 
 def main_option_strategies_tab():
