@@ -131,8 +131,12 @@ def _interactive_pricing_lab():
             st.session_state.selected_option = "digital"
     with col4:
         if st.button("Lookback Options", key="select_lookback", help="Extrema-based"):
-            st.session_state.selected_option = "lookback" 
+            st.session_state.selected_option = "lookback"
 
+    
+    # Initialize session state
+    if 'selected_option' not in st.session_state:
+        st.session_state.selected_option = "asian"
     
     # Show current selection
     option_names = {"asian": "Asian Options", "barrier": "Barrier Options", "digital": "Digital Options", "lookback": "Lookback Options"}
