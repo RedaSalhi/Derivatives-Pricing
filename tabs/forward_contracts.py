@@ -526,7 +526,7 @@ def forward_contracts_tab():
         try:
             # Calculate numerical derivatives
             delta_s = 0.01 * spot_price  # 1% change in spot
-            delta_r = 0.01  # 1 basis point
+            delta_r = 0.0001  # 1 basis point
             delta_t = 0.01    # 1% change in time
             
             # Spot sensitivity (Delta equivalent)
@@ -535,7 +535,7 @@ def forward_contracts_tab():
             
             # Rate sensitivity (Rho equivalent)
             rate_up = price_forward_contract(spot_price, interest_rate + delta_r, time_to_maturity, storage_cost, dividend_yield)
-            rate_sensitivity = (rate_up - forward_price) / (delta_r)
+            rate_sensitivity = (rate_up - forward_price) / (100 * delta_r)
             
             # Time sensitivity (Theta equivalent)
             time_up = price_forward_contract(spot_price, interest_rate, time_to_maturity + delta_t, storage_cost, dividend_yield)
@@ -543,11 +543,11 @@ def forward_contracts_tab():
             
             # Storage cost sensitivity
             storage_up = price_forward_contract(spot_price, interest_rate, time_to_maturity, storage_cost + delta_r, dividend_yield)
-            storage_sensitivity = (storage_up - forward_price) / delta_r
+            storage_sensitivity = (storage_up - forward_price) / (100 * delta_r)
             
             # Dividend sensitivity
             dividend_up = price_forward_contract(spot_price, interest_rate, time_to_maturity, storage_cost, dividend_yield + delta_r)
-            dividend_sensitivity = (dividend_up - forward_price) / delta_r
+            dividend_sensitivity = (dividend_up - forward_price) / (100 * delta_r)
             
             # Display sensitivities in professional table
             st.markdown(f"""
