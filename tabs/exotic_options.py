@@ -239,7 +239,7 @@ def _interactive_pricing_lab():
 
 
 def _live_greeks_analysis():
-    """Live Greeks analysis with table format"""
+    """Live Greeks analysis with improved visualization"""
     
     st.markdown('<div class="sub-header">Live Greeks Analysis</div>', unsafe_allow_html=True)
     
@@ -263,49 +263,17 @@ def _live_greeks_analysis():
                                    ["Asian", "Barrier", "Digital", "Lookback"], 
                                    key="greek_option_family")
     
-    # Calculate and display Greeks in table format
+    # Calculate and display Greeks
     try:
-        # Create spot range for Greeks analysis
-        spot_range = np.linspace(70, 130, 13)  # Smaller range around current spot for stability
+        # Create continuous spot range for smooth plots (bigger range: 0.5x to 2x)
+        spot_range = np.linspace(S0_greek * 0.5, S0_greek * 2.0, 100)  # Continuous with 100 points
         
         # Calculate Greeks across spot range
-        greeks_data = calculate_greeks_range_stable(spot_range, K_greek, T_greek, r_greek, sigma_greek, 
+        greeks_data = calculate_greeks_range_continuous(spot_range, K_greek, T_greek, r_greek, sigma_greek, 
                                            option_type_greek, greek_option_type.lower())
         
-        # Create Greeks table
-        st.markdown("### Greeks Across Spot Price Range")
-        
-        greeks_df = pd.DataFrame({
-            'Spot Price': spot_range,
-            'Delta': greeks_data['Delta'],
-            'Gamma': greeks_data['Gamma'],
-            'Theta': greeks_data['Theta'],
-            'Vega': greeks_data['Vega'],
-            'Rho': greeks_data['Rho'],
-            'Option Price': greeks_data['Price']
-        })
-        
-        # Format the dataframe for better display
-        greeks_df = greeks_df.round({
-            'Spot Price': 2,
-            'Delta': 4,
-            'Gamma': 6,
-            'Theta': 4,
-            'Vega': 4,
-            'Rho': 4,
-            'Option Price': 4
-        })
-        
-        # Highlight current spot price row
-        current_spot_idx = np.argmin(np.abs(spot_range - S0_greek))
-        
-        st.dataframe(
-            greeks_df.style.highlight_max(subset=['Spot Price'], color='lightblue'),
-            use_container_width=True
-        )
-        
         # Current Greeks values prominently displayed
-        current_greeks = greeks_df.iloc[current_spot_idx]
+        current_spot_idx = np.argmin(np.abs(spot_range - S0_greek))
         
         st.markdown("### Current Greeks at Selected Spot Price")
         
@@ -313,33 +281,33 @@ def _live_greeks_analysis():
         
         with col_g1:
             st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Delta", f"{current_greeks['Delta']:.4f}")
+            st.metric("Delta", f"{greeks_data['Delta'][current_spot_idx]:.4f}")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col_g2:
             st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Gamma", f"{current_greeks['Gamma']:.6f}")
+            st.metric("Gamma", f"{greeks_data['Gamma'][current_spot_idx]:.6f}")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col_g3:
             st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Theta", f"{current_greeks['Theta']:.4f}")
+            st.metric("Theta", f"{greeks_data['Theta'][current_spot_idx]:.4f}")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col_g4:
             st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Vega", f"{current_greeks['Vega']:.4f}")
+            st.metric("Vega", f"{greeks_data['Vega'][current_spot_idx]:.4f}")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with col_g5:
             st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Rho", f"{current_greeks['Rho']:.4f}")
+            st.metric("Rho", f"{greeks_data['Rho'][current_spot_idx]:.4f}")
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # Individual Greeks charts
+        # Continuous Greeks charts
         st.markdown("### Greeks Visualization")
         
-        # Create individual charts for each Greek
+        # Create individual charts for each Greek with continuous lines
         fig_greeks = make_subplots(
             rows=2, cols=3,
             subplot_titles=['Delta', 'Gamma', 'Theta', 'Vega', 'Rho', 'Price'],
@@ -356,23 +324,28 @@ def _live_greeks_analysis():
             
             fig_greeks.add_trace(
                 go.Scatter(x=spot_range, y=greeks_data[greek_name], 
-                          mode='lines+markers', name=greek_name, 
-                          line=dict(color=color, width=2),
-                          marker=dict(size=4)),
+                          mode='lines', name=greek_name, 
+                          line=dict(color=color, width=3)),  # Smooth continuous lines
                 row=row, col=col
             )
             
             # Add current spot indicator
             fig_greeks.add_vline(x=S0_greek, line_dash="dash", line_color="red", 
-                               row=row, col=col)
+                               annotation_text="Current", row=row, col=col)
         
         fig_greeks.update_layout(
-            title=f"Greeks Analysis - {greek_option_type} Options",
-            height=500,
+            title=f"Continuous Greeks Analysis - {greek_option_type} Options",
+            height=600,
             showlegend=False
         )
         
         st.plotly_chart(fig_greeks, use_container_width=True)
+        
+        # Add path visualization for path-dependent options
+        if greek_option_type.lower() in ["asian", "barrier", "lookback"]:
+            st.markdown("### Sample Price Paths")
+            fig_paths = create_sample_paths_visualization(S0_greek, r_greek, sigma_greek, T_greek, greek_option_type.lower())
+            st.plotly_chart(fig_paths, use_container_width=True)
         
     except Exception as e:
         st.error(f"Greeks calculation error: {str(e)}")
@@ -380,9 +353,16 @@ def _live_greeks_analysis():
 
 
 def _strategy_comparator():
-    """Fair strategy comparison tool"""
+    """Fully customizable strategy comparison"""
     
     st.markdown('<div class="sub-header">Strategy Comparator</div>', unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="info-box">
+        <h4>Customizable Strategy Comparison</h4>
+        <p>Configure each strategy with your preferred parameters for detailed comparison analysis.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Strategy selection
     col1, col2 = st.columns(2)
@@ -391,9 +371,71 @@ def _strategy_comparator():
         st.markdown("### Strategy A")
         strategy_a = st.selectbox("Option Type A", ["Asian", "Barrier", "Digital", "Lookback"], key="strat_a")
         
+        # Strategy A specific parameters
+        st.markdown("#### Strategy A Parameters")
+        params_a = {}
+        
+        if strategy_a == "Asian":
+            params_a['asian_type'] = st.selectbox("Asian Type A", ["average_price", "average_strike"], key="asian_a")
+            st.markdown(f"📋 **{params_a['asian_type'].replace('_', ' ').title()} Asian call**")
+            
+        elif strategy_a == "Barrier":
+            params_a['barrier_type'] = st.selectbox("Barrier Type A", 
+                                                   ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], 
+                                                   key="barrier_type_a")
+            params_a['barrier_multiple'] = st.slider("Barrier Level A (% of strike)", 80, 150, 120, 5, key="barrier_mult_a") / 100
+            st.markdown(f"📋 **{params_a['barrier_type'].replace('-', ' ').title()} call** (barrier at {params_a['barrier_multiple']:.0%} of strike)")
+            
+        elif strategy_a == "Digital":
+            params_a['style'] = st.selectbox("Digital Style A", ["cash", "asset"], key="digital_style_a")
+            if params_a['style'] == "cash":
+                params_a['Q'] = st.slider("Cash Payout A", 0.5, 5.0, 1.0, 0.1, key="digital_Q_a")
+                st.markdown(f"📋 **Cash-or-nothing call** (pays ${params_a['Q']:.1f})")
+            else:
+                params_a['Q'] = 1.0
+                st.markdown("📋 **Asset-or-nothing call** (pays underlying price)")
+                
+        elif strategy_a == "Lookback":
+            params_a['floating'] = st.checkbox("Floating Strike A", value=True, key="lookback_float_a")
+            if params_a['floating']:
+                st.markdown("📋 **Floating strike call** (strike = minimum price reached)")
+            else:
+                st.markdown("📋 **Fixed strike call** (strike = predetermined level)")
+        
     with col2:
         st.markdown("### Strategy B") 
         strategy_b = st.selectbox("Option Type B", ["Asian", "Barrier", "Digital", "Lookback"], key="strat_b")
+        
+        # Strategy B specific parameters
+        st.markdown("#### Strategy B Parameters")
+        params_b = {}
+        
+        if strategy_b == "Asian":
+            params_b['asian_type'] = st.selectbox("Asian Type B", ["average_price", "average_strike"], key="asian_b")
+            st.markdown(f"📋 **{params_b['asian_type'].replace('_', ' ').title()} Asian call**")
+            
+        elif strategy_b == "Barrier":
+            params_b['barrier_type'] = st.selectbox("Barrier Type B", 
+                                                   ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], 
+                                                   key="barrier_type_b")
+            params_b['barrier_multiple'] = st.slider("Barrier Level B (% of strike)", 80, 150, 120, 5, key="barrier_mult_b") / 100
+            st.markdown(f"📋 **{params_b['barrier_type'].replace('-', ' ').title()} call** (barrier at {params_b['barrier_multiple']:.0%} of strike)")
+            
+        elif strategy_b == "Digital":
+            params_b['style'] = st.selectbox("Digital Style B", ["cash", "asset"], key="digital_style_b")
+            if params_b['style'] == "cash":
+                params_b['Q'] = st.slider("Cash Payout B", 0.5, 5.0, 1.0, 0.1, key="digital_Q_b")
+                st.markdown(f"📋 **Cash-or-nothing call** (pays ${params_b['Q']:.1f})")
+            else:
+                params_b['Q'] = 1.0
+                st.markdown("📋 **Asset-or-nothing call** (pays underlying price)")
+                
+        elif strategy_b == "Lookback":
+            params_b['floating'] = st.checkbox("Floating Strike B", value=True, key="lookback_float_b")
+            if params_b['floating']:
+                st.markdown("📋 **Floating strike call** (strike = minimum price reached)")
+            else:
+                st.markdown("📋 **Fixed strike call** (strike = predetermined level)")
     
     # Common parameters
     st.markdown("### Market Parameters")
@@ -411,9 +453,9 @@ def _strategy_comparator():
     if st.button("Compare Strategies", type="primary"):
         
         try:
-            # Calculate prices for both strategies with standardized parameters
-            price_a = calculate_strategy_price_standardized(strategy_a, S0_comp, S0_comp, T_comp, r_comp, sigma_comp)
-            price_b = calculate_strategy_price_standardized(strategy_b, S0_comp, S0_comp, T_comp, r_comp, sigma_comp)
+            # Calculate prices for both strategies with custom parameters
+            price_a = calculate_strategy_price_custom(strategy_a, params_a, S0_comp, S0_comp, T_comp, r_comp, sigma_comp)
+            price_b = calculate_strategy_price_custom(strategy_b, params_b, S0_comp, S0_comp, T_comp, r_comp, sigma_comp)
             
             # Create comparison visualization
             col_result1, col_result2 = st.columns(2)
@@ -443,37 +485,51 @@ def _strategy_comparator():
                 <h3>Price Difference Analysis</h3>
                 <p><strong>Absolute Difference:</strong> ${diff:.4f}</p>
                 <p><strong>Percentage Difference:</strong> {diff_pct:+.2f}%</p>
+                <p><strong>Interpretation:</strong> {get_custom_price_interpretation(strategy_a, strategy_b, params_a, params_b, diff)}</p>
             </div>
             """, unsafe_allow_html=True)
             
-            # Comparative payoff diagram
-            spot_range_comp = np.linspace(S0_comp*0.5, S0_comp*1.5, 50)
-            payoffs_a = [calculate_strategy_payoff_standardized(strategy_a, spot, S0_comp) for spot in spot_range_comp]
-            payoffs_b = [calculate_strategy_payoff_standardized(strategy_b, spot, S0_comp) for spot in spot_range_comp]
+            # Comparative payoff diagram with continuous lines
+            spot_range_comp = np.linspace(S0_comp*0.5, S0_comp*2.0, 100)  # Bigger continuous range
+            payoffs_a = [calculate_strategy_payoff_custom(strategy_a, params_a, spot, S0_comp) for spot in spot_range_comp]
+            payoffs_b = [calculate_strategy_payoff_custom(strategy_b, params_b, spot, S0_comp) for spot in spot_range_comp]
             
             fig_comp = go.Figure()
             fig_comp.add_trace(go.Scatter(x=spot_range_comp, y=payoffs_a, 
                                         name=f"{strategy_a} Strategy", 
-                                        line=dict(color='blue', width=3)))
+                                        line=dict(color='blue', width=3),
+                                        mode='lines'))  # Continuous lines
             fig_comp.add_trace(go.Scatter(x=spot_range_comp, y=payoffs_b, 
                                         name=f"{strategy_b} Strategy", 
-                                        line=dict(color='red', width=3)))
+                                        line=dict(color='red', width=3),
+                                        mode='lines'))  # Continuous lines
             
             # Add current spot line
             fig_comp.add_vline(x=S0_comp, line_dash="dash", line_color="green",
                              annotation_text=f"Current Spot: ${S0_comp}")
             
+            # Add barrier lines if applicable
+            if strategy_a == "Barrier":
+                barrier_a = S0_comp * params_a['barrier_multiple']
+                fig_comp.add_vline(x=barrier_a, line_dash="dashdot", line_color="blue", 
+                                 annotation_text=f"Barrier A: ${barrier_a:.1f}")
+            
+            if strategy_b == "Barrier":
+                barrier_b = S0_comp * params_b['barrier_multiple']
+                fig_comp.add_vline(x=barrier_b, line_dash="dashdot", line_color="red",
+                                 annotation_text=f"Barrier B: ${barrier_b:.1f}")
+            
             fig_comp.update_layout(
-                title="Strategy Payoff Comparison",
-                xaxis_title="Spot Price at Expiry",
-                yaxis_title="Payoff",
+                title="Strategy Payoff Comparison at Expiration",
+                xaxis_title="Spot Price at Expiry ($)",
+                yaxis_title="Payoff ($)",
                 height=500
             )
             
             st.plotly_chart(fig_comp, use_container_width=True)
             
             # Performance metrics comparison
-            st.markdown("### Performance Metrics")
+            st.markdown("### Performance Metrics Comparison")
             
             metrics_df = pd.DataFrame({
                 'Metric': ['Current Price', 'Max Payoff', 'Min Payoff', 'Payoff at Current Spot'],
@@ -493,28 +549,203 @@ def _strategy_comparator():
             
             st.dataframe(metrics_df, use_container_width=True)
             
-            # Analysis summary
-            if abs(diff) > 5:
-                st.markdown('<div class="info-box">', unsafe_allow_html=True)
-                st.markdown(f"<strong>Analysis:</strong> Significant price difference of ${abs(diff):.2f} detected. ")
-                if diff > 0:
-                    st.markdown(f"{strategy_a} is more expensive, likely due to additional features or reduced risk.")
-                else:
-                    st.markdown(f"{strategy_b} is more expensive, likely due to additional features or reduced risk.")
-                st.markdown('</div>', unsafe_allow_html=True)
-            else:
-                st.markdown('<div class="info-box">', unsafe_allow_html=True)
-                st.markdown("**Analysis:** Strategies are similarly priced. Consider other factors like risk profile and market view for selection.")
-                st.markdown('</div>', unsafe_allow_html=True)
+            # Configuration summary
+            st.markdown("### Configuration Summary")
+            config_df = pd.DataFrame({
+                'Parameter': get_config_summary_labels(strategy_a, strategy_b),
+                f'{strategy_a}': get_config_summary_values(strategy_a, params_a, S0_comp),
+                f'{strategy_b}': get_config_summary_values(strategy_b, params_b, S0_comp)
+            })
+            st.dataframe(config_df, use_container_width=True)
         
         except Exception as e:
             st.error(f"Comparison Error: {str(e)}")
 
 
-def _market_scenario_analysis():
-    """Market scenario analysis with stress testing"""
+def calculate_strategy_price_custom(strategy, params, S0, K, T, r, sigma):
+    """Calculate price with custom parameters"""
+    try:
+        if strategy == "Asian":
+            asian_type = params.get('asian_type', 'average_price')
+            return price_asian_option(S0, K, T, r, sigma, 100, 3000, "monte_carlo", "call", asian_type)
+            
+        elif strategy == "Barrier":
+            barrier_type = params.get('barrier_type', 'up-and-out')
+            barrier_multiple = params.get('barrier_multiple', 1.2)
+            H = K * barrier_multiple
+            price, _ = price_barrier_option(S0, K, H, T, r, sigma, "call", barrier_type, "monte_carlo", 3000, 50)
+            return price
+            
+        elif strategy == "Digital":
+            style = params.get('style', 'cash')
+            Q = params.get('Q', 1.0)
+            return price_digital_option("black_scholes", "call", style, S0, K, T, r, sigma, Q)
+            
+        elif strategy == "Lookback":
+            floating = params.get('floating', True)
+            if floating:
+                price, _ = price_lookback_option(S0, None, r, sigma, T, "monte_carlo", "call", True, 3000, 100)
+            else:
+                price, _ = price_lookback_option(S0, K, r, sigma, T, "monte_carlo", "call", False, 3000, 100)
+            return price
+        else:
+            return 0
+            
+    except Exception as e:
+        # Fallback to approximation
+        from scipy.stats import norm
+        d1 = (np.log(S0/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+        d2 = d1 - sigma*np.sqrt(T)
+        vanilla = S0*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
+        
+        # Strategy-specific approximations
+        if strategy == "Asian":
+            return vanilla * 0.9
+        elif strategy == "Barrier":
+            return vanilla * 0.7
+        elif strategy == "Digital":
+            return np.exp(-r*T) * norm.cdf(d2) * params.get('Q', 1.0)
+        elif strategy == "Lookback":
+            return vanilla * 1.4
+        else:
+            return vanilla
+
+def calculate_strategy_payoff_custom(strategy, params, spot_at_expiry, reference_spot):
+    """Calculate payoff with custom parameters"""
+    K = reference_spot  # Use reference spot as strike
     
-    st.markdown('<div class="sub-header">Market Scenario Analysis</div>', unsafe_allow_html=True)
+    if strategy == "Asian":
+        # Simplified: assume average equals final spot for payoff illustration
+        return max(0, spot_at_expiry - K)
+        
+    elif strategy == "Barrier":
+        barrier_type = params.get('barrier_type', 'up-and-out')
+        barrier_multiple = params.get('barrier_multiple', 1.2)
+        H = K * barrier_multiple
+        
+        # Check knockout conditions
+        knocked_out = False
+        if "up" in barrier_type and spot_at_expiry >= H:
+            knocked_out = True
+        elif "down" in barrier_type and spot_at_expiry <= H:
+            knocked_out = True
+        
+        if "out" in barrier_type and knocked_out:
+            return 0
+        elif "in" in barrier_type and not knocked_out:
+            return 0
+        else:
+            return max(0, spot_at_expiry - K)
+            
+    elif strategy == "Digital":
+        style = params.get('style', 'cash')
+        Q = params.get('Q', 1.0)
+        
+        if style == "cash":
+            return Q if spot_at_expiry > K else 0
+        else:  # asset
+            return spot_at_expiry if spot_at_expiry > K else 0
+            
+    elif strategy == "Lookback":
+        floating = params.get('floating', True)
+        if floating:
+            # Simplified: assume minimum was 20% below reference
+            min_price = K * 0.8
+            return max(0, spot_at_expiry - min_price)
+        else:
+            return max(0, spot_at_expiry - K)
+    else:
+        return max(0, spot_at_expiry - K)
+
+def get_custom_price_interpretation(strategy_a, strategy_b, params_a, params_b, price_diff):
+    """Get interpretation based on custom parameters"""
+    
+    if abs(price_diff) < 0.5:
+        return "Prices are very similar with current configurations"
+    
+    more_expensive = strategy_a if price_diff > 0 else strategy_b
+    cheaper = strategy_b if price_diff > 0 else strategy_a
+    more_exp_params = params_a if price_diff > 0 else params_b
+    cheaper_params = params_b if price_diff > 0 else params_a
+    
+    # Generate parameter-specific interpretation
+    interpretation = f"{more_expensive} is more expensive"
+    
+    # Add specific reasons based on parameters
+    if more_expensive == "Digital" and more_exp_params.get('style') == 'asset':
+        interpretation += " (asset-or-nothing provides unlimited upside)"
+    elif more_expensive == "Digital" and more_exp_params.get('Q', 1) > 1:
+        interpretation += f" (higher cash payout of ${more_exp_params['Q']:.1f})"
+    elif more_expensive == "Barrier" and "in" in more_exp_params.get('barrier_type', ''):
+        interpretation += " (knock-in provides conditional protection)"
+    elif cheaper == "Barrier" and "out" in cheaper_params.get('barrier_type', ''):
+        interpretation += " due to knockout risk in " + cheaper
+    elif more_expensive == "Lookback" and more_exp_params.get('floating', True):
+        interpretation += " (floating strike provides optimal timing)"
+    elif more_expensive == "Asian" and more_exp_params.get('asian_type') == 'average_price':
+        interpretation += " (average price reduces volatility impact)"
+    
+    return interpretation
+
+def get_config_summary_labels(strategy_a, strategy_b):
+    """Get configuration summary labels"""
+    labels = ['Option Type']
+    
+    if strategy_a == "Asian" or strategy_b == "Asian":
+        labels.append('Asian Type')
+    if strategy_a == "Barrier" or strategy_b == "Barrier":
+        labels.extend(['Barrier Type', 'Barrier Level'])
+    if strategy_a == "Digital" or strategy_b == "Digital":
+        labels.extend(['Digital Style', 'Payout Amount'])
+    if strategy_a == "Lookback" or strategy_b == "Lookback":
+        labels.append('Strike Type')
+    
+    return labels
+
+def get_config_summary_values(strategy, params, reference_spot):
+    """Get configuration summary values"""
+    values = [strategy]
+    
+    if strategy == "Asian":
+        values.append(params.get('asian_type', 'average_price').replace('_', ' ').title())
+    elif strategy == "Barrier":
+        values.append(params.get('barrier_type', 'up-and-out').replace('-', ' ').title())
+        barrier_level = reference_spot * params.get('barrier_multiple', 1.2)
+        values.append(f"${barrier_level:.1f}")
+    elif strategy == "Digital":
+        values.append(params.get('style', 'cash').title())
+        if params.get('style') == 'cash':
+            values.append(f"${params.get('Q', 1.0):.1f}")
+        else:
+            values.append("Asset Price")
+    elif strategy == "Lookback":
+        strike_type = "Floating" if params.get('floating', True) else "Fixed"
+        values.append(strike_type)
+    
+    # Pad with empty strings to match label length
+    while len(values) < 6:  # Max possible labels
+        values.append("-")
+    
+    return values[:len(get_config_summary_labels("Asian", "Lookback"))]  # Trim to actual label count
+
+
+def _market_scenario_analysis():
+    """Clear market scenario analysis with specific stress tests"""
+    
+    st.markdown('<div class="sub-header">Market Scenario Stress Testing</div>', unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="info-box">
+        <h4>Stress Testing Framework</h4>
+        <p>Test how exotic option prices respond to extreme market conditions:</p>
+        <ul>
+        <li><strong>Market Crash:</strong> Spot drops 10-40%, volatility spikes 20-80%, rates drop 0-150bp</li>
+        <li><strong>Volatility Spike:</strong> Volatility increases 50-150%, modest spot movement ±15%</li>
+        <li><strong>Interest Rate Hike:</strong> Rates increase 50-400bp, volatility rises 10-20%</li>
+        </ul>
+        <p><em>All scenarios test 6 progressive stress levels to understand option sensitivity.</em></p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Scenario setup
     col1, col2 = st.columns(2)
@@ -526,31 +757,51 @@ def _market_scenario_analysis():
         base_rate = st.number_input("Base Interest Rate", value=0.05, key="scenario_rate")
     
     with col2:
-        st.markdown("### Scenario Configuration")
-        scenario_type = st.selectbox("Scenario Type", 
+        st.markdown("### Stress Test Configuration")
+        scenario_type = st.selectbox("Stress Scenario", 
                                    ["Market Crash", "Volatility Spike", "Interest Rate Hike"],
                                    key="scenario_type")
-        option_family = st.selectbox("Option to Analyze", 
+        option_family = st.selectbox("Option to Test", 
                                    ["Asian", "Barrier", "Digital", "Lookback"],
                                    key="scenario_option")
-    
-    if st.button("Run Scenario Analysis", type="primary"):
         
-        # Define scenario parameters
+        # Show what this option configuration means
+        if option_family == "Asian":
+            st.markdown("📋 **Testing:** Average-price call option")
+        elif option_family == "Barrier":
+            st.markdown("📋 **Testing:** Up-and-out call (barrier at 120% of spot)")
+        elif option_family == "Digital":
+            st.markdown("📋 **Testing:** Cash-or-nothing call ($1 payout)")
+        elif option_family == "Lookback":
+            st.markdown("📋 **Testing:** Floating strike call")
+    
+    if st.button("Run Stress Test", type="primary"):
+        
+        # Define specific scenario parameters with clear descriptions
         if scenario_type == "Market Crash":
-            spot_shocks = [-0.4, -0.3, -0.2, -0.1, 0, 0.1]
-            vol_shocks = [0.8, 0.5, 0.3, 0.2, 0, 0]
-            rate_shocks = [-0.015, -0.01, -0.005, 0, 0, 0]
+            spot_shocks = [-0.4, -0.3, -0.2, -0.15, -0.1, -0.05]
+            vol_shocks = [0.8, 0.6, 0.4, 0.3, 0.2, 0.1]
+            rate_shocks = [-0.015, -0.01, -0.008, -0.005, -0.003, -0.001]
+            scenario_description = "Progressive market crash with volatility spike and rate cuts"
             
         elif scenario_type == "Volatility Spike":
-            spot_shocks = [-0.05, 0, 0, 0.05, 0.1, 0.15]
-            vol_shocks = [1.5, 1.0, 0.5, 0.3, 0.2, 0.1]
+            spot_shocks = [-0.15, -0.1, -0.05, 0.05, 0.1, 0.15]
+            vol_shocks = [1.5, 1.2, 0.8, 0.6, 0.4, 0.2]
             rate_shocks = [0, 0, 0, 0, 0, 0]
+            scenario_description = "Volatility surge with modest directional movement"
             
         else:  # Interest Rate Hike
-            spot_shocks = [0, 0, 0, 0, 0, 0]
-            vol_shocks = [0.2, 0.1, 0.05, 0, 0, 0]
-            rate_shocks = [0.04, 0.03, 0.02, 0.01, 0.005, 0]
+            spot_shocks = [0.05, 0.03, 0.02, 0.01, 0, -0.02]
+            vol_shocks = [0.2, 0.15, 0.1, 0.08, 0.05, 0.02]
+            rate_shocks = [0.04, 0.03, 0.025, 0.02, 0.015, 0.005]
+            scenario_description = "Progressive interest rate hikes with volatility increase"
+        
+        st.markdown(f"""
+        <div class="warning-box">
+            <h4>Running: {scenario_type}</h4>
+            <p>{scenario_description}</p>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Progress tracking
         progress_bar = st.progress(0)
@@ -561,7 +812,7 @@ def _market_scenario_analysis():
         
         for i, (spot_shock, vol_shock, rate_shock) in enumerate(zip(spot_shocks, vol_shocks, rate_shocks)):
             progress_bar.progress((i + 1) / len(spot_shocks))
-            status_text.text(f"Analyzing scenario {i+1}/{len(spot_shocks)}...")
+            status_text.text(f"Testing stress level {i+1}/6...")
             
             # Apply shocks
             shocked_spot = base_spot * (1 + spot_shock)
@@ -573,63 +824,65 @@ def _market_scenario_analysis():
                 price = calculate_strategy_price_standardized(option_family, shocked_spot, base_spot, 1.0, shocked_rate, shocked_vol)
                 
                 scenario_results.append({
-                    'Scenario': f"Scenario {i+1}",
-                    'Spot_Shock_%': spot_shock * 100,
-                    'Vol_Shock_%': vol_shock * 100,
-                    'Rate_Shock_bps': rate_shock * 10000,
-                    'Shocked_Spot': shocked_spot,
-                    'Shocked_Vol': shocked_vol,
-                    'Shocked_Rate': shocked_rate,
-                    'Option_Price': price
+                    'Stress_Level': i+1,
+                    'Spot_Change_%': spot_shock * 100,
+                    'Vol_Change_%': vol_shock * 100,
+                    'Rate_Change_bp': rate_shock * 10000,
+                    'Final_Spot': shocked_spot,
+                    'Final_Vol': shocked_vol,
+                    'Final_Rate': shocked_rate,
+                    'Option_Price': price,
+                    'Description': f"Level {i+1}: {scenario_type.lower()}"
                 })
                 
             except Exception as e:
-                st.warning(f"Calculation failed for scenario {i+1}: {str(e)}")
+                st.warning(f"Calculation failed for stress level {i+1}: {str(e)}")
                 scenario_results.append({
-                    'Scenario': f"Scenario {i+1}",
-                    'Spot_Shock_%': spot_shock * 100,
-                    'Vol_Shock_%': vol_shock * 100,
-                    'Rate_Shock_bps': rate_shock * 10000,
-                    'Shocked_Spot': shocked_spot,
-                    'Shocked_Vol': shocked_vol,
-                    'Shocked_Rate': shocked_rate,
-                    'Option_Price': 0
+                    'Stress_Level': i+1,
+                    'Spot_Change_%': spot_shock * 100,
+                    'Vol_Change_%': vol_shock * 100,
+                    'Rate_Change_bp': rate_shock * 10000,
+                    'Final_Spot': shocked_spot,
+                    'Final_Vol': shocked_vol,
+                    'Final_Rate': shocked_rate,
+                    'Option_Price': 0,
+                    'Description': f"Level {i+1}: calculation failed"
                 })
         
         progress_bar.progress(1.0)
-        status_text.text("Analysis Complete!")
+        status_text.text("Stress test complete!")
         
         # Display results
         scenario_df = pd.DataFrame(scenario_results)
         
-        st.markdown("### Scenario Analysis Results")
+        st.markdown("### Stress Test Results")
         st.dataframe(scenario_df.round(4), use_container_width=True)
         
-        # Visualization
+        # Visualization with continuous lines
         fig_scenario = go.Figure()
         
         fig_scenario.add_trace(go.Scatter(
-            x=scenario_df['Spot_Shock_%'],
+            x=scenario_df['Stress_Level'],
             y=scenario_df['Option_Price'],
             mode='lines+markers',
-            name='Option Price',
-            line=dict(width=3),
-            marker=dict(size=8)
+            name=f'{option_family} Option Price',
+            line=dict(width=4, color='blue'),
+            marker=dict(size=10, color='red')
         ))
         
         fig_scenario.update_layout(
-            title=f"{option_family} Option Price Sensitivity to {scenario_type}",
-            xaxis_title="Spot Price Shock (%)",
+            title=f"{option_family} Option Response to {scenario_type}",
+            xaxis_title="Stress Level (1=Mild → 6=Severe)",
             yaxis_title="Option Price ($)",
             height=500
         )
         
         st.plotly_chart(fig_scenario, use_container_width=True)
         
-        # Risk metrics
-        prices = scenario_df['Option_Price'][scenario_df['Option_Price'] > 0]  # Exclude failed calculations
+        # Risk metrics with clear interpretation
+        prices = scenario_df['Option_Price'][scenario_df['Option_Price'] > 0]
         if len(prices) > 0:
-            base_price = prices.iloc[4] if len(prices) > 4 else prices.mean()
+            base_price = prices.iloc[0] if len(prices) > 0 else prices.mean()
             
             max_loss = base_price - prices.min()
             max_gain = prices.max() - base_price
@@ -652,19 +905,19 @@ def _market_scenario_analysis():
                 st.metric("Price Volatility", f"${price_volatility:.4f}")
                 st.markdown('</div>', unsafe_allow_html=True)
             
-            # Risk assessment
+            # Clear risk assessment based on actual data
             loss_ratio = max_loss / base_price if base_price > 0 else 0
-            if loss_ratio > 0.3:
+            if loss_ratio > 0.5:
                 st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-                st.markdown(f"**High Risk Detected:** Option shows {loss_ratio:.1%} maximum downside exposure in stress scenarios.")
+                st.markdown(f"<strong>High Risk:</strong> Option lost {loss_ratio:.1%} of value in worst stress scenario. Consider hedging strategies.")
                 st.markdown('</div>', unsafe_allow_html=True)
-            elif loss_ratio > 0.15:
+            elif loss_ratio > 0.25:
                 st.markdown('<div class="info-box">', unsafe_allow_html=True)
-                st.markdown(f"**Moderate Risk:** Option shows {loss_ratio:.1%} maximum downside exposure. Consider hedging strategies.")
+                st.markdown(f"<strong>Moderate Risk:</strong> Option shows {loss_ratio:.1%} maximum downside. Monitor market conditions closely.")
                 st.markdown('</div>', unsafe_allow_html=True)
             else:
                 st.markdown('<div class="success-box">', unsafe_allow_html=True)
-                st.markdown(f"**Low Risk:** Option shows good resilience with only {loss_ratio:.1%} maximum downside.")
+                st.markdown(f"<strong>Low Risk:</strong> Option demonstrates resilience with only {loss_ratio:.1%} maximum loss under stress.")
                 st.markdown('</div>', unsafe_allow_html=True)
 
 
@@ -951,8 +1204,8 @@ def calculate_greeks_lookback_stable(S0, K, T, r, sigma, option_type, floating_s
         'Rho': 0.12
     }
 
-def calculate_greeks_range_stable(spot_range, K, T, r, sigma, option_type, option_family):
-    """Calculate Greeks across spot range with stability improvements"""
+def calculate_greeks_range_continuous(spot_range, K, T, r, sigma, option_type, option_family):
+    """Calculate Greeks across continuous spot range for smooth plots"""
     greeks_data = {
         'Delta': [],
         'Gamma': [],
@@ -965,12 +1218,12 @@ def calculate_greeks_range_stable(spot_range, K, T, r, sigma, option_type, optio
     for spot in spot_range:
         try:
             if option_family == "asian":
-                greeks = calculate_greeks_asian_stable(spot, K, T, r, sigma, 50, 1000, option_type, "average_price")
-                price = price_asian_option(spot, K, T, r, sigma, 50, 1000, "monte_carlo", option_type, "average_price")
+                greeks = calculate_greeks_asian_stable(spot, K, T, r, sigma, 30, 500, option_type, "average_price")
+                price = price_asian_option(spot, K, T, r, sigma, 30, 500, "monte_carlo", option_type, "average_price")
             
             elif option_family == "barrier":
                 greeks = calculate_greeks_barrier_stable(spot, K, spot*1.2, T, r, sigma, option_type, "up-and-out")
-                price, _ = price_barrier_option(spot, K, spot*1.2, T, r, sigma, option_type, "up-and-out", "monte_carlo", 1000, 50)
+                price, _ = price_barrier_option(spot, K, spot*1.2, T, r, sigma, option_type, "up-and-out", "monte_carlo", 500, 30)
             
             elif option_family == "digital":
                 greeks = calculate_greeks_digital_stable(spot, K, T, r, sigma, option_type, "cash", 1.0)
@@ -978,7 +1231,7 @@ def calculate_greeks_range_stable(spot_range, K, T, r, sigma, option_type, optio
             
             elif option_family == "lookback":
                 greeks = calculate_greeks_lookback_stable(spot, K, T, r, sigma, option_type, True)
-                price, _ = price_lookback_option(spot, None, r, sigma, T, "monte_carlo", option_type, True, 1000, 100)
+                price, _ = price_lookback_option(spot, None, r, sigma, T, "monte_carlo", option_type, True, 500, 50)
             
             else:
                 greeks = {'Delta': 0, 'Gamma': 0, 'Theta': 0, 'Vega': 0, 'Rho': 0}
@@ -991,7 +1244,7 @@ def calculate_greeks_range_stable(spot_range, K, T, r, sigma, option_type, optio
                     greeks_data[greek].append(greeks.get(greek, 0))
                     
         except Exception as e:
-            # Fallback values
+            # Fallback values for smooth plots
             for greek in greeks_data.keys():
                 if greek == 'Price':
                     greeks_data[greek].append(0)
@@ -1000,9 +1253,181 @@ def calculate_greeks_range_stable(spot_range, K, T, r, sigma, option_type, optio
     
     return greeks_data
 
+def create_sample_paths_visualization(S0, r, sigma, T, option_family):
+    """Create sample price paths visualization for path-dependent options"""
+    try:
+        n_paths = 10  # Number of sample paths to show
+        n_steps = int(T * 252)  # Daily steps
+        dt = T / n_steps
+        
+        paths = np.zeros((n_paths, n_steps + 1))
+        paths[:, 0] = S0
+        
+        # Generate sample paths
+        for path in range(n_paths):
+            for t in range(1, n_steps + 1):
+                Z = np.random.normal()
+                paths[path, t] = paths[path, t-1] * np.exp(
+                    (r - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z
+                )
+        
+        # Create time axis
+        time_axis = np.linspace(0, T, n_steps + 1)
+        
+        # Create figure
+        fig = go.Figure()
+        
+        # Add each path
+        for path in range(n_paths):
+            fig.add_trace(go.Scatter(
+                x=time_axis, 
+                y=paths[path, :],
+                mode='lines',
+                name=f'Path {path+1}',
+                line=dict(width=2, color=f'rgba({50 + path*20}, {100 + path*15}, {200 - path*10}, 0.7)'),
+                showlegend=False
+            ))
+        
+        # Add average path
+        avg_path = np.mean(paths, axis=0)
+        fig.add_trace(go.Scatter(
+            x=time_axis,
+            y=avg_path,
+            mode='lines',
+            name='Average Path',
+            line=dict(width=4, color='red', dash='dash')
+        ))
+        
+        # Add starting point
+        fig.add_hline(y=S0, line_dash="dot", line_color="green",
+                     annotation_text=f"Starting Price: ${S0}")
+        
+        # Special annotations for different option types
+        if option_family == "barrier":
+            barrier_level = S0 * 1.2
+            fig.add_hline(y=barrier_level, line_dash="dashdot", line_color="orange",
+                         annotation_text=f"Barrier: ${barrier_level:.1f}")
+        
+        elif option_family == "asian":
+            fig.add_annotation(
+                text="Average calculated over entire path",
+                xref="paper", yref="paper",
+                x=0.5, y=0.95, showarrow=False,
+                bgcolor="rgba(255,255,0,0.5)"
+            )
+        
+        elif option_family == "lookback":
+            fig.add_annotation(
+                text="Lookback tracks min/max over path",
+                xref="paper", yref="paper",
+                x=0.5, y=0.95, showarrow=False,
+                bgcolor="rgba(0,255,255,0.5)"
+            )
+        
+        fig.update_layout(
+            title=f"Sample Price Paths for {option_family.title()} Options",
+            xaxis_title="Time (Years)",
+            yaxis_title="Asset Price ($)",
+            height=400,
+            hovermode='x unified'
+        )
+        
+        return fig
+        
+    except Exception as e:
+        # Return simple figure on error
+        fig = go.Figure()
+        fig.add_annotation(
+            text="Path visualization temporarily unavailable",
+            xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False
+        )
+        return fig
+
+def get_price_interpretation(strategy_a, strategy_b, price_diff):
+    """Get interpretation of price difference between strategies"""
+    
+    if abs(price_diff) < 1:
+        return "Prices are very similar - choice depends on market outlook and risk tolerance"
+    
+    more_expensive = strategy_a if price_diff > 0 else strategy_b
+    cheaper = strategy_b if price_diff > 0 else strategy_a
+    
+    # Strategy-specific interpretations
+    explanations = {
+        ("Asian", "Barrier"): f"{more_expensive} provides more predictable payoff vs {cheaper}'s knockout risk",
+        ("Asian", "Digital"): f"{more_expensive} offers graduated payoff vs {cheaper}'s binary outcome", 
+        ("Asian", "Lookback"): f"{more_expensive} provides perfect timing vs {cheaper}'s averaging effect",
+        ("Barrier", "Digital"): f"{more_expensive} has potential for full payoff vs {cheaper}'s fixed amount",
+        ("Barrier", "Lookback"): f"{more_expensive} offers comprehensive coverage vs {cheaper}'s knockout risk",
+        ("Digital", "Lookback"): f"{more_expensive} provides unlimited upside vs {cheaper}'s fixed payout"
+    }
+    
+    # Try both orderings
+    key = (strategy_a, strategy_b)
+    reverse_key = (strategy_b, strategy_a)
+    
+    if key in explanations:
+        return explanations[key]
+    elif reverse_key in explanations:
+        return explanations[reverse_key]
+    else:
+        return f"{more_expensive} is more expensive due to enhanced features or reduced risk profile"
+
+def create_price_sensitivity_chart(K, T, r, sigma, option_type, option_family, params):
+    """Create continuous price sensitivity analysis chart with bigger range"""
+    try:
+        # Create continuous sensitivity to spot price (bigger range: 0.5x to 2x)
+        spot_range = np.linspace(K * 0.5, K * 2.0, 100)  # Continuous with 100 points
+        prices = []
+        
+        for spot in spot_range:
+            try:
+                if option_family == "asian":
+                    price = price_asian_option(spot, K, T, r, sigma, 30, 500, "monte_carlo", option_type, "average_price")
+                elif option_family == "barrier":
+                    H = params.get('H', spot*1.2)
+                    price, _ = price_barrier_option(spot, K, H, T, r, sigma, option_type, "up-and-out", "monte_carlo", 500, 20)
+                elif option_family == "digital":
+                    price = price_digital_option("black_scholes", option_type, "cash", spot, K, T, r, sigma, 1.0)
+                elif option_family == "lookback":
+                    price, _ = price_lookback_option(spot, None, r, sigma, T, "monte_carlo", option_type, True, 500, 30)
+                else:
+                    price = 0
+                prices.append(max(price, 0))
+            except:
+                prices.append(0)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=spot_range, y=prices, mode='lines',  # Continuous line
+            name='Option Price', line=dict(width=3, color='blue')
+        ))
+        
+        # Add reference lines
+        fig.add_vline(x=K, line_dash="dash", line_color="green",
+                     annotation_text=f"Strike: ${K}")
+        
+        fig.update_layout(
+            title=f"Price Sensitivity Analysis - {option_family.title()} Option",
+            xaxis_title="Spot Price ($)",
+            yaxis_title="Option Price ($)",
+            height=400
+        )
+        
+        return fig
+        
+    except Exception as e:
+        # Return empty figure on error
+        fig = go.Figure()
+        fig.add_annotation(
+            text="Price sensitivity chart temporarily unavailable",
+            xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False
+        )
+        return fig
+
 def create_live_payoff_diagram(S0, K, option_type, option_family, params):
-    """Create live payoff diagram"""
-    spot_range = np.linspace(S0*0.6, S0*1.4, 50)
+    """Create live payoff diagram with bigger continuous range"""
+    spot_range = np.linspace(S0*0.5, S0*2.0, 100)  # Bigger range, continuous
     payoffs = []
     
     for spot in spot_range:
@@ -1047,13 +1472,13 @@ def create_live_payoff_diagram(S0, K, option_type, option_family, params):
             # Simplified lookback payoff
             if params.get('floating', True):
                 if option_type == "call":
-                    # Assume minimum was 20% below current spot
-                    min_price = min(spot_range) * 0.8
-                    payoff = spot - min_price
+                    # Assume minimum was 20% below current range minimum
+                    min_price = min(spot_range) * 0.9
+                    payoff = max(0, spot - min_price)
                 else:
-                    # Assume maximum was 20% above current spot
-                    max_price = max(spot_range) * 1.2
-                    payoff = max_price - spot
+                    # Assume maximum was 20% above current range maximum
+                    max_price = max(spot_range) * 1.1
+                    payoff = max(0, max_price - spot)
             else:
                 payoff = max(0, spot - K) if option_type == "call" else max(0, K - spot)
         else:
@@ -1063,24 +1488,24 @@ def create_live_payoff_diagram(S0, K, option_type, option_family, params):
     
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=spot_range, y=payoffs, mode='lines', name='Payoff',
-        line=dict(color='blue', width=3), fill='tozeroy', fillcolor='rgba(0,100,200,0.1)'
+        x=spot_range, y=payoffs, mode='lines', name='Payoff',  # Continuous line
+        line=dict(color='blue', width=4), fill='tozeroy', fillcolor='rgba(0,100,200,0.1)'
     ))
     
     # Add reference lines
     fig.add_vline(x=S0, line_dash="dash", line_color="red", 
-                 annotation_text=f"Current Spot: ${S0}")
+                 annotation_text=f"Current Spot: ${S0:.1f}")
     fig.add_vline(x=K, line_dash="dot", line_color="green",
-                 annotation_text=f"Strike: ${K}")
+                 annotation_text=f"Strike: ${K:.1f}")
     
     # Add barrier line for barrier options
     if option_family == "barrier" and 'H' in params:
         fig.add_vline(x=params['H'], line_dash="dashdot", line_color="orange",
-                     annotation_text=f"Barrier: ${params['H']}")
+                     annotation_text=f"Barrier: ${params['H']:.1f}")
     
     fig.update_layout(
-        title=f"{option_family.title()} {option_type.title()} Payoff Diagram",
-        xaxis_title="Spot Price at Expiry",
+        title=f"{option_family.title()} {option_type.title()} Payoff at Expiration",
+        xaxis_title="Spot Price at Expiry ($)",
         yaxis_title="Payoff ($)",
         height=400
     )
