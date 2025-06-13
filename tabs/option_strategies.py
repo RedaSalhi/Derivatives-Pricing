@@ -1204,6 +1204,103 @@ def _sensitivity_analysis_tab(params):
 
 
 def display_educational_content():
+    # Custom CSS for enhanced styling
+    st.markdown("""
+    <style>
+        .main-header {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            color: #1f77b4;
+            margin-bottom: 2rem;
+        }
+        .sub-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff7f0e;
+            margin: 1rem 0;
+        }
+        .metric-container {
+            background-color: #f0f2f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+        }
+        .info-box {
+            background-color: #e8f4f8;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #1f77b4;
+            margin: 1rem 0;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #ffc107;
+            margin: 1rem 0;
+        }
+        .success-box {
+            background-color: #d4edda;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+        .formula {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #1f77b4;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            border: 1px solid #d0e7ff;
+        }
+        .results-table {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #dee2e6;
+        }
+        .section-title {
+            color: #1f77b4;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .parameter-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #dee2e6;
+        }
+        .sensitivity-long {
+            background-color: #d4edda;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        .sensitivity-short {
+            background-color: #f8d7da;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+        }
+        .calculation-step {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-family: monospace;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
     """Display comprehensive educational content"""
     st.markdown("---")
     st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
