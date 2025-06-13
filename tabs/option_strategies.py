@@ -134,7 +134,7 @@ def option_strategies_tab():
     """, unsafe_allow_html=True)
     
     # Main title
-    st.markdown('<div class="main-header">🎯 Advanced Options Strategy Suite</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Options Strategy</div>', unsafe_allow_html=True)
     st.markdown("---")
     
     # Initialize session state for setup completion
@@ -156,12 +156,12 @@ def option_strategies_tab():
 
     # Tab structure
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "⚙️ Setup & Parameters",
-        "📊 Single Option Pricing", 
-        "🔧 Strategy Builder", 
-        "📈 Payoff Analysis", 
-        "🎯 Greeks Analysis",
-        "🔬 Sensitivity Analysis"
+        "Setup & Parameters",
+        "Single Option Pricing", 
+        "Strategy Builder", 
+        "Payoff Analysis", 
+        "Greeks Analysis",
+        "Sensitivity Analysis"
     ])
     
     with tab1:
@@ -205,24 +205,24 @@ def option_strategies_tab():
                 background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; 
                 border: 1px solid #dee2e6;'>
         <div style="margin-bottom: 10px;">
-            <span style="font-size: 2rem;">🎯</span>
+            <span style="font-size: 2rem;"></span>
         </div>
         <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1f77b4;">Advanced Options Strategy Suite</p>
         <p style="margin: 8px 0; color: #6c757d;">Built with Streamlit & Python</p>
-        <p style="margin: 0; color: #dc3545; font-weight: bold;">⚠️ For educational purposes only. Not financial advice.</p>
+        <p style="margin: 0; color: #dc3545; font-weight: bold;">For educational purposes only. Not financial advice.</p>
     </div>
     """, unsafe_allow_html=True)
 
 
 def _setup_tab():
     """Setup and Parameters Tab"""
-    st.markdown('<div class="sub-header">🚀 Welcome to the Options Strategy Suite!</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Welcome to the Options Strategy Suite!</div>', unsafe_allow_html=True)
     
     # Welcome message
     if not st.session_state.setup_completed:
         st.markdown("""
         <div class="setup-incomplete">
-            <h2 style="color: #856404; margin-top: 0;">🎯 Quick Start Guide</h2>
+            <h2 style="color: #856404; margin-top: 0;">Quick Start Guide</h2>
             <p style="font-size: 1.1em; margin-bottom: 0;">
                 Configure your market parameters below to unlock advanced options analysis tools!
             </p>
@@ -231,7 +231,7 @@ def _setup_tab():
     else:
         st.markdown("""
         <div class="setup-complete">
-            <h3 style="color: #155724; margin-top: 0;">✅ Setup Complete!</h3>
+            <h3 style="color: #155724; margin-top: 0;">Setup Complete!</h3>
             <p style="margin-bottom: 0;">All analysis tools are now available. You can modify parameters anytime.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -239,10 +239,10 @@ def _setup_tab():
     # Feature overview
     st.markdown("""
     <div class="info-box">
-        <h3>🎯 Suite Capabilities</h3>
+        <h3>Suite Capabilities</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
             <div>
-                <h4 style="color: #1f77b4; margin-bottom: 10px;">📊 Pricing & Valuation</h4>
+                <h4 style="color: #1f77b4; margin-bottom: 10px;">Pricing & Valuation</h4>
                 <ul style="margin: 0; padding-left: 20px;">
                     <li>Single option pricing with multiple models</li>
                     <li>Multi-leg strategy construction</li>
@@ -251,7 +251,7 @@ def _setup_tab():
                 </ul>
             </div>
             <div>
-                <h4 style="color: #1f77b4; margin-bottom: 10px;">📈 Risk Management</h4>
+                <h4 style="color: #1f77b4; margin-bottom: 10px;">Risk Management</h4>
                 <ul style="margin: 0; padding-left: 20px;">
                     <li>Interactive payoff diagrams</li>
                     <li>Greeks analysis and visualization</li>
@@ -266,14 +266,14 @@ def _setup_tab():
     st.markdown("---")
     
     # Global Parameters Section
-    st.markdown('<div class="sub-header">📊 Global Market Parameters</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Global Market Parameters</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
         <div class="parameter-grid">
-            <h4 style="color: #1f77b4; margin-top: 0;">💰 Asset & Market Parameters</h4>
+            <h4 style="color: #1f77b4; margin-top: 0;">Asset & Market Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -311,7 +311,7 @@ def _setup_tab():
     with col2:
         st.markdown("""
         <div class="parameter-grid">
-            <h4 style="color: #1f77b4; margin-top: 0;">📊 Option Parameters</h4>
+            <h4 style="color: #1f77b4; margin-top: 0;">Option Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -339,7 +339,7 @@ def _setup_tab():
     st.markdown("---")
     
     # Model Selection
-    st.markdown('<div class="sub-header">🔧 Pricing Model Configuration</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Pricing Model Configuration</div>', unsafe_allow_html=True)
     
     col3, col4 = st.columns(2)
     
@@ -355,22 +355,22 @@ def _setup_tab():
         # Model descriptions
         model_descriptions = {
             "black-scholes": {
-                "title": "🎯 Black-Scholes Model",
+                "title": "Black-Scholes Model",
                 "description": "Analytical solution for European options providing instant, precise results.",
-                "pros": ["⚡ Fastest computation", "📐 Exact analytical solution", "🎓 Widely understood"],
-                "cons": ["❌ European exercise only", "📊 Constant volatility assumption"]
+                "pros": ["Fastest computation", "Exact analytical solution", "Widely understood"],
+                "cons": ["European exercise only", "Constant volatility assumption"]
             },
             "binomial": {
-                "title": "🌳 Binomial Tree Model", 
+                "title": "Binomial Tree Model", 
                 "description": "Discrete time model supporting American options with flexible implementation.",
-                "pros": ["🇺🇸 American exercise support", "🔧 Flexible implementation", "📈 Intuitive approach"],
-                "cons": ["⏱️ Slower computation", "🔢 Convergence dependent on steps"]
+                "pros": ["American exercise support", "Flexible implementation", "Intuitive approach"],
+                "cons": ["Slower computation", "Convergence dependent on steps"]
             },
             "monte-carlo": {
-                "title": "🎲 Monte Carlo Simulation",
+                "title": "Monte Carlo Simulation",
                 "description": "Simulation-based approach handling complex payoffs and exotic features.",
-                "pros": ["🌟 Handles exotic payoffs", "📊 Statistical confidence", "🔄 Path-dependent options"],
-                "cons": ["⌛ Slowest method", "📈 Random error component"]
+                "pros": ["Handles exotic payoffs", "Statistical confidence", "Path-dependent options"],
+                "cons": ["Slowest method", "Random error component"]
             }
         }
         
@@ -419,7 +419,7 @@ def _setup_tab():
                 
             st.markdown(f"""
             <div class="parameter-grid">
-                <h5>⚡ Performance Impact</h5>
+                <h5>Performance Impact</h5>
                 <p><strong>Current setting:</strong> {step_performance}</p>
                 <p><strong>Recommended:</strong> 100-200 steps for good accuracy</p>
             </div>
@@ -446,7 +446,7 @@ def _setup_tab():
                 
             st.markdown(f"""
             <div class="parameter-grid">
-                <h5>⚡ Performance Impact</h5>
+                <h5>Performance Impact</h5>
                 <p><strong>Current setting:</strong> {sim_performance}</p>
                 <p><strong>Recommended:</strong> 10,000+ simulations for accuracy</p>
                 <p><strong>Error estimate:</strong> ±{1.96/np.sqrt(n_simulations)*100:.2f}%</p>
@@ -457,7 +457,7 @@ def _setup_tab():
             n_simulations = st.session_state.global_params['n_simulations']
             st.markdown("""
             <div class="success-box">
-                <h5>⚡ Black-Scholes Performance</h5>
+                <h5>Black-Scholes Performance</h5>
                 <p>Instantaneous computation with exact analytical results!</p>
                 <p>Perfect for rapid analysis and parameter sweeps.</p>
             </div>
@@ -469,7 +469,7 @@ def _setup_tab():
     col_button1, col_button2, col_button3 = st.columns([1, 2, 1])
     
     with col_button2:
-        setup_button_text = "🔄 Update Configuration" if st.session_state.setup_completed else "🚀 Complete Setup & Start Analysis"
+        setup_button_text = "Update Configuration" if st.session_state.setup_completed else "Complete Setup & Start Analysis"
         
         if st.button(setup_button_text, type="primary", use_container_width=True):
             # Update session state with all parameters
@@ -502,14 +502,14 @@ def _setup_tab():
 
 def _single_option_tab(params):
     """Single Option Pricing Tab"""
-    st.markdown('<div class="sub-header">📊 Single Option Pricing & Analysis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Single Option Pricing & Analysis</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 2])
     
     with col1:
         st.markdown("""
         <div class="parameter-grid">
-            <h4 style="color: #1f77b4; margin-top: 0;">🎯 Option Specification</h4>
+            <h4 style="color: #1f77b4; margin-top: 0;">Option Specification</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -539,7 +539,7 @@ def _single_option_tab(params):
             
             st.markdown(f"""
             <div class="success-box">
-                <h4 style="margin-top: 0;">💰 Option Valuation</h4>
+                <h4 style="margin-top: 0;">Option Valuation</h4>
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr style="border-bottom: 1px solid #28a745;">
                         <td style="padding: 8px; font-weight: bold;">Total Price</td>
@@ -566,7 +566,7 @@ def _single_option_tab(params):
             """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown('<div class="sub-header">📈 Parameter Sensitivity Analysis</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Parameter Sensitivity Analysis</div>', unsafe_allow_html=True)
         
         param_col1, param_col2 = st.columns(2)
         
@@ -589,7 +589,7 @@ def _single_option_tab(params):
         with range_col2:
             param_max = st.number_input(f"Max {param_to_vary}", value=current_val * 1.5, step=0.01)
         
-        if st.button("🔍 Generate Sensitivity Analysis", type="primary", use_container_width=True):
+        if st.button("Generate Sensitivity Analysis", type="primary", use_container_width=True):
             try:
                 with st.spinner("Calculating parameter sensitivity..."):
                     fixed_params = {
@@ -651,7 +651,7 @@ def _single_option_tab(params):
             except Exception as e:
                 st.markdown(f"""
                 <div class="error-box">
-                    <h4>❌ Analysis Error</h4>
+                    <h4>Analysis Error</h4>
                     <p>Error generating sensitivity plot: {str(e)}</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -659,14 +659,14 @@ def _single_option_tab(params):
 
 def _strategy_builder_tab(params):
     """Strategy Builder Tab"""
-    st.markdown('<div class="sub-header">🔧 Advanced Strategy Builder</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Advanced Strategy Builder</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 2])
     
     with col1:
         st.markdown("""
         <div class="parameter-grid">
-            <h4 style="color: #1f77b4; margin-top: 0;">🎯 Strategy Configuration</h4>
+            <h4 style="color: #1f77b4; margin-top: 0;">Strategy Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -699,7 +699,7 @@ def _strategy_builder_tab(params):
                 legs = get_predefined_strategy(strategy_name, strike1, strike2, strike3, strike4)
                 
         else:  # Custom Strategy
-            st.markdown("#### 🛠️ Custom Strategy Builder")
+            st.markdown("#### Custom Strategy Builder")
             num_legs = st.number_input("Number of Legs", value=2, min_value=1, max_value=10, step=1, key="custom_num_legs")
             
             legs = []
@@ -728,7 +728,7 @@ def _strategy_builder_tab(params):
         st.session_state.current_strategy_exercise = strategy_exercise
     
     with col2:
-        st.markdown('<div class="sub-header">📊 Strategy Analysis</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Strategy Analysis</div>', unsafe_allow_html=True)
         
         if isinstance(legs, str):  # Error message from predefined strategy
             st.markdown(f"""
@@ -781,7 +781,7 @@ def _strategy_builder_tab(params):
                 
                 st.markdown(f"""
                 <div class="success-box">
-                    <h4 style="margin-top: 0;">💰 Strategy Valuation</h4>
+                    <h4 style="margin-top: 0;">Strategy Valuation</h4>
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr style="border-bottom: 2px solid #28a745;">
                             <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -814,7 +814,7 @@ def _strategy_builder_tab(params):
 
 def _payoff_analysis_tab(params):
     """Payoff Analysis Tab"""
-    st.markdown('<div class="sub-header">📈 Strategy Payoff Analysis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Strategy Payoff Analysis</div>', unsafe_allow_html=True)
     
     if 'current_legs' not in st.session_state:
         st.markdown("""
@@ -831,7 +831,7 @@ def _payoff_analysis_tab(params):
     config_col1, config_col2, config_col3 = st.columns(3)
     
     with config_col1:
-        st.markdown("#### 📊 Price Range")
+        st.markdown("#### Price Range")
         strikes = [leg['strike'] for leg in legs]
         min_strike, max_strike = min(strikes), max(strikes)
         
@@ -839,12 +839,12 @@ def _payoff_analysis_tab(params):
         spot_max = st.number_input("Max Spot Price", value=max_strike * 1.3, step=1.0)
     
     with config_col2:
-        st.markdown("#### ⚙️ Analysis Options")
+        st.markdown("#### Analysis Options")
         n_points = st.slider("Resolution", 50, 500, 200)
         show_breakeven = st.checkbox("Show Breakeven Points", value=True)
     
     with config_col3:
-        st.markdown("#### 💰 P&L Options")
+        st.markdown("#### P&L Options")
         show_profit_loss = st.checkbox("Include Premium Cost", value=True)
         show_individual_legs = st.checkbox("Show Individual Legs", value=False)
     
@@ -906,7 +906,7 @@ def _payoff_analysis_tab(params):
         
         st.markdown(f"""
         <div class="payoff-stats">
-            <h4>📊 Strategy Statistics</h4>
+            <h4>Strategy Statistics</h4>
             <table style="width: 100%; border-collapse: collapse;">
                 <tr style="border-bottom: 2px solid #6c757d;">
                     <td style="padding: 10px; font-weight: bold;">Max Payoff</td>
@@ -931,7 +931,7 @@ def _payoff_analysis_tab(params):
 
 def _greeks_analysis_tab(params):
     """Greeks Analysis Tab"""
-    st.markdown('<div class="sub-header">🎯 Greeks Risk Analysis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Greeks Risk Analysis</div>', unsafe_allow_html=True)
     
     if 'current_legs' not in st.session_state:
         st.markdown("""
@@ -952,11 +952,11 @@ def _greeks_analysis_tab(params):
         
         # Greek descriptions
         greek_descriptions = {
-            "delta": "📈 **Delta**: Price sensitivity to underlying asset moves",
-            "gamma": "🔄 **Gamma**: Rate of change of delta",
-            "vega": "🌊 **Vega**: Sensitivity to volatility changes",
-            "theta": "⏰ **Theta**: Time decay",
-            "rho": "💰 **Rho**: Interest rate sensitivity"
+            "delta": "Delta: Price sensitivity to underlying asset moves",
+            "gamma": "Gamma: Rate of change of delta",
+            "vega": "Vega: Sensitivity to volatility changes",
+            "theta": "Theta: Time decay",
+            "rho": "Rho: Interest rate sensitivity"
         }
         
         st.markdown(f"""
@@ -975,7 +975,7 @@ def _greeks_analysis_tab(params):
     
     with config_col3:
         greek_points = st.slider("Analysis Resolution", 50, 300, 150)
-        run_greeks_analysis = st.button("🔍 Run Greeks Analysis", type="primary")
+        run_greeks_analysis = st.button("Run Greeks Analysis", type="primary")
     
     if run_greeks_analysis:
         try:
@@ -1027,7 +1027,7 @@ def _greeks_analysis_tab(params):
                 # Display current Greek value
                 st.markdown(f"""
                 <div class="success-box">
-                    <h4>📊 Current {greek_name.title()} Analysis</h4>
+                    <h4>Current {greek_name.title()} Analysis</h4>
                     <p><strong>Current {greek_name.title()} value:</strong> {current_greek:.6f}</p>
                     <p><strong>Spot Price:</strong> ${params['spot_price']:.2f}</p>
                 </div>
@@ -1044,12 +1044,12 @@ def _greeks_analysis_tab(params):
 
 def _sensitivity_analysis_tab(params):
     """Advanced Sensitivity Analysis Tab"""
-    st.markdown('<div class="sub-header">🔬 Advanced Multi-Parameter Sensitivity</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Advanced Multi-Parameter Sensitivity</div>', unsafe_allow_html=True)
     
     if 'current_legs' not in st.session_state:
         st.markdown("""
         <div class="warning-box">
-            <h4>⚠️ No Strategy Configured</h4>
+            <h4>No Strategy Configured</h4>
             <p>Please build a strategy in the <strong>Strategy Builder</strong> tab first!</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1058,7 +1058,7 @@ def _sensitivity_analysis_tab(params):
     legs = st.session_state.current_legs
     strategy_exercise = st.session_state.get('current_strategy_exercise', 'european')
     
-    st.markdown("#### 🔬 Multi-Parameter Sensitivity Heatmap")
+    st.markdown("#### Multi-Parameter Sensitivity Heatmap")
     
     # Parameter selection
     sens_col1, sens_col2, sens_col3 = st.columns(3)
@@ -1074,7 +1074,7 @@ def _sensitivity_analysis_tab(params):
     with sens_col3:
         resolution = st.slider("Grid Resolution", 10, 50, 20, key="sensitivity_resolution")
         analysis_type = st.selectbox("Analysis Type", ["Strategy Price", "Profit/Loss", "% Change"])
-        generate_heatmap = st.button("🔥 Generate Sensitivity Heatmap", type="primary")
+        generate_heatmap = st.button("Generate Sensitivity Heatmap", type="primary")
     
     if generate_heatmap:
         if param1 == param2:
@@ -1187,7 +1187,7 @@ def _sensitivity_analysis_tab(params):
                     
                     st.markdown(f"""
                     <div class="success-box">
-                        <h4>📊 Sensitivity Analysis Summary</h4>
+                        <h4>Sensitivity Analysis Summary</h4>
                         <p><strong>Minimum {analysis_type}:</strong> {min_val:.4f}</p>
                         <p><strong>Maximum {analysis_type}:</strong> {max_val:.4f}</p>
                         <p><strong>Range:</strong> {max_val - min_val:.4f}</p>
@@ -1247,15 +1247,15 @@ def display_educational_content():
     """, unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)
     
-    with st.expander("🎓 Options Strategy Fundamentals"):
-        st.markdown("### 📊 Core Strategy Categories")
+    with st.expander("Options Strategy Fundamentals"):
+        st.markdown("### Core Strategy Categories")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("#### 📈 Directional Strategies")
+            st.markdown("#### Directional Strategies")
             st.markdown("""
             - **Long Call/Put:** Unlimited profit potential, limited risk
             - **Bull/Bear Spreads:** Limited risk and reward
@@ -1263,7 +1263,7 @@ def display_educational_content():
             - **Ratio Spreads:** Unequal long/short positions
             """)
             
-            st.markdown("#### ⚖️ Neutral Strategies")
+            st.markdown("#### Neutral Strategies")
             st.markdown("""
             - **Straddles/Strangles:** Profit from volatility
             - **Iron Condors:** Range-bound profit
@@ -1272,7 +1272,7 @@ def display_educational_content():
             """)
         
         with col2:
-            st.markdown("#### 🌊 Volatility Strategies")
+            st.markdown("#### Volatility Strategies")
             st.markdown("""
             - **Long Volatility:** Buy straddles/strangles
             - **Short Volatility:** Sell premium strategies
@@ -1280,7 +1280,7 @@ def display_educational_content():
             - **Dispersion Trading:** Index vs stocks
             """)
             
-            st.markdown("#### 💰 Income Strategies")
+            st.markdown("#### Income Strategies")
             st.markdown("""
             - **Covered Calls:** Generate income on holdings
             - **Cash-Secured Puts:** Income while acquiring
@@ -1288,21 +1288,21 @@ def display_educational_content():
             - **Short Strangles:** Range-bound income
             """)
     
-    with st.expander("📊 Understanding the Greeks"):
-        st.markdown("### 🎯 The Greeks - Risk Sensitivities Explained")
+    with st.expander("Understanding the Greeks"):
+        st.markdown("### The Greeks - Risk Sensitivities Explained")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("#### 📈 First-Order Greeks")
+            st.markdown("#### First-Order Greeks")
             st.markdown("""
             - **Delta (Δ):** Price sensitivity to underlying moves
             - **Vega (ν):** Sensitivity to volatility changes  
-            - **Theta (Θ):** Time decay (usually negative)
+            - **Theta (Θ):** Sensitivity to time (usually negative)
             - **Rho (ρ):** Interest rate sensitivity
             """)
             
-            st.markdown("#### 📋 Greek Ranges")
+            st.markdown("#### Greek Ranges")
             st.markdown("""
             - **Delta:** -1.0 to +1.0 (calls: 0 to 1, puts: -1 to 0)
             - **Gamma:** 0 to ∞ (highest for ATM options)
@@ -1311,80 +1311,18 @@ def display_educational_content():
             """)
         
         with col2:
-            st.markdown("#### 🔄 Second-Order Greeks")
+            st.markdown("#### Second-Order Greeks")
             st.markdown("""
             - **Gamma (Γ):** Rate of change of delta
             - **Vomma:** Rate of change of vega
             - **Charm:** Rate of change of delta over time
             - **Color:** Rate of change of gamma over time
             """)
-            
-            st.markdown("#### 💡 Practical Applications")
-            st.markdown("""
-            - **Delta Hedging:** Maintain market neutrality
-            - **Gamma Scalping:** Profit from rebalancing
-            - **Vega Trading:** Volatility arbitrage
-            - **Theta Harvesting:** Time decay strategies
-            """)
     
-    with st.expander("⚠️ Risk Management Best Practices"):
-        st.warning("🛡️ Professional Risk Management Framework")
+    with st.expander("Mathematical Formulas & Models"):
+        st.markdown("### Core Mathematical Foundations")
         
-        st.markdown("#### 📊 Position Sizing Guidelines")
-        st.markdown("""
-        - **Risk Capital:** Never risk more than 1-2% of capital per trade
-        - **Correlation:** Account for correlation between positions
-        - **Concentration:** Avoid over-concentration in strategies
-        - **Volatility Scaling:** Size inversely to expected volatility
-        """)
-        
-        st.markdown("#### 🎯 Greeks Limits Framework")
-        st.markdown("""
-        - **Portfolio Delta:** Maintain within ±10% of portfolio value
-        - **Gamma Limits:** Control convexity exposure
-        - **Vega Limits:** Manage volatility risk across cycles
-        - **Theta Targets:** Balance decay income vs risk
-        """)
-        
-        st.markdown("#### 🚨 Stop Loss & Risk Controls")
-        st.markdown("""
-        - **Hard Stops:** Automatic closure at predefined levels
-        - **Profit Targets:** Take profits at 20-50% of max potential
-        - **Time Stops:** Close before theta acceleration
-        - **Volatility Stops:** Exit at volatility extremes
-        """)
-    
-    with st.expander("🔧 Troubleshooting & Tips"):
-        st.info("💡 Common Issues & Solutions")
-        
-        st.markdown("#### ⚠️ Strategy Configuration")
-        st.markdown("""
-        - **Negative Strikes:** Ensure all strikes are positive
-        - **Zero Quantities:** Use non-zero option quantities
-        - **Strike Ordering:** Check ascending order for spreads
-        - **Extreme Parameters:** Use realistic market values
-        """)
-        
-        st.markdown("#### 📊 Calculation Errors")
-        st.markdown("""
-        - **Numerical Precision:** Extreme parameters may fail
-        - **Model Limitations:** Each model has constraints
-        - **Time to Expiry:** Avoid very small values (< 0.001)
-        - **Volatility Range:** Keep between 1% and 200%
-        """)
-        
-        st.markdown("#### ✅ Best Practices")
-        st.markdown("""
-        - **Start Simple:** Begin with basic strategies
-        - **Validate Results:** Check economic sense
-        - **Use Realistic Parameters:** Market-observed ranges
-        - **Document Insights:** Keep track of key findings
-        """)
-    
-    with st.expander("📐 Mathematical Formulas & Models"):
-        st.markdown("### 🧮 Core Mathematical Foundations")
-        
-        st.markdown("#### 📊 Black-Scholes Formula")
+        st.markdown("#### Black-Scholes Formula")
         st.latex(r'''
         \text{Call: } C = S_0 e^{-qT} N(d_1) - K e^{-rT} N(d_2)
         ''')
@@ -1400,7 +1338,7 @@ def display_educational_content():
         d_2 = d_1 - \sigma\sqrt{T}
         ''')
         
-        st.markdown("#### 📈 The Greeks Formulas")
+        st.markdown("#### The Greeks Formulas")
         
         col1, col2 = st.columns(2)
         
@@ -1439,7 +1377,7 @@ def display_educational_content():
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown("#### 🐂 Bullish Strategies")
+            st.markdown("#### Bullish Strategies")
             st.markdown("""
             - Long Call
             - Bull Call Spread
@@ -1449,7 +1387,7 @@ def display_educational_content():
             """)
         
         with col2:
-            st.markdown("#### 🐻 Bearish Strategies")
+            st.markdown("#### Bearish Strategies")
             st.markdown("""
             - Long Put
             - Bear Put Spread
@@ -1459,7 +1397,7 @@ def display_educational_content():
             """)
         
         with col3:
-            st.markdown("#### ⚖️ Neutral Strategies")
+            st.markdown("#### Neutral Strategies")
             st.markdown("""
             - Long/Short Straddle
             - Long/Short Strangle
@@ -1468,7 +1406,7 @@ def display_educational_content():
             - Calendar Spread
             """)
         
-        st.success("💡 **Strategy Selection Tips**")
+        st.success("**Strategy Selection Tips**")
         st.markdown("""
         - **High Volatility Expected:** Buy straddles or strangles
         - **Low Volatility Expected:** Sell premium (iron condors, butterflies)
