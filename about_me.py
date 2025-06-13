@@ -220,49 +220,58 @@ with st.container():
     
     formsubmit_email = "salhi.reda47@gmail.com"
     
-    minimal_css = """
+    # CSS personnalisé pour un look moderne et sobre
+    form_css = """
     <style>
-    .minimal-form {
-        max-width: 600px;
-        margin: 2rem auto;
+    .contact-form {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         padding: 2rem;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin: 1rem 0;
+        border: 1px solid #dee2e6;
     }
-    .minimal-form input, .minimal-form textarea {
+    .contact-form input, .contact-form textarea {
         width: 100%;
-        padding: 12px 0;
+        padding: 15px;
         margin-bottom: 20px;
-        border: none;
-        border-bottom: 2px solid #e1e1e1;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
         font-size: 16px;
-        background: transparent;
-        transition: border-color 0.3s ease;
+        background: white;
+        transition: all 0.3s ease;
+        color: #495057;
     }
-    .minimal-form input:focus, .minimal-form textarea:focus {
+    .contact-form input:focus, .contact-form textarea:focus {
         outline: none;
-        border-bottom-color: #667eea;
+        border-color: #6c757d;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.15);
     }
-    .minimal-form button {
-        background: #667eea;
+    .contact-form button {
+        background: linear-gradient(45deg, #6c757d, #495057);
         color: white;
-        padding: 12px 24px;
+        padding: 15px 30px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 16px;
+        font-weight: 600;
         cursor: pointer;
-        transition: background 0.3s ease;
+        transition: all 0.3s ease;
+        text-transform: none;
+        letter-spacing: 0.5px;
     }
-    .minimal-form button:hover {
-        background: #5a67d8;
+    .contact-form button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+        background: linear-gradient(45deg, #495057, #343a40);
     }
     </style>
     """
     
     form_code = f"""
-    {minimal_css}
-    <div class="minimal-form">
+    {form_css}
+    <div class="contact-form">
         <form action="https://formsubmit.co/{formsubmit_email}" method="POST">
             <input type="hidden" name="_captcha" value="false">
             <input type="hidden" name="_template" value="table">
