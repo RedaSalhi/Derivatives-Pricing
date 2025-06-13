@@ -512,13 +512,13 @@ def forward_contracts_tab():
         
         # Original matplotlib chart as alternative
         try:
-            st.markdown('<div class="sub-header">📊 Alternative Payout Visualization</div>', unsafe_allow_html=True)
+            st.markdown('<div class="sub-header">Alternative Payout Visualization</div>', unsafe_allow_html=True)
             plot_forward_payout_and_value(strike_price, position.lower())
         except:
             pass
     
     with ta4:
-        st.markdown('<div class="sub-header">🔬 Sensitivity Analysis</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Sensitivity Analysis</div>', unsafe_allow_html=True)
         st.info("**Parameter Sensitivity:** How forward prices respond to changes in underlying parameters")
         
         # Sensitivity analysis chart
@@ -544,12 +544,12 @@ def forward_contracts_tab():
             """, unsafe_allow_html=True)
         
         # Risk metrics calculations
-        st.markdown('<div class="sub-header">📊 Risk Sensitivities (Greeks)</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Risk Sensitivities (Greeks)</div>', unsafe_allow_html=True)
         
         try:
             # Calculate numerical derivatives
             delta_s = 0.01 * spot_price  # 1% change in spot
-            delta_r = 0.01  # 1 basis point
+            delta_r = 0.0001  # 1 basis point
             delta_t = 0.01    # 1% change in time
             
             # Spot sensitivity (Delta equivalent)
@@ -558,7 +558,7 @@ def forward_contracts_tab():
             
             # Rate sensitivity (Rho equivalent)
             rate_up = price_forward_contract(spot_price, interest_rate + delta_r, time_to_maturity, storage_cost, dividend_yield)
-            rate_sensitivity = (rate_up - forward_price) / delta_r
+            rate_sensitivity = (rate_up - forward_price) / (100 * delta_r)
             
             # Time sensitivity (Theta equivalent)
             time_up = price_forward_contract(spot_price, interest_rate, time_to_maturity + delta_t, storage_cost, dividend_yield)
@@ -575,7 +575,7 @@ def forward_contracts_tab():
             # Display sensitivities in professional table
             st.markdown(f"""
             <div class="metric-container">
-                <h4>🎯 Risk Sensitivities</h4>
+                <h4>Risk Sensitivities</h4>
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                         <td style="padding: 12px; font-weight: bold;">Risk Factor</td>
@@ -629,7 +629,7 @@ def forward_contracts_tab():
             if rate_sensitivity > 0:
                 st.markdown(f"""
                 <div class="info-box">
-                    <h4>📈 Interest Rate Risk</h4>
+                    <h4>Interest Rate Risk</h4>
                     <p>Positive rate sensitivity ({rate_sensitivity:.2f}): Forward prices increase when interest rates rise. This is typical for most forward contracts.</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -663,7 +663,7 @@ def forward_contracts_tab():
             )
             st.markdown("""
             • **Obligation:** Buy the asset at maturity  
-            • **Payoff:** $S_T - K$ (where $S_T = \text{spot at maturity}$, $K = \text{forward price}$)  
+            • **Payoff:** $S_T - K$ (where $S_T =$ spot at maturity, $K =$ forward price)  
             • **Profit when:** $S_T > K$ (spot price rises above forward price)  
             • **Risk:** Unlimited upside, limited downside to $-K$
             """)
@@ -826,7 +826,7 @@ def forward_contracts_tab():
         st.markdown("""
         • **Basis:** $F - S$ (forward premium/discount)  
         • **Calendar Spread:** $ F_1 - F_2 $ (between different maturities)  
-        • **Cross-Asset Spread:** $ F_{\text{asset}_1} - F_{\text{asset}_2} $ (between different assets) 
+        • **Cross-Asset Spread:** $ F_{{asset}_1} - F_{{asset}_2} $ (between different assets) 
         """)
     
     # Enhanced Footer
