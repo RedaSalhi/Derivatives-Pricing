@@ -207,7 +207,7 @@ def option_strategies_tab():
         <div style="margin-bottom: 10px;">
             <span style="font-size: 2rem;"></span>
         </div>
-        <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1f77b4;">Advanced Options Strategy Suite</p>
+        <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1f77b4;">Options Strategy</p>
         <p style="margin: 8px 0; color: #6c757d;">Built with Streamlit & Python</p>
         <p style="margin: 0; color: #dc3545; font-weight: bold;">For educational purposes only. Not financial advice.</p>
     </div>
@@ -1371,8 +1371,8 @@ def display_educational_content():
             st.error("**Theta (Θ):**")
             st.markdown("Complex formula involving time decay components")
     
-    with st.expander("🎯 Strategy Quick Reference"):
-        st.markdown("### 📋 Popular Strategy Combinations")
+    with st.expander("Strategy Quick Reference"):
+        st.markdown("### Popular Strategy Combinations")
         
         col1, col2, col3 = st.columns(3)
         
