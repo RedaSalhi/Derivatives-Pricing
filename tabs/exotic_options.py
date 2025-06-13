@@ -1625,5 +1625,297 @@ def calculate_greeks_barrier_stable(S0, K, H, T, r, sigma, option_type, barrier_
     
     delta = norm.pdf(d1) * barrier_factor
     gamma = norm.pdf(d1) / (S0 * sigma * np.sqrt(T)) * barrier_factor
-    vega = 0
-    return None 
+    vega = S0 * np.sqrt(T) * norm.pdf(d1) * barrier_factor
+    theta = (-S0 * norm.pdf(d1) * sigma / (2 * np.sqrt(T)) - r * K * np.exp(-r*T) * norm.cdf(d2)) * barrier_factor
+    rho = K * T * np.exp(-r*T) * norm.cdf(d2) * barrier_factor if option_type == "call" else -K * T * np.exp(-r*T) * norm.cdf(-d2) * barrier_factor
+    
+    return {
+        'Delta': delta,
+        'Gamma': gamma,
+        'Theta': theta,
+        'Vega': vega,
+        'Rho': rho
+    }
+
+def calculate_greeks_digital_stable(S0, K, T, r, sigma, option_type, style, Q):
+    """Stable Greeks calculation for Digital options"""
+    from scipy.stats import norm
+    
+    d2 = (np.log(S0/K) + (r - 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+    
+    if style == "cash":
+        delta = norm.pdf(d2) * np.exp(-r*T) / (S0 * sigma * np.sqrt(T)) * Q
+        gamma = (d2 / (S0**2 * sigma**2 * T)) * norm.pdf(d2) * np.exp(-r*T) * Q
+        vega = (-d2 / sigma) * norm.pdf(d2) * np.exp(-r*T) * Q
+        theta = (r * norm.cdf(d2) + norm.pdf(d2) * (r*d2 - 0.5*sigma)/np.sqrt(T)) * np.exp(-r*T) * Q
+        rho = -T * np.exp(-r*T) * norm.cdf(d2) * Q if option_type == "call" else T * np.exp(-r*T) * norm.cdf(-d2) * Q
+    else:  # asset-or-nothing
+        d1 = d2 + sigma * np.sqrt(T)
+        delta = norm.pdf(d1) / (S0 * sigma * np.sqrt(T))
+        gamma = (d1 / (S0**2 * sigma**2 * T)) * norm.pdf(d1)
+        vega = (-d1 / sigma) * norm.pdf(d1)
+        theta = norm.pdf(d1) * (r*d1 - 0.5*sigma)/np.sqrt(T)
+        rho = S0 * np.sqrt(T) * norm.pdf(d1)
+    
+    return {
+        'Delta': delta,
+        'Gamma': gamma,
+        'Theta': theta,
+        'Vega': vega,
+        'Rho': rho
+    }
+
+def calculate_greeks_lookback_stable(S0, K, T, r, sigma, option_type, floating):
+    """Stable Greeks calculation for Lookback options"""
+    # Simplified approximations
+    from scipy.stats import norm
+    
+    if floating:
+        # Floating strike approximation
+        adj_sigma = sigma * 1.2  # Adjusted for lookback feature
+        d1 = (np.log(S0/S0) + (r + 0.5*adj_sigma**2)*T / (adj_sigma*np.sqrt(T))
+        delta = norm.cdf(d1) * 1.3  # Higher delta due to optimal exercise
+        gamma = norm.pdf(d1) / (S0 * adj_sigma * np.sqrt(T)) * 0.8
+        vega = S0 * np.sqrt(T) * norm.pdf(d1) * 1.5
+        theta = -0.4 * S0 * norm.pdf(d1) * adj_sigma / np.sqrt(T)
+        rho = 0.7 * S0 * T * norm.cdf(d1)
+    else:
+        # Fixed strike approximation
+        adj_sigma = sigma * 1.1
+        d1 = (np.log(S0/K) + (r + 0.5*adj_sigma**2)*T / (adj_sigma*np.sqrt(T))
+        delta = norm.cdf(d1) * 1.2
+        gamma = norm.pdf(d1) / (S0 * adj_sigma * np.sqrt(T)) * 0.9
+        vega = S0 * np.sqrt(T) * norm.pdf(d1) * 1.3
+        theta = -0.5 * S0 * norm.pdf(d1) * adj_sigma / np.sqrt(T)
+        rho = 0.6 * K * T * np.exp(-r*T) * norm.cdf(d1 - adj_sigma*np.sqrt(T))
+    
+    return {
+        'Delta': delta,
+        'Gamma': gamma,
+        'Theta': theta,
+        'Vega': vega,
+        'Rho': rho
+    }
+
+def create_live_payoff_diagram(S0, K, option_type, option_family, params):
+    """Create interactive payoff diagram for the selected option"""
+    spot_range = np.linspace(S0 * 0.5, S0 * 2.0, 100)
+    payoffs = []
+    
+    for spot in spot_range:
+        if option_family == "asian":
+            # Simplified Asian payoff approximation
+            avg_price = spot * 0.95  # Assume average is 95% of final price
+            if option_type == "call":
+                payoffs.append(max(0, avg_price - K))
+            else:
+                payoffs.append(max(0, K - avg_price))
+                
+        elif option_family == "barrier":
+            H = params.get('H', S0 * 1.2)
+            barrier_type = params.get('barrier_type', 'up-and-out')
+            rebate = params.get('rebate', 0.0)
+            
+            # Simplified barrier logic
+            knocked_out = False
+            if "up" in barrier_type and spot >= H:
+                knocked_out = True
+            elif "down" in barrier_type and spot <= H:
+                knocked_out = True
+                
+            if "out" in barrier_type:
+                if knocked_out:
+                    payoffs.append(rebate)
+                else:
+                    if option_type == "call":
+                        payoffs.append(max(0, spot - K))
+                    else:
+                        payoffs.append(max(0, K - spot))
+            else:  # "in" type
+                if knocked_out:
+                    if option_type == "call":
+                        payoffs.append(max(0, spot - K))
+                    else:
+                        payoffs.append(max(0, K - spot))
+                else:
+                    payoffs.append(rebate)
+                    
+        elif option_family == "digital":
+            style = params.get('style', 'cash')
+            Q = params.get('Q', 1.0)
+            
+            if option_type == "call":
+                in_the_money = spot > K
+            else:
+                in_the_money = spot < K
+                
+            if style == "cash":
+                payoffs.append(Q if in_the_money else 0)
+            else:  # asset-or-nothing
+                payoffs.append(spot if in_the_money else 0)
+                
+        elif option_family == "lookback":
+            floating = params.get('floating', True)
+            
+            if floating:
+                # Simplified: assume minimum was 85% of current spot
+                min_price = spot * 0.85
+                if option_type == "call":
+                    payoffs.append(max(0, spot - min_price))
+                else:
+                    payoffs.append(0)  # Floating put would use max price
+            else:
+                if option_type == "call":
+                    payoffs.append(max(0, spot - K))
+                else:
+                    payoffs.append(max(0, K - spot))
+        else:
+            if option_type == "call":
+                payoffs.append(max(0, spot - K))
+            else:
+                payoffs.append(max(0, K - spot))
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=spot_range, 
+        y=payoffs,
+        mode='lines',
+        name='Payoff',
+        line=dict(width=3, color='blue')
+    )
+    
+    # Add reference lines
+    fig.add_vline(x=K, line_dash="dash", line_color="red", annotation_text="Strike")
+    fig.add_vline(x=S0, line_dash="dot", line_color="green", annotation_text="Current Spot")
+    
+    # Add barrier line if applicable
+    if option_family == "barrier":
+        H = params.get('H', S0 * 1.2)
+        fig.add_vline(x=H, line_dash="dashdot", line_color="orange", annotation_text="Barrier")
+    
+    fig.update_layout(
+        title=f"{option_family.title()} Option Payoff Diagram",
+        xaxis_title="Underlying Price at Expiry",
+        yaxis_title="Payoff",
+        height=500
+    )
+    
+    return fig
+
+def create_sample_paths_visualization(S0, r, sigma, T, option_family):
+    """Create visualization of sample price paths for path-dependent options"""
+    n_paths = 20
+    n_steps = 252
+    dt = T / n_steps
+    
+    paths = np.zeros((n_paths, n_steps + 1))
+    paths[:, 0] = S0
+    
+    for i in range(n_paths):
+        for j in range(1, n_steps + 1):
+            z = np.random.normal()
+            paths[i, j] = paths[i, j-1] * np.exp((r - 0.5*sigma**2)*dt + sigma*np.sqrt(dt)*z)
+    
+    fig = go.Figure()
+    
+    for i in range(n_paths):
+        fig.add_trace(go.Scatter(
+            x=np.linspace(0, T, n_steps + 1),
+            y=paths[i],
+            mode='lines',
+            line=dict(width=1),
+            showlegend=False
+        ))
+    
+    # Add features based on option type
+    if option_family == "asian":
+        avg_prices = np.mean(paths[:, 1:], axis=1)
+        fig.add_hline(y=np.mean(avg_prices), line_dash="dash", line_color="red",
+                     annotation_text="Average Price")
+        
+    elif option_family == "barrier":
+        H = S0 * 1.2  # Example barrier level
+        fig.add_hline(y=H, line_dash="dash", line_color="orange",
+                     annotation_text="Barrier Level")
+        
+    elif option_family == "lookback":
+        min_prices = np.min(paths[:, 1:], axis=1)
+        fig.add_hline(y=np.mean(min_prices), line_dash="dash", line_color="purple",
+                     annotation_text="Average Minimum")
+    
+    fig.update_layout(
+        title=f"Sample Price Paths for {option_family.title()} Options",
+        xaxis_title="Time",
+        yaxis_title="Underlying Price",
+        height=500
+    )
+    
+    return fig
+
+def _display_educational_content():
+    """Display educational content about exotic options"""
+    st.markdown("---")
+    st.markdown('<div class="sub-header">Exotic Options Educational Resources</div>', unsafe_allow_html=True)
+    
+    with st.expander("Learn About Exotic Options"):
+        st.markdown("""
+        ### Asian Options
+        **Definition:** Options where the payoff depends on the average price of the underlying asset over a certain period.
+        
+        **Key Features:**
+        - Reduced volatility impact due to averaging
+        - Popular for commodities and currencies
+        - Two types: average price and average strike
+        
+        **Use Cases:**
+        - Hedging regular purchases/sales of a commodity
+        - Reducing the impact of market manipulation
+        
+        ### Barrier Options
+        **Definition:** Options that either come into existence or cease to exist when the underlying asset price crosses a barrier.
+        
+        **Key Features:**
+        - Knock-in: Option activates when barrier is hit
+        - Knock-out: Option terminates when barrier is hit
+        - Generally cheaper than vanilla options
+        
+        **Use Cases:**
+        - Cost-effective hedging
+        - Speculating on price movements with barriers
+        
+        ### Digital Options
+        **Definition:** Options that pay a fixed amount if the underlying meets certain conditions at expiration.
+        
+        **Key Features:**
+        - Binary payoff (all or nothing)
+        - Cash-or-nothing vs asset-or-nothing
+        - Simple payoff structure
+        
+        **Use Cases:**
+        - Event-based trading
+        - Simple hedging strategies
+        
+        ### Lookback Options
+        **Definition:** Options where the payoff depends on the maximum or minimum price of the underlying during the option's life.
+        
+        **Key Features:**
+        - Floating strike vs fixed strike
+        - More expensive than vanilla options
+        - Perfect market timing
+        
+        **Use Cases:**
+        - Maximizing gains in trending markets
+        - Hedging worst-case scenarios
+        """)
+    
+    st.markdown("""
+    <div class="info-box">
+        <h4>Professional Usage Notes</h4>
+        <ul>
+        <li><strong>Pricing Complexity:</strong> Exotic options often require Monte Carlo simulation or other numerical methods</li>
+        <li><strong>Hedging Challenges:</strong> Greeks can be discontinuous for some exotic options</li>
+        <li><strong>Market Liquidity:</strong> Most exotic options are OTC instruments with limited liquidity</li>
+        <li><strong>Counterparty Risk:</strong> Important to consider when trading OTC exotics</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True) 
