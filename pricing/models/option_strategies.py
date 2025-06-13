@@ -237,4 +237,4 @@ def get_pricing_model(model_name):
     if model_name not in models:
         raise ValueError(f"Unknown model: {model_name}. Available models: {list(models.keys())}")
     
-    return models[model_name]m
+    return models[model_name]
