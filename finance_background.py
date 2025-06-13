@@ -186,7 +186,7 @@ with st.container():
     <div class="methodology-box">
         <div class="section-title">⚙️ Methodology & Pricing Models</div>
         <div class="content-text">
-            We implement core pricing methodologies under the <strong>risk-neutral measure</strong> ($\\mathbb{Q}$), where the present value of any derivative is the discounted expected payoff:
+            We implement core pricing methodologies under the <strong>risk-neutral measure</strong> (ℚ), where the present value of any derivative is the discounted expected payoff:
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -212,12 +212,11 @@ with st.container():
         <div class="content-text">
             Used for <strong>European options</strong>, assumes:
             <ul>
-                <li>Geometric Brownian Motion (GBM): $dS_t = \\mu S_t dt + \\sigma S_t dW_t$</li>
-                <li>Constant volatility $\\sigma$</li>
+                <li>Geometric Brownian Motion (GBM)</li>
+                <li>Constant volatility σ</li>
                 <li>No arbitrage, no dividends</li>
             </ul>
-            
-            Closed-form price for a European <strong>Call</strong>:
+            <strong>European Call Price:</strong><br>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -241,7 +240,7 @@ with st.container():
             Used for <strong>European and American options</strong>:
             <ul>
                 <li>Builds a discrete recombining tree with $N$ steps</li>
-                <li>Up/down factors: $u = e^{\\sigma \\sqrt{\\Delta t}}, \\quad d = \\frac{1}{u}$</li>
+                <li>Up/down factors: u = e<sup>σ√Δt</sup>, d = 1/u</li>
                 <li>Risk-neutral probability:</li>
             </ul>
         </div>
@@ -259,7 +258,7 @@ with st.container():
     <div class="model-card">
         <div class="subsection-title">3. Monte Carlo Simulation</div>
         <div class="content-text">
-            Used for <strong>path-dependent options</strong> (e.g., Asian, Lookback). Simulates $M$ sample paths of the underlying:
+            Used for <strong>path-dependent options</strong> (e.g., Asian, Lookback). Simulates M sample paths of the underlying:
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -282,9 +281,9 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="greeks-box">
-        <div class="section-title">📐 Greeks & Sensitivities</div>
+        <div class="section-title">Greeks & Sensitivities</div>
         <div class="content-text">
-            The app computes standard <strong>Greeks</strong> — partial derivatives of the option price with respect to key parameters — for <strong>vanilla options</strong> under the <strong>Black-Scholes</strong> model.
+            The app computes standard <strong>Greeks</strong> for <strong>vanilla options</strong> under the <strong>Black-Scholes</strong> model.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -296,7 +295,7 @@ with st.container():
         st.markdown("""
         <div class="greek-item">
             <strong>🔹 Delta (Δ)</strong><br>
-            Represents sensitivity of the option price $V$ to changes in the underlying asset price $S$:
+            Represents sensitivity of the option price V to changes in the underlying asset price S:
         </div>
         """, unsafe_allow_html=True)
         st.latex(r'\Delta = \frac{\partial V}{\partial S}')
@@ -304,7 +303,7 @@ with st.container():
         st.markdown("""
         <div class="greek-item">
             <strong>🔹 Gamma (Γ)</strong><br>
-            Second derivative of the option price with respect to $S$. Measures the curvature of $V(S)$:
+            Second derivative of the option price with respect to S. Measures the curvature of V(S):
         </div>
         """, unsafe_allow_html=True)
         st.latex(r'\Gamma = \frac{\partial^2 V}{\partial S^2}')
@@ -312,7 +311,7 @@ with st.container():
         st.markdown("""
         <div class="greek-item">
             <strong>🔹 Vega (ν)</strong><br>
-            Sensitivity of the option price to volatility $\\sigma$:
+            Sensitivity of the option price to volatility σ:
         </div>
         """, unsafe_allow_html=True)
         st.latex(r'\nu = \frac{\partial V}{\partial \sigma}')
@@ -321,7 +320,7 @@ with st.container():
         st.markdown("""
         <div class="greek-item">
             <strong>🔹 Theta (Θ)</strong><br>
-            Rate of change of the option price with respect to time $t$:
+            Rate of change of the option price with respect to time t:
         </div>
         """, unsafe_allow_html=True)
         st.latex(r'\Theta = \frac{\partial V}{\partial t}')
@@ -329,7 +328,7 @@ with st.container():
         st.markdown("""
         <div class="greek-item">
             <strong>🔹 Rho (ρ)</strong><br>
-            Sensitivity of the option price to the risk-free interest rate $r$:
+            Sensitivity of the option price to the risk-free interest rate r:
         </div>
         """, unsafe_allow_html=True)
         st.latex(r'\rho = \frac{\partial V}{\partial r}')
@@ -372,7 +371,7 @@ with st.container():
     <div class="risk-neutral-box">
         <div class="section-title">⚖️ Risk-Neutral Framework</div>
         <div class="content-text">
-            All pricing models in this app are based on the <strong>risk-neutral measure</strong> $\\mathbb{Q}$, under which the discounted price of a traded asset is a <strong>martingale</strong>. This leads to the fundamental pricing formula:
+            All pricing models in this app are based on the <strong>risk-neutral measure</strong> ℚ, under which the discounted price of a traded asset is a <strong>martingale</strong>. This leads to the fundamental pricing formula:
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -388,8 +387,8 @@ with st.container():
             <li>$V(t)$ is the value of the derivative at time $t$</li>
             <li>$r$ is the risk-free interest rate</li>
             <li>$T$ is the maturity</li>
-            <li>$S_T$ is the underlying asset price at time $T$</li>
-            <li>$\\mathcal{F}_t$ is the information available at time $t$</li>
+            <li>S<sub>T is the underlying asset price at time $T$</li>
+            <li>$ℱ<sub>t$ is the information available at time $t$</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
@@ -422,7 +421,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="engineering-box">
-        <div class="section-title">🔧 Engineering & Design</div>
+        <div class="section-title">Engineering & Design</div>
         <div class="content-text">
             All code is written in <strong>Python</strong> and available on <strong>GitHub</strong>. The application features:
         </div>
