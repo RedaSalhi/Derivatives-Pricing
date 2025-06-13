@@ -843,25 +843,45 @@ def _greeks_analysis_tab():
     
     # --- Bond Pricing ---
     with st.expander("Bond Pricing Formulas"):
-        with st.container():
-            st.markdown('<div class="info-box">', unsafe_allow_html=True)
-            st.markdown("### Vasicek Bond Pricing Formulas")
-    
-            st.markdown("#### Zero-Coupon Bond:")
-            st.latex(r"P(t,T) = A(t,T) \cdot \exp(-B(t,T) \cdot r(t))")
-            st.latex(r"B(t,T) = \frac{1 - e^{-a(T - t)}}{a}")
-            st.latex(r"A(t,T) = \exp\left[\left(\lambda - \frac{\sigma^2}{2a^2}\right)(B(t,T) - (T - t)) - \frac{\sigma^2 B(t,T)^2}{4a}\right]")
-    
-            st.markdown("#### Coupon Bond:")
-            st.markdown("Sum of discounted coupons and principal:")
-            st.latex(r"P = \sum_i C_i \cdot P(t,T_i) + F \cdot P(t,T)")
-    
-            st.markdown("#### Bond Option Price:")
-            st.markdown("Black-like formula:")
-            st.latex(r"\text{Call} = P(t,T_1) \cdot N(d_1) - K \cdot P(t,T_2) \cdot N(d_2)")
-            st.latex(r"\text{Put} = K \cdot P(t,T_2) \cdot N(-d_2) - P(t,T_1) \cdot N(-d_1)")
-    
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="info-box">
+            <h4>Vasicek Bond Pricing Formulas</h4>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h5 style="color: #1f77b4;">Zero-Coupon Bond Price:</h5>
+                <p style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4;">
+                    P(t,T) = A(t,T) × exp(-B(t,T) × r(t))
+                </p>
+                
+                <p><strong>Where:</strong></p>
+                <p style="text-align: center; font-weight: bold;">
+                    B(t,T) = (1 - exp(-a(T-t))) / a
+                </p>
+                <p style="text-align: center; font-weight: bold; font-size: 0.9em;">
+                    A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
+                </p>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h5 style="color: #1f77b4;">Coupon Bond Price:</h5>
+                <p>Sum of discounted coupon payments plus principal:</p>
+                <p style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4;">
+                    P = Σ C × P(t,Tᵢ) + F × P(t,T)
+                </p>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h5 style="color: #1f77b4;">Bond Option Price:</h5>
+                <p>Uses the Black-Scholes formula adapted for bonds:</p>
+                <p style="text-align: center; font-weight: bold;">
+                    <strong>Call:</strong> P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)
+                </p>
+                <p style="text-align: center; font-weight: bold;">
+                    <strong>Put:</strong> K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 
     
