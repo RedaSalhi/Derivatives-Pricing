@@ -203,7 +203,7 @@ def _interactive_pricing_lab():
                 )
                 try:
                     Q = _safe_eval_cash_expression(cash_expr, S0, K, T, r, sigma)
-                    st.success(f"✅ Calculated payout: ${Q:.4f}")
+                    st.success(f"✅ Calculated payout: ${Q:.2f}")
                 except Exception as e:
                     st.error(f"❌ Invalid expression: {str(e)}. Using default value 1.0")
                     Q = 1.0
@@ -317,40 +317,40 @@ def _live_greeks_analysis():
         with col_g1:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3>"Delta"</h3>
-                    <h3>{greeks_data['Delta'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: red;">Delta</h3>
+                    <h3 style="color: blue;">{greeks_data['Delta'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
             
         with col_g2:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3>"Gamma"</h3>
-                    <h3>{greeks_data['Gamma'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: red;">Gamma</h3>
+                    <h3 style="color: blue;">{greeks_data['Gamma'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
             
         with col_g3:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3>"Theta"</h3>
-                    <h3>{greeks_data['Theta'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: red;">Theta</h3>
+                    <h3 style="color: blue;">{greeks_data['Theta'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
             
         with col_g4:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3>"Vega"</h3>
-                    <h3>{greeks_data['Vega'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: red;">Vega</h3>
+                    <h3 style="color: blue;">{greeks_data['Vega'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
             
         with col_g5:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3>"Rho"</h3>
-                    <h3>{greeks_data['Rho'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: red;">Rho</h3>
+                    <h3 style="color: blue;">{greeks_data['Rho'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
         
@@ -395,7 +395,7 @@ def _live_greeks_analysis():
         if greek_option_type == "Asian" and use_enhanced_smoothing:
             st.markdown(f"""
             <div class="info-box">
-                <h4>📊 Asian Greeks Smoothing Applied</h4>
+                <h4>Asian Greeks Smoothing Applied</h4>
                 <p><strong>Smoothing Factor:</strong> {smoothing_factor:.1f}</p>
                 <p><strong>Method:</strong> Enhanced finite differences with variance reduction</p>
                 <p><strong>Note:</strong> Asian Greeks are inherently noisy due to Monte Carlo simulation. Smoothing reduces noise but may affect precision.</p>
@@ -437,53 +437,49 @@ def _strategy_comparator():
         params_a = {}
         
         if strategy_a == "Asian":
-            params_a['asian_type'] = st.selectbox("Asian Type A", ["average_price", "average_strike"], key="asian_a")
+            params_a['asian_type'] = st.selectbox("Asian Type A", ["Average_Price", "Average_Strike"], key="asian_a").lower()
             # Add more granular control
             params_a['n_steps'] = st.slider("Time Steps A", 50, 500, 100, 10, key="asian_steps_a")
             params_a['n_paths'] = st.slider("MC Paths A", 1000, 10000, 3000, 500, key="asian_paths_a")
-            st.markdown(f"📋 **{params_a['asian_type'].replace('_', ' ').title()} Asian call** ({params_a['n_steps']} steps, {params_a['n_paths']} paths)")
+            st.markdown(f" **{params_a['asian_type'].replace('_', ' ').title()} Asian call** ({params_a['n_steps']} steps, {params_a['n_paths']} paths)")
             
         elif strategy_a == "Barrier":
             params_a['barrier_type'] = st.selectbox("Barrier Type A", 
-                                                   ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], 
-                                                   key="barrier_type_a")
+                                                   ["Up-and-Out", "Down-and-Out", "Up-and-In", "Down-and-In"], 
+                                                   key="barrier_type_a").lower()
             params_a['barrier_multiple'] = st.slider("Barrier Level A (% of strike)", 80, 150, 120, 5, key="barrier_mult_a") / 100
             # Enhanced: Add payout style control
-            params_a['payout_style'] = st.radio("Payout Style A", ["cash", "asset"], key="payout_a")
+            params_a['payout_style'] = st.radio("Payout Style A", ["Cash", "Asset"], key="payout_a").lower()
             if params_a['payout_style'] == "cash":
                 params_a['rebate'] = st.number_input("Rebate A", value=0.0, key="rebate_a")
             else:
                 params_a['rebate'] = 0.0
-            st.markdown(f"📋 **{params_a['barrier_type'].replace('-', ' ').title()} call** (barrier at {params_a['barrier_multiple']:.0%}, {params_a['payout_style']} paying)")
+            st.markdown(f"**{params_a['barrier_type'].replace('-', ' ').title()} call** (barrier at {params_a['barrier_multiple']:.0%}, {params_a['payout_style']} paying)")
             
         elif strategy_a == "Digital":
-            params_a['style'] = st.selectbox("Digital Style A", ["cash", "asset"], key="digital_style_a")
+            params_a['style'] = st.selectbox("Digital Style A", ["Cash", "Asset"], key="digital_style_a").lower()
             if params_a['style'] == "cash":
                 # Enhanced: Add expression input option
-                cash_method_a = st.radio("Cash Input Method A", ["Simple", "Expression"], key="cash_method_a")
-                if cash_method_a == "Simple":
-                    params_a['Q'] = st.slider("Cash Payout A", 0.5, 5.0, 1.0, 0.1, key="digital_Q_a")
-                else:
-                    expr_a = st.text_input("Cash Expression A", value="1.0", key="cash_expr_a", 
-                                         help="Use S, K, r, sigma, T")
-                    try:
-                        params_a['Q'] = _safe_eval_cash_expression(expr_a, 100, 100, 1, 0.05, 0.2)
-                        st.success(f"✅ A payout: ${params_a['Q']:.4f}")
-                    except:
-                        params_a['Q'] = 1.0
-                        st.warning("⚠️ Invalid expression, using 1.0")
-                st.markdown(f"📋 **Cash-or-nothing call** (pays ${params_a['Q']:.1f})")
+                expr_a = st.text_input("Cash Expression A", value="1.0", key="cash_expr_a", 
+                                     help="Use S, K, r, sigma, T")
+                try:
+                    params_a['Q'] = _safe_eval_cash_expression(expr_a, 100, 100, 1, 0.05, 0.2)
+                    st.success(f"✅ A payout: ${params_a['Q']:.2f}")
+                except:
+                    params_a['Q'] = 1.0
+                    st.warning("⚠️ Invalid expression, using 1.0")
+                st.markdown(f"**Cash-or-nothing call** (pays ${params_a['Q']:.1f})")
             else:
                 params_a['Q'] = 1.0
-                st.markdown("📋 **Asset-or-nothing call** (pays underlying price)")
+                st.markdown("**Asset-or-nothing call** (pays underlying price)")
                 
         elif strategy_a == "Lookback":
             params_a['floating'] = st.checkbox("Floating Strike A", value=True, key="lookback_float_a")
             params_a['n_paths'] = st.slider("MC Paths A", 1000, 20000, 5000, 1000, key="lookback_paths_a")
             if params_a['floating']:
-                st.markdown(f"📋 **Floating strike call** ({params_a['n_paths']} paths)")
+                st.markdown(f"**Floating strike call** ({params_a['n_paths']} paths)")
             else:
-                st.markdown(f"📋 **Fixed strike call** ({params_a['n_paths']} paths)")
+                st.markdown(f"**Fixed strike call** ({params_a['n_paths']} paths)")
         
     with col2:
         st.markdown("### Strategy B") 
@@ -494,50 +490,46 @@ def _strategy_comparator():
         params_b = {}
         
         if strategy_b == "Asian":
-            params_b['asian_type'] = st.selectbox("Asian Type B", ["average_price", "average_strike"], key="asian_b")
+            params_b['asian_type'] = st.selectbox("Asian Type B", ["Average_Price", "Average_Strike"], key="asian_b").lower()
             params_b['n_steps'] = st.slider("Time Steps B", 50, 500, 100, 10, key="asian_steps_b")
             params_b['n_paths'] = st.slider("MC Paths B", 1000, 10000, 3000, 500, key="asian_paths_b")
-            st.markdown(f"📋 **{params_b['asian_type'].replace('_', ' ').title()} Asian call** ({params_b['n_steps']} steps, {params_b['n_paths']} paths)")
+            st.markdown(f"**{params_b['asian_type'].replace('_', ' ').title()} Asian call** ({params_b['n_steps']} steps, {params_b['n_paths']} paths)")
             
         elif strategy_b == "Barrier":
             params_b['barrier_type'] = st.selectbox("Barrier Type B", 
                                                    ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], 
                                                    key="barrier_type_b")
             params_b['barrier_multiple'] = st.slider("Barrier Level B (% of strike)", 80, 150, 120, 5, key="barrier_mult_b") / 100
-            params_b['payout_style'] = st.radio("Payout Style B", ["cash", "asset"], key="payout_b")
+            params_b['payout_style'] = st.radio("Payout Style B", ["Cash", "Asset"], key="payout_b").lower()
             if params_b['payout_style'] == "cash":
                 params_b['rebate'] = st.number_input("Rebate B", value=0.0, key="rebate_b")
             else:
                 params_b['rebate'] = 0.0
-            st.markdown(f"📋 **{params_b['barrier_type'].replace('-', ' ').title()} call** (barrier at {params_b['barrier_multiple']:.0%}, {params_b['payout_style']} paying)")
+            st.markdown(f"**{params_b['barrier_type'].replace('-', ' ').title()} call** (barrier at {params_b['barrier_multiple']:.0%}, {params_b['payout_style']} paying)")
             
         elif strategy_b == "Digital":
-            params_b['style'] = st.selectbox("Digital Style B", ["cash", "asset"], key="digital_style_b")
+            params_b['style'] = st.selectbox("Digital Style B", ["Cash", "Asset"], key="digital_style_b")
             if params_b['style'] == "cash":
-                cash_method_b = st.radio("Cash Input Method B", ["Simple", "Expression"], key="cash_method_b")
-                if cash_method_b == "Simple":
-                    params_b['Q'] = st.slider("Cash Payout B", 0.5, 5.0, 1.0, 0.1, key="digital_Q_b")
-                else:
-                    expr_b = st.text_input("Cash Expression B", value="1.0", key="cash_expr_b",
-                                         help="Use S, K, r, sigma, T")
-                    try:
-                        params_b['Q'] = _safe_eval_cash_expression(expr_b, 100, 100, 1, 0.05, 0.2)
-                        st.success(f"✅ B payout: ${params_b['Q']:.4f}")
-                    except:
-                        params_b['Q'] = 1.0
-                        st.warning("⚠️ Invalid expression, using 1.0")
-                st.markdown(f"📋 **Cash-or-nothing call** (pays ${params_b['Q']:.1f})")
+                expr_b = st.text_input("Cash Expression B", value="1.0", key="cash_expr_b",
+                                     help="Use S, K, r, sigma, T")
+                try:
+                    params_b['Q'] = _safe_eval_cash_expression(expr_b, 100, 100, 1, 0.05, 0.2)
+                    st.success(f"✅ B payout: ${params_b['Q']:.2f}")
+                except:
+                    params_b['Q'] = 1.0
+                    st.warning("⚠️ Invalid expression, using 1.0")
+                st.markdown(f"**Cash-or-nothing call** (pays ${params_b['Q']:.1f})")
             else:
                 params_b['Q'] = 1.0
-                st.markdown("📋 **Asset-or-nothing call** (pays underlying price)")
+                st.markdown("**Asset-or-nothing call** (pays underlying price)")
                 
         elif strategy_b == "Lookback":
             params_b['floating'] = st.checkbox("Floating Strike B", value=True, key="lookback_float_b")
             params_b['n_paths'] = st.slider("MC Paths B", 1000, 20000, 5000, 1000, key="lookback_paths_b")
             if params_b['floating']:
-                st.markdown(f"📋 **Floating strike call** ({params_b['n_paths']} paths)")
+                st.markdown(f"**Floating strike call** ({params_b['n_paths']} paths)")
             else:
-                st.markdown(f"📋 **Fixed strike call** ({params_b['n_paths']} paths)")
+                st.markdown(f"**Fixed strike call** ({params_b['n_paths']} paths)")
     
     # Enhanced market parameters with more control
     st.markdown("### Market Parameters")
@@ -546,9 +538,9 @@ def _strategy_comparator():
     with col_c1:
         S0_comp = st.slider("Spot Price", 50.0, 200.0, 100.0, key="comp_S0")
     with col_c2:
-        T_comp = st.slider("Time to Expiry", 0.1, 2.0, 1.0, key="comp_T")
+        T_comp = st.slider("Time to Expiry", 0.1, 5.0, 1.0, key="comp_T")
     with col_c3:
-        r_comp = st.slider("Risk-free Rate", 0.0, 0.2, 0.05, key="comp_r")
+        r_comp = st.slider("Risk-free Rate", 0.0, 1.0, 0.05, key="comp_r")
     with col_c4:
         sigma_comp = st.slider("Volatility", 0.1, 1.0, 0.2, key="comp_sigma")
     
@@ -566,7 +558,7 @@ def _strategy_comparator():
                 st.markdown(f"""
                 <div class="price-display">
                     <h2>{strategy_a}</h2>
-                    <h1>${price_a:.4f}</h1>
+                    <h1>${price_a:.2f}</h1>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -574,7 +566,7 @@ def _strategy_comparator():
                 st.markdown(f"""
                 <div class="price-display">
                     <h2>{strategy_b}</h2>
-                    <h1>${price_b:.4f}</h1>
+                    <h1>${price_b:.2f}</h1>
                 </div>
                 """, unsafe_allow_html=True)
             
@@ -585,14 +577,14 @@ def _strategy_comparator():
             st.markdown(f"""
             <div class="metric-container">
                 <h3>Price Difference Analysis</h3>
-                <p><strong>Absolute Difference:</strong> ${diff:.4f}</p>
+                <p><strong>Absolute Difference:</strong> ${diff:.2f}</p>
                 <p><strong>Percentage Difference:</strong> {diff_pct:+.2f}%</p>
                 <p><strong>Interpretation:</strong> {get_custom_price_interpretation_enhanced(strategy_a, strategy_b, params_a, params_b, diff)}</p>
             </div>
             """, unsafe_allow_html=True)
             
             # FIX #1 & #5: Comparative payoff diagram with continuous lines and fixed array lengths
-            spot_range_comp = np.linspace(S0_comp*0.5, S0_comp*2.0, 200)  # More points for smoother lines
+            spot_range_comp = np.linspace(S0_comp*0, S0_comp*2.0, 300)  # More points for smoother lines
             
             try:
                 payoffs_a = []
@@ -662,16 +654,16 @@ def _strategy_comparator():
                 metrics_df = pd.DataFrame({
                     'Metric': ['Current Price', 'Max Payoff', 'Min Payoff', 'Payoff at Current Spot'],
                     f'{strategy_a}': [
-                        f"${price_a:.4f}",
-                        f"${max(payoffs_a):.4f}" if payoffs_a else "N/A",
-                        f"${min(payoffs_a):.4f}" if payoffs_a else "N/A",
-                        f"${payoffs_a[len(payoffs_a)//2]:.4f}" if payoffs_a else "N/A"  # Middle point
+                        f"${price_a:.2f}",
+                        f"${max(payoffs_a):.2f}" if payoffs_a else "N/A",
+                        f"${min(payoffs_a):.2f}" if payoffs_a else "N/A",
+                        f"${payoffs_a[len(payoffs_a)//2]:.2f}" if payoffs_a else "N/A"  # Middle point
                     ],
                     f'{strategy_b}': [
-                        f"${price_b:.4f}",
-                        f"${max(payoffs_b):.4f}" if payoffs_b else "N/A",
-                        f"${min(payoffs_b):.4f}" if payoffs_b else "N/A", 
-                        f"${payoffs_b[len(payoffs_b)//2]:.4f}" if payoffs_b else "N/A"  # Middle point
+                        f"${price_b:.2f}",
+                        f"${max(payoffs_b):.2f}" if payoffs_b else "N/A",
+                        f"${min(payoffs_b):.2f}" if payoffs_b else "N/A", 
+                        f"${payoffs_b[len(payoffs_b)//2]:.2f}" if payoffs_b else "N/A"  # Middle point
                     ]
                 })
                 
@@ -741,13 +733,13 @@ def _market_scenario_analysis():
         
         # Show what this option configuration means
         if option_family == "Asian":
-            st.markdown("📋 **Testing:** Average-price call option")
+            st.markdown("**Testing:** Average-price call option")
         elif option_family == "Barrier":
-            st.markdown("📋 **Testing:** Up-and-out call (barrier at 120% of spot)")
+            st.markdown("**Testing:** Up-and-out call (barrier at 120% of spot)")
         elif option_family == "Digital":
-            st.markdown("📋 **Testing:** Cash-or-nothing call ($1 payout)")
+            st.markdown("**Testing:** Cash-or-nothing call ($1 payout)")
         elif option_family == "Lookback":
-            st.markdown("📋 **Testing:** Floating strike call")
+            st.markdown("**Testing:** Floating strike call")
     
     # Custom scenario controls
     if scenario_type == "Custom Scenario":
@@ -888,22 +880,22 @@ def _market_scenario_analysis():
             
             with col_risk1:
                 st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                st.metric("Maximum Loss", f"${max_loss:.4f}")
+                st.metric("Maximum Loss", f"${max_loss:.2f}")
                 st.markdown('</div>', unsafe_allow_html=True)
             
             with col_risk2:
                 st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                st.metric("Maximum Gain", f"${max_gain:.4f}")
+                st.metric("Maximum Gain", f"${max_gain:.2f}")
                 st.markdown('</div>', unsafe_allow_html=True)
             
             with col_risk3:
                 st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                st.metric("Price Volatility", f"${price_volatility:.4f}")
+                st.metric("Price Volatility", f"${price_volatility:.2f}")
                 st.markdown('</div>', unsafe_allow_html=True)
             
             with col_risk4:
                 st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-                st.metric("Price Range", f"${price_range:.4f}")
+                st.metric("Price Range", f"${price_range:.2f}")
                 st.markdown('</div>', unsafe_allow_html=True)
             
             # Enhanced risk assessment with more nuanced interpretation
@@ -911,17 +903,30 @@ def _market_scenario_analysis():
             volatility_ratio = price_volatility / base_price if base_price > 0 else 0
             
             if loss_ratio > 0.5 or volatility_ratio > 0.3:
-                st.markdown('<div class="warning-box">', unsafe_allow_html=True)
-                st.markdown(f"<strong>High Risk:</strong> Option shows significant stress sensitivity. Max loss: {loss_ratio:.1%}, Price volatility: {volatility_ratio:.1%}. Consider hedging strategies.")
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="risk-box warning-box">
+                        <strong>High Risk:</strong> Option shows significant stress sensitivity.<br>
+                        Max loss: {loss_ratio:.1%}, Price volatility: {volatility_ratio:.1%}.<br>
+                        Consider hedging strategies.
+                    </div>
+                    """, unsafe_allow_html=True)
+            
             elif loss_ratio > 0.25 or volatility_ratio > 0.15:
-                st.markdown('<div class="info-box">', unsafe_allow_html=True)
-                st.markdown(f"<strong>Moderate Risk:</strong> Option shows moderate stress sensitivity. Max loss: {loss_ratio:.1%}, Price volatility: {volatility_ratio:.1%}. Monitor market conditions.")
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="risk-box info-box">
+                        <strong>Moderate Risk:</strong> Option shows moderate stress sensitivity.<br>
+                        Max loss: {loss_ratio:.1%}, Price volatility: {volatility_ratio:.1%}.<br>
+                        Monitor market conditions.
+                    </div>
+                    """, unsafe_allow_html=True)
+            
             else:
-                st.markdown('<div class="success-box">', unsafe_allow_html=True)
-                st.markdown(f"<strong>Low Risk:</strong> Option demonstrates resilience under stress. Max loss: {loss_ratio:.1%}, Price volatility: {volatility_ratio:.1%}.")
-                st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="risk-box success-box">
+                        <strong>Low Risk:</strong> Option demonstrates resilience under stress.<br>
+                        Max loss: {loss_ratio:.1%}, Price volatility: {volatility_ratio:.1%}.
+                    </div>
+                    """, unsafe_allow_html=True)
 
 
 # ENHANCED HELPER FUNCTIONS - FIXES IMPLEMENTED
