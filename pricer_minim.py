@@ -11,7 +11,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 # Import tab modules
 from tabs.vanilla_options import vanilla_options_tab
 from tabs.forward_contracts import forward_contracts_tab
-from tabs.option_strategies import option_strategies_tab
+from tabs.option_strategies import main_option_strategies_tab
 from tabs.exotic_options import exotic_options_tab
 from tabs.swaps import swaps_tab
 from tabs.interest_rate_instruments import interest_rate_instruments_tab
@@ -141,7 +141,7 @@ with tab2:
     forward_contracts_tab()
 
 with tab3:
-    option_strategies_tab()
+    main_option_strategies_tab()
 
 with tab4:
     exotic_options_tab()
