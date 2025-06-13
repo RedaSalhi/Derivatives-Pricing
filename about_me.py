@@ -242,39 +242,39 @@ with st.container():
         </div>
     </div>
     """, unsafe_allow_html=True)
-    """
-with st.container():
-    st.markdown("""
-    <div class="contact-box">
-        <div class="section-title">📬 Get In Touch</div>
-        <p style="margin-bottom: 1.5rem; color: #6c757d;">
-            I'd love to hear from you! Whether it's about collaboration opportunities, 
-            questions about my work, or just to connect, feel free to reach out.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Using Streamlit's native form components instead of HTML
-    with st.form("contact_form"):
-        st.markdown("### Contact Form")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            name = st.text_input("Your Name", placeholder="Enter your full name")
-        with col2:
-            email = st.text_input("Your Email", placeholder="your.email@example.com")
-        
-        message = st.text_area("Your Message", placeholder="Tell me about your project, question, or how we can collaborate...", height=120)
-        
-        submitted = st.form_submit_button("Send Message", use_container_width=True)
-        
-        if submitted:
-            if name and email and message:
-                st.success("✅ Thank you for your message! I'll get back to you soon.")
-                st.info("📧 You can also reach me directly at: salhi.reda47@gmail.com")
-            else:
-                st.error("❌ Please fill in all fields before submitting.")
-    """
+ 
+#with st.container():
+#    st.markdown("""
+#    <div class="contact-box">
+#        <div class="section-title">📬 Get In Touch</div>
+#        <p style="margin-bottom: 1.5rem; color: #6c757d;">
+#            I'd love to hear from you! Whether it's about collaboration opportunities, 
+#            questions about my work, or just to connect, feel free to reach out.
+#        </p>
+#    </div>
+#    """, unsafe_allow_html=True)
+#    
+#    # Using Streamlit's native form components instead of HTML
+#    with st.form("contact_form"):
+#        st.markdown("### Contact Form")
+#        
+#        col1, col2 = st.columns(2)
+#        with col1:
+#            name = st.text_input("Your Name", placeholder="Enter your full name")
+#        with col2:
+#            email = st.text_input("Your Email", placeholder="your.email@example.com")
+#        
+#        message = st.text_area("Your Message", placeholder="Tell me about your project, question, or how we can collaborate...", height=120)
+#        
+#        submitted = st.form_submit_button("Send Message", use_container_width=True)
+#        
+#        if submitted:
+#            if name and email and message:
+#                st.success("✅ Thank you for your message! I'll get back to you soon.")
+#                st.info("📧 You can also reach me directly at: salhi.reda47@gmail.com")
+#            else:
+#                st.error("❌ Please fill in all fields before submitting.")
+  
     # Alternative contact methods
     st.markdown("### 📞 Other Ways to Connect")
     col1, col2, col3 = st.columns(3)
