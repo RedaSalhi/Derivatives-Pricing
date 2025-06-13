@@ -810,154 +810,171 @@ def _greeks_analysis_tab():
                     """, unsafe_allow_html=True)
     
     # Main header
-    st.markdown('<div class="main-header">Vasicek Model Educational Resources</div>', unsafe_allow_html=True)
-    
-    # Header separator
+    # Educational content
     st.markdown("---")
-    st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
     
-    # --- Vasicek Model ---
-    with st.expander("Understanding the Vasicek Model"):
+    with st.expander("📊 Understanding the Vasicek Model"):
         st.markdown("""
         <div class="info-box">
             <h4>The Vasicek Interest Rate Model</h4>
-            <p>The Vasicek model describes interest rate evolution using a mean-reverting stochastic process.</p>
             
-            <div class="formula">dr(t) = a(λ - r(t))dt + σ dW(t)</div>
+            <p>The Vasicek model is a mathematical model describing the evolution of interest rates. It is a type of "one-factor short-rate model" as it describes interest rate movements as driven by only one source of market risk.</p>
             
-            <h5 style="color: #ff7f0e; margin-top: 20px; margin-bottom: 10px;">Parameters:</h5>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin: 15px 0;">
+                <h5 style="color: #1f77b4; margin-top: 0;">📐 Model Equation:</h5>
+                <p style="text-align: center; font-size: 1.3em; font-weight: bold; color: #1f77b4; margin: 10px 0;">
+                    dr(t) = a(λ - r(t))dt + σ dW(t)
+                </p>
+            </div>
+            
+            <h5 style="color: #ff7f0e;">🔧 Parameters:</h5>
             <ul>
-                <li><strong>a</strong>: Speed of mean reversion</li>
-                <li><strong>λ</strong>: Long-term mean rate</li>
-                <li><strong>σ</strong>: Volatility of rate</li>
-                <li><strong>r(t)</strong>: Short-term rate</li>
-                <li><strong>dW(t)</strong>: Wiener process</li>
+                <li><strong>a</strong>: Speed of mean reversion (how quickly rates return to long-term mean)</li>
+                <li><strong>λ</strong>: Long-term mean level of interest rates</li>
+                <li><strong>σ</strong>: Volatility of interest rate changes</li>
+                <li><strong>r(t)</strong>: Short-term interest rate at time t</li>
+                <li><strong>dW(t)</strong>: Wiener process (random component)</li>
             </ul>
             
-            <h5 style="color: #ff7f0e; margin-top: 20px; margin-bottom: 10px;">Key Features:</h5>
+            <h5 style="color: #ff7f0e;">✨ Key Features:</h5>
             <ul>
-                <li><strong>Mean Reversion</strong>: Rates revert to λ</li>
-                <li><strong>Analytical Solutions</strong>: Bond pricing is tractable</li>
-                <li><strong>Negative Rates</strong>: Allowed by model</li>
-                <li><strong>Normal Distribution</strong>: Assumes normality of changes</li>
+                <li><strong>Mean Reversion</strong>: Rates tend to drift back toward the long-term mean</li>
+                <li><strong>Analytical Solutions</strong>: Closed-form formulas for bond prices and options</li>
+                <li><strong>Negative Rates</strong>: Model allows for negative interest rates</li>
+                <li><strong>Normal Distribution</strong>: Rate changes are normally distributed</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
     
-    # --- Bond Pricing ---
-    with st.expander("Bond Pricing Formulas"):
+    with st.expander("🏦 Bond Pricing Formulas"):
         st.markdown("""
         <div class="info-box">
             <h4>Vasicek Bond Pricing Formulas</h4>
             
-            <h5 style="color: #ff7f0e; margin-bottom: 10px;">Zero-Coupon Bond Price:</h5>
-            <div class="formula">P(t,T) = A(t,T) × exp(-B(t,T) × r(t))</div>
-            
-            <p><strong>Where:</strong></p>
-            <div class="formula">B(t,T) = (1 - exp(-a(T-t))) / a</div>
-            <div class="formula">A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)</div>
-            
-            <hr style="margin: 25px 0; border: 1px solid #ccc;">
-            
-            <h5 style="color: #ff7f0e; margin-bottom: 10px;">Coupon Bond Price:</h5>
-            <p>Sum of discounted coupon payments plus principal:</p>
-            <div class="formula">P = Σ C × P(t,Tᵢ) + F × P(t,T)</div>
-            
-            <hr style="margin: 25px 0; border: 1px solid #ccc;">
-            
-            <h5 style="color: #ff7f0e; margin-bottom: 10px;">Bond Option Price:</h5>
-            <p>Uses the Black-Scholes formula adapted for bonds:</p>
-            <div class="formula">Call: P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)</div>
-            <div class="formula">Put: K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # --- Greeks ---
-    with st.expander("Greeks for Bond Options"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>Bond Option Greeks</h4>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-                <div style="flex: 1; min-width: 300px;">
-                    <h5 style="color: #ff7f0e;">Delta (Δ):</h5>
-                    <ul>
-                        <li>Sensitivity to bond price changes</li>
-                        <li>0 to 1 for calls, -1 to 0 for puts</li>
-                        <li><strong>Δ = ∂V / ∂S</strong></li>
-                    </ul>
-                    
-                    <h5 style="color: #ff7f0e;">Rho (ρ):</h5>
-                    <ul>
-                        <li>Sensitivity to interest rate changes</li>
-                        <li>Negative for calls</li>
-                        <li><strong>ρ = ∂V / ∂r</strong></li>
-                    </ul>
-                    
-                    <h5 style="color: #ff7f0e;">Vega (ν):</h5>
-                    <ul>
-                        <li>Sensitivity to volatility changes</li>
-                        <li>Positive for both calls and puts</li>
-                        <li><strong>ν = ∂V / ∂σ</strong></li>
-                    </ul>
-                </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h5 style="color: #1f77b4;">💰 Zero-Coupon Bond Price:</h5>
+                <p style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4;">
+                    P(t,T) = A(t,T) × exp(-B(t,T) × r(t))
+                </p>
                 
-                <div style="flex: 1; min-width: 300px;">
-                    <h5 style="color: #ff7f0e;">Theta (Θ):</h5>
-                    <ul>
-                        <li>Time decay</li>
-                        <li>Typically negative</li>
-                        <li><strong>Θ = ∂V / ∂t</strong></li>
-                    </ul>
-                    
-                    <h5 style="color: #ff7f0e;">Gamma (Γ):</h5>
-                    <ul>
-                        <li>Change in delta (convexity)</li>
-                        <li>Highest near expiry, at-the-money</li>
-                        <li><strong>Γ = ∂²V / ∂S²</strong></li>
-                    </ul>
-                </div>
+                <p><strong>Where:</strong></p>
+                <p style="text-align: center; font-weight: bold;">
+                    B(t,T) = (1 - exp(-a(T-t))) / a
+                </p>
+                <p style="text-align: center; font-weight: bold; font-size: 0.9em;">
+                    A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
+                </p>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h5 style="color: #1f77b4;">🎫 Coupon Bond Price:</h5>
+                <p>Sum of discounted coupon payments plus principal:</p>
+                <p style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4;">
+                    P = Σ C × P(t,Tᵢ) + F × P(t,T)
+                </p>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h5 style="color: #1f77b4;">📈 Bond Option Price:</h5>
+                <p>Uses the Black-Scholes formula adapted for bonds:</p>
+                <p style="text-align: center; font-weight: bold;">
+                    <strong>Call:</strong> P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)
+                </p>
+                <p style="text-align: center; font-weight: bold;">
+                    <strong>Put:</strong> K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
+                </p>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
-    # --- Limitations ---
+    with st.expander("📊 Greeks for Bond Options"):
+        st.markdown("""
+        <div class="info-box">
+            <h4>Bond Option Greeks</h4>
+            
+            <div style="background: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0;">
+                <h5 style="color: #1f77b4;">📈 Delta (Δ): Sensitivity to Bond Price Changes</h5>
+                <ul>
+                    <li>Measures how much the option price changes for a $1 change in bond price</li>
+                    <li><strong>Range:</strong> 0 to 1 for calls, -1 to 0 for puts</li>
+                    <li><strong>Formula:</strong> Δ = ∂V/∂S</li>
+                </ul>
+            </div>
+            
+            <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0;">
+                <h5 style="color: #856404;">💸 Rho (ρ): Sensitivity to Interest Rate Changes</h5>
+                <ul>
+                    <li>Measures how much the option price changes for a 1% change in rates</li>
+                    <li>More important for bond options than equity options</li>
+                    <li><strong>Negative</strong> for calls (higher rates → lower bond prices → lower call values)</li>
+                    <li><strong>Formula:</strong> ρ = ∂V/∂r</li>
+                </ul>
+            </div>
+            
+            <div style="background: #d1ecf1; padding: 12px; border-radius: 8px; margin: 10px 0;">
+                <h5 style="color: #0c5460;">🌊 Vega (ν): Sensitivity to Volatility Changes</h5>
+                <ul>
+                    <li>Measures how much the option price changes for a 1% change in volatility</li>
+                    <li><strong>Positive</strong> for both calls and puts (higher volatility → higher option values)</li>
+                    <li><strong>Formula:</strong> ν = ∂V/∂σ</li>
+                </ul>
+            </div>
+            
+            <div style="background: #f8d7da; padding: 12px; border-radius: 8px; margin: 10px 0;">
+                <h5 style="color: #721c24;">⏰ Theta (Θ): Time Decay</h5>
+                <ul>
+                    <li>Measures how much the option price changes as time passes</li>
+                    <li>Usually <strong>negative</strong> (options lose value as expiration approaches)</li>
+                    <li><strong>Formula:</strong> Θ = ∂V/∂t</li>
+                </ul>
+            </div>
+            
+            <div style="background: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0;">
+                <h5 style="color: #155724;">🎯 Gamma (Γ): Rate of Change of Delta</h5>
+                <ul>
+                    <li>Measures the convexity of the option price</li>
+                    <li>Highest for <strong>at-the-money</strong> options near expiration</li>
+                    <li><strong>Formula:</strong> Γ = ∂²V/∂S²</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with st.expander("⚠️ Model Limitations & Considerations"):
         st.markdown("""
         <div class="warning-box">
             <h4>Vasicek Model Limitations</h4>
             
-            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-                <div style="flex: 1; min-width: 250px;">
-                    <h5 style="color: #856404;">Theoretical Limitations:</h5>
-                    <ul>
-                        <li>Allows negative rates</li>
-                        <li>Assumes constant a, λ, σ</li>
-                        <li>Normal distribution (not fat-tailed)</li>
-                        <li>Single risk factor only</li>
-                    </ul>
-                </div>
-                
-                <div style="flex: 1; min-width: 250px;">
-                    <h5 style="color: #856404;">Practical Considerations:</h5>
-                    <ul>
-                        <li>Estimation depends on historical data</li>
-                        <li>Calibration may not fit live markets</li>
-                        <li>Doesn't capture volatility clustering</li>
-                        <li>Can break under regime changes</li>
-                    </ul>
-                </div>
-                
-                <div style="flex: 1; min-width: 250px;">
-                    <h5 style="color: #856404;">Risk Management Tips:</h5>
-                    <ul>
-                        <li>Compare with multiple models</li>
-                        <li>Recalibrate frequently</li>
-                        <li>Stress test extreme scenarios</li>
-                        <li>Monitor performance vs market</li>
-                        <li>Account for model risk explicitly</li>
-                    </ul>
-                </div>
+            <div style="margin: 15px 0;">
+                <h5 style="color: #dc3545;">🔍 Theoretical Limitations:</h5>
+                <ul>
+                    <li><strong>Negative Rates:</strong> Model allows unrealistic negative rates (though less problematic now)</li>
+                    <li><strong>Constant Parameters:</strong> Assumes constant mean reversion speed and volatility</li>
+                    <li><strong>Normal Distribution:</strong> Real rate changes may have fat tails</li>
+                    <li><strong>Single Factor:</strong> Ignores multiple sources of interest rate risk</li>
+                </ul>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <h5 style="color: #dc3545;">⚙️ Practical Considerations:</h5>
+                <ul>
+                    <li><strong>Parameter Estimation:</strong> Historical data may not reflect future behavior</li>
+                    <li><strong>Calibration:</strong> Model may not fit current market prices perfectly</li>
+                    <li><strong>Volatility Clustering:</strong> Real rates show periods of high/low volatility</li>
+                    <li><strong>Regime Changes:</strong> Central bank policy changes can break model assumptions</li>
+                </ul>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <h5 style="color: #dc3545;">🛡️ Risk Management Best Practices:</h5>
+                <ul>
+                    <li>Use multiple models for comparison and validation</li>
+                    <li>Regular recalibration with fresh market data</li>
+                    <li>Stress testing with extreme market scenarios</li>
+                    <li>Consider model uncertainty in risk measures</li>
+                    <li>Monitor model performance against market prices</li>
+                </ul>
             </div>
         </div>
         """, unsafe_allow_html=True)
