@@ -1782,7 +1782,7 @@ def create_live_payoff_diagram(S0, K, option_type, option_family, params):
         mode='lines',
         name='Payoff',
         line=dict(width=3, color='blue')
-    )
+    ))
     
     # Add reference lines
     fig.add_vline(x=K, line_dash="dash", line_color="red", annotation_text="Strike")
