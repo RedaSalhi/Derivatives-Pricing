@@ -137,13 +137,13 @@ st.markdown('<div class="subtitle">Financial Engineering Student | Quant Researc
 with st.container():
     st.markdown("""
     <div class="profile-box">
-        <div class="section-title">👨‍🎓 Profile</div>
+        <div class="section-title">Profile</div>
         <div class="profile-info">
             <strong>SALHI Reda</strong><br>
-            🎓 Engineering student at <strong>Centrale Méditerranée</strong><br>
-            📈 Passionate about <strong>mathematics</strong>, <strong>financial markets</strong>, and <strong>economic research</strong><br>
-            💡 Specializing in quantitative finance and derivatives pricing<br>
-            🔬 Currently developing advanced pricing models and risk management tools
+            Engineering student at <strong>Centrale Méditerranée</strong><br>
+            Passionate about <strong>mathematics</strong>, <strong>financial markets</strong>, and <strong>economic research</strong><br>
+            Specializing in quantitative finance<br>
+            Currently developing advanced pricing models and risk management tools
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -154,7 +154,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="download-section">
-        <div class="section-title">📄 Resume Downloads</div>
+        <div class="section-title">Resume Downloads</div>
         <p style="margin-bottom: 1.5rem; color: #6c757d;">Download my latest resume in your preferred language:</p>
     </div>
     """, unsafe_allow_html=True)
@@ -169,27 +169,27 @@ with st.container():
         if os.path.exists(cv_en):
             with open(cv_en, "rb") as f:
                 st.download_button(
-                    label="🇺🇸 Download CV - English Version",
+                    label="Download CV - English Version",
                     data=f,
                     file_name="Reda_Salhi_CV_EN.pdf",
                     mime="application/pdf",
                     use_container_width=True
                 )
         else:
-            st.info("🇺🇸 English CV - Coming Soon")
+            st.info("English CV - Coming Soon")
     
     with col2:
         if os.path.exists(cv_fr):
             with open(cv_fr, "rb") as f:
                 st.download_button(
-                    label="🇫🇷 Download CV - French Version",
+                    label="Download CV - French Version",
                     data=f,
                     file_name="Reda_Salhi_CV_FR.pdf",
                     mime="application/pdf",
                     use_container_width=True
                 )
         else:
-            st.info("🇫🇷 French CV - Coming Soon")
+            st.info("French CV - Coming Soon")
 
 # ----------------------
 # Links Section
@@ -199,10 +199,10 @@ with st.container():
     <div class="links-box">
         <div class="section-title">🔗 Connect With Me</div>
         <div class="link-item">
-            💼 <a href="https://www.linkedin.com/in/reda-salhi-195297290/" target="_blank">LinkedIn Profile</a>
+            <a href="https://www.linkedin.com/in/reda-salhi-195297290/" target="_blank">LinkedIn Profile</a>
         </div>
         <div class="link-item">
-            💻 <a href="https://github.com/RedaSalhi" target="_blank">GitHub Portfolio</a>
+            <a href="https://github.com/RedaSalhi" target="_blank">GitHub Portfolio</a>
         </div>
         <div class="link-item">
             📧 Email: salhi.reda47@gmail.com
@@ -213,6 +213,36 @@ with st.container():
 # ----------------------
 # Contact Form Section
 # ----------------------
+# ----------------------
+# Contact Form Section
+# ----------------------
+with st.container():
+    st.markdown("""
+    <div class="contact-box">
+        <div class="section-title">📬 Get In Touch</div>
+        <p style="margin-bottom: 1.5rem; color: #6c757d;">
+            I'd love to hear from you! Whether it's about collaboration opportunities, 
+            questions about my work, or just to connect, feel free to reach out.
+        </p>
+        
+        <div class="contact-form">
+            <form action="https://formsubmit.co/salhi.reda47@gmail.com" method="POST">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_template" value="table">
+                <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
+                
+                <input type="text" name="name" placeholder="Your Name" required class="form-input">
+                <input type="email" name="email" placeholder="Your Email Address" required class="form-input">
+                <textarea name="message" placeholder="Your Message" rows="5" required class="form-input"></textarea>
+                
+                <button type="submit" class="form-button">
+                    Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    """
 with st.container():
     st.markdown("""
     <div class="contact-box">
@@ -226,7 +256,7 @@ with st.container():
     
     # Using Streamlit's native form components instead of HTML
     with st.form("contact_form"):
-        st.markdown("### 📝 Contact Form")
+        st.markdown("### Contact Form")
         
         col1, col2 = st.columns(2)
         with col1:
@@ -236,7 +266,7 @@ with st.container():
         
         message = st.text_area("Your Message", placeholder="Tell me about your project, question, or how we can collaborate...", height=120)
         
-        submitted = st.form_submit_button("🚀 Send Message", use_container_width=True)
+        submitted = st.form_submit_button("Send Message", use_container_width=True)
         
         if submitted:
             if name and email and message:
@@ -244,19 +274,19 @@ with st.container():
                 st.info("📧 You can also reach me directly at: salhi.reda47@gmail.com")
             else:
                 st.error("❌ Please fill in all fields before submitting.")
-    
+    """
     # Alternative contact methods
     st.markdown("### 📞 Other Ways to Connect")
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.info("📧 **Email**\nsalhi.reda47@gmail.com")
+        st.info("**Email**\nsalhi.reda47@gmail.com")
     
     with col2:
-        st.info("💼 **LinkedIn**\nConnect professionally")
+        st.info("**LinkedIn**\nConnect professionally")
     
     with col3:
-        st.info("💻 **GitHub**\nCheck out my projects")
+        st.info("**GitHub**\nCheck out my projects")
 
 # ----------------------
 # Skills & Interests (Additional Section)
@@ -267,7 +297,7 @@ with st.container():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("### 🔧 Technical Skills")
+        st.markdown("### Technical Skills")
         st.markdown("""
         - **Programming**: Python, R, MATLAB
         - **Finance**: Derivatives Pricing, Risk Management
@@ -276,7 +306,7 @@ with st.container():
         """)
     
     with col2:
-        st.markdown("### 📚 Areas of Interest")
+        st.markdown("### Areas of Interest")
         st.markdown("""
         - Quantitative Finance
         - Financial Engineering
@@ -286,7 +316,7 @@ with st.container():
         """)
     
     with col3:
-        st.markdown("### 🎯 Current Focus")
+        st.markdown("### Current Focus")
         st.markdown("""
         - Advanced Derivatives Pricing
         - Monte Carlo Simulations
