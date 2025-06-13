@@ -139,14 +139,6 @@ st.markdown("""
 
 
 
-# Add custom CSS for better styling
-    st.markdown("""
-    <style>
-        
-    </style>
-    """, unsafe_allow_html=True)
-
-
 
 # Main header
 st.header("Derivatives Pricer")
