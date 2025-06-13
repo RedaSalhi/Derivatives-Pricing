@@ -809,157 +809,152 @@ def _greeks_analysis_tab():
                     </div>
                     """, unsafe_allow_html=True)
     
-    # --- Header ---
-    st.markdown("---")
-    st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)
-    
-    # --- Vasicek Model ---
-    with st.expander("Understanding the Vasicek Model"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>The Vasicek Interest Rate Model</h4>
-            <p>The Vasicek model describes interest rate evolution using a mean-reverting stochastic process.</p>
-            
-            <div class="formula">dr(t) = a(λ - r(t))dt + σ dW(t)</div>
-    
-            <h5>Parameters:</h5>
-            <ul>
-                <li><strong>a</strong>: Speed of mean reversion</li>
-                <li><strong>λ</strong>: Long-term mean rate</li>
-                <li><strong>σ</strong>: Volatility of rate</li>
-                <li><strong>r(t)</strong>: Short-term rate</li>
-                <li><strong>dW(t)</strong>: Wiener process</li>
-            </ul>
-    
-            <h5>Key Features:</h5>
-            <ul>
-                <li><strong>Mean Reversion</strong>: Rates revert to λ</li>
-                <li><strong>Analytical Solutions</strong>: Bond pricing is tractable</li>
-                <li><strong>Negative Rates</strong>: Allowed by model</li>
-                <li><strong>Normal Distribution</strong>: Assumes normality of changes</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # --- Bond Pricing ---
-    with st.expander("Bond Pricing Formulas"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>Vasicek Bond Pricing Formulas</h4>
-            
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h5 style="color: #1f77b4;">Zero-Coupon Bond Price:</h5>
-                <p style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4;">
-                    P(t,T) = A(t,T) × exp(-B(t,T) × r(t))
-                </p>
-                
-                <p><strong>Where:</strong></p>
-                <p style="text-align: center; font-weight: bold;">
-                    B(t,T) = (1 - exp(-a(T-t))) / a
-                </p>
-                <p style="text-align: center; font-weight: bold; font-size: 0.9em;">
-                    A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
-                </p>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h5 style="color: #1f77b4;">Coupon Bond Price:</h5>
-                <p>Sum of discounted coupon payments plus principal:</p>
-                <p style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4;">
-                    P = Σ C × P(t,Tᵢ) + F × P(t,T)
-                </p>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h5 style="color: #1f77b4;">Bond Option Price:</h5>
-                <p>Uses the Black-Scholes formula adapted for bonds:</p>
-                <p style="text-align: center; font-weight: bold;">
-                    <strong>Call:</strong> P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)
-                </p>
-                <p style="text-align: center; font-weight: bold;">
-                    <strong>Put:</strong> K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
-                </p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+    # Main header
+st.markdown('<div class="main-header">Vasicek Model Educational Resources</div>', unsafe_allow_html=True)
 
+# Header separator
+st.markdown("---")
+st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)
 
-    
-    # --- Greeks ---
-    with st.expander("Greeks for Bond Options"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>Bond Option Greeks</h4>
-    
-            <h5>Delta (Δ):</h5>
-            <ul>
-                <li>Sensitivity to bond price changes</li>
-                <li>0 to 1 for calls, -1 to 0 for puts</li>
-                <li><strong>Δ = ∂V / ∂S</strong></li>
-            </ul>
-    
-            <h5>Rho (ρ):</h5>
-            <ul>
-                <li>Sensitivity to interest rate changes</li>
-                <li>Negative for calls</li>
-                <li><strong>ρ = ∂V / ∂r</strong></li>
-            </ul>
-    
-            <h5>Vega (ν):</h5>
-            <ul>
-                <li>Sensitivity to volatility changes</li>
-                <li>Positive for both calls and puts</li>
-                <li><strong>ν = ∂V / ∂σ</strong></li>
-            </ul>
-    
-            <h5>Theta (Θ):</h5>
-            <ul>
-                <li>Time decay</li>
-                <li>Typically negative</li>
-                <li><strong>Θ = ∂V / ∂t</strong></li>
-            </ul>
-    
-            <h5>Gamma (Γ):</h5>
-            <ul>
-                <li>Change in delta (convexity)</li>
-                <li>Highest near expiry, at-the-money</li>
-                <li><strong>Γ = ∂²V / ∂S²</strong></li>
-            </ul>
+# --- Vasicek Model ---
+with st.expander("Understanding the Vasicek Model"):
+    st.markdown("""
+    <div class="info-box">
+        <h4>The Vasicek Interest Rate Model</h4>
+        <p>The Vasicek model describes interest rate evolution using a mean-reverting stochastic process.</p>
+        
+        <div class="formula">dr(t) = a(λ - r(t))dt + σ dW(t)</div>
+
+        <h5>Parameters:</h5>
+        <ul>
+            <li><strong>a</strong>: Speed of mean reversion</li>
+            <li><strong>λ</strong>: Long-term mean rate</li>
+            <li><strong>σ</strong>: Volatility of rate</li>
+            <li><strong>r(t)</strong>: Short-term rate</li>
+            <li><strong>dW(t)</strong>: Wiener process</li>
+        </ul>
+
+        <h5>Key Features:</h5>
+        <ul>
+            <li><strong>Mean Reversion</strong>: Rates revert to λ</li>
+            <li><strong>Analytical Solutions</strong>: Bond pricing is tractable</li>
+            <li><strong>Negative Rates</strong>: Allowed by model</li>
+            <li><strong>Normal Distribution</strong>: Assumes normality of changes</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- Bond Pricing ---
+with st.expander("Bond Pricing Formulas"):
+    st.markdown("""
+    <div class="info-box">
+        <h4>Vasicek Bond Pricing Formulas</h4>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <h5 style="color: #1f77b4;">Zero-Coupon Bond Price:</h5>
+            <div class="formula">P(t,T) = A(t,T) × exp(-B(t,T) × r(t))</div>
+            
+            <p><strong>Where:</strong></p>
+            <div class="formula">B(t,T) = (1 - exp(-a(T-t))) / a</div>
+            <div class="formula" style="font-size: 1.0em;">
+                A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    # --- Limitations ---
-    with st.expander("⚠️ Model Limitations & Considerations"):
-        st.markdown("""
-        <div class="warning-box">
-            <h4>Vasicek Model Limitations</h4>
-    
-            <h5>Theoretical Limitations:</h5>
-            <ul>
-                <li>Allows negative rates</li>
-                <li>Assumes constant a, λ, σ</li>
-                <li>Normal distribution (not fat-tailed)</li>
-                <li>Single risk factor only</li>
-            </ul>
-    
-            <h5>Practical Considerations:</h5>
-            <ul>
-                <li>Estimation depends on historical data</li>
-                <li>Calibration may not fit live markets</li>
-                <li>Doesn’t capture volatility clustering</li>
-                <li>Can break under regime changes</li>
-            </ul>
-    
-            <h5>Risk Management Tips:</h5>
-            <ul>
-                <li>Compare with multiple models</li>
-                <li>Recalibrate frequently</li>
-                <li>Stress test extreme scenarios</li>
-                <li>Monitor performance vs market</li>
-                <li>Account for model risk explicitly</li>
-            </ul>
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <h5 style="color: #1f77b4;">Coupon Bond Price:</h5>
+            <p>Sum of discounted coupon payments plus principal:</p>
+            <div class="formula">P = Σ C × P(t,Tᵢ) + F × P(t,T)</div>
         </div>
-        """, unsafe_allow_html=True)
+        
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <h5 style="color: #1f77b4;">Bond Option Price:</h5>
+            <p>Uses the Black-Scholes formula adapted for bonds:</p>
+            <div class="formula">
+                <strong>Call:</strong> P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)
+            </div>
+            <div class="formula">
+                <strong>Put:</strong> K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- Greeks ---
+with st.expander("Greeks for Bond Options"):
+    st.markdown("""
+    <div class="info-box">
+        <h4>Bond Option Greeks</h4>
+
+        <h5>Delta (Δ):</h5>
+        <ul>
+            <li>Sensitivity to bond price changes</li>
+            <li>0 to 1 for calls, -1 to 0 for puts</li>
+            <li><strong>Δ = ∂V / ∂S</strong></li>
+        </ul>
+
+        <h5>Rho (ρ):</h5>
+        <ul>
+            <li>Sensitivity to interest rate changes</li>
+            <li>Negative for calls</li>
+            <li><strong>ρ = ∂V / ∂r</strong></li>
+        </ul>
+
+        <h5>Vega (ν):</h5>
+        <ul>
+            <li>Sensitivity to volatility changes</li>
+            <li>Positive for both calls and puts</li>
+            <li><strong>ν = ∂V / ∂σ</strong></li>
+        </ul>
+
+        <h5>Theta (Θ):</h5>
+        <ul>
+            <li>Time decay</li>
+            <li>Typically negative</li>
+            <li><strong>Θ = ∂V / ∂t</strong></li>
+        </ul>
+
+        <h5>Gamma (Γ):</h5>
+        <ul>
+            <li>Change in delta (convexity)</li>
+            <li>Highest near expiry, at-the-money</li>
+            <li><strong>Γ = ∂²V / ∂S²</strong></li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- Limitations ---
+with st.expander("⚠️ Model Limitations & Considerations"):
+    st.markdown("""
+    <div class="warning-box">
+        <h4>Vasicek Model Limitations</h4>
+
+        <h5>Theoretical Limitations:</h5>
+        <ul>
+            <li>Allows negative rates</li>
+            <li>Assumes constant a, λ, σ</li>
+            <li>Normal distribution (not fat-tailed)</li>
+            <li>Single risk factor only</li>
+        </ul>
+
+        <h5>Practical Considerations:</h5>
+        <ul>
+            <li>Estimation depends on historical data</li>
+            <li>Calibration may not fit live markets</li>
+            <li>Doesn't capture volatility clustering</li>
+            <li>Can break under regime changes</li>
+        </ul>
+
+        <h5>Risk Management Tips:</h5>
+        <ul>
+            <li>Compare with multiple models</li>
+            <li>Recalibrate frequently</li>
+            <li>Stress test extreme scenarios</li>
+            <li>Monitor performance vs market</li>
+            <li>Account for model risk explicitly</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Footer
     st.markdown("""
