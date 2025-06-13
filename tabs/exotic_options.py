@@ -18,7 +18,6 @@ from pricing.lookback_option import price_lookback_option, plot_payoff, plot_pat
 
 
 def exotic_options_tab():
-    """Interactive Exotic Options Tab - Professional - FIXED VERSION"""
     
     # Custom CSS for enhanced styling - matching other tabs
     st.markdown("""
@@ -87,15 +86,15 @@ def exotic_options_tab():
     </style>
     """, unsafe_allow_html=True)
     
-    st.markdown('<div class="main-header">Exotic Options Pricing Laboratory</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Exotic Options Pricing</div>', unsafe_allow_html=True)
     st.markdown("---")
     
     # Main tabs
     main_tab1, main_tab2, main_tab3, main_tab4 = st.tabs([
-        "Interactive Pricing Lab", 
-        "Live Greeks Analysis", 
+        "Pricing Tool", 
+        "Greeks Analysis", 
         "Strategy Comparator",
-        "Market Scenario Testing"
+        "Market Stress Testing"
     ])
     
     with main_tab1:
@@ -115,9 +114,8 @@ def exotic_options_tab():
 
 
 def _interactive_pricing_lab():
-    """Interactive pricing laboratory with live updates - ENHANCED VERSION"""
     
-    st.markdown('<div class="sub-header">Interactive Pricing Laboratory</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Pricing Laboratory</div>', unsafe_allow_html=True)
     
     # Option type selector
     col1, col2, col3, col4 = st.columns(4)
@@ -157,13 +155,13 @@ def _interactive_pricing_lab():
         st.markdown("### Market Parameters")
         
         # Common parameters
-        S0 = st.slider("Spot Price", 50.0, 200.0, 100.0, 1.0, key="live_S0")
-        K = st.slider("Strike Price", 50.0, 200.0, 100.0, 1.0, key="live_K")
-        T = st.slider("Time to Expiry (years)", 0.1, 5.0, 1.0, 0.1, key="live_T")
+        S0 = st.slider("Spot Price", 0.0, 200.0, 100.0, 1.0, key="live_S0")
+        K = st.slider("Strike Price", 0.0, 200.0, 100.0, 1.0, key="live_K")
+        T = st.slider("Time to Expiry (years)", 0.1, 10.0, 1.0, 0.1, key="live_T")
         r = st.slider("Risk-free Rate", 0.0, 0.2, 0.05, 0.01, key="live_r")
         sigma = st.slider("Volatility", 0.1, 1.0, 0.2, 0.01, key="live_sigma")
         
-        option_type = st.selectbox("Option Type", ["call", "put"], key="live_option_type")
+        option_type = st.selectbox("Option Type", ["Call", "Put"], key="live_option_type").lower()
         
         # Option-specific parameters
         params = {}
@@ -176,12 +174,12 @@ def _interactive_pricing_lab():
             
         elif st.session_state.selected_option == "barrier":
             st.markdown("### Barrier Parameters")
-            H = st.slider("Barrier Level", 50.0, 200.0, 120.0, 1.0, key="live_barrier_H")
+            H = st.slider("Barrier Level", 10.0, 200.0, 120.0, 1.0, key="live_barrier_H")
             barrier_type = st.selectbox("Barrier Type", 
                                       ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], 
                                       key="live_barrier_type")
             # FIX #3: Add payout style selection for barriers
-            payout_style = st.radio("Payout Style", ["cash", "asset"], key="live_barrier_payout")
+            payout_style = st.radio("Payout Style", ["Cash", "Asset"], key="live_barrier_payout").lower()
             if payout_style == "cash":
                 rebate = st.number_input("Cash Rebate", value=0.0, min_value=0.0, key="live_barrier_rebate")
             else:
@@ -191,29 +189,24 @@ def _interactive_pricing_lab():
             
         elif st.session_state.selected_option == "digital":
             st.markdown("### Digital Parameters")
-            digital_style = st.selectbox("Digital Style", ["cash", "asset"], key="live_digital_style")
+            digital_style = st.selectbox("Digital Style", ["Cash", "Asset"], key="live_digital_style").lower()
             
             # FIX #2: Enhanced cash parameter input with freedom
             if digital_style == "cash":
                 st.markdown("#### Cash Payout Configuration")
-                cash_input_method = st.radio("Input Method", ["Simple Value", "Custom Expression"], key="cash_method")
-                
-                if cash_input_method == "Simple Value":
-                    Q = st.number_input("Cash Payout (Q)", value=1.0, min_value=0.01, key="live_digital_Q_simple")
-                else:
-                    # Free-form text input for maximum flexibility
-                    cash_expr = st.text_input(
-                        "Cash Payout Expression", 
-                        value="1.0", 
-                        key="live_digital_Q_expr",
-                        help="Enter any expression using S, K, T, r, sigma. Examples: 'S*0.1', 'K*1.5', 'S/K', 'sigma*100'"
-                    )
-                    try:
-                        Q = _safe_eval_cash_expression(cash_expr, S0, K, T, r, sigma)
-                        st.success(f"✅ Calculated payout: ${Q:.4f}")
-                    except Exception as e:
-                        st.error(f"❌ Invalid expression: {str(e)}. Using default value 1.0")
-                        Q = 1.0
+                # Free-form text input for maximum flexibility
+                cash_expr = st.text_input(
+                    "Cash Payout Expression", 
+                    value="1.0", 
+                    key="live_digital_Q_expr",
+                    help="Enter any expression using S, K, T, r, sigma."
+                )
+                try:
+                    Q = _safe_eval_cash_expression(cash_expr, S0, K, T, r, sigma)
+                    st.success(f"✅ Calculated payout: ${Q:.4f}")
+                except Exception as e:
+                    st.error(f"❌ Invalid expression: {str(e)}. Using default value 1.0")
+                    Q = 1.0
             else:
                 Q = 1.0  # Asset-or-nothing always pays the asset
                 st.info("Asset-or-nothing pays the underlying asset price if in-the-money")
@@ -238,7 +231,7 @@ def _interactive_pricing_lab():
             # Price display
             st.markdown(f"""
             <div class="price-display">
-                <h1>${price:.4f}</h1>
+                <h1>${price:.2f}</h1>
                 <h3>{option_names[st.session_state.selected_option]} Price</h3>
             </div>
             """, unsafe_allow_html=True)
@@ -266,16 +259,16 @@ def _interactive_pricing_lab():
 
 
 def _live_greeks_analysis():
-    """Live Greeks analysis with improved visualization - ENHANCED VERSION"""
+
     
-    st.markdown('<div class="sub-header">Live Greeks Analysis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Greeks Analysis</div>', unsafe_allow_html=True)
     
     # Parameter controls
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        S0_greek = st.slider("Spot Price", 50.0, 200.0, 100.0, 1.0, key="greek_S0")
-        K_greek = st.slider("Strike Price", 50.0, 200.0, 100.0, 1.0, key="greek_K")
+        S0_greek = st.slider("Spot Price", 0.0, 200.0, 100.0, 1.0, key="greek_S0")
+        K_greek = st.slider("Strike Price", 0.0, 200.0, 100.0, 1.0, key="greek_K")
     
     with col2:
         T_greek = st.slider("Time to Expiry", 0.1, 2.0, 1.0, 0.1, key="greek_T")
@@ -322,29 +315,44 @@ def _live_greeks_analysis():
         col_g1, col_g2, col_g3, col_g4, col_g5 = st.columns(5)
         
         with col_g1:
-            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Delta", f"{greeks_data['Delta'][current_spot_idx]:.4f}")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+                <div class="metric-container">
+                    <h3>"Delta"</h3>
+                    <h3>{greeks_data['Delta'][current_spot_idx]:.2f}</h3>
+                </div>
+                """, unsafe_allow_html=True)
             
         with col_g2:
-            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Gamma", f"{greeks_data['Gamma'][current_spot_idx]:.6f}")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+                <div class="metric-container">
+                    <h3>"Gamma"</h3>
+                    <h3>{greeks_data['Gamma'][current_spot_idx]:.2f}</h3>
+                </div>
+                """, unsafe_allow_html=True)
             
         with col_g3:
-            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Theta", f"{greeks_data['Theta'][current_spot_idx]:.4f}")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+                <div class="metric-container">
+                    <h3>"Theta"</h3>
+                    <h3>{greeks_data['Theta'][current_spot_idx]:.2f}</h3>
+                </div>
+                """, unsafe_allow_html=True)
             
         with col_g4:
-            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Vega", f"{greeks_data['Vega'][current_spot_idx]:.4f}")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+                <div class="metric-container">
+                    <h3>"Vega"</h3>
+                    <h3>{greeks_data['Vega'][current_spot_idx]:.2f}</h3>
+                </div>
+                """, unsafe_allow_html=True)
             
         with col_g5:
-            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-            st.metric("Rho", f"{greeks_data['Rho'][current_spot_idx]:.4f}")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+                <div class="metric-container">
+                    <h3>"Rho"</h3>
+                    <h3>{greeks_data['Rho'][current_spot_idx]:.2f}</h3>
+                </div>
+                """, unsafe_allow_html=True)
         
         # Continuous Greeks charts
         st.markdown("### Greeks Visualization")
