@@ -826,7 +826,7 @@ def forward_contracts_tab():
         st.markdown("""
         • **Basis:** $F - S$ (forward premium/discount)  
         • **Calendar Spread:** $ F_1 - F_2 $ (between different maturities)  
-        • **Cross-Asset Spread:** $ F_\text{asset_1} - F_\text{asset_2} $ (between different assets)
+        • **Cross-Asset Spread:** st.latex(r""" F_{\text{asset}_1} - F_{\text{asset}_2} """) (between different assets) 
         """)
     
     # Enhanced Footer
