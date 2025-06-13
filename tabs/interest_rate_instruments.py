@@ -76,7 +76,7 @@ def _parameter_estimation_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>Data Configuration</h4>
+            <h4>📊 Data Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -134,7 +134,7 @@ def _parameter_estimation_tab():
     with col2:
         st.markdown("""
         <div class="info-box">
-            <h4>Estimated Parameters</h4>
+            <h4>📈 Estimated Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -184,14 +184,14 @@ def _parameter_estimation_tab():
                 </table>
                 <br>
                 <p style="text-align: center; font-weight: bold; color: #1f77b4; font-size: 1.1em;">
-                    Data Source: {params['ticker']}
+                    📊 Data Source: {params['ticker']}
                 </p>
             </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown("""
             <div class="info-box">
-                <h4>Get Started</h4>
+                <h4>👆 Get Started</h4>
                 <p>Click <strong>'Estimate Parameters'</strong> to begin analyzing interest rate data.</p>
                 <br>
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4;">
@@ -224,7 +224,7 @@ def _simulation_yield_curves_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>Simulation Parameters</h4>
+            <h4>🎛️ Simulation Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -234,7 +234,7 @@ def _simulation_yield_curves_tab():
 
         st.markdown("""
         <div class="info-box">
-            <h4>Yield Curve Configuration</h4>
+            <h4>📊 Yield Curve Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -301,7 +301,7 @@ def _simulation_yield_curves_tab():
                 # Descriptive statistics
                 st.markdown(f"""
                 <div class="metric-container">
-                    <h4>Final Rate Statistics</h4>
+                    <h4>📊 Final Rate Statistics</h4>
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                             <td style="padding: 12px; font-weight: bold;">Statistic</td>
@@ -353,7 +353,7 @@ def _bond_pricing_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>Bond Parameters</h4>
+            <h4>🏦 Bond Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -371,7 +371,7 @@ def _bond_pricing_tab():
 
         st.markdown("""
         <div class="info-box">
-            <h4>Sensitivity Analysis</h4>
+            <h4>📈 Sensitivity Analysis</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -399,7 +399,7 @@ def _bond_pricing_tab():
                         
                         st.markdown(f"""
                         <div class="metric-container">
-                            <h4>Zero-Coupon Bond Pricing Results</h4>
+                            <h4>💰 Zero-Coupon Bond Pricing Results</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -435,7 +435,7 @@ def _bond_pricing_tab():
                         
                         st.markdown(f"""
                         <div class="metric-container">
-                            <h4>Coupon Bond Pricing Results</h4>
+                            <h4>💰 Coupon Bond Pricing Results</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -464,7 +464,7 @@ def _bond_pricing_tab():
                         """, unsafe_allow_html=True)
 
                     # Sensitivity Analysis
-                    st.markdown('<div class="sub-header">Sensitivity Analysis</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="sub-header">📊 Sensitivity Analysis</div>', unsafe_allow_html=True)
 
                     fig = go.Figure()
 
@@ -548,7 +548,7 @@ def _bond_options_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>Option Parameters</h4>
+            <h4>📋 Option Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -607,7 +607,7 @@ def _bond_options_tab():
                         
                         st.markdown(f"""
                         <div class="metric-container">
-                            <h4>{option_type} Option Pricing Results (Analytical)</h4>
+                            <h4>💰 {option_type} Option Pricing Results (Analytical)</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -643,7 +643,7 @@ def _bond_options_tab():
                         
                         st.markdown(f"""
                         <div class="metric-container">
-                            <h4>{option_type} Option Pricing Results (Monte Carlo)</h4>
+                            <h4>💰 {option_type} Option Pricing Results (Monte Carlo)</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -672,7 +672,7 @@ def _bond_options_tab():
                     # Summary parameters table
                     st.markdown(f"""
                     <div class="info-box">
-                        <h4>Option Configuration Summary</h4>
+                        <h4>📊 Option Configuration Summary</h4>
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                 <td style="padding: 10px; font-weight: bold;">Parameter</td>
@@ -751,7 +751,7 @@ def _greeks_analysis_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>Greeks Configuration</h4>
+            <h4>🎛️ Greeks Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -809,7 +809,6 @@ def _greeks_analysis_tab():
                     </div>
                     """, unsafe_allow_html=True)
     
-    # Main header
     # Educational content
     st.markdown("---")
     st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
@@ -821,14 +820,11 @@ def _greeks_analysis_tab():
             
             <p>The Vasicek model is a mathematical model describing the evolution of interest rates. It is a type of "one-factor short-rate model" as it describes interest rate movements as driven by only one source of market risk.</p>
             
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #1f77b4; margin: 15px 0;">
-                <h5 style="color: #1f77b4; margin-top: 0;">📐 Model Equation:</h5>
-                <p style="text-align: center; font-size: 1.3em; font-weight: bold; color: #1f77b4; margin: 10px 0;">
-                    dr(t) = a(λ - r(t))dt + σ dW(t)
-                </p>
+            <div class="formula">
+                dr(t) = a(λ - r(t))dt + σ dW(t)
             </div>
             
-            <h5 style="color: #ff7f0e;">🔧 Parameters:</h5>
+            <div class="section-title">🔧 Parameters:</div>
             <ul>
                 <li><strong>a</strong>: Speed of mean reversion (how quickly rates return to long-term mean)</li>
                 <li><strong>λ</strong>: Long-term mean level of interest rates</li>
@@ -837,7 +833,7 @@ def _greeks_analysis_tab():
                 <li><strong>dW(t)</strong>: Wiener process (random component)</li>
             </ul>
             
-            <h5 style="color: #ff7f0e;">✨ Key Features:</h5>
+            <div class="section-title">✨ Key Features:</div>
             <ul>
                 <li><strong>Mean Reversion</strong>: Rates tend to drift back toward the long-term mean</li>
                 <li><strong>Analytical Solutions</strong>: Closed-form formulas for bond prices and options</li>
@@ -852,38 +848,30 @@ def _greeks_analysis_tab():
         <div class="info-box">
             <h4>Vasicek Bond Pricing Formulas</h4>
             
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h5 style="color: #1f77b4;">💰 Zero-Coupon Bond Price:</h5>
-                <p style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4;">
-                    P(t,T) = A(t,T) × exp(-B(t,T) × r(t))
-                </p>
-                
-                <p><strong>Where:</strong></p>
-                <p style="text-align: center; font-weight: bold;">
-                    B(t,T) = (1 - exp(-a(T-t))) / a
-                </p>
-                <p style="text-align: center; font-weight: bold; font-size: 0.9em;">
-                    A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
-                </p>
+            <div class="section-title">💰 Zero-Coupon Bond Price:</div>
+            <div class="formula">
+                P(t,T) = A(t,T) × exp(-B(t,T) × r(t))
             </div>
             
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h5 style="color: #1f77b4;">🎫 Coupon Bond Price:</h5>
-                <p>Sum of discounted coupon payments plus principal:</p>
-                <p style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4;">
-                    P = Σ C × P(t,Tᵢ) + F × P(t,T)
-                </p>
+            <p><strong>Where:</strong></p>
+            <div class="formula">
+                B(t,T) = (1 - exp(-a(T-t))) / a
+            </div>
+            <div class="formula">
+                A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
             </div>
             
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h5 style="color: #1f77b4;">📈 Bond Option Price:</h5>
-                <p>Uses the Black-Scholes formula adapted for bonds:</p>
-                <p style="text-align: center; font-weight: bold;">
-                    <strong>Call:</strong> P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)
-                </p>
-                <p style="text-align: center; font-weight: bold;">
-                    <strong>Put:</strong> K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
-                </p>
+            <div class="section-title">🎫 Coupon Bond Price:</div>
+            <p>Sum of discounted coupon payments plus principal:</p>
+            <div class="formula">
+                P = Σ C × P(t,Tᵢ) + F × P(t,T)
+            </div>
+            
+            <div class="section-title">📈 Bond Option Price:</div>
+            <p>Uses the Black-Scholes formula adapted for bonds:</p>
+            <div class="formula">
+                Call: P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)<br>
+                Put: K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -893,8 +881,8 @@ def _greeks_analysis_tab():
         <div class="info-box">
             <h4>Bond Option Greeks</h4>
             
-            <div style="background: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0;">
-                <h5 style="color: #1f77b4;">📈 Delta (Δ): Sensitivity to Bond Price Changes</h5>
+            <div class="greeks-delta">
+                <div class="section-title">📈 Delta (Δ): Sensitivity to Bond Price Changes</div>
                 <ul>
                     <li>Measures how much the option price changes for a $1 change in bond price</li>
                     <li><strong>Range:</strong> 0 to 1 for calls, -1 to 0 for puts</li>
@@ -902,8 +890,8 @@ def _greeks_analysis_tab():
                 </ul>
             </div>
             
-            <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0;">
-                <h5 style="color: #856404;">💸 Rho (ρ): Sensitivity to Interest Rate Changes</h5>
+            <div class="greeks-rho">
+                <div class="section-title">💸 Rho (ρ): Sensitivity to Interest Rate Changes</div>
                 <ul>
                     <li>Measures how much the option price changes for a 1% change in rates</li>
                     <li>More important for bond options than equity options</li>
@@ -912,8 +900,8 @@ def _greeks_analysis_tab():
                 </ul>
             </div>
             
-            <div style="background: #d1ecf1; padding: 12px; border-radius: 8px; margin: 10px 0;">
-                <h5 style="color: #0c5460;">🌊 Vega (ν): Sensitivity to Volatility Changes</h5>
+            <div class="greeks-vega">
+                <div class="section-title">🌊 Vega (ν): Sensitivity to Volatility Changes</div>
                 <ul>
                     <li>Measures how much the option price changes for a 1% change in volatility</li>
                     <li><strong>Positive</strong> for both calls and puts (higher volatility → higher option values)</li>
@@ -921,8 +909,8 @@ def _greeks_analysis_tab():
                 </ul>
             </div>
             
-            <div style="background: #f8d7da; padding: 12px; border-radius: 8px; margin: 10px 0;">
-                <h5 style="color: #721c24;">⏰ Theta (Θ): Time Decay</h5>
+            <div class="greeks-theta">
+                <div class="section-title">⏰ Theta (Θ): Time Decay</div>
                 <ul>
                     <li>Measures how much the option price changes as time passes</li>
                     <li>Usually <strong>negative</strong> (options lose value as expiration approaches)</li>
@@ -930,8 +918,8 @@ def _greeks_analysis_tab():
                 </ul>
             </div>
             
-            <div style="background: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0;">
-                <h5 style="color: #155724;">🎯 Gamma (Γ): Rate of Change of Delta</h5>
+            <div class="greeks-gamma">
+                <div class="section-title">🎯 Gamma (Γ): Rate of Change of Delta</div>
                 <ul>
                     <li>Measures the convexity of the option price</li>
                     <li>Highest for <strong>at-the-money</strong> options near expiration</li>
@@ -946,36 +934,30 @@ def _greeks_analysis_tab():
         <div class="warning-box">
             <h4>Vasicek Model Limitations</h4>
             
-            <div style="margin: 15px 0;">
-                <h5 style="color: #dc3545;">🔍 Theoretical Limitations:</h5>
-                <ul>
-                    <li><strong>Negative Rates:</strong> Model allows unrealistic negative rates (though less problematic now)</li>
-                    <li><strong>Constant Parameters:</strong> Assumes constant mean reversion speed and volatility</li>
-                    <li><strong>Normal Distribution:</strong> Real rate changes may have fat tails</li>
-                    <li><strong>Single Factor:</strong> Ignores multiple sources of interest rate risk</li>
-                </ul>
-            </div>
+            <div class="section-title">🔍 Theoretical Limitations:</div>
+            <ul>
+                <li><strong>Negative Rates:</strong> Model allows unrealistic negative rates (though less problematic now)</li>
+                <li><strong>Constant Parameters:</strong> Assumes constant mean reversion speed and volatility</li>
+                <li><strong>Normal Distribution:</strong> Real rate changes may have fat tails</li>
+                <li><strong>Single Factor:</strong> Ignores multiple sources of interest rate risk</li>
+            </ul>
             
-            <div style="margin: 15px 0;">
-                <h5 style="color: #dc3545;">⚙️ Practical Considerations:</h5>
-                <ul>
-                    <li><strong>Parameter Estimation:</strong> Historical data may not reflect future behavior</li>
-                    <li><strong>Calibration:</strong> Model may not fit current market prices perfectly</li>
-                    <li><strong>Volatility Clustering:</strong> Real rates show periods of high/low volatility</li>
-                    <li><strong>Regime Changes:</strong> Central bank policy changes can break model assumptions</li>
-                </ul>
-            </div>
+            <div class="section-title">⚙️ Practical Considerations:</div>
+            <ul>
+                <li><strong>Parameter Estimation:</strong> Historical data may not reflect future behavior</li>
+                <li><strong>Calibration:</strong> Model may not fit current market prices perfectly</li>
+                <li><strong>Volatility Clustering:</strong> Real rates show periods of high/low volatility</li>
+                <li><strong>Regime Changes:</strong> Central bank policy changes can break model assumptions</li>
+            </ul>
             
-            <div style="margin: 15px 0;">
-                <h5 style="color: #dc3545;">🛡️ Risk Management Best Practices:</h5>
-                <ul>
-                    <li>Use multiple models for comparison and validation</li>
-                    <li>Regular recalibration with fresh market data</li>
-                    <li>Stress testing with extreme market scenarios</li>
-                    <li>Consider model uncertainty in risk measures</li>
-                    <li>Monitor model performance against market prices</li>
-                </ul>
-            </div>
+            <div class="section-title">🛡️ Risk Management Best Practices:</div>
+            <ul>
+                <li>Use multiple models for comparison and validation</li>
+                <li>Regular recalibration with fresh market data</li>
+                <li>Stress testing with extreme market scenarios</li>
+                <li>Consider model uncertainty in risk measures</li>
+                <li>Monitor model performance against market prices</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
     
@@ -983,7 +965,7 @@ def _greeks_analysis_tab():
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.9rem; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 1px solid #dee2e6;'>
         <div style="margin-bottom: 10px;">
-            <span style="font-size: 2rem;"></span>
+            <span style="font-size: 2rem;">🏦</span>
         </div>
         <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1f77b4;">Vasicek Interest Rate Model</p>
         <p style="margin: 8px 0; color: #6c757d;">Built with Streamlit & Python</p>
