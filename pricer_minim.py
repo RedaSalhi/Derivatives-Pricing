@@ -56,6 +56,19 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+st.markdown("""
+<script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+""", unsafe_allow_html=True)
+
+
+
+
+
+
+
 # Main header
 st.header("Derivatives Pricer")
 
