@@ -811,19 +811,19 @@ def _greeks_analysis_tab():
     
     # Educational content
     st.markdown("---")
-    st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)
     
-    with st.expander("📊 Understanding the Vasicek Model"):
+    with st.expander("Understanding the Vasicek Model"):
         st.markdown("#### The Vasicek Interest Rate Model")
         st.info("The Vasicek model is a mathematical model describing the evolution of interest rates. It is a type of 'one-factor short-rate model' as it describes interest rate movements as driven by only one source of market risk.")
         
-        st.markdown("#### 📐 Model Equation:")
+        st.markdown("#### Model Equation:")
         st.markdown(
             '<div style="text-align: center; font-size: 1.3em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">dr(t) = a(λ - r(t))dt + σ dW(t)</div>', 
             unsafe_allow_html=True
         )
         
-        st.markdown("#### 🔧 Parameters:")
+        st.markdown("#### Parameters:")
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("• **a**: Speed of mean reversion")
@@ -833,7 +833,7 @@ def _greeks_analysis_tab():
             st.markdown("• **r(t)**: Interest rate at time t")
             st.markdown("• **dW(t)**: Wiener process")
         
-        st.markdown("#### ✨ Key Features:")
+        st.markdown("#### Key Features:")
         st.markdown("""
         • **Mean Reversion**: Rates tend to drift back toward the long-term mean  
         • **Analytical Solutions**: Closed-form formulas for bond prices and options  
@@ -841,41 +841,42 @@ def _greeks_analysis_tab():
         • **Normal Distribution**: Rate changes are normally distributed
         """)
     
-    with st.expander("🏦 Bond Pricing Formulas"):
+    with st.expander("Bond Pricing Formulas"):
         st.markdown("#### Vasicek Bond Pricing Formulas")
         
-        st.markdown("##### 💰 Zero-Coupon Bond Price:")
+        st.markdown("##### Zero-Coupon Bond Price:")
         st.markdown(
             '<div style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">P(t,T) = A(t,T) × exp(-B(t,T) × r(t))</div>', 
             unsafe_allow_html=True
         )
         
         st.markdown("**Where:**")
-        st.code("""
-B(t,T) = (1 - exp(-a(T-t))) / a
-A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
-        """)
+        st.latex(r"""
+B(t,T) = \frac{1 - e^{-a(T - t)}}{a} \\
+A(t,T) = \exp\left( \left( \lambda - \frac{\sigma^2}{2a^2} \right)(B(t,T) - (T - t)) - \frac{\sigma^2 B(t,T)^2}{4a} \right)
+""")
+
         
-        st.markdown("##### 🎫 Coupon Bond Price:")
+        st.markdown("##### Coupon Bond Price:")
         st.markdown("Sum of discounted coupon payments plus principal:")
         st.markdown(
             '<div style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">P = Σ C × P(t,Tᵢ) + F × P(t,T)</div>', 
             unsafe_allow_html=True
         )
         
-        st.markdown("##### 📈 Bond Option Price:")
+        st.markdown("##### Bond Option Price:")
         st.markdown("Uses the Black-Scholes formula adapted for bonds:")
-        st.code("""
-Call: P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)
-Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
-        """)
+        st.latex(r"""
+\text{Call: } P(t,T_1) \cdot N(d_1) - K \cdot P(t,T_2) \cdot N(d_2) \\
+\text{Put: } K \cdot P(t,T_2) \cdot N(-d_2) - P(t,T_1) \cdot N(-d_1)
+""")
     
-    with st.expander("📊 Greeks for Bond Options"):
+    with st.expander("Greeks for Bond Options"):
         st.markdown("#### Bond Option Greeks")
         
         # Delta
         st.markdown(
-            '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>📈 Delta (Δ): Sensitivity to Bond Price Changes</strong></div>', 
+            '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>Delta (Δ): Sensitivity to Bond Price Changes</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -886,7 +887,7 @@ Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
         
         # Rho
         st.markdown(
-            '<div style="background-color: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;"><strong>💸 Rho (ρ): Sensitivity to Interest Rate Changes</strong></div>', 
+            '<div style="background-color: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;"><strong>Rho (ρ): Sensitivity to Interest Rate Changes</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -898,7 +899,7 @@ Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
         
         # Vega
         st.markdown(
-            '<div style="background-color: #d1ecf1; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #17a2b8;"><strong>🌊 Vega (ν): Sensitivity to Volatility Changes</strong></div>', 
+            '<div style="background-color: #d1ecf1; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #17a2b8;"><strong>Vega (ν): Sensitivity to Volatility Changes</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -909,7 +910,7 @@ Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
         
         # Theta
         st.markdown(
-            '<div style="background-color: #f8d7da; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #dc3545;"><strong>⏰ Theta (Θ): Time Decay</strong></div>', 
+            '<div style="background-color: #f8d7da; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #dc3545;"><strong>Theta (Θ): Time Decay</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -920,7 +921,7 @@ Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
         
         # Gamma
         st.markdown(
-            '<div style="background-color: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;"><strong>🎯 Gamma (Γ): Rate of Change of Delta</strong></div>', 
+            '<div style="background-color: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;"><strong>Gamma (Γ): Rate of Change of Delta</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -932,7 +933,7 @@ Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
     with st.expander("⚠️ Model Limitations & Considerations"):
         st.warning("#### Vasicek Model Limitations")
         
-        st.markdown("##### 🔍 Theoretical Limitations:")
+        st.markdown("##### Theoretical Limitations:")
         st.markdown("""
         • **Negative Rates:** Model allows unrealistic negative rates (though less problematic now)  
         • **Constant Parameters:** Assumes constant mean reversion speed and volatility  
@@ -940,7 +941,7 @@ Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
         • **Single Factor:** Ignores multiple sources of interest rate risk
         """)
         
-        st.markdown("##### ⚙️ Practical Considerations:")
+        st.markdown("##### Practical Considerations:")
         st.markdown("""
         • **Parameter Estimation:** Historical data may not reflect future behavior  
         • **Calibration:** Model may not fit current market prices perfectly  
@@ -948,7 +949,7 @@ Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
         • **Regime Changes:** Central bank policy changes can break model assumptions
         """)
         
-        st.markdown("##### 🛡️ Risk Management Best Practices:")
+        st.markdown("##### Risk Management Best Practices:")
         st.markdown("""
         • Use multiple models for comparison and validation  
         • Regular recalibration with fresh market data  
@@ -961,7 +962,7 @@ Put:  K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.9rem; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 1px solid #dee2e6;'>
         <div style="margin-bottom: 10px;">
-            <span style="font-size: 2rem;">🏦</span>
+            <span style="font-size: 2rem;"></span>
         </div>
         <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1f77b4;">Vasicek Interest Rate Model</p>
         <p style="margin: 8px 0; color: #6c757d;">Built with Streamlit & Python</p>
