@@ -162,7 +162,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Main header
-st.markdown('<div class="main-header">📊 Finance Background & Methodology</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">Finance Background & Methodology</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Mathematical Models & Quantitative Framework</div>', unsafe_allow_html=True)
 
 # ----------------------
@@ -171,7 +171,7 @@ st.markdown('<div class="subtitle">Mathematical Models & Quantitative Framework<
 with st.container():
     st.markdown("""
     <div class="objective-box">
-        <div class="section-title">🎯 Objective</div>
+        <div class="section-title">Objective</div>
         <div class="content-text">
             The <strong>Derivatives Pricing App</strong> is built to help users understand and visualize how various financial derivatives are priced and analyzed using different mathematical models. Whether you're a student, a quant, or a curious learner, this app aims to bridge theory and implementation through interactive tools and comprehensive visualizations.
         </div>
@@ -184,7 +184,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="methodology-box">
-        <div class="section-title">⚙️ Methodology & Pricing Models</div>
+        <div class="section-title">Methodology & Pricing Models</div>
         <div class="content-text">
             We implement core pricing methodologies under the <strong>risk-neutral measure</strong> (ℚ), where the present value of any derivative is the discounted expected payoff:
         </div>
@@ -201,7 +201,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="model-box">
-        <div class="section-title">📈 Pricing Models</div>
+        <div class="section-title">Pricing Models</div>
     </div>
     """, unsafe_allow_html=True)
 
