@@ -820,134 +820,147 @@ def _greeks_analysis_tab():
     with st.expander("Understanding the Vasicek Model"):
         st.markdown("""
         <div class="info-box">
-            <h4 style="color: #1f77b4; margin-bottom: 15px;">The Vasicek Interest Rate Model</h4>
+            <h4>The Vasicek Interest Rate Model</h4>
             <p>The Vasicek model describes interest rate evolution using a mean-reverting stochastic process.</p>
             
             <div class="formula">dr(t) = a(λ - r(t))dt + σ dW(t)</div>
+            
+            <h5 style="color: #ff7f0e; margin-top: 20px; margin-bottom: 10px;">Parameters:</h5>
+            <ul>
+                <li><strong>a</strong>: Speed of mean reversion</li>
+                <li><strong>λ</strong>: Long-term mean rate</li>
+                <li><strong>σ</strong>: Volatility of rate</li>
+                <li><strong>r(t)</strong>: Short-term rate</li>
+                <li><strong>dW(t)</strong>: Wiener process</li>
+            </ul>
+            
+            <h5 style="color: #ff7f0e; margin-top: 20px; margin-bottom: 10px;">Key Features:</h5>
+            <ul>
+                <li><strong>Mean Reversion</strong>: Rates revert to λ</li>
+                <li><strong>Analytical Solutions</strong>: Bond pricing is tractable</li>
+                <li><strong>Negative Rates</strong>: Allowed by model</li>
+                <li><strong>Normal Distribution</strong>: Assumes normality of changes</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
-        
-        st.markdown("**Parameters:**")
-        st.markdown("""
-        - **a**: Speed of mean reversion
-        - **λ**: Long-term mean rate  
-        - **σ**: Volatility of rate
-        - **r(t)**: Short-term rate
-        - **dW(t)**: Wiener process
-        """)
-        
-        st.markdown("**Key Features:**")
-        st.markdown("""
-        - **Mean Reversion**: Rates revert to λ
-        - **Analytical Solutions**: Bond pricing is tractable
-        - **Negative Rates**: Allowed by model
-        - **Normal Distribution**: Assumes normality of changes
-        """)
     
     # --- Bond Pricing ---
     with st.expander("Bond Pricing Formulas"):
-        st.markdown('<div class="section-title">Vasicek Bond Pricing Formulas</div>', unsafe_allow_html=True)
-        
-        st.markdown("**Zero-Coupon Bond Price:**")
-        st.markdown('<div class="formula">P(t,T) = A(t,T) × exp(-B(t,T) × r(t))</div>', unsafe_allow_html=True)
-        
-        st.markdown("**Where:**")
-        st.markdown('<div class="formula">B(t,T) = (1 - exp(-a(T-t))) / a</div>', unsafe_allow_html=True)
-        st.markdown('<div class="formula">A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)</div>', unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        st.markdown("**Coupon Bond Price:**")
-        st.markdown("Sum of discounted coupon payments plus principal:")
-        st.markdown('<div class="formula">P = Σ C × P(t,Tᵢ) + F × P(t,T)</div>', unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        st.markdown("**Bond Option Price:**")
-        st.markdown("Uses the Black-Scholes formula adapted for bonds:")
-        st.markdown('<div class="formula">Call: P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)</div>', unsafe_allow_html=True)
-        st.markdown('<div class="formula">Put: K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="info-box">
+            <h4>Vasicek Bond Pricing Formulas</h4>
+            
+            <h5 style="color: #ff7f0e; margin-bottom: 10px;">Zero-Coupon Bond Price:</h5>
+            <div class="formula">P(t,T) = A(t,T) × exp(-B(t,T) × r(t))</div>
+            
+            <p><strong>Where:</strong></p>
+            <div class="formula">B(t,T) = (1 - exp(-a(T-t))) / a</div>
+            <div class="formula">A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)</div>
+            
+            <hr style="margin: 25px 0; border: 1px solid #ccc;">
+            
+            <h5 style="color: #ff7f0e; margin-bottom: 10px;">Coupon Bond Price:</h5>
+            <p>Sum of discounted coupon payments plus principal:</p>
+            <div class="formula">P = Σ C × P(t,Tᵢ) + F × P(t,T)</div>
+            
+            <hr style="margin: 25px 0; border: 1px solid #ccc;">
+            
+            <h5 style="color: #ff7f0e; margin-bottom: 10px;">Bond Option Price:</h5>
+            <p>Uses the Black-Scholes formula adapted for bonds:</p>
+            <div class="formula">Call: P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)</div>
+            <div class="formula">Put: K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # --- Greeks ---
     with st.expander("Greeks for Bond Options"):
-        st.markdown('<div class="section-title">Bond Option Greeks</div>', unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("**Delta (Δ):**")
-            st.markdown("""
-            - Sensitivity to bond price changes
-            - 0 to 1 for calls, -1 to 0 for puts
-            - **Δ = ∂V / ∂S**
-            """)
+        st.markdown("""
+        <div class="info-box">
+            <h4>Bond Option Greeks</h4>
             
-            st.markdown("**Rho (ρ):**")
-            st.markdown("""
-            - Sensitivity to interest rate changes
-            - Negative for calls
-            - **ρ = ∂V / ∂r**
-            """)
-            
-            st.markdown("**Vega (ν):**")
-            st.markdown("""
-            - Sensitivity to volatility changes
-            - Positive for both calls and puts
-            - **ν = ∂V / ∂σ**
-            """)
-        
-        with col2:
-            st.markdown("**Theta (Θ):**")
-            st.markdown("""
-            - Time decay
-            - Typically negative
-            - **Θ = ∂V / ∂t**
-            """)
-            
-            st.markdown("**Gamma (Γ):**")
-            st.markdown("""
-            - Change in delta (convexity)
-            - Highest near expiry, at-the-money
-            - **Γ = ∂²V / ∂S²**
-            """)
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 300px;">
+                    <h5 style="color: #ff7f0e;">Delta (Δ):</h5>
+                    <ul>
+                        <li>Sensitivity to bond price changes</li>
+                        <li>0 to 1 for calls, -1 to 0 for puts</li>
+                        <li><strong>Δ = ∂V / ∂S</strong></li>
+                    </ul>
+                    
+                    <h5 style="color: #ff7f0e;">Rho (ρ):</h5>
+                    <ul>
+                        <li>Sensitivity to interest rate changes</li>
+                        <li>Negative for calls</li>
+                        <li><strong>ρ = ∂V / ∂r</strong></li>
+                    </ul>
+                    
+                    <h5 style="color: #ff7f0e;">Vega (ν):</h5>
+                    <ul>
+                        <li>Sensitivity to volatility changes</li>
+                        <li>Positive for both calls and puts</li>
+                        <li><strong>ν = ∂V / ∂σ</strong></li>
+                    </ul>
+                </div>
+                
+                <div style="flex: 1; min-width: 300px;">
+                    <h5 style="color: #ff7f0e;">Theta (Θ):</h5>
+                    <ul>
+                        <li>Time decay</li>
+                        <li>Typically negative</li>
+                        <li><strong>Θ = ∂V / ∂t</strong></li>
+                    </ul>
+                    
+                    <h5 style="color: #ff7f0e;">Gamma (Γ):</h5>
+                    <ul>
+                        <li>Change in delta (convexity)</li>
+                        <li>Highest near expiry, at-the-money</li>
+                        <li><strong>Γ = ∂²V / ∂S²</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # --- Limitations ---
     with st.expander("⚠️ Model Limitations & Considerations"):
         st.markdown("""
         <div class="warning-box">
-            <h4 style="color: #856404; margin-bottom: 15px;">Vasicek Model Limitations</h4>
+            <h4>Vasicek Model Limitations</h4>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 250px;">
+                    <h5 style="color: #856404;">Theoretical Limitations:</h5>
+                    <ul>
+                        <li>Allows negative rates</li>
+                        <li>Assumes constant a, λ, σ</li>
+                        <li>Normal distribution (not fat-tailed)</li>
+                        <li>Single risk factor only</li>
+                    </ul>
+                </div>
+                
+                <div style="flex: 1; min-width: 250px;">
+                    <h5 style="color: #856404;">Practical Considerations:</h5>
+                    <ul>
+                        <li>Estimation depends on historical data</li>
+                        <li>Calibration may not fit live markets</li>
+                        <li>Doesn't capture volatility clustering</li>
+                        <li>Can break under regime changes</li>
+                    </ul>
+                </div>
+                
+                <div style="flex: 1; min-width: 250px;">
+                    <h5 style="color: #856404;">Risk Management Tips:</h5>
+                    <ul>
+                        <li>Compare with multiple models</li>
+                        <li>Recalibrate frequently</li>
+                        <li>Stress test extreme scenarios</li>
+                        <li>Monitor performance vs market</li>
+                        <li>Account for model risk explicitly</li>
+                    </ul>
+                </div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.markdown("**Theoretical Limitations:**")
-            st.markdown("""
-            - Allows negative rates
-            - Assumes constant a, λ, σ
-            - Normal distribution (not fat-tailed)
-            - Single risk factor only
-            """)
-        
-        with col2:
-            st.markdown("**Practical Considerations:**")
-            st.markdown("""
-            - Estimation depends on historical data
-            - Calibration may not fit live markets
-            - Doesn't capture volatility clustering
-            - Can break under regime changes
-            """)
-        
-        with col3:
-            st.markdown("**Risk Management Tips:**")
-            st.markdown("""
-            - Compare with multiple models
-            - Recalibrate frequently
-            - Stress test extreme scenarios
-            - Monitor performance vs market
-            - Account for model risk explicitly
-            """)
     
     # Footer
     st.markdown("""
