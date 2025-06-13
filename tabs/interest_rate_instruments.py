@@ -848,9 +848,9 @@ def _greeks_analysis_tab():
             <h4>Vasicek Bond Pricing Formulas</h4>
     
             <h5>Zero-Coupon Bond:</h5>
-            <div class="formula">P(t,T) = A(t,T) × exp(-B(t,T) × r(t))</div>
-            <div class="formula">B(t,T) = (1 - e^{-a(T−t)}) / a</div>
-            <div class="formula">A(t,T) = exp[(λ - σ²/2a²)(B(t,T) - (T−t)) - (σ²B(t,T)²)/(4a)]</div>
+            <div class="formula">P(t,T) = A(t,T) × exp(−B(t,T) × r(t))</div>
+            <div class="formula">B(t,T) = (1 − e^(−a(T−t))) / a</div>
+            <div class="formula">A(t,T) = exp[(λ − σ²/2a²)(B(t,T) − (T−t)) − (σ²B(t,T)²)/(4a)]</div>
     
             <h5>Coupon Bond:</h5>
             <p>Sum of discounted coupons and principal:</p>
