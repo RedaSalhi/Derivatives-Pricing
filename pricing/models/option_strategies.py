@@ -1,6 +1,6 @@
 """
 Option Pricing Models
-pricing/models.py
+pricing/models/option_strategies.py
 
 This module contains the core mathematical models for option pricing.
 """
