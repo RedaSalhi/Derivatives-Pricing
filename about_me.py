@@ -356,7 +356,7 @@ with st.container():
         st.markdown("""
         - **Programming**: Python, SQL, MATLAB, Excel
         - **Finance**: Derivatives Pricing, Risk Management, Portfolio Optimization
-        - **Tools**: Streamlit, NumPy, Pandas
+        - **Tools**: Streamlit, NumPy, Pandas, GitHub
         - **Mathematics**: Stochastic Calculus, Statistics
         """)
     
