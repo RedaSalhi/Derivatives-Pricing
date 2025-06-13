@@ -221,7 +221,7 @@ def _interactive_pricing_lab(auto_refresh, show_confidence, chart_theme, show_an
         try:
             with st.spinner("🔄 Calculating..."):
                 if st.session_state.selected_option == "asian":
-                    price = price_asian_option(S0, K, T, r, sigma, n_steps, n_paths, option_type, asian_type)
+                    price = price_asian_option(S0, K, T, r, sigma, n_steps, n_paths, "monte_carlo", option_type, asian_type)
                     greeks = calculate_greeks_asian(S0, K, T, r, sigma, n_steps, n_paths, option_type, asian_type)
                     
                 elif st.session_state.selected_option == "barrier":
@@ -754,7 +754,7 @@ def create_price_surface(spot_range, vol_range, K, T, r, option_type, option_fam
         for j, spot in enumerate(spot_range):
             try:
                 if option_family == "asian":
-                    price = price_asian_option(spot, K, T, r, vol, 252, 5000, option_type, 
+                    price = price_asian_option(spot, K, T, r, vol, 252, 5000, "monte_carlo", option_type, 
                                              params.get('asian_type', 'average_price'))
                 elif option_family == "barrier":
                     price, _ = price_barrier_option(spot, K, params.get('H', spot*1.2), T, r, vol,
@@ -856,27 +856,27 @@ def calculate_greeks_asian(S0, K, T, r, sigma, n_steps, n_paths, option_type, as
         dr = 0.0001
         dT = T * 0.01
         
-        base_price = price_asian_option(S0, K, T, r, sigma, n_steps, n_paths, option_type, asian_type)
+        base_price = price_asian_option(S0, K, T, r, sigma, n_steps, n_paths, "monte_carlo", option_type, asian_type)
         
         # Delta
-        price_up = price_asian_option(S0 + dS, K, T, r, sigma, n_steps, n_paths, option_type, asian_type)
-        price_down = price_asian_option(S0 - dS, K, T, r, sigma, n_steps, n_paths, option_type, asian_type)
+        price_up = price_asian_option(S0 + dS, K, T, r, sigma, n_steps, n_paths, "monte_carlo", option_type, asian_type)
+        price_down = price_asian_option(S0 - dS, K, T, r, sigma, n_steps, n_paths, "monte_carlo", option_type, asian_type)
         delta = (price_up - price_down) / (2 * dS)
         
         # Gamma
         gamma = (price_up - 2 * base_price + price_down) / (dS ** 2)
         
         # Vega
-        price_vol_up = price_asian_option(S0, K, T, r, sigma + dsigma, n_steps, n_paths, option_type, asian_type)
+        price_vol_up = price_asian_option(S0, K, T, r, sigma + dsigma, n_steps, n_paths, "monte_carlo", option_type, asian_type)
         vega = (price_vol_up - base_price) / dsigma
         
         # Rho
-        price_rate_up = price_asian_option(S0, K, T, r + dr, sigma, n_steps, n_paths, option_type, asian_type)
+        price_rate_up = price_asian_option(S0, K, T, r + dr, sigma, n_steps, n_paths, "monte_carlo", option_type, asian_type)
         rho = (price_rate_up - base_price) / dr
         
         # Theta
         if T > dT:
-            price_time_down = price_asian_option(S0, K, T - dT, r, sigma, n_steps, n_paths, option_type, asian_type)
+            price_time_down = price_asian_option(S0, K, T - dT, r, sigma, n_steps, n_paths, "monte_carlo", option_type, asian_type)
             theta = (price_time_down - base_price) / dT
         else:
             theta = -base_price / T
@@ -945,7 +945,7 @@ def calculate_greeks_range(spot_range, K, T, r, sigma, option_type, option_famil
     for spot in spot_range:
         if option_family == "asian":
             greeks = calculate_greeks_asian(spot, K, T, r, sigma, 100, 5000, option_type, "average_price")
-            price = price_asian_option(spot, K, T, r, sigma, 100, 5000, option_type, "average_price")
+            price = price_asian_option(spot, K, T, r, sigma, 100, 5000, "monte_carlo", option_type, "average_price")
         elif option_family == "barrier":
             greeks = calculate_greeks_barrier(spot, K, spot*1.2, T, r, sigma, option_type, "up-and-out")
             price, _ = price_barrier_option(spot, K, spot*1.2, T, r, sigma, option_type, "up-and-out", 5000, 50)
@@ -989,7 +989,7 @@ def calculate_strategy_price(strategy, params, S0, T, r, sigma):
     K = S0  # Use ATM for comparison
     
     if strategy == "Asian":
-        return price_asian_option(S0, K, T, r, sigma, 100, 5000, "call", params.get('asian_type', 'average_price'))
+        return price_asian_option(S0, K, T, r, sigma, 100, 5000, "monte_carlo", "call", params.get('asian_type', 'average_price'))
     elif strategy == "Barrier":
         price, _ = price_barrier_option(S0, K, params.get('H', S0*1.2), T, r, sigma, "call", 
                                       params.get('barrier_type', 'up-and-out'), 5000, 50)
