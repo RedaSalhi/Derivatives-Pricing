@@ -1673,7 +1673,7 @@ def calculate_greeks_lookback_stable(S0, K, T, r, sigma, option_type, floating):
     if floating:
         # Floating strike approximation
         adj_sigma = sigma * 1.2  # Adjusted for lookback feature
-        d1 = ( np.log(S0/S0) + (r + 0.5*adj_sigma**2)*T) / (adj_sigma*np.sqrt(T))
+        d1 = (np.log(S0/S0) + (r + 0.5*adj_sigma**2)*T) / (adj_sigma*np.sqrt(T))
         delta = norm.cdf(d1) * 1.3  # Higher delta due to optimal exercise
         gamma = norm.pdf(d1) / (S0 * adj_sigma * np.sqrt(T)) * 0.8
         vega = S0 * np.sqrt(T) * norm.pdf(d1) * 1.5
@@ -1682,7 +1682,7 @@ def calculate_greeks_lookback_stable(S0, K, T, r, sigma, option_type, floating):
     else:
         # Fixed strike approximation
         adj_sigma = sigma * 1.1
-        d1 = (np.log(S0/K) + (r + 0.5*adj_sigma**2)*T / (adj_sigma*np.sqrt(T))
+        d1 = (np.log(S0/K) + (r + 0.5*adj_sigma**2)*T) / (adj_sigma*np.sqrt(T))
         delta = norm.cdf(d1) * 1.2
         gamma = norm.pdf(d1) / (S0 * adj_sigma * np.sqrt(T)) * 0.9
         vega = S0 * np.sqrt(T) * norm.pdf(d1) * 1.3
