@@ -212,16 +212,6 @@ with st.container():
 # ----------------------
 # Contact Form Section
 # ----------------------
-with st.container():
-    st.markdown("""
-    <div class="contact-box">
-        <div class="section-title">📬 Get In Touch</div>
-        <p style="margin-bottom: 1.5rem; color: #6c757d;">
-            I'd love to hear from you! Whether it's about collaboration opportunities, 
-            questions about my work, or just to connect, feel free to reach out.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
 
 formsubmit_email = "salhi.reda47@gmail.com"
 form_code = f"""
