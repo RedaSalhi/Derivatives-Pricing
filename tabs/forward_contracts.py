@@ -137,8 +137,8 @@ def forward_contracts_tab():
         strike_price = st.number_input(
             "Strike Price ($)", 
             min_value=0.01, 
-            value=105, 
-            step=1,
+            value=105.00, 
+            step=1.00,
             help="Agreed delivery price at maturity"
         )
         
