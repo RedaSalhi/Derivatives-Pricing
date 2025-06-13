@@ -1,6 +1,6 @@
 """
 Pricing Utilities
-pricing/utils.py
+pricing/utils/option_strategies_utils.py
 
 This module contains utility functions for option pricing calculations,
 including Greeks calculation and strategy analysis.
