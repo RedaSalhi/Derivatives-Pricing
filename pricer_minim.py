@@ -16,7 +16,6 @@ from tabs.exotic_options import exotic_options_tab
 from tabs.swaps import swaps_tab
 from tabs.interest_rate_instruments import interest_rate_instruments_tab
 
-# Custom CSS for enhanced styling
 st.markdown("""
 <style>
     .main-header {
