@@ -257,30 +257,30 @@ form_code = f"""
 <style>
     .styled-form {{
         max-width: 500px;
-        margin: auto;
-        background-color: #f9f9f9;
+        margin: 2rem auto;
         padding: 1.5rem;
+        background-color: #f9f9f9;
         border-radius: 10px;
-        border: 1px solid #ddd;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border: 1px solid #ddd;
     }}
     .styled-form input,
     .styled-form textarea {{
         width: 100%;
         padding: 0.75rem;
         margin-bottom: 1rem;
-        border: 1px solid #ccc;
         border-radius: 6px;
+        border: 1px solid #ccc;
         font-size: 1rem;
     }}
     .styled-form button {{
         background-color: #4CAF50;
         color: white;
-        padding: 0.75rem 1.5rem;
         border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
         border-radius: 6px;
         cursor: pointer;
-        font-size: 1rem;
     }}
     .styled-form button:hover {{
         background-color: #45a049;
