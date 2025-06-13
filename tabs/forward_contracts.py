@@ -549,7 +549,7 @@ def forward_contracts_tab():
         try:
             # Calculate numerical derivatives
             delta_s = 0.01 * spot_price  # 1% change in spot
-            delta_r = 0.0001  # 1 basis point
+            delta_r = 0.01  # 1 basis point
             delta_t = 0.01    # 1% change in time
             
             # Spot sensitivity (Delta equivalent)
@@ -644,9 +644,9 @@ def forward_contracts_tab():
     
     # Educational Content Section
     st.markdown("---")
-    st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header"> Educational Resources</div>', unsafe_allow_html=True)
     
-    with st.expander("📊 Understanding Forward Contracts"):
+    with st.expander(" Understanding Forward Contracts"):
         st.markdown("#### Forward Contract Fundamentals")
         
         st.markdown(
@@ -663,9 +663,9 @@ def forward_contracts_tab():
             )
             st.markdown("""
             • **Obligation:** Buy the asset at maturity  
-            • **Payoff:** S_T - K (where S_T = spot at maturity, K = forward price)  
-            • **Profit when:** S_T > K (spot price rises above forward price)  
-            • **Risk:** Unlimited upside, limited downside to -K
+            • **Payoff:** $S_T - K$ (where $S_T = \text{spot at maturity}$, $K = \text{forward price}$)  
+            • **Profit when:** $S_T > K$ (spot price rises above forward price)  
+            • **Risk:** Unlimited upside, limited downside to $-K$
             """)
         
         with col2:
@@ -675,9 +675,9 @@ def forward_contracts_tab():
             )
             st.markdown("""
             • **Obligation:** Sell the asset at maturity  
-            • **Payoff:** K - S_T  
-            • **Profit when:** S_T < K (spot price falls below forward price)  
-            • **Risk:** Limited upside to K, unlimited downside
+            • **Payoff:** $K - S_T  $
+            • **Profit when:** $S_T < K$ (spot price falls below forward price)  
+            • **Risk:** Limited upside to $K$, unlimited downside
             """)
         
         st.markdown("#### Key Characteristics")
@@ -688,7 +688,7 @@ def forward_contracts_tab():
         • **Customizable:** Terms negotiated between counterparties
         """)
     
-    with st.expander("💡 Cost of Carry Model"):
+    with st.expander("Cost of Carry Model"):
         st.markdown("#### Theoretical Foundation")
         
         st.markdown(
@@ -701,7 +701,7 @@ def forward_contracts_tab():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("##### 📈 Costs (Increase Forward Price)")
+            st.markdown("##### Costs (Increase Forward Price)")
             st.markdown("""
             • **Interest Rate (r):** Cost of financing the purchase  
             • **Storage Costs (c):** Physical storage, insurance, maintenance  
@@ -709,7 +709,7 @@ def forward_contracts_tab():
             """)
         
         with col2:
-            st.markdown("##### 📉 Benefits (Decrease Forward Price)")
+            st.markdown("##### Benefits (Decrease Forward Price)")
             st.markdown("""
             • **Dividends (q):** Cash flows received from holding asset  
             • **Commodity Yields:** Benefits from physical ownership  
@@ -720,13 +720,13 @@ def forward_contracts_tab():
         st.markdown("""
         The forward price is determined by the **no-arbitrage condition**:  
         
-        **If F > S₀ × e^((r+c-q)×T):** Sell forward, buy spot → Risk-free profit  
-        **If F < S₀ × e^((r+c-q)×T):** Buy forward, sell spot → Risk-free profit  
+        **If $F > S_0 × e^{(r+c-q)T}$:** Sell forward, buy spot → Risk-free profit  
+        **If $F < S_0 × e^{(r+c-q)T}$:** Buy forward, sell spot → Risk-free profit  
         
-        Market forces ensure F = S₀ × e^((r+c-q)×T) in equilibrium.
+        Market forces ensure $F = S_0 × e^{(r+c-q)T}$ in equilibrium.
         """)
     
-    with st.expander("📈 Mark-to-Market Valuation"):
+    with st.expander("Mark-to-Market Valuation"):
         st.markdown("#### Valuation Before Maturity")
         
         st.markdown(
@@ -736,27 +736,27 @@ def forward_contracts_tab():
         
         st.markdown("#### Value Components")
         st.markdown("""
-        • **S × e^((r+c-q)×(T-t)):** Present value of receiving the asset  
-        • **K × e^(-r×(T-t)):** Present value of paying the strike price  
+        • **$S × e^{(r+c-q)×(T-t)}$:** Present value of receiving the asset  
+        • **$K × e^{-r×(T-t)}$:** Present value of paying the strike price  
         • **Net Value:** Difference between these present values
         """)
         
         st.markdown("#### Key Insights")
         st.markdown("""
-        • **At inception (t=0):** V = 0 (forward is fairly priced)  
-        • **During life:** V fluctuates with spot price, rates, and time  
-        • **At maturity (t=T):** V = S_T - K (terminal payoff)  
+        • **At inception (t=0):** $V = 0$ (forward is fairly priced)  
+        • **During life:** $V$ fluctuates with spot price, rates, and time  
+        • **At maturity (t=T):** $V = S_T - K$ (terminal payoff)  
         • **Long position:** Gains when spot rises, loses when spot falls  
         • **Short position:** Opposite of long position
         """)
     
-    with st.expander("⚖️ Risk Management & Applications"):
+    with st.expander("Risk Management & Applications"):
         st.markdown("#### Common Applications")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("##### 🛡️ Hedging Applications")
+            st.markdown("##### Hedging Applications")
             st.markdown("""
             • **Export Company:** Sell foreign currency forward  
             • **Import Company:** Buy foreign currency forward  
@@ -766,7 +766,7 @@ def forward_contracts_tab():
             """)
         
         with col2:
-            st.markdown("##### 📊 Speculation & Arbitrage")
+            st.markdown("##### Speculation & Arbitrage")
             st.markdown("""
             • **Directional Bets:** Take views on future price direction  
             • **Carry Trade:** Exploit interest rate differentials  
@@ -777,20 +777,20 @@ def forward_contracts_tab():
         
         st.markdown("#### Risk Considerations")
         st.markdown("""
-        ##### 🎯 Market Risks
+        ##### Market Risks
         • **Price Risk:** Adverse moves in underlying asset price  
         • **Interest Rate Risk:** Changes in risk-free rates  
         • **Basis Risk:** Forward-spot relationship changes  
         • **Volatility Risk:** Impact of price fluctuations
         
-        ##### 🏦 Operational Risks
+        ##### Operational Risks
         • **Counterparty Risk:** Risk of default by other party  
         • **Liquidity Risk:** Difficulty in closing positions  
         • **Settlement Risk:** Issues with physical delivery  
         • **Regulatory Risk:** Changes in rules and regulations
         """)
     
-    with st.expander("🔢 Advanced Formulas & Calculations"):
+    with st.expander("Advanced Formulas & Calculations"):
         st.markdown("#### Mathematical Framework")
         
         st.markdown("##### Forward Price Formula")
@@ -812,28 +812,21 @@ def forward_contracts_tab():
         )
         
         st.markdown("##### Risk Sensitivities")
-        st.code("""
-Delta (∂F/∂S):
-F_delta = e^((r+c-q)×T) ≈ 1 for short maturities
-
-Rho (∂F/∂r):
-F_rho = S₀ × T × e^((r+c-q)×T)
-
-Theta (∂F/∂T):
-F_theta = S₀ × (r+c-q) × e^((r+c-q)×T)
-
-Storage Sensitivity (∂F/∂c):
-F_storage = S₀ × T × e^((r+c-q)×T)
-
-Dividend Sensitivity (∂F/∂q):
-F_dividend = -S₀ × T × e^((r+c-q)×T)
-        """)
+        st.latex(r"""
+            \begin{aligned}
+            \text{Delta } \left( \frac{\partial F}{\partial S_0} \right): & \quad F_\Delta = e^{(r + c - q)T} \approx 1 \text{ for short maturities} \\
+            \text{Rho } \left( \frac{\partial F}{\partial r} \right): & \quad F_\rho = S_0 \cdot T \cdot e^{(r + c - q)T} \\
+            \text{Theta } \left( \frac{\partial F}{\partial T} \right): & \quad F_\Theta = S_0 \cdot (r + c - q) \cdot e^{(r + c - q)T} \\
+            \text{Storage Sensitivity } \left( \frac{\partial F}{\partial c} \right): & \quad F_{\text{storage}} = S_0 \cdot T \cdot e^{(r + c - q)T} \\
+            \text{Dividend Sensitivity } \left( \frac{\partial F}{\partial q} \right): & \quad F_{\text{dividend}} = -S_0 \cdot T \cdot e^{(r + c - q)T}
+            \end{aligned}
+            """)
         
         st.markdown("##### Basis and Spreads")
         st.markdown("""
-        • **Basis:** F - S (forward premium/discount)  
-        • **Calendar Spread:** F₁ - F₂ (between different maturities)  
-        • **Cross-Asset Spread:** F_asset1 - F_asset2 (between different assets)
+        • **Basis:** $F - S$ (forward premium/discount)  
+        • **Calendar Spread:** $ F_1 - F_2 $ (between different maturities)  
+        • **Cross-Asset Spread:** $ F_{\text{asset1}} - F_{\text{asset2}} $ (between different assets)
         """)
     
     # Enhanced Footer
@@ -841,7 +834,7 @@ F_dividend = -S₀ × T × e^((r+c-q)×T)
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.9rem; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 1px solid #dee2e6;'>
         <div style="margin-bottom: 10px;">
-            <span style="font-size: 2rem;">📈</span>
+            <span style="font-size: 2rem;"></span>
         </div>
         <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1f77b4;">Forward Contract Pricing & Analysis</p>
         <p style="margin: 8px 0; color: #6c757d;">Built with Streamlit & Python</p>
