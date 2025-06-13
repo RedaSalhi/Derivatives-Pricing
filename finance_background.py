@@ -1,6 +1,6 @@
 import streamlit as st
 
-# Enhanced CSS for finance background page
+# Enhanced CSS for finance background page with LaTeX support
 st.markdown("""
 <style>
     .main-header {
@@ -118,15 +118,6 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     
-    .formula-box {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
-    }
-    
     .highlight-box {
         background: rgba(31, 119, 180, 0.1);
         border-left: 4px solid #1f77b4;
@@ -144,19 +135,13 @@ st.markdown("""
         border-left: 3px solid #dc3545;
     }
     
-    .model-comparison {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1rem;
-        margin: 1rem 0;
-    }
-    
     .model-card {
         background: white;
         border-radius: 10px;
         padding: 1.5rem;
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         border-top: 4px solid #28a745;
+        margin: 1rem 0;
         transition: transform 0.3s ease;
     }
     
@@ -177,7 +162,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Main header
-st.markdown('<div class="main-header">Finance Background & Methodology</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">📊 Finance Background & Methodology</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Mathematical Models & Quantitative Framework</div>', unsafe_allow_html=True)
 
 # ----------------------
@@ -186,7 +171,7 @@ st.markdown('<div class="subtitle">Mathematical Models & Quantitative Framework<
 with st.container():
     st.markdown("""
     <div class="objective-box">
-        <div class="section-title">Objective</div>
+        <div class="section-title">🎯 Objective</div>
         <div class="content-text">
             The <strong>Derivatives Pricing App</strong> is built to help users understand and visualize how various financial derivatives are priced and analyzed using different mathematical models. Whether you're a student, a quant, or a curious learner, this app aims to bridge theory and implementation through interactive tools and comprehensive visualizations.
         </div>
@@ -199,17 +184,16 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="methodology-box">
-        <div class="section-title">Methodology & Pricing Models</div>
+        <div class="section-title">⚙️ Methodology & Pricing Models</div>
         <div class="content-text">
-            We implement core pricing methodologies under the <strong>risk-neutral measure</strong> (ℚ), where the present value of any derivative is the discounted expected payoff:
-        </div>
-        <div class="formula-box">
-            <div style="text-align: center; font-size: 1.2rem;">
-                <strong>V(t) = 𝔼<sup>ℚ</sup>[e<sup>-r(T-t)</sup> · Payoff(S<sub>T</sub>) | ℱ<sub>t</sub>]</strong>
-            </div>
+            We implement core pricing methodologies under the <strong>risk-neutral measure</strong> ($\\mathbb{Q}$), where the present value of any derivative is the discounted expected payoff:
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.latex(r'''
+    V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]
+    ''')
 
 # ----------------------
 # Models Section
@@ -217,59 +201,80 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="model-box">
-        <div class="section-title">Pricing Models</div>
-        <div class="model-comparison">
+        <div class="section-title">📈 Pricing Models</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Black-Scholes Model
+    st.markdown("""
+    <div class="model-card">
+        <div class="subsection-title">1. Black–Scholes Model</div>
+        <div class="content-text">
+            Used for <strong>European options</strong>, assumes:
+            <ul>
+                <li>Geometric Brownian Motion (GBM): $dS_t = \\mu S_t dt + \\sigma S_t dW_t$</li>
+                <li>Constant volatility $\\sigma$</li>
+                <li>No arbitrage, no dividends</li>
+            </ul>
+            
+            Closed-form price for a European <strong>Call</strong>:
+        </div>
+    </div>
     """, unsafe_allow_html=True)
     
-    # Model cards
+    st.latex(r'''
+    C = S_0 N(d_1) - K e^{-rT} N(d_2)
+    ''')
+    
+    st.markdown("with:")
+    
+    st.latex(r'''
+    d_1 = \frac{\ln\left(\frac{S_0}{K}\right) + \left( r + \frac{1}{2}\sigma^2 \right) T}{\sigma \sqrt{T}}, \quad
+    d_2 = d_1 - \sigma \sqrt{T}
+    ''')
+
+    # Binomial Tree Model
     st.markdown("""
-        <div class="model-card">
-            <div class="subsection-title">1. Black–Scholes Model</div>
-            <div class="content-text">
-                <strong>Used for:</strong> European options<br>
-                <strong>Assumptions:</strong>
-                <ul>
-                    <li>Geometric Brownian Motion (GBM)</li>
-                    <li>Constant volatility σ</li>
-                    <li>No arbitrage, no dividends</li>
-                </ul>
-                <strong>European Call Price:</strong><br>
-                C = S₀N(d₁) - Ke<sup>-rT</sup>N(d₂)
-            </div>
+    <div class="model-card">
+        <div class="subsection-title">2. Binomial Tree Model</div>
+        <div class="content-text">
+            Used for <strong>European and American options</strong>:
+            <ul>
+                <li>Builds a discrete recombining tree with $N$ steps</li>
+                <li>Up/down factors: $u = e^{\\sigma \\sqrt{\\Delta t}}, \\quad d = \\frac{1}{u}$</li>
+                <li>Risk-neutral probability:</li>
+            </ul>
         </div>
-        
-        <div class="model-card">
-            <div class="subsection-title">2. Binomial Tree Model</div>
-            <div class="content-text">
-                <strong>Used for:</strong> European & American options<br>
-                <strong>Features:</strong>
-                <ul>
-                    <li>Discrete recombining tree with N steps</li>
-                    <li>Up/down factors: u = e<sup>σ√Δt</sup>, d = 1/u</li>
-                    <li>Backward induction pricing</li>
-                </ul>
-                <strong>Risk-neutral probability:</strong><br>
-                p = (e<sup>rΔt</sup> - d)/(u - d)
-            </div>
-        </div>
-        
-        <div class="model-card">
-            <div class="subsection-title">3. Monte Carlo Simulation</div>
-            <div class="content-text">
-                <strong>Used for:</strong> Path-dependent options<br>
-                <strong>Applications:</strong>
-                <ul>
-                    <li>Asian options</li>
-                    <li>Lookback options</li>
-                    <li>Barrier options</li>
-                </ul>
-                <strong>Price Estimation:</strong><br>
-                V₀ ≈ e<sup>-rT</sup> · (1/M)∑Payoff<sup>(i)</sup>
-            </div>
-        </div>
-    </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.latex(r'''
+    p = \frac{e^{r \Delta t} - d}{u - d}
+    ''')
+    
+    st.markdown("Backward induction yields the fair price. Useful for early-exercise features and American options. Adapted for **barrier** and **lookback** options.")
+
+    # Monte Carlo Simulation
+    st.markdown("""
+    <div class="model-card">
+        <div class="subsection-title">3. Monte Carlo Simulation</div>
+        <div class="content-text">
+            Used for <strong>path-dependent options</strong> (e.g., Asian, Lookback). Simulates $M$ sample paths of the underlying:
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.latex(r'''
+    S_{t+\Delta t} = S_t \cdot \exp\left( \left( r - \frac{1}{2}\sigma^2 \right)\Delta t + \sigma \sqrt{\Delta t} \cdot Z \right), \quad Z \sim \mathcal{N}(0,1)
+    ''')
+    
+    st.markdown("Option value estimated as:")
+    
+    st.latex(r'''
+    V_0 \approx e^{-rT} \cdot \frac{1}{M} \sum_{i=1}^M \text{Payoff}^{(i)}
+    ''')
+    
+    st.markdown("Extended with **Longstaff-Schwartz** regression for American options.")
 
 # ----------------------
 # Greeks Section
@@ -277,52 +282,63 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="greeks-box">
-        <div class="section-title">Greeks & Sensitivities</div>
+        <div class="section-title">📐 Greeks & Sensitivities</div>
         <div class="content-text">
             The app computes standard <strong>Greeks</strong> — partial derivatives of the option price with respect to key parameters — for <strong>vanilla options</strong> under the <strong>Black-Scholes</strong> model.
         </div>
+    </div>
     """, unsafe_allow_html=True)
     
-    # Greeks grid
+    # Greeks with LaTeX
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
         <div class="greek-item">
             <strong>🔹 Delta (Δ)</strong><br>
-            Sensitivity to underlying price changes<br>
-            <em>Δ = ∂V/∂S</em>
-        </div>
-        
-        <div class="greek-item">
-            <strong>🔹 Gamma (Γ)</strong><br>
-            Second derivative w.r.t. underlying price<br>
-            <em>Γ = ∂²V/∂S²</em>
-        </div>
-        
-        <div class="greek-item">
-            <strong>🔹 Vega (ν)</strong><br>
-            Sensitivity to volatility changes<br>
-            <em>ν = ∂V/∂σ</em>
+            Represents sensitivity of the option price $V$ to changes in the underlying asset price $S$:
         </div>
         """, unsafe_allow_html=True)
+        st.latex(r'\Delta = \frac{\partial V}{\partial S}')
+        
+        st.markdown("""
+        <div class="greek-item">
+            <strong>🔹 Gamma (Γ)</strong><br>
+            Second derivative of the option price with respect to $S$. Measures the curvature of $V(S)$:
+        </div>
+        """, unsafe_allow_html=True)
+        st.latex(r'\Gamma = \frac{\partial^2 V}{\partial S^2}')
+        
+        st.markdown("""
+        <div class="greek-item">
+            <strong>🔹 Vega (ν)</strong><br>
+            Sensitivity of the option price to volatility $\\sigma$:
+        </div>
+        """, unsafe_allow_html=True)
+        st.latex(r'\nu = \frac{\partial V}{\partial \sigma}')
     
     with col2:
         st.markdown("""
         <div class="greek-item">
             <strong>🔹 Theta (Θ)</strong><br>
-            Time decay sensitivity<br>
-            <em>Θ = ∂V/∂t</em>
-        </div>
-        
-        <div class="greek-item">
-            <strong>🔹 Rho (ρ)</strong><br>
-            Interest rate sensitivity<br>
-            <em>ρ = ∂V/∂r</em>
+            Rate of change of the option price with respect to time $t$:
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.latex(r'\Theta = \frac{\partial V}{\partial t}')
+        
+        st.markdown("""
+        <div class="greek-item">
+            <strong>🔹 Rho (ρ)</strong><br>
+            Sensitivity of the option price to the risk-free interest rate $r$:
+        </div>
+        """, unsafe_allow_html=True)
+        st.latex(r'\rho = \frac{\partial V}{\partial r}')
+
+    st.markdown("""
+    <div class="content-text">
+        For each option, these sensitivities are computed numerically and visualized to show how risk exposure evolves across strike prices and underlying values.
+    </div>
+    """, unsafe_allow_html=True)
 
 # ----------------------
 # Strategy Section
@@ -330,7 +346,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="strategy-box">
-        <div class="section-title">Multi-Leg Strategies</div>
+        <div class="section-title">🔄 Multi-Leg Strategies</div>
         <div class="content-text">
             In real-world trading, investors often combine multiple options into <strong>sophisticated strategies</strong>:
         </div>
@@ -354,27 +370,51 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="risk-neutral-box">
-        <div class="section-title">Risk-Neutral Framework</div>
+        <div class="section-title">⚖️ Risk-Neutral Framework</div>
         <div class="content-text">
-            All pricing models in this app are based on the <strong>risk-neutral measure</strong> ℚ, under which the discounted price of a traded asset is a <strong>martingale</strong>. This leads to the fundamental pricing formula:
-        </div>
-        <div class="formula-box">
-            <div style="text-align: center; font-size: 1.1rem;">
-                <strong>V(t) = 𝔼<sup>ℚ</sup>[e<sup>-r(T-t)</sup> · Payoff(S<sub>T</sub>) | ℱ<sub>t</sub>]</strong>
-            </div>
-        </div>
-        <div class="highlight-box">
-            <strong>Key Components:</strong>
-            <ul>
-                <li><strong>V(t):</strong> Derivative value at time t</li>
-                <li><strong>r:</strong> Risk-free interest rate</li>
-                <li><strong>T:</strong> Time to maturity</li>
-                <li><strong>S<sub>T</sub>:</strong> Underlying asset price at maturity</li>
-                <li><strong>ℱ<sub>t</sub>:</strong> Information available at time t</li>
-            </ul>
+            All pricing models in this app are based on the <strong>risk-neutral measure</strong> $\\mathbb{Q}$, under which the discounted price of a traded asset is a <strong>martingale</strong>. This leads to the fundamental pricing formula:
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    st.latex(r'''
+    V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]
+    ''')
+    
+    st.markdown("""
+    <div class="highlight-box">
+        <strong>Where:</strong>
+        <ul>
+            <li>$V(t)$ is the value of the derivative at time $t$</li>
+            <li>$r$ is the risk-free interest rate</li>
+            <li>$T$ is the maturity</li>
+            <li>$S_T$ is the underlying asset price at time $T$</li>
+            <li>$\\mathcal{F}_t$ is the information available at time $t$</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Application in Models")
+    
+    st.markdown("- In **Black-Scholes**, we transform real-world drift $\\mu$ to $r$, and simulate:")
+    
+    st.latex(r'''
+    dS_t = r S_t dt + \sigma S_t dW_t^{\mathbb{Q}}
+    ''')
+    
+    st.markdown("- In **Binomial models**, we construct a **risk-neutral probability**:")
+    
+    st.latex(r'''
+    p = \frac{e^{r \Delta t} - d}{u - d}
+    ''')
+    
+    st.markdown("- In **Monte Carlo**, each simulated payoff is discounted:")
+    
+    st.latex(r'''
+    V_0 \approx e^{-rT} \cdot \frac{1}{M} \sum_{i=1}^M \text{Payoff}^{(i)}
+    ''')
+    
+    st.markdown("This unified framework enables the consistent pricing of a wide range of derivatives.")
 
 # ----------------------
 # Engineering Section
@@ -382,7 +422,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="engineering-box">
-        <div class="section-title">Engineering & Design</div>
+        <div class="section-title">🔧 Engineering & Design</div>
         <div class="content-text">
             All code is written in <strong>Python</strong> and available on <strong>GitHub</strong>. The application features:
         </div>
