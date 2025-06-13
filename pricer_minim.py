@@ -17,103 +17,103 @@ from tabs.swaps import swaps_tab
 from tabs.interest_rate_instruments import interest_rate_instruments_tab
 
 # Custom CSS for enhanced styling
-    st.markdown("""
-    <style>
-        .main-header {
-            font-size: 3rem;
-            font-weight: bold;
-            text-align: center;
-            color: #1f77b4;
-            margin-bottom: 2rem;
-        }
-        .sub-header {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ff7f0e;
-            margin: 1rem 0;
-        }
-        .metric-container {
-            background-color: #f0f2f6;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 0.5rem 0;
-        }
-        .info-box {
-            background-color: #e8f4f8;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #1f77b4;
-            margin: 1rem 0;
-        }
-        .warning-box {
-            background-color: #fff3cd;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #ffc107;
-            margin: 1rem 0;
-        }
-        .formula {
-            text-align: center;
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #1f77b4;
-            margin: 15px 0;
-            padding: 15px;
-            background-color: #f0f8ff;
-            border-radius: 8px;
-            border: 1px solid #d0e7ff;
-        }
-        .section-title {
-            color: #1f77b4;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        .info-box h4, .warning-box h4 {
-            color: #1f77b4;
-            margin-bottom: 15px;
-            margin-top: 0;
-        }
-        .warning-box h4 {
-            color: #856404;
-        }
-        .greeks-delta {
-            background-color: #e8f4f8;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #1f77b4;
-        }
-        .greeks-rho {
-            background-color: #fff3cd;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #ffc107;
-        }
-        .greeks-vega {
-            background-color: #d1ecf1;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #17a2b8;
-        }
-        .greeks-theta {
-            background-color: #f8d7da;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #dc3545;
-        }
-        .greeks-gamma {
-            background-color: #d4edda;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #28a745;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+st.markdown("""
+<style>
+    .main-header {
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        color: #1f77b4;
+        margin-bottom: 2rem;
+    }
+    .sub-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ff7f0e;
+        margin: 1rem 0;
+    }
+    .metric-container {
+        background-color: #f0f2f6;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin: 0.5rem 0;
+    }
+    .info-box {
+        background-color: #e8f4f8;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #1f77b4;
+        margin: 1rem 0;
+    }
+    .warning-box {
+        background-color: #fff3cd;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border-left: 4px solid #ffc107;
+        margin: 1rem 0;
+    }
+    .formula {
+        text-align: center;
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #1f77b4;
+        margin: 15px 0;
+        padding: 15px;
+        background-color: #f0f8ff;
+        border-radius: 8px;
+        border: 1px solid #d0e7ff;
+    }
+    .section-title {
+        color: #1f77b4;
+        font-weight: bold;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+    }
+    .info-box h4, .warning-box h4 {
+        color: #1f77b4;
+        margin-bottom: 15px;
+        margin-top: 0;
+    }
+    .warning-box h4 {
+        color: #856404;
+    }
+    .greeks-delta {
+        background-color: #e8f4f8;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 10px 0;
+        border-left: 4px solid #1f77b4;
+    }
+    .greeks-rho {
+        background-color: #fff3cd;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 10px 0;
+        border-left: 4px solid #ffc107;
+    }
+    .greeks-vega {
+        background-color: #d1ecf1;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 10px 0;
+        border-left: 4px solid #17a2b8;
+    }
+    .greeks-theta {
+        background-color: #f8d7da;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 10px 0;
+        border-left: 4px solid #dc3545;
+    }
+    .greeks-gamma {
+        background-color: #d4edda;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 10px 0;
+        border-left: 4px solid #28a745;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 
 
