@@ -76,7 +76,7 @@ def _parameter_estimation_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>📊 Data Configuration</h4>
+            <h4>Data Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -134,7 +134,7 @@ def _parameter_estimation_tab():
     with col2:
         st.markdown("""
         <div class="info-box">
-            <h4>📈 Estimated Parameters</h4>
+            <h4>Estimated Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -184,7 +184,7 @@ def _parameter_estimation_tab():
                 </table>
                 <br>
                 <p style="text-align: center; font-weight: bold; color: #1f77b4; font-size: 1.1em;">
-                    📊 Data Source: {params['ticker']}
+                    Data Source: {params['ticker']}
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -224,7 +224,7 @@ def _simulation_yield_curves_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>🎛️ Simulation Parameters</h4>
+            <h4>Simulation Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -234,7 +234,7 @@ def _simulation_yield_curves_tab():
 
         st.markdown("""
         <div class="info-box">
-            <h4>📊 Yield Curve Configuration</h4>
+            <h4>Yield Curve Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -301,7 +301,7 @@ def _simulation_yield_curves_tab():
                 # Descriptive statistics
                 st.markdown(f"""
                 <div class="metric-container">
-                    <h4>📊 Final Rate Statistics</h4>
+                    <h4>Final Rate Statistics</h4>
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                             <td style="padding: 12px; font-weight: bold;">Statistic</td>
@@ -353,7 +353,7 @@ def _bond_pricing_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>🏦 Bond Parameters</h4>
+            <h4>Bond Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -371,7 +371,7 @@ def _bond_pricing_tab():
 
         st.markdown("""
         <div class="info-box">
-            <h4>📈 Sensitivity Analysis</h4>
+            <h4>Sensitivity Analysis</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -399,7 +399,7 @@ def _bond_pricing_tab():
                         
                         st.markdown(f"""
                         <div class="metric-container">
-                            <h4>💰 Zero-Coupon Bond Pricing Results</h4>
+                            <h4>Zero-Coupon Bond Pricing Results</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -435,7 +435,7 @@ def _bond_pricing_tab():
                         
                         st.markdown(f"""
                         <div class="metric-container">
-                            <h4>💰 Coupon Bond Pricing Results</h4>
+                            <h4>Coupon Bond Pricing Results</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -464,7 +464,7 @@ def _bond_pricing_tab():
                         """, unsafe_allow_html=True)
 
                     # Sensitivity Analysis
-                    st.markdown('<div class="sub-header">📊 Sensitivity Analysis</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="sub-header">Sensitivity Analysis</div>', unsafe_allow_html=True)
 
                     fig = go.Figure()
 
@@ -548,7 +548,7 @@ def _bond_options_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>📋 Option Parameters</h4>
+            <h4>Option Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -607,7 +607,7 @@ def _bond_options_tab():
                         
                         st.markdown(f"""
                         <div class="metric-container">
-                            <h4>💰 {option_type} Option Pricing Results (Analytical)</h4>
+                            <h4>{option_type} Option Pricing Results (Analytical)</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -643,7 +643,7 @@ def _bond_options_tab():
                         
                         st.markdown(f"""
                         <div class="metric-container">
-                            <h4>💰 {option_type} Option Pricing Results (Monte Carlo)</h4>
+                            <h4>{option_type} Option Pricing Results (Monte Carlo)</h4>
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -672,7 +672,7 @@ def _bond_options_tab():
                     # Summary parameters table
                     st.markdown(f"""
                     <div class="info-box">
-                        <h4>📊 Option Configuration Summary</h4>
+                        <h4>Option Configuration Summary</h4>
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                 <td style="padding: 10px; font-weight: bold;">Parameter</td>
@@ -751,7 +751,7 @@ def _greeks_analysis_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>🎛️ Greeks Configuration</h4>
+            <h4>Greeks Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
 
