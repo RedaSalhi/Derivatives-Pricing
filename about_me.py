@@ -195,16 +195,72 @@ with st.container():
 # ----------------------
 with st.container():
     st.markdown("""
+    <style>
+    .links-box {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        border: 1px solid #dee2e6;
+        margin: 1rem 0;
+    }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #495057;
+        text-align: center;
+    }
+    .link-item {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    .link-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.15);
+    }
+    .link-item a {
+        color: #495057;
+        text-decoration: none;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .link-item a:hover {
+        color: #6c757d;
+    }
+    .email-link {
+        color: #495057;
+        text-decoration: none;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .email-link:hover {
+        color: #6c757d;
+    }
+    </style>
     <div class="links-box">
         <div class="section-title">🔗 Connect With Me</div>
         <div class="link-item">
-            💼 <a href="https://www.linkedin.com/in/reda-salhi-195297290/" target="_blank">LinkedIn Profile</a>
+            <a href="https://www.linkedin.com/in/reda-salhi-195297290/" target="_blank">
+                📊 LinkedIn Profile
+            </a>
         </div>
         <div class="link-item">
-            💻 <a href="https://github.com/RedaSalhi" target="_blank">GitHub Portfolio</a>
+            <a href="https://github.com/RedaSalhi" target="_blank">
+                💻 GitHub Portfolio
+            </a>
         </div>
         <div class="link-item">
-            📧 Email: salhi.reda47@gmail.com
+            <a href="mailto:salhi.reda47@gmail.com" class="email-link">
+                📧 salhi.reda47@gmail.com
+            </a>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -296,32 +352,30 @@ with st.container():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("### 🔧 Technical Skills")
+        st.markdown("### Technical Skills")
         st.markdown("""
-        - **Programming**: Python, R, MATLAB
-        - **Finance**: Derivatives Pricing, Risk Management
+        - **Programming**: Python, SQL, MATLAB, Excel
+        - **Finance**: Derivatives Pricing, Risk Management, Portfolio Optimization
         - **Tools**: Streamlit, NumPy, Pandas
         - **Mathematics**: Stochastic Calculus, Statistics
         """)
     
     with col2:
-        st.markdown("### 📚 Areas of Interest")
+        st.markdown("### Areas of Interest")
         st.markdown("""
         - Quantitative Finance
         - Financial Engineering
-        - Algorithmic Trading
         - Risk Management
         - Economic Research
         """)
     
     with col3:
-        st.markdown("### 🎯 Current Focus")
+        st.markdown("### Current Focus")
         st.markdown("""
-        - Advanced Derivatives Pricing
+        - Derivatives Pricing
         - Monte Carlo Simulations
         - Interest Rate Models
         - Portfolio Optimization
-        - Financial Data Analysis
         """)
 
 # Footer
