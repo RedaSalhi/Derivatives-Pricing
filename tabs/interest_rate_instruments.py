@@ -846,29 +846,23 @@ def _greeks_analysis_tab():
         st.markdown("""
         <div class="info-box">
             <h4>Vasicek Bond Pricing Formulas</h4>
+    
             <h5>Zero-Coupon Bond:</h5>
-        """, unsafe_allow_html=True)
+            <p>\\( P(t,T) = A(t,T) \\cdot e^{-B(t,T) \\cdot r(t)} \\)</p>
+            <p>\\( B(t,T) = \\frac{1 - e^{-a(T-t)}}{a} \\)</p>
+            <p>\\( A(t,T) = \\exp \\left[ \\left( \\lambda - \\frac{\\sigma^2}{2a^2} \\right)(B(t,T) - (T-t)) - \\frac{\\sigma^2 B(t,T)^2}{4a} \\right] \\)</p>
     
-        st.latex(r"P(t,T) = A(t,T) \cdot \exp(-B(t,T) \cdot r(t))")
-        st.latex(r"B(t,T) = \frac{1 - e^{-a(T - t)}}{a}")
-        st.latex(r"A(t,T) = \exp\left[\left(\lambda - \frac{\sigma^2}{2a^2}\right)(B(t,T) - (T - t)) - \frac{\sigma^2 B(t,T)^2}{4a}\right]")
-    
-        st.markdown("""
             <h5>Coupon Bond:</h5>
             <p>Sum of discounted coupons and principal:</p>
-        """, unsafe_allow_html=True)
+            <p>\\( P = \\sum_i C_i \\cdot P(t,T_i) + F \\cdot P(t,T) \\)</p>
     
-        st.latex(r"P = \sum_i C_i \cdot P(t,T_i) + F \cdot P(t,T)")
-    
-        st.markdown("""
             <h5>Bond Option Price:</h5>
             <p>Black-like formula:</p>
+            <p>\\( \mathrm{Call} = P(t,T_1) \\cdot N(d_1) - K \\cdot P(t,T_2) \\cdot N(d_2) \\)</p>
+            <p>\\( \mathrm{Put} = K \\cdot P(t,T_2) \\cdot N(-d_2) - P(t,T_1) \\cdot N(-d_1) \\)</p>
+        </div>
         """, unsafe_allow_html=True)
-    
-        st.latex(r"\text{Call} = P(t,T_1) \cdot N(d_1) - K \cdot P(t,T_2) \cdot N(d_2)")
-        st.latex(r"\text{Put} = K \cdot P(t,T_2) \cdot N(-d_2) - P(t,T_1) \cdot N(-d_1)")
-    
-        st.markdown("</div>", unsafe_allow_html=True)
+
 
     
     # --- Greeks ---
