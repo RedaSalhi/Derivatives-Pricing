@@ -111,12 +111,40 @@ st.markdown("""
         margin: 10px 0;
         border-left: 4px solid #28a745;
     }
+    .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+        }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: #f0f2f6;
+        border-radius: 4px 4px 0px 0px;
+        gap: 4px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #1f77b4;
+        color: white;
+    }
+    .metric-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        border-left: 4px solid #1f77b4;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 
 
-
+# Add custom CSS for better styling
+    st.markdown("""
+    <style>
+        
+    </style>
+    """, unsafe_allow_html=True)
 
 
 
