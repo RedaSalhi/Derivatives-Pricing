@@ -1,3 +1,6 @@
+# tabs/exotic_options.py
+# Exotic Options Tab - Tab 4
+
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -6,8 +9,14 @@ import plotly.express as px
 from scipy.stats import norm
 import math
 
-def option_strategies_tab():
-    """Option Strategies Tab Content"""
+# Import your pricing functions
+from pricing.exotic_options import *
+from pricing.utils.monte_carlo import *
+from pricing.utils.numerical_methods import *
+
+
+def exotic_options_tab():
+    """Exotic Options Tab Content"""
     
     # Custom CSS for enhanced styling
     st.markdown("""
@@ -16,223 +25,207 @@ def option_strategies_tab():
             font-size: 3rem;
             font-weight: bold;
             text-align: center;
-            color: #1f77b4;
+            color: #9c27b0;
             margin-bottom: 2rem;
         }
         .sub-header {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #ff7f0e;
+            color: #ff6f00;
             margin: 1rem 0;
         }
         .metric-container {
-            background-color: #f0f2f6;
+            background-color: #f3e5f5;
             padding: 1rem;
             border-radius: 0.5rem;
             margin: 0.5rem 0;
+            border-left: 4px solid #9c27b0;
         }
         .info-box {
-            background-color: #e8f4f8;
+            background-color: #f3e5f5;
             padding: 1.5rem;
             border-radius: 0.5rem;
-            border-left: 4px solid #1f77b4;
+            border-left: 4px solid #9c27b0;
             margin: 1rem 0;
         }
         .warning-box {
-            background-color: #fff3cd;
+            background-color: #fff8e1;
             padding: 1.5rem;
             border-radius: 0.5rem;
-            border-left: 4px solid #ffc107;
+            border-left: 4px solid #ff8f00;
             margin: 1rem 0;
         }
         .success-box {
-            background-color: #d4edda;
+            background-color: #e8f5e8;
             padding: 1.5rem;
             border-radius: 0.5rem;
-            border-left: 4px solid #28a745;
+            border-left: 4px solid #4caf50;
             margin: 1rem 0;
         }
         .error-box {
-            background-color: #f8d7da;
+            background-color: #ffebee;
             padding: 1.5rem;
             border-radius: 0.5rem;
-            border-left: 4px solid #dc3545;
+            border-left: 4px solid #f44336;
             margin: 1rem 0;
         }
-        .setup-incomplete {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid #ffc107;
-            text-align: center;
-        }
-        .setup-complete {
-            background: linear-gradient(135deg, #d4edda 0%, #a8e6cf 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 2px solid #28a745;
-            text-align: center;
-            margin: 1rem 0;
-        }
-        .parameter-grid {
-            background-color: #f8f9fa;
+        .exotic-type-card {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
             padding: 15px;
             border-radius: 10px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #9c27b0;
             margin: 10px 0;
         }
-        .strategy-leg {
-            background-color: #e9ecef;
+        .parameter-grid {
+            background-color: #fafafa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            margin: 10px 0;
+        }
+        .pricing-result {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #4caf50;
+        }
+        .complexity-indicator {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffcc02 100%);
             padding: 10px;
             border-radius: 8px;
-            margin: 5px 0;
-            border-left: 3px solid #17a2b8;
+            border: 1px solid #ff8f00;
+            text-align: center;
         }
-        .greek-analysis {
-            background: linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 100%);
+        .monte-carlo-progress {
+            background-color: #e3f2fd;
             padding: 15px;
             border-radius: 10px;
-            border: 1px solid #17a2b8;
+            border: 1px solid #2196f3;
         }
-        .payoff-stats {
-            background: linear-gradient(135deg, #f0f2f6 0%, #e9ecef 100%);
+        .barrier-visualization {
+            background: linear-gradient(135deg, #f1f8e9 0%, #dcedc8 100%);
             padding: 15px;
             border-radius: 10px;
-            border: 1px solid #6c757d;
+            border: 1px solid #8bc34a;
         }
-        .results-table {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #dee2e6;
+        .path-dependent-info {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e91e63;
         }
     </style>
     """, unsafe_allow_html=True)
     
     # Main title
-    st.markdown('<div class="main-header">🎯 Advanced Options Strategy Suite</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">🌟 Exotic Options Pricing Laboratory</div>', unsafe_allow_html=True)
     st.markdown("---")
     
-    # Initialize session state for setup completion
-    if 'setup_completed' not in st.session_state:
-        st.session_state.setup_completed = False
+    # Initialize session state
+    if 'exotic_setup_completed' not in st.session_state:
+        st.session_state.exotic_setup_completed = False
     
-    # Initialize session state for parameters
-    if 'global_params' not in st.session_state:
-        st.session_state.global_params = {
+    if 'exotic_params' not in st.session_state:
+        st.session_state.exotic_params = {
             'spot_price': 100.0,
             'risk_free_rate': 0.05,
             'dividend_yield': 0.0,
-            'volatility': 0.2,
+            'volatility': 0.25,
             'time_to_expiry': 1.0,
-            'model': 'black-scholes',
-            'n_steps': 100,
-            'n_simulations': 10000
+            'n_simulations': 100000,
+            'n_time_steps': 252
         }
 
     # Tab structure
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "⚙️ Setup & Parameters",
-        "📊 Single Option Pricing", 
-        "🔧 Strategy Builder", 
-        "📈 Payoff Analysis", 
-        "🎯 Greeks Analysis",
-        "🔬 Sensitivity Analysis"
+    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "⚙️ Exotic Setup",
+        "🎯 Barrier Options", 
+        "🔗 Path-Dependent Options", 
+        "🏺 Asian Options", 
+        "🎲 Monte Carlo Analysis",
+        "📊 Exotic Strategies"
     ])
     
-    with tab1:
-        _setup_tab()
+    with tab0:
+        _exotic_setup_tab()
     
     # Extract parameters for other tabs
-    if st.session_state.setup_completed:
-        params = st.session_state.global_params
+    if st.session_state.exotic_setup_completed:
+        params = st.session_state.exotic_params
+        
+        with tab1:
+            _barrier_options_tab(**params)
         
         with tab2:
-            _single_option_tab(params)
+            _path_dependent_tab(**params)
         
         with tab3:
-            _strategy_builder_tab(params)
+            _asian_options_tab(**params)
         
         with tab4:
-            _payoff_analysis_tab(params)
+            _monte_carlo_tab(**params)
         
         with tab5:
-            _greeks_analysis_tab(params)
-        
-        with tab6:
-            _sensitivity_analysis_tab(params)
+            _exotic_strategies_tab(**params)
     
-    else:
-        # Show warning for incomplete setup in other tabs
-        for tab in [tab2, tab3, tab4, tab5, tab6]:
-            with tab:
-                st.markdown("""
-                <div class="warning-box">
-                    <h4>⚠️ Setup Required</h4>
-                    <p>Please complete the setup in the <strong>Setup & Parameters</strong> tab first!</p>
-                    <p><strong>Next Step:</strong> Go to Setup & Parameters → Configure your parameters</p>
-                </div>
-                """, unsafe_allow_html=True)
-    
-    # Footer
+    # Enhanced Footer
     st.markdown("---")
     st.markdown("""
-    <div style='text-align: center; color: #666; font-size: 0.9rem; margin-top: 2rem; padding: 2rem; 
-                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; 
-                border: 1px solid #dee2e6;'>
+    <div style='text-align: center; color: #666; font-size: 0.9rem; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); border-radius: 15px; border: 1px solid #9c27b0;'>
         <div style="margin-bottom: 10px;">
-            <span style="font-size: 2rem;">🎯</span>
+            <span style="font-size: 2rem;">🌟</span>
         </div>
-        <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1f77b4;">Advanced Options Strategy Suite</p>
-        <p style="margin: 8px 0; color: #6c757d;">Built with Streamlit & Python</p>
-        <p style="margin: 0; color: #dc3545; font-weight: bold;">⚠️ For educational purposes only. Not financial advice.</p>
+        <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #9c27b0;">Exotic Options Pricing Laboratory</p>
+        <p style="margin: 8px 0; color: #6c757d;">Advanced derivatives pricing with Monte Carlo simulation</p>
+        <p style="margin: 0; color: #f44336; font-weight: bold;">⚠️ For educational and research purposes only. Not financial advice.</p>
     </div>
     """, unsafe_allow_html=True)
 
 
-def _setup_tab():
-    """Setup and Parameters Tab"""
-    st.markdown('<div class="sub-header">🚀 Welcome to the Options Strategy Suite!</div>', unsafe_allow_html=True)
+def _exotic_setup_tab():
+    """Exotic Options Setup Tab"""
+    st.markdown('<div class="sub-header">🚀 Exotic Options Configuration</div>', unsafe_allow_html=True)
     
     # Welcome message
-    if not st.session_state.setup_completed:
+    if not st.session_state.exotic_setup_completed:
         st.markdown("""
-        <div class="setup-incomplete">
-            <h2 style="color: #856404; margin-top: 0;">🎯 Quick Start Guide</h2>
-            <p style="font-size: 1.1em; margin-bottom: 0;">
-                Configure your market parameters below to unlock advanced options analysis tools!
+        <div class="warning-box">
+            <h2 style="color: #e65100; margin-top: 0;">🌟 Welcome to Exotic Options!</h2>
+            <p style="font-size: 1.1em;">
+                Configure your market parameters to unlock advanced exotic derivatives pricing and analysis tools.
             </p>
+            <p><strong>Featured:</strong> Barrier options, Asian options, lookback options, and Monte Carlo analysis.</p>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
-        <div class="setup-complete">
-            <h3 style="color: #155724; margin-top: 0;">✅ Setup Complete!</h3>
-            <p style="margin-bottom: 0;">All analysis tools are now available. You can modify parameters anytime.</p>
+        <div class="success-box">
+            <h3 style="color: #2e7d32; margin-top: 0;">✅ Exotic Options Ready!</h3>
+            <p>All advanced pricing tools are available. Modify parameters anytime to see instant updates.</p>
         </div>
         """, unsafe_allow_html=True)
     
-    # Feature overview
+    # Exotic options overview
     st.markdown("""
     <div class="info-box">
-        <h3>🎯 Suite Capabilities</h3>
+        <h3>🌟 Exotic Options Laboratory</h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
             <div>
-                <h4 style="color: #1f77b4; margin-bottom: 10px;">📊 Pricing & Valuation</h4>
+                <h4 style="color: #9c27b0; margin-bottom: 10px;">🎯 Barrier Options</h4>
                 <ul style="margin: 0; padding-left: 20px;">
-                    <li>Single option pricing with multiple models</li>
-                    <li>Multi-leg strategy construction</li>
-                    <li>Real-time parameter sensitivity</li>
-                    <li>Model comparison analysis</li>
+                    <li>Knock-in and knock-out options</li>
+                    <li>Up-and-in/out, down-and-in/out variants</li>
+                    <li>Continuous barrier monitoring</li>
+                    <li>Rebate payments upon barrier breach</li>
                 </ul>
             </div>
             <div>
-                <h4 style="color: #1f77b4; margin-bottom: 10px;">📈 Risk Management</h4>
+                <h4 style="color: #9c27b0; margin-bottom: 10px;">🏺 Path-Dependent Options</h4>
                 <ul style="margin: 0; padding-left: 20px;">
-                    <li>Interactive payoff diagrams</li>
-                    <li>Greeks analysis and visualization</li>
-                    <li>Multi-parameter sensitivity heatmaps</li>
-                    <li>Breakeven and scenario analysis</li>
+                    <li>Asian options (average price/strike)</li>
+                    <li>Lookback options (floating/fixed)</li>
+                    <li>Cliquet options with performance caps</li>
+                    <li>Monte Carlo simulation required</li>
                 </ul>
             </div>
         </div>
@@ -241,1325 +234,862 @@ def _setup_tab():
     
     st.markdown("---")
     
-    # Global Parameters Section
-    st.markdown('<div class="sub-header">📊 Global Market Parameters</div>', unsafe_allow_html=True)
+    # Market Parameters
+    st.markdown('<div class="sub-header">📊 Market Parameters</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
         <div class="parameter-grid">
-            <h4 style="color: #1f77b4; margin-top: 0;">💰 Asset & Market Parameters</h4>
+            <h4 style="color: #9c27b0; margin-top: 0;">💰 Core Market Data</h4>
         </div>
         """, unsafe_allow_html=True)
         
         spot_price = st.number_input(
-            "Spot Price (S)", 
-            value=st.session_state.global_params['spot_price'], 
+            "Current Spot Price (S₀)", 
+            value=st.session_state.exotic_params['spot_price'], 
             min_value=0.1, 
             step=0.1, 
-            key="setup_spot",
+            key="exotic_spot",
             help="Current price of the underlying asset"
         )
         
         risk_free_rate = st.number_input(
             "Risk-free Rate (r)", 
-            value=st.session_state.global_params['risk_free_rate'], 
+            value=st.session_state.exotic_params['risk_free_rate'], 
             min_value=0.0, 
             max_value=1.0, 
             step=0.001, 
             format="%.3f", 
-            key="setup_rate",
-            help="Annual risk-free interest rate (e.g., 0.05 = 5%)"
+            key="exotic_rate",
+            help="Continuously compounded risk-free rate"
         )
         
         dividend_yield = st.number_input(
             "Dividend Yield (q)", 
-            value=st.session_state.global_params['dividend_yield'], 
+            value=st.session_state.exotic_params['dividend_yield'], 
             min_value=0.0, 
             max_value=1.0, 
             step=0.001, 
             format="%.3f", 
-            key="setup_dividend",
-            help="Annual dividend yield (e.g., 0.02 = 2%)"
+            key="exotic_dividend",
+            help="Continuous dividend yield"
         )
     
     with col2:
         st.markdown("""
         <div class="parameter-grid">
-            <h4 style="color: #1f77b4; margin-top: 0;">📊 Option Parameters</h4>
+            <h4 style="color: #9c27b0; margin-top: 0;">📈 Volatility & Time</h4>
         </div>
         """, unsafe_allow_html=True)
         
         volatility = st.number_input(
             "Volatility (σ)", 
-            value=st.session_state.global_params['volatility'], 
+            value=st.session_state.exotic_params['volatility'], 
             min_value=0.01, 
-            max_value=2.0, 
+            max_value=3.0, 
             step=0.01, 
             format="%.3f", 
-            key="setup_vol",
-            help="Annual volatility (e.g., 0.20 = 20%)"
+            key="exotic_vol",
+            help="Annual volatility for geometric Brownian motion"
         )
         
         time_to_expiry = st.number_input(
             "Time to Expiry (T)", 
-            value=st.session_state.global_params['time_to_expiry'], 
-            min_value=0.001, 
+            value=st.session_state.exotic_params['time_to_expiry'], 
+            min_value=0.01, 
             step=0.01, 
             format="%.3f", 
-            key="setup_time",
-            help="Time to expiration in years (e.g., 0.25 = 3 months)"
+            key="exotic_time",
+            help="Time to expiration in years"
         )
     
     st.markdown("---")
     
-    # Model Selection
-    st.markdown('<div class="sub-header">🔧 Pricing Model Configuration</div>', unsafe_allow_html=True)
+    # Monte Carlo Configuration
+    st.markdown('<div class="sub-header">🎲 Monte Carlo Configuration</div>', unsafe_allow_html=True)
     
-    col3, col4 = st.columns(2)
+    mc_col1, mc_col2 = st.columns(2)
     
-    with col3:
-        model = st.selectbox(
-            "Select Pricing Model", 
-            ["black-scholes", "binomial", "monte-carlo"],
-            index=["black-scholes", "binomial", "monte-carlo"].index(st.session_state.global_params['model']),
-            key="setup_model",
-            help="Choose the mathematical model for option pricing"
+    with mc_col1:
+        n_simulations = st.number_input(
+            "Number of Simulations", 
+            value=st.session_state.exotic_params['n_simulations'], 
+            min_value=1000, 
+            max_value=1000000, 
+            step=1000, 
+            key="exotic_n_sims",
+            help="More simulations = higher accuracy but slower computation"
         )
         
-        # Model descriptions
-        model_descriptions = {
-            "black-scholes": {
-                "title": "🎯 Black-Scholes Model",
-                "description": "Analytical solution for European options providing instant, precise results.",
-                "pros": ["⚡ Fastest computation", "📐 Exact analytical solution", "🎓 Widely understood"],
-                "cons": ["❌ European exercise only", "📊 Constant volatility assumption"]
-            },
-            "binomial": {
-                "title": "🌳 Binomial Tree Model", 
-                "description": "Discrete time model supporting American options with flexible implementation.",
-                "pros": ["🇺🇸 American exercise support", "🔧 Flexible implementation", "📈 Intuitive approach"],
-                "cons": ["⏱️ Slower computation", "🔢 Convergence dependent on steps"]
-            },
-            "monte-carlo": {
-                "title": "🎲 Monte Carlo Simulation",
-                "description": "Simulation-based approach handling complex payoffs and exotic features.",
-                "pros": ["🌟 Handles exotic payoffs", "📊 Statistical confidence", "🔄 Path-dependent options"],
-                "cons": ["⌛ Slowest method", "📈 Random error component"]
-            }
-        }
+        # Performance indicator
+        if n_simulations <= 10000:
+            perf_indicator = "🟢 Fast (< 5 seconds)"
+            perf_color = "#4caf50"
+        elif n_simulations <= 100000:
+            perf_indicator = "🟡 Moderate (5-30 seconds)"
+            perf_color = "#ff9800"
+        else:
+            perf_indicator = "🔴 Slow (30+ seconds)"
+            perf_color = "#f44336"
         
-        current_model = model_descriptions[model]
         st.markdown(f"""
-        <div class="info-box">
-            <h4>{current_model['title']}</h4>
-            <p><strong>Description:</strong> {current_model['description']}</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                <div>
-                    <h5 style="color: #28a745;">✅ Advantages:</h5>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        {''.join([f'<li>{pro}</li>' for pro in current_model['pros']])}
-                    </ul>
-                </div>
-                <div>
-                    <h5 style="color: #dc3545;">⚠️ Limitations:</h5>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        {''.join([f'<li>{con}</li>' for con in current_model['cons']])}
-                    </ul>
-                </div>
-            </div>
+        <div class="complexity-indicator">
+            <p style="margin: 0; color: {perf_color}; font-weight: bold;">{perf_indicator}</p>
+            <p style="margin: 5px 0 0 0; font-size: 0.9em;">Standard Error: ±{1.96/np.sqrt(n_simulations)*100:.3f}%</p>
         </div>
         """, unsafe_allow_html=True)
     
-    with col4:
-        # Additional parameters for specific models
-        if model == "binomial":
-            n_steps = st.number_input(
-                "Number of Steps (N)", 
-                value=st.session_state.global_params['n_steps'], 
-                min_value=1, 
-                max_value=1000, 
-                step=1, 
-                key="setup_n_steps",
-                help="More steps = higher accuracy but slower computation"
-            )
-            
-            # Performance guidance
-            if n_steps <= 50:
-                step_performance = "🟢 Fast computation"
-            elif n_steps <= 200:
-                step_performance = "🟡 Moderate computation time"
-            else:
-                step_performance = "🔴 Slow computation"
-                
-            st.markdown(f"""
-            <div class="parameter-grid">
-                <h5>⚡ Performance Impact</h5>
-                <p><strong>Current setting:</strong> {step_performance}</p>
-                <p><strong>Recommended:</strong> 100-200 steps for good accuracy</p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        elif model == "monte-carlo":
-            n_simulations = st.number_input(
-                "Number of Simulations", 
-                value=st.session_state.global_params['n_simulations'], 
-                min_value=100, 
-                max_value=100000, 
-                step=100, 
-                key="setup_n_sims",
-                help="More simulations = higher accuracy but slower computation"
-            )
-            
-            # Performance guidance
-            if n_simulations <= 1000:
-                sim_performance = "🟢 Fast computation"
-            elif n_simulations <= 10000:
-                sim_performance = "🟡 Moderate computation time"
-            else:
-                sim_performance = "🔴 Slow computation"
-                
-            st.markdown(f"""
-            <div class="parameter-grid">
-                <h5>⚡ Performance Impact</h5>
-                <p><strong>Current setting:</strong> {sim_performance}</p>
-                <p><strong>Recommended:</strong> 10,000+ simulations for accuracy</p>
-                <p><strong>Error estimate:</strong> ±{1.96/np.sqrt(n_simulations)*100:.2f}%</p>
-            </div>
-            """, unsafe_allow_html=True)
+    with mc_col2:
+        n_time_steps = st.number_input(
+            "Time Steps per Year", 
+            value=st.session_state.exotic_params['n_time_steps'], 
+            min_value=50, 
+            max_value=1000, 
+            step=1, 
+            key="exotic_steps",
+            help="Daily steps = 252, weekly = 52, monthly = 12"
+        )
+        
+        # Time step interpretation
+        if n_time_steps >= 250:
+            step_desc = "📅 Daily monitoring"
+        elif n_time_steps >= 50:
+            step_desc = "📊 Weekly monitoring"
         else:
-            n_steps = st.session_state.global_params['n_steps']
-            n_simulations = st.session_state.global_params['n_simulations']
-            st.markdown("""
-            <div class="success-box">
-                <h5>⚡ Black-Scholes Performance</h5>
-                <p>Instantaneous computation with exact analytical results!</p>
-                <p>Perfect for rapid analysis and parameter sweeps.</p>
-            </div>
-            """, unsafe_allow_html=True)
+            step_desc = "📈 Monthly monitoring"
+        
+        st.markdown(f"""
+        <div class="parameter-grid">
+            <h5>⏱️ Monitoring Frequency</h5>
+            <p><strong>{step_desc}</strong></p>
+            <p>Δt = {time_to_expiry/n_time_steps:.4f} years per step</p>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Setup completion button
+    # Parameter Summary
+    st.markdown('<div class="sub-header">📋 Configuration Summary</div>', unsafe_allow_html=True)
+    
+    # Market regime analysis
+    vol_regime = "High Volatility" if volatility > 0.4 else "Moderate Volatility" if volatility > 0.2 else "Low Volatility"
+    rate_regime = "High Rate" if risk_free_rate > 0.05 else "Low Rate"
+    
+    st.markdown(f"""
+    <div class="parameter-grid">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 2px solid #9c27b0; background-color: #f3e5f5;">
+                <td style="padding: 12px; font-weight: bold;">Parameter</td>
+                <td style="padding: 12px; font-weight: bold;">Value</td>
+                <td style="padding: 12px; font-weight: bold;">Market Regime</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">Spot Price</td>
+                <td style="padding: 10px; font-family: monospace; color: #7b1fa2;">${spot_price:.2f}</td>
+                <td style="padding: 10px; font-style: italic;">Reference level</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">Volatility</td>
+                <td style="padding: 10px; font-family: monospace; color: #7b1fa2;">{volatility*100:.1f}%</td>
+                <td style="padding: 10px; font-style: italic;">{vol_regime}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">Interest Rate</td>
+                <td style="padding: 10px; font-family: monospace; color: #7b1fa2;">{risk_free_rate*100:.2f}%</td>
+                <td style="padding: 10px; font-style: italic;">{rate_regime} Environment</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">Time Horizon</td>
+                <td style="padding: 10px; font-family: monospace; color: #7b1fa2;">{time_to_expiry:.2f} years</td>
+                <td style="padding: 10px; font-style: italic;">{int(time_to_expiry*365)} days to expiry</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-weight: bold;">Simulation Quality</td>
+                <td style="padding: 10px; font-family: monospace; color: #7b1fa2;">{n_simulations:,} paths</td>
+                <td style="padding: 10px; font-style: italic;">{perf_indicator.split()[1]} computation</td>
+            </tr>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Setup completion
+    st.markdown("---")
+    
     col_button1, col_button2, col_button3 = st.columns([1, 2, 1])
     
     with col_button2:
-        setup_button_text = "🔄 Update Configuration" if st.session_state.setup_completed else "🚀 Complete Setup & Start Analysis"
+        setup_button_text = "🔄 Update Exotic Configuration" if st.session_state.exotic_setup_completed else "🚀 Initialize Exotic Options Lab"
         
         if st.button(setup_button_text, type="primary", use_container_width=True):
-            # Update session state with all parameters
-            st.session_state.global_params.update({
+            # Update session state
+            st.session_state.exotic_params.update({
                 'spot_price': spot_price,
                 'risk_free_rate': risk_free_rate,
                 'dividend_yield': dividend_yield,
                 'volatility': volatility,
                 'time_to_expiry': time_to_expiry,
-                'model': model,
-                'n_steps': n_steps if model == "binomial" else st.session_state.global_params['n_steps'],
-                'n_simulations': n_simulations if model == "monte-carlo" else st.session_state.global_params['n_simulations']
+                'n_simulations': n_simulations,
+                'n_time_steps': n_time_steps
             })
             
-            st.session_state.setup_completed = True
-            st.success("✅ Configuration updated successfully! All analysis tools are now available.")
-            if not st.session_state.get('setup_completed_before', False):
+            st.session_state.exotic_setup_completed = True
+            st.success("✅ Exotic options laboratory is now ready! All advanced pricing tools are available.")
+            if not st.session_state.get('exotic_setup_completed_before', False):
                 st.balloons()
-                st.session_state.setup_completed_before = True
+                st.session_state.exotic_setup_completed_before = True
     
-    if not st.session_state.setup_completed:
+    if not st.session_state.exotic_setup_completed:
         st.markdown("""
         <div class="warning-box">
             <h4>⚠️ Setup Required</h4>
-            <p>Please complete the setup above to unlock all advanced analysis features!</p>
-            <p><strong>Next Steps:</strong> Configure your parameters and click the setup button.</p>
+            <p>Please complete the setup above to unlock advanced exotic options analysis!</p>
+            <p><strong>What you'll get:</strong> Barrier options, Asian options, lookback options, and Monte Carlo simulation tools.</p>
         </div>
         """, unsafe_allow_html=True)
 
 
-def _single_option_tab(params):
-    """Single Option Pricing Tab"""
-    st.markdown('<div class="sub-header">📊 Single Option Pricing & Analysis</div>', unsafe_allow_html=True)
+def _barrier_options_tab():
+    """Barrier Options Tab"""
+    st.markdown('<div class="sub-header">Barrier Options Pricing</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 2])
     
     with col1:
-        st.markdown("""
-        <div class="parameter-grid">
-            <h4 style="color: #1f77b4; margin-top: 0;">🎯 Option Specification</h4>
-        </div>
-        """, unsafe_allow_html=True)
+        st.subheader("📋 Parameters")
         
-        option_type = st.selectbox("Option Type", ["call", "put"], help="Call = Right to buy, Put = Right to sell")
-        exercise_style = st.selectbox("Exercise Style", ["european", "american"], help="European = Exercise only at expiry")
-        strike_price = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, step=0.1, key="single_strike")
+        barrier_S = st.number_input("Current Stock Price (S)", value=100.0, min_value=0.1, key="barrier_s")
+        barrier_K = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="barrier_k")
+        barrier_H = st.number_input("Barrier Level (H)", value=120.0, min_value=0.1, key="barrier_h")
+        barrier_T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=10.0, key="barrier_t")
+        barrier_r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, format="%.4f", key="barrier_r")
+        barrier_sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, format="%.4f", key="barrier_sigma")
+        barrier_n_sim = st.number_input("Number of Simulations", value=10000, min_value=1000, max_value=100000, key="barrier_sim")
+        barrier_n_steps = st.number_input("Steps per Path", value=100, min_value=10, max_value=500, key="barrier_steps")
         
-        # Calculate option price
-        try:
-            option_price = price_vanilla_option(
-                option_type=option_type,
-                exercise_style=exercise_style,
-                model=params['model'],
-                S=params['spot_price'],
-                K=strike_price,
-                T=params['time_to_expiry'],
-                r=params['risk_free_rate'],
-                sigma=params['volatility'],
-                q=params['dividend_yield'],
-                N=params.get('n_steps', 100),
-                n_simulations=params.get('n_simulations', 10000)
-            )
-            
-            # Enhanced price display
-            intrinsic_value = max(params['spot_price'] - strike_price, 0) if option_type == "call" else max(strike_price - params['spot_price'], 0)
-            time_value = option_price - intrinsic_value
-            
-            st.markdown(f"""
-            <div class="success-box">
-                <h4 style="margin-top: 0;">💰 Option Valuation</h4>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr style="border-bottom: 1px solid #28a745;">
-                        <td style="padding: 8px; font-weight: bold;">Total Price</td>
-                        <td style="padding: 8px; font-family: monospace; color: #2E8B57; font-size: 1.2em; font-weight: bold;">${option_price:.4f}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 8px;">Intrinsic Value</td>
-                        <td style="padding: 8px; font-family: monospace;">${intrinsic_value:.4f}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px;">Time Value</td>
-                        <td style="padding: 8px; font-family: monospace;">${time_value:.4f}</td>
-                    </tr>
-                </table>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        except Exception as e:
-            st.markdown(f"""
-            <div class="error-box">
-                <h4>❌ Pricing Error</h4>
-                <p>Error calculating option price: {str(e)}</p>
-            </div>
-            """, unsafe_allow_html=True)
+        barrier_option_type = st.selectbox("Option Type", ["call", "put"], key="barrier_option_type")
+        barrier_type = st.selectbox("Barrier Type", 
+                                  ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], 
+                                  key="barrier_type")
+        
+        calculate_barrier = st.button("🔢 Calculate Barrier Option", key="calc_barrier")
+        show_paths_barrier = st.checkbox("📈 Show Sample Paths", key="show_paths_barrier")
     
     with col2:
-        st.markdown('<div class="sub-header">📈 Parameter Sensitivity Analysis</div>', unsafe_allow_html=True)
-        
-        param_col1, param_col2 = st.columns(2)
-        
-        with param_col1:
-            param_to_vary = st.selectbox("Parameter to Vary", ["S", "K", "T", "r", "sigma", "q"])
-        
-        with param_col2:
-            n_points = st.slider("Analysis Points", 20, 100, 50)
-        
-        # Sensitivity analysis
-        current_val = {
-            "S": params['spot_price'], "K": strike_price, "T": params['time_to_expiry'],
-            "r": params['risk_free_rate'], "sigma": params['volatility'], "q": params['dividend_yield']
-        }[param_to_vary]
-        
-        range_col1, range_col2 = st.columns(2)
-        
-        with range_col1:
-            param_min = st.number_input(f"Min {param_to_vary}", value=current_val * 0.5, step=0.01)
-        with range_col2:
-            param_max = st.number_input(f"Max {param_to_vary}", value=current_val * 1.5, step=0.01)
-        
-        if st.button("🔍 Generate Sensitivity Analysis", type="primary", use_container_width=True):
-            try:
-                with st.spinner("Calculating parameter sensitivity..."):
-                    fixed_params = {
-                        "S": params['spot_price'], "K": strike_price, "T": params['time_to_expiry'],
-                        "r": params['risk_free_rate'], "sigma": params['volatility'], "q": params['dividend_yield']
-                    }
-                    if params['model'] == "binomial":
-                        fixed_params["N"] = params['n_steps']
-                    elif params['model'] == "monte-carlo":
-                        fixed_params["n_simulations"] = params['n_simulations']
+        if calculate_barrier:
+            with st.spinner("Calculating barrier option price..."):
+                try:
+                    # Validate barrier level
+                    if barrier_type.startswith("up") and barrier_H <= max(barrier_S, barrier_K):
+                        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
+                        st.markdown("⚠️ For up barriers, H should typically be above current spot and strike prices")
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    elif barrier_type.startswith("down") and barrier_H >= min(barrier_S, barrier_K):
+                        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
+                        st.markdown("⚠️ For down barriers, H should typically be below current spot and strike prices")
+                        st.markdown('</div>', unsafe_allow_html=True)
                     
-                    # Create parameter range
-                    param_values = np.linspace(param_min, param_max, n_points)
-                    option_prices = []
+                    # Calculate option price
+                    barrier_price, paths = price_barrier_option(
+                        S=barrier_S, K=barrier_K, H=barrier_H, T=barrier_T,
+                        r=barrier_r, sigma=barrier_sigma,
+                        option_type=barrier_option_type, barrier_type=barrier_type,
+                        n_simulations=barrier_n_sim, n_steps=barrier_n_steps
+                    )
                     
-                    for param_val in param_values:
-                        temp_params = fixed_params.copy()
-                        temp_params[param_to_vary] = param_val
+                    # Display results
+                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                    st.success(f"**Barrier Option Price: ${barrier_price:.4f}**")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    # Show payoff diagram
+                    st.markdown('<div class="sub-header">📈 Payoff Diagram</div>', unsafe_allow_html=True)
+                    plot_barrier_payoff(
+                        barrier_K, barrier_H, barrier_option_type, barrier_type,
+                        S_min=barrier_S*0.5, S_max=barrier_S*1.5
+                    )
+                    
+                    # Show sample paths if requested
+                    if show_paths_barrier and paths is not None:
+                        st.markdown('<div class="sub-header">📊 Sample Monte Carlo Paths</div>', unsafe_allow_html=True)
+                        plot_sample_paths_barrier(
+                            paths[:20], barrier_K, barrier_H, 
+                            barrier_option_type, barrier_type
+                        )
+                    
+                    # Market insights
+                    st.markdown('<div class="sub-header">💡 Market Insights</div>', unsafe_allow_html=True)
+                    if "out" in barrier_type:
+                        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                        st.markdown("**Knock-out options** are cheaper than vanilla options as they can expire worthless if the barrier is breached.")
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    else:
+                        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                        st.markdown("**Knock-in options** are cheaper than vanilla options as they only become active if the barrier is breached.")
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    
+                except Exception as e:
+                    st.error(f"Error calculating barrier option: {str(e)}")
+
+
+def _digital_options_tab():
+    """Digital Options Tab"""
+    st.markdown('<div class="sub-header">Digital Options Pricing</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.subheader("📋 Parameters")
+        
+        digital_S = st.number_input("Current Stock Price (S)", value=100.0, min_value=0.1, key="digital_s")
+        digital_K = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="digital_k")
+        digital_T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=10.0, key="digital_t")
+        digital_r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, format="%.4f", key="digital_r")
+        digital_sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, format="%.4f", key="digital_sigma")
+        
+        digital_option_type = st.selectbox("Option Type", ["call", "put"], key="digital_option_type")
+        digital_style = st.selectbox("Digital Style", ["cash", "asset"], key="digital_style")
+        
+        if digital_style == "cash":
+            digital_Q = st.number_input("Cash Payout (Q)", value=1.0, min_value=0.01, key="digital_q")
+        else:
+            digital_Q = 1.0
+        
+        calculate_digital = st.button("🔢 Calculate Digital Option", key="calc_digital")
+        show_greeks_digital = st.checkbox("📈 Show Greeks", key="show_greeks_digital")
+    
+    with col2:
+        if calculate_digital:
+            with st.spinner("Calculating digital option price..."):
+                try:
+                    # Calculate option price
+                    digital_price = price_digital_option(
+                        model="black_scholes", option_type=digital_option_type,
+                        style=digital_style, S=digital_S, K=digital_K,
+                        T=digital_T, r=digital_r, sigma=digital_sigma, Q=digital_Q
+                    )
+                    
+                    # Display results
+                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                    st.success(f"**Digital Option Price: ${digital_price:.4f}**")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    # Calculate and display Greeks if requested
+                    if show_greeks_digital:
+                        greeks = calculate_greeks_digital(
+                            digital_S, digital_K, digital_T, digital_r, digital_sigma,
+                            digital_option_type, digital_style, digital_Q
+                        )
                         
-                        try:
-                            price = price_vanilla_option(
-                                option_type=option_type,
-                                exercise_style=exercise_style,
-                                model=params['model'],
-                                **temp_params
-                            )
-                            option_prices.append(price)
-                        except:
-                            option_prices.append(np.nan)
+                        col_g1, col_g2, col_g3 = st.columns(3)
+                        with col_g1:
+                            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                            st.metric("Delta (Δ)", f"{greeks['Delta']:.4f}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                            st.metric("Gamma (Γ)", f"{greeks['Gamma']:.6f}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                        with col_g2:
+                            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                            st.metric("Theta (Θ)", f"{greeks['Theta']:.4f}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                            st.metric("Vega (ν)", f"{greeks['Vega']:.4f}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                        with col_g3:
+                            st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                            st.metric("Rho (ρ)", f"{greeks['Rho']:.4f}")
+                            st.markdown('</div>', unsafe_allow_html=True)
                     
-                    # Create plot
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(
-                        x=param_values,
-                        y=option_prices,
-                        mode='lines',
-                        name=f'Option Price vs {param_to_vary}',
-                        line=dict(color='#1f77b4', width=3)
-                    ))
-                    
-                    # Mark current value
-                    fig.add_vline(
-                        x=current_val,
-                        line_dash="dash",
-                        line_color="red",
-                        annotation_text=f"Current {param_to_vary}: {current_val:.4f}"
+                    # Show payoff diagram
+                    st.markdown('<div class="sub-header">📈 Payoff Diagram</div>', unsafe_allow_html=True)
+                    plot_digital_payoff(
+                        digital_K, digital_option_type, digital_style, digital_Q,
+                        S_min=digital_S*0.5, S_max=digital_S*1.5
                     )
                     
-                    fig.update_layout(
-                        title=f'{exercise_style.title()} {option_type.title()} Price Sensitivity to {param_to_vary}',
-                        xaxis_title=param_to_vary,
-                        yaxis_title='Option Price ($)',
-                        hovermode='x unified',
-                        height=400
-                    )
+                    # Educational content
+                    st.markdown('<div class="sub-header">📚 Digital Options Explained</div>', unsafe_allow_html=True)
+                    if digital_style == "cash":
+                        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                        st.markdown(f"**Cash-or-Nothing**: Pays ${digital_Q:.2f} if the option finishes in-the-money, nothing otherwise.")
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    else:
+                        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                        st.markdown("**Asset-or-Nothing**: Pays the asset price if the option finishes in-the-money, nothing otherwise.")
+                        st.markdown('</div>', unsafe_allow_html=True)
                     
-                    st.plotly_chart(fig, use_container_width=True)
-                
-            except Exception as e:
-                st.markdown(f"""
-                <div class="error-box">
-                    <h4>❌ Analysis Error</h4>
-                    <p>Error generating sensitivity plot: {str(e)}</p>
-                </div>
-                """, unsafe_allow_html=True)
+                except Exception as e:
+                    st.error(f"Error calculating digital option: {str(e)}")
 
 
-def _strategy_builder_tab(params):
-    """Strategy Builder Tab"""
-    st.markdown('<div class="sub-header">🔧 Advanced Strategy Builder</div>', unsafe_allow_html=True)
+def _lookback_options_tab():
+    """Lookback Options Tab"""
+    st.markdown('<div class="sub-header">Lookback Options Pricing</div>', unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 2])
     
     with col1:
-        st.markdown("""
-        <div class="parameter-grid">
-            <h4 style="color: #1f77b4; margin-top: 0;">🎯 Strategy Configuration</h4>
-        </div>
-        """, unsafe_allow_html=True)
+        st.subheader("📋 Parameters")
         
-        strategy_method = st.radio("Choose Construction Method", ["Predefined Strategy", "Custom Strategy"])
+        lookback_S0 = st.number_input("Initial Stock Price (S₀)", value=100.0, min_value=0.1, key="lookback_s0")
         
-        if strategy_method == "Predefined Strategy":
-            strategy_name = st.selectbox(
-                "Select Strategy Template",
-                ["straddle", "bull call spread", "bear put spread", "butterfly", "iron condor"]
-            )
-            
-            # Dynamic strike inputs based on strategy
-            if strategy_name == "straddle":
-                strike1 = st.number_input("Strike Price", value=params['spot_price'], key="pred_k1")
-                legs = get_predefined_strategy(strategy_name, strike1)
-            elif strategy_name in ["bull call spread", "bear put spread"]:
-                strike1 = st.number_input("Lower Strike", value=params['spot_price']-5, key="pred_k1")
-                strike2 = st.number_input("Higher Strike", value=params['spot_price']+5, key="pred_k2")
-                legs = get_predefined_strategy(strategy_name, strike1, strike2)
-            elif strategy_name == "butterfly":
-                strike1 = st.number_input("Lower Strike", value=params['spot_price']-10, key="pred_k1")
-                strike2 = st.number_input("Middle Strike", value=params['spot_price'], key="pred_k2")
-                strike3 = st.number_input("Upper Strike", value=params['spot_price']+10, key="pred_k3")
-                legs = get_predefined_strategy(strategy_name, strike1, strike2, strike3)
-            elif strategy_name == "iron condor":
-                strike1 = st.number_input("Put Long Strike", value=params['spot_price']-15, key="pred_k1")
-                strike2 = st.number_input("Put Short Strike", value=params['spot_price']-5, key="pred_k2")
-                strike3 = st.number_input("Call Short Strike", value=params['spot_price']+5, key="pred_k3")
-                strike4 = st.number_input("Call Long Strike", value=params['spot_price']+15, key="pred_k4")
-                legs = get_predefined_strategy(strategy_name, strike1, strike2, strike3, strike4)
-                
-        else:  # Custom Strategy
-            st.markdown("#### 🛠️ Custom Strategy Builder")
-            num_legs = st.number_input("Number of Legs", value=2, min_value=1, max_value=10, step=1, key="custom_num_legs")
-            
-            legs = []
-            for i in range(num_legs):
-                st.markdown(f"""
-                <div class="strategy-leg">
-                    <h5 style="margin-top: 0; color: #17a2b8;">Leg {i+1}</h5>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                col_type, col_strike, col_qty = st.columns(3)
-                with col_type:
-                    leg_type = st.selectbox(f"Type", ["call", "put"], key=f"leg_type_{i}")
-                with col_strike:
-                    leg_strike = st.number_input(f"Strike", value=params['spot_price'], key=f"leg_strike_{i}")
-                with col_qty:
-                    leg_qty = st.number_input(f"Quantity", value=1.0, step=0.1, key=f"leg_qty_{i}")
-                
-                legs.append({"type": leg_type, "strike": leg_strike, "qty": leg_qty})
+        lookback_floating = st.checkbox("Floating Strike", value=True, key="lookback_floating")
         
-        # Exercise style for strategy
-        strategy_exercise = st.selectbox("Exercise Style", ["european", "american"], key="strategy_exercise")
+        if not lookback_floating:
+            lookback_K = st.number_input("Strike Price (K)", value=100.0, min_value=0.1, key="lookback_k")
+        else:
+            lookback_K = None
         
-        # Store legs in session state
-        st.session_state.current_legs = legs
-        st.session_state.current_strategy_exercise = strategy_exercise
+        lookback_T = st.number_input("Time to Maturity (T)", value=1.0, min_value=0.01, max_value=10.0, key="lookback_t")
+        lookback_r = st.number_input("Risk-free Rate (r)", value=0.05, min_value=0.0, max_value=1.0, format="%.4f", key="lookback_r")
+        lookback_sigma = st.number_input("Volatility (σ)", value=0.2, min_value=0.01, max_value=2.0, format="%.4f", key="lookback_sigma")
+        lookback_n_paths = st.number_input("Number of Paths", value=100000, min_value=10000, max_value=1000000, key="lookback_paths")
+        lookback_n_steps = st.number_input("Steps per Path", value=252, min_value=50, max_value=1000, key="lookback_steps")
+        
+        lookback_option_type = st.selectbox("Option Type", ["call", "put"], key="lookback_option_type")
+        
+        calculate_lookback = st.button("🔢 Calculate Lookback Option", key="calc_lookback")
+        show_paths_lookback = st.checkbox("📈 Show Sample Paths", key="show_paths_lookback")
+        show_distribution = st.checkbox("📊 Show Payoff Distribution", key="show_dist_lookback")
     
     with col2:
-        st.markdown('<div class="sub-header">📊 Strategy Analysis</div>', unsafe_allow_html=True)
-        
-        if isinstance(legs, str):  # Error message from predefined strategy
-            st.markdown(f"""
-            <div class="error-box">
-                <h4>❌ Strategy Configuration Error</h4>
-                <p>{legs}</p>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            # Strategy display
-            strategy_df = pd.DataFrame(legs)
-            strategy_df['Position'] = strategy_df['qty'].apply(lambda x: f"{'Long' if x > 0 else 'Short'} {abs(x)}")
-            strategy_df['Option'] = strategy_df.apply(lambda row: f"{row['type'].title()} @ ${row['strike']:.2f}", axis=1)
-            
-            display_df = strategy_df[['Position', 'Option']].copy()
-            display_df.index = [f"Leg {i+1}" for i in range(len(display_df))]
-            
-            st.dataframe(display_df, use_container_width=True)
-            
-            # Price the strategy
-            try:
-                with st.spinner("Pricing strategy..."):
-                    strategy_kwargs = {
-                        'S': params['spot_price'],
-                        'T': params['time_to_expiry'],
-                        'r': params['risk_free_rate'],
-                        'sigma': params['volatility'],
-                        'q': params['dividend_yield']
-                    }
+        if calculate_lookback:
+            with st.spinner("Calculating lookback option price..."):
+                try:
+                    # Calculate option price
+                    if lookback_floating:
+                        lookback_price, lookback_stderr = price_lookback_option(
+                            S0=lookback_S0, r=lookback_r, sigma=lookback_sigma, T=lookback_T,
+                            option_type=lookback_option_type, floating_strike=True,
+                            n_paths=lookback_n_paths, n_steps=lookback_n_steps
+                        )
+                    else:
+                        lookback_price, lookback_stderr = price_lookback_option(
+                            S0=lookback_S0, K=lookback_K, r=lookback_r, sigma=lookback_sigma, T=lookback_T,
+                            option_type=lookback_option_type, floating_strike=False,
+                            n_paths=lookback_n_paths, n_steps=lookback_n_steps
+                        )
                     
-                    if params['model'] == "binomial":
-                        strategy_kwargs["N"] = params['n_steps']
-                    elif params['model'] == "monte-carlo":
-                        strategy_kwargs["n_simulations"] = params['n_simulations']
+                    # Display results
+                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                    st.success(f"**Lookback Option Price: ${lookback_price:.4f} ± {lookback_stderr:.4f}**")
+                    st.markdown('</div>', unsafe_allow_html=True)
                     
-                    strategy_result = price_option_strategy(
-                        legs=legs,
-                        exercise_style=strategy_exercise,
-                        model=params['model'],
-                        **strategy_kwargs
-                    )
-                
-                # Store result in session state
-                st.session_state.strategy_result = strategy_result
-                
-                # Results display
-                net_premium = strategy_result['strategy_price']
-                strategy_type = "Credit" if net_premium < 0 else "Debit"
-                strategy_color = "#28a745" if net_premium < 0 else "#dc3545"
-                
-                st.markdown(f"""
-                <div class="success-box">
-                    <h4 style="margin-top: 0;">💰 Strategy Valuation</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 2px solid #28a745;">
-                            <td style="padding: 12px; font-weight: bold;">Metric</td>
-                            <td style="padding: 12px; font-weight: bold;">Value</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 10px; font-weight: bold;">Strategy Price</td>
-                            <td style="padding: 10px; font-family: monospace; color: {strategy_color}; font-size: 1.2em; font-weight: bold;">${strategy_result['strategy_price']:.4f}</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 10px; font-weight: bold;">Strategy Type</td>
-                            <td style="padding: 10px; font-weight: bold; color: {strategy_color};">{strategy_type} Strategy</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; font-weight: bold;">Net Premium</td>
-                            <td style="padding: 10px; font-family: monospace; color: {strategy_color};">{"Received" if net_premium < 0 else "Paid"}: ${abs(net_premium):.4f}</td>
-                        </tr>
-                    </table>
-                </div>
-                """, unsafe_allow_html=True)
-                
-            except Exception as e:
-                st.markdown(f"""
-                <div class="error-box">
-                    <h4>❌ Strategy Pricing Error</h4>
-                    <p>Error pricing strategy: {str(e)}</p>
-                </div>
-                """, unsafe_allow_html=True)
+                    # Confidence interval
+                    ci_lower = lookback_price - 1.96 * lookback_stderr
+                    ci_upper = lookback_price + 1.96 * lookback_stderr
+                    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                    st.markdown(f"**95% Confidence Interval: [${ci_lower:.4f}, ${ci_upper:.4f}]**")
+                    st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    # Show payoff diagram
+                    st.markdown('<div class="sub-header">📈 Payoff Function</div>', unsafe_allow_html=True)
+                    fig_payoff = plot_payoff(lookback_S0, lookback_option_type, lookback_K, lookback_floating)
+                    st.pyplot(fig_payoff)
+                    
+                    # Show sample paths if requested
+                    if show_paths_lookback:
+                        st.markdown('<div class="sub-header">📊 Sample Price Paths</div>', unsafe_allow_html=True)
+                        fig_paths = plot_paths(lookback_S0, lookback_r, lookback_sigma, lookback_T, 
+                                             min(10, lookback_n_paths), lookback_n_steps)
+                        st.pyplot(fig_paths)
+                    
+                    # Show payoff distribution if requested
+                    if show_distribution:
+                        st.markdown('<div class="sub-header">📈 Payoff Distribution</div>', unsafe_allow_html=True)
+                        fig_dist = plot_price_distribution(
+                            lookback_S0, lookback_r, lookback_sigma, lookback_T,
+                            lookback_option_type, lookback_floating,
+                            min(10000, lookback_n_paths), lookback_n_steps
+                        )
+                        st.pyplot(fig_dist)
+                    
+                    # Educational content
+                    st.markdown('<div class="sub-header">💡 Lookback Options Explained</div>', unsafe_allow_html=True)
+                    if lookback_floating:
+                        if lookback_option_type == "call":
+                            st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                            st.markdown("**Floating Strike Call**: Pays S_T - min(S_t), where min(S_t) is the minimum price during the option's life.")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                        else:
+                            st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                            st.markdown("**Floating Strike Put**: Pays max(S_t) - S_T, where max(S_t) is the maximum price during the option's life.")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                    else:
+                        if lookback_option_type == "call":
+                            st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                            st.markdown(f"**Fixed Strike Call**: Pays max(0, max(S_t) - ${lookback_K}), based on the maximum price reached.")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                        else:
+                            st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                            st.markdown(f"**Fixed Strike Put**: Pays max(0, ${lookback_K} - min(S_t)), based on the minimum price reached.")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                    
+                except Exception as e:
+                    st.error(f"Error calculating lookback option: {str(e)}")
 
 
-def _payoff_analysis_tab(params):
-    """Payoff Analysis Tab"""
-    st.markdown('<div class="sub-header">📈 Strategy Payoff Analysis</div>', unsafe_allow_html=True)
+def _portfolio_analysis_tab():
+    """Portfolio Analysis Tab"""
+    st.markdown('<div class="sub-header">Portfolio Analysis & Comparison</div>', unsafe_allow_html=True)
     
-    if 'current_legs' not in st.session_state:
-        st.markdown("""
-        <div class="warning-box">
-            <h4>⚠️ No Strategy Configured</h4>
-            <p>Please build a strategy in the <strong>Strategy Builder</strong> tab first!</p>
-        </div>
-        """, unsafe_allow_html=True)
-        return
+    st.subheader("📊 Multi-Option Comparison")
     
-    legs = st.session_state.current_legs
+    # Portfolio builder
+    col1, col2 = st.columns([1, 2])
     
-    # Payoff controls
-    config_col1, config_col2, config_col3 = st.columns(3)
-    
-    with config_col1:
-        st.markdown("#### 📊 Price Range")
-        strikes = [leg['strike'] for leg in legs]
-        min_strike, max_strike = min(strikes), max(strikes)
+    with col1:
+        st.subheader("🏗️ Build Portfolio")
         
-        spot_min = st.number_input("Min Spot Price", value=min_strike * 0.7, step=1.0)
-        spot_max = st.number_input("Max Spot Price", value=max_strike * 1.3, step=1.0)
-    
-    with config_col2:
-        st.markdown("#### ⚙️ Analysis Options")
-        n_points = st.slider("Resolution", 50, 500, 200)
-        show_breakeven = st.checkbox("Show Breakeven Points", value=True)
-    
-    with config_col3:
-        st.markdown("#### 💰 P&L Options")
-        show_profit_loss = st.checkbox("Include Premium Cost", value=True)
-        show_individual_legs = st.checkbox("Show Individual Legs", value=False)
-    
-    # Calculate and display payoff
-    spot_range = np.linspace(spot_min, spot_max, n_points)
-    
-    try:
-        payoffs = compute_strategy_payoff(legs, spot_range)
+        # Common parameters
+        port_S0 = st.number_input("Current Stock Price", value=100.0, key="port_s0")
+        port_K = st.number_input("Strike Price", value=100.0, key="port_k")
+        port_T = st.number_input("Time to Maturity", value=1.0, key="port_t")
+        port_r = st.number_input("Risk-free Rate", value=0.05, format="%.4f", key="port_r")
+        port_sigma = st.number_input("Volatility", value=0.2, format="%.4f", key="port_sigma")
         
-        # Create plotly chart
-        fig = go.Figure()
+        # Option selections
+        include_vanilla = st.checkbox("Include Vanilla Option", value=True, key="include_vanilla")
+        include_asian = st.checkbox("Include Asian Option", value=True, key="include_asian")
+        include_barrier = st.checkbox("Include Barrier Option", value=True, key="include_barrier")
+        include_digital = st.checkbox("Include Digital Option", value=True, key="include_digital")
+        include_lookback = st.checkbox("Include Lookback Option", value=True, key="include_lookback")
         
-        # Main payoff line
-        fig.add_trace(go.Scatter(
-            x=spot_range,
-            y=payoffs,
-            mode='lines',
-            name='Strategy Payoff at Expiration',
-            line=dict(color='#1f77b4', width=4)
-        ))
-        
-        # Add profit/loss line if premium is included
-        if show_profit_loss and 'strategy_result' in st.session_state:
-            pnl = payoffs - st.session_state.strategy_result['strategy_price']
-            fig.add_trace(go.Scatter(
-                x=spot_range,
-                y=pnl,
-                mode='lines',
-                name='Net P&L (including premium)',
-                line=dict(color='#ff7f0e', width=3, dash='dash')
-            ))
-        
-        # Add zero line
-        fig.add_hline(y=0, line_dash="solid", line_color="black", line_width=1, opacity=0.5)
-        
-        # Add current spot line
-        fig.add_vline(
-            x=params['spot_price'],
-            line_dash="dash",
-            line_color="green",
-            line_width=2,
-            annotation_text=f"Current Spot: ${params['spot_price']:.2f}"
-        )
-        
-        fig.update_layout(
-            title="Strategy Payoff Diagram",
-            xaxis_title="Spot Price at Expiration ($)",
-            yaxis_title="Payoff ($)",
-            hovermode='x unified',
-            height=500,
-            showlegend=True
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Summary statistics
-        max_payoff = np.max(payoffs)
-        min_payoff = np.min(payoffs)
-        
-        st.markdown(f"""
-        <div class="payoff-stats">
-            <h4>📊 Strategy Statistics</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr style="border-bottom: 2px solid #6c757d;">
-                    <td style="padding: 10px; font-weight: bold;">Max Payoff</td>
-                    <td style="padding: 10px; font-family: monospace; color: #28a745;">${max_payoff:.2f}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; font-weight: bold;">Min Payoff</td>
-                    <td style="padding: 10px; font-family: monospace; color: #dc3545;">${min_payoff:.2f}</td>
-                </tr>
-            </table>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    except Exception as e:
-        st.markdown(f"""
-        <div class="error-box">
-            <h4>❌ Payoff Calculation Error</h4>
-            <p>Error calculating strategy payoff: {str(e)}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-def _greeks_analysis_tab(params):
-    """Greeks Analysis Tab"""
-    st.markdown('<div class="sub-header">🎯 Greeks Risk Analysis</div>', unsafe_allow_html=True)
+        analyze_portfolio = st.button("📈 Analyze Portfolio", key="analyze_port")
     
-    if 'current_legs' not in st.session_state:
-        st.markdown("""
-        <div class="warning-box">
-            <h4>⚠️ No Strategy Configured</h4>
-            <p>Please build a strategy in the <strong>Strategy Builder</strong> tab first!</p>
-        </div>
-        """, unsafe_allow_html=True)
-        return
-    
-    legs = st.session_state.current_legs
-    
-    # Greeks configuration
-    config_col1, config_col2, config_col3 = st.columns(3)
-    
-    with config_col1:
-        greek_name = st.selectbox("Select Greek to Analyze", ["delta", "gamma", "vega", "theta", "rho"])
-        
-        # Greek descriptions
-        greek_descriptions = {
-            "delta": "📈 **Delta**: Price sensitivity to underlying asset moves",
-            "gamma": "🔄 **Gamma**: Rate of change of delta",
-            "vega": "🌊 **Vega**: Sensitivity to volatility changes",
-            "theta": "⏰ **Theta**: Time decay",
-            "rho": "💰 **Rho**: Interest rate sensitivity"
-        }
-        
-        st.markdown(f"""
-        <div class="info-box">
-            {greek_descriptions[greek_name]}
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with config_col2:
-        # Spot range for Greeks
-        strikes = [leg['strike'] for leg in legs]
-        min_strike, max_strike = min(strikes), max(strikes)
-        
-        greek_spot_min = st.number_input("Min Spot for Analysis", value=min_strike * 0.8, step=1.0)
-        greek_spot_max = st.number_input("Max Spot for Analysis", value=max_strike * 1.2, step=1.0)
-    
-    with config_col3:
-        greek_points = st.slider("Analysis Resolution", 50, 300, 150)
-        run_greeks_analysis = st.button("🔍 Run Greeks Analysis", type="primary")
-    
-    if run_greeks_analysis:
-        try:
-            with st.spinner(f"Calculating {greek_name} analysis..."):
-                # Generate spot range
-                spot_range = np.linspace(greek_spot_min, greek_spot_max, greek_points)
-                
-                # Calculate strategy Greeks
-                strategy_greeks = calculate_strategy_greeks(
-                    legs, spot_range, greek_name, 
-                    params['time_to_expiry'], params['risk_free_rate'], 
-                    params['volatility'], params['dividend_yield']
-                )
-                
-                # Create plot
-                fig = go.Figure()
-                
-                fig.add_trace(go.Scatter(
-                    x=spot_range,
-                    y=strategy_greeks,
-                    mode='lines',
-                    name=f'Strategy {greek_name.title()}',
-                    line=dict(color='#1f77b4', width=3)
-                ))
-                
-                # Add current spot marker
-                current_greek = np.interp(params['spot_price'], spot_range, strategy_greeks)
-                fig.add_scatter(
-                    x=[params['spot_price']],
-                    y=[current_greek],
-                    mode='markers',
-                    name='Current Position',
-                    marker=dict(color='red', size=12, symbol='diamond')
-                )
-                
-                # Add zero line
-                fig.add_hline(y=0, line_dash="solid", line_color="black", line_width=1, opacity=0.5)
-                
-                fig.update_layout(
-                    title=f'Strategy {greek_name.title()} vs Spot Price',
-                    xaxis_title='Spot Price ($)',
-                    yaxis_title=f'{greek_name.title()}',
-                    hovermode='x unified',
-                    height=500
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Display current Greek value
-                st.markdown(f"""
-                <div class="success-box">
-                    <h4>📊 Current {greek_name.title()} Analysis</h4>
-                    <p><strong>Current {greek_name.title()} value:</strong> {current_greek:.6f}</p>
-                    <p><strong>Spot Price:</strong> ${params['spot_price']:.2f}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-        except Exception as e:
-            st.markdown(f"""
-            <div class="error-box">
-                <h4>❌ Analysis Error</h4>
-                <p>Error calculating Greeks: {str(e)}</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-
-def _sensitivity_analysis_tab(params):
-    """Advanced Sensitivity Analysis Tab"""
-    st.markdown('<div class="sub-header">🔬 Advanced Multi-Parameter Sensitivity</div>', unsafe_allow_html=True)
-    
-    if 'current_legs' not in st.session_state:
-        st.markdown("""
-        <div class="warning-box">
-            <h4>⚠️ No Strategy Configured</h4>
-            <p>Please build a strategy in the <strong>Strategy Builder</strong> tab first!</p>
-        </div>
-        """, unsafe_allow_html=True)
-        return
-    
-    legs = st.session_state.current_legs
-    strategy_exercise = st.session_state.get('current_strategy_exercise', 'european')
-    
-    st.markdown("#### 🔬 Multi-Parameter Sensitivity Heatmap")
-    
-    # Parameter selection
-    sens_col1, sens_col2, sens_col3 = st.columns(3)
-    
-    with sens_col1:
-        param1 = st.selectbox("First Parameter (X-Axis)", ["S", "T", "r", "sigma", "q"], key="param1")
-        param1_range = st.slider(f"{param1} Range (%)", -50, 100, (-20, 20), step=5, key="param1_range")
-    
-    with sens_col2:
-        param2 = st.selectbox("Second Parameter (Y-Axis)", ["S", "T", "r", "sigma", "q"], key="param2")
-        param2_range = st.slider(f"{param2} Range (%)", -50, 100, (-20, 20), step=5, key="param2_range")
-    
-    with sens_col3:
-        resolution = st.slider("Grid Resolution", 10, 50, 20, key="sensitivity_resolution")
-        analysis_type = st.selectbox("Analysis Type", ["Strategy Price", "Profit/Loss", "% Change"])
-        generate_heatmap = st.button("🔥 Generate Sensitivity Heatmap", type="primary")
-    
-    if generate_heatmap:
-        if param1 == param2:
-            st.warning("Please select different parameters for X and Y axes!")
-        else:
-            try:
-                with st.spinner("Generating multi-parameter sensitivity analysis..."):
-                    # Get base values
-                    base_values = {
-                        "S": params['spot_price'], "T": params['time_to_expiry'], "r": params['risk_free_rate'],
-                        "sigma": params['volatility'], "q": params['dividend_yield']
-                    }
+    with col2:
+        if analyze_portfolio:
+            with st.spinner("Analyzing portfolio..."):
+                try:
+                    results = []
                     
-                    # Create parameter grids
-                    param1_vals = np.linspace(
-                        base_values[param1] * (1 + param1_range[0]/100),
-                        base_values[param1] * (1 + param1_range[1]/100),
-                        resolution
-                    )
-                    param2_vals = np.linspace(
-                        base_values[param2] * (1 + param2_range[0]/100),
-                        base_values[param2] * (1 + param2_range[1]/100),
-                        resolution
-                    )
+                    # Calculate prices for selected options
+                    if include_vanilla:
+                        # Simple Black-Scholes for vanilla
+                        from scipy.stats import norm
+                        d1 = (np.log(port_S0/port_K) + (port_r + 0.5*port_sigma**2)*port_T) / (port_sigma*np.sqrt(port_T))
+                        d2 = d1 - port_sigma*np.sqrt(port_T)
+                        vanilla_price = port_S0*norm.cdf(d1) - port_K*np.exp(-port_r*port_T)*norm.cdf(d2)
+                        results.append({"Option Type": "Vanilla Call", "Price": vanilla_price, "Complexity": "Low"})
                     
-                    # Calculate strategy prices for each combination
-                    price_grid = np.zeros((len(param2_vals), len(param1_vals)))
+                    if include_asian:
+                        asian_price = price_asian_option(
+                            port_S0, port_K, port_T, port_r, port_sigma, 252, 10000, 
+                            "call", "average_price"
+                        )
+                        results.append({"Option Type": "Asian Call", "Price": asian_price, "Complexity": "Medium"})
                     
-                    progress_bar = st.progress(0)
-                    total_iterations = len(param1_vals) * len(param2_vals)
-                    iteration = 0
+                    if include_barrier:
+                        barrier_price, _ = price_barrier_option(
+                            port_S0, port_K, port_S0*1.2, port_T, port_r, port_sigma,
+                            "call", "up-and-out", 10000, 100
+                        )
+                        results.append({"Option Type": "Barrier Call", "Price": barrier_price, "Complexity": "Medium"})
                     
-                    # Base strategy price for comparison
-                    base_strategy_price = None
-                    if 'strategy_result' in st.session_state:
-                        base_strategy_price = st.session_state.strategy_result['strategy_price']
+                    if include_digital:
+                        digital_price = price_digital_option(
+                            "black_scholes", "call", "cash", port_S0, port_K, port_T, port_r, port_sigma
+                        )
+                        results.append({"Option Type": "Digital Call", "Price": digital_price, "Complexity": "Low"})
                     
-                    for i, p1_val in enumerate(param1_vals):
-                        for j, p2_val in enumerate(param2_vals):
-                            temp_kwargs = {
-                                'S': base_values['S'],
-                                'T': base_values['T'], 
-                                'r': base_values['r'],
-                                'sigma': base_values['sigma'],
-                                'q': base_values['q']
-                            }
-                            temp_kwargs[param1] = p1_val
-                            temp_kwargs[param2] = p2_val
+                    if include_lookback:
+                        lookback_price, _ = price_lookback_option(
+                            port_S0, None, port_r, port_sigma, port_T, "call", True, 10000, 252
+                        )
+                        results.append({"Option Type": "Lookback Call", "Price": lookback_price, "Complexity": "High"})
+                    
+                    # Display results
+                    if results:
+                        df_results = pd.DataFrame(results)
+                        df_results['Price'] = df_results['Price'].round(4)
+                        
+                        st.markdown('<div class="sub-header">💰 Portfolio Summary</div>', unsafe_allow_html=True)
+                        st.dataframe(df_results, use_container_width=True)
+                        
+                        # Total portfolio value
+                        total_value = df_results['Price'].sum()
+                        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                        st.metric("**Total Portfolio Value**", f"${total_value:.4f}")
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        # Price comparison chart
+                        fig = px.bar(df_results, x='Option Type', y='Price', 
+                                   color='Complexity', title="Option Prices Comparison")
+                        fig.update_layout(xaxis_tickangle=-45)
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Risk analysis
+                        st.markdown('<div class="sub-header">⚠️ Risk Analysis</div>', unsafe_allow_html=True)
+                        
+                        risk_metrics = []
+                        for _, row in df_results.iterrows():
+                            if "Barrier" in row['Option Type']:
+                                risk = "High - Path dependent with knock-out risk"
+                            elif "Lookback" in row['Option Type']:
+                                risk = "Medium - Path dependent but no knock-out"
+                            elif "Asian" in row['Option Type']:
+                                risk = "Medium - Averaging reduces volatility impact"
+                            elif "Digital" in row['Option Type']:
+                                risk = "High - Binary payoff creates gamma risk"
+                            else:
+                                risk = "Low - Standard European option"
                             
-                            if params['model'] == "binomial":
-                                temp_kwargs["N"] = params['n_steps']
-                            elif params['model'] == "monte-carlo":
-                                temp_kwargs["n_simulations"] = params['n_simulations']
-                            
-                            try:
-                                result = price_option_strategy(
-                                    legs=legs,
-                                    exercise_style=strategy_exercise,
-                                    model=params['model'],
-                                    **temp_kwargs
+                            risk_metrics.append({"Option": row['Option Type'], "Risk Level": risk})
+                        
+                        df_risk = pd.DataFrame(risk_metrics)
+                        st.dataframe(df_risk, use_container_width=True)
+                        
+                        # Hedging suggestions
+                        st.markdown('<div class="sub-header">🛡️ Hedging Suggestions</div>', unsafe_allow_html=True)
+                        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+                        st.markdown("""
+                        **Portfolio Hedging Strategies:**
+                        - **Delta Hedging**: Regularly adjust underlying position to maintain delta neutrality
+                        - **Gamma Hedging**: Use options to hedge gamma exposure, especially for digital options
+                        - **Vega Hedging**: Consider volatility swaps for high vega exposure
+                        - **Barrier Monitoring**: Set up real-time alerts for barrier levels
+                        - **Diversification**: Spread risk across different option types and underlyings
+                        """)
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        # Monte Carlo analysis for portfolio
+                        st.markdown('<div class="sub-header">🎲 Portfolio Monte Carlo Analysis</div>', unsafe_allow_html=True)
+                        
+                        mc_runs = st.slider("Monte Carlo Runs", 1000, 10000, 5000, key="mc_runs")
+                        
+                        if st.button("Run Monte Carlo Analysis", key="run_mc"):
+                            with st.spinner("Running Monte Carlo simulation..."):
+                                # Simulate price paths
+                                dt = port_T / 252
+                                n_sims = mc_runs
+                                
+                                # Generate correlated price paths
+                                Z = np.random.normal(0, 1, (n_sims, 252))
+                                price_paths = np.zeros((n_sims, 253))
+                                price_paths[:, 0] = port_S0
+                                
+                                for t in range(1, 253):
+                                    price_paths[:, t] = price_paths[:, t-1] * np.exp(
+                                        (port_r - 0.5 * port_sigma**2) * dt + port_sigma * np.sqrt(dt) * Z[:, t-1]
+                                    )
+                                
+                                final_prices = price_paths[:, -1]
+                                
+                                # Calculate portfolio P&L distribution
+                                portfolio_pnl = []
+                                
+                                for final_price in final_prices:
+                                    pnl = 0
+                                    
+                                    if include_vanilla:
+                                        pnl += max(final_price - port_K, 0) - vanilla_price
+                                    
+                                    # For simplicity, approximate other options' P&L
+                                    # In practice, you'd re-price each option at the final price
+                                    if include_asian:
+                                        approx_asian_pnl = max(final_price - port_K, 0) * 0.8 - asian_price
+                                        pnl += approx_asian_pnl
+                                    
+                                    if include_digital:
+                                        digital_pnl = (1.0 if final_price > port_K else 0.0) - digital_price
+                                        pnl += digital_pnl
+                                    
+                                    portfolio_pnl.append(pnl)
+                                
+                                portfolio_pnl = np.array(portfolio_pnl)
+                                
+                                # Display Monte Carlo results
+                                col_mc1, col_mc2, col_mc3 = st.columns(3)
+                                
+                                with col_mc1:
+                                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                                    st.metric("Expected P&L", f"${np.mean(portfolio_pnl):.2f}")
+                                    st.markdown('</div>', unsafe_allow_html=True)
+                                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                                    st.metric("P&L Std Dev", f"${np.std(portfolio_pnl):.2f}")
+                                    st.markdown('</div>', unsafe_allow_html=True)
+                                
+                                with col_mc2:
+                                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                                    st.metric("VaR (95%)", f"${np.percentile(portfolio_pnl, 5):.2f}")
+                                    st.markdown('</div>', unsafe_allow_html=True)
+                                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                                    st.metric("CVaR (95%)", f"${np.mean(portfolio_pnl[portfolio_pnl <= np.percentile(portfolio_pnl, 5)]):.2f}")
+                                    st.markdown('</div>', unsafe_allow_html=True)
+                                
+                                with col_mc3:
+                                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                                    st.metric("Max Loss", f"${np.min(portfolio_pnl):.2f}")
+                                    st.markdown('</div>', unsafe_allow_html=True)
+                                    st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+                                    st.metric("Max Gain", f"${np.max(portfolio_pnl):.2f}")
+                                    st.markdown('</div>', unsafe_allow_html=True)
+                                
+                                # P&L distribution plot
+                                fig_dist = go.Figure()
+                                fig_dist.add_trace(go.Histogram(
+                                    x=portfolio_pnl, 
+                                    nbinsx=50, 
+                                    name="P&L Distribution",
+                                    opacity=0.7
+                                ))
+                                
+                                # Add VaR line
+                                var_95 = np.percentile(portfolio_pnl, 5)
+                                fig_dist.add_vline(
+                                    x=var_95, 
+                                    line_dash="dash", 
+                                    line_color="red",
+                                    annotation_text=f"VaR 95%: ${var_95:.2f}"
                                 )
                                 
-                                strategy_price = result["strategy_price"]
+                                fig_dist.update_layout(
+                                    title="Portfolio P&L Distribution",
+                                    xaxis_title="P&L ($)",
+                                    yaxis_title="Frequency",
+                                    height=400
+                                )
                                 
-                                if analysis_type == "Strategy Price":
-                                    price_grid[j, i] = strategy_price
-                                elif analysis_type == "Profit/Loss" and base_strategy_price is not None:
-                                    price_grid[j, i] = strategy_price - base_strategy_price
-                                elif analysis_type == "% Change" and base_strategy_price is not None and base_strategy_price != 0:
-                                    price_grid[j, i] = (strategy_price - base_strategy_price) / abs(base_strategy_price) * 100
-                                else:
-                                    price_grid[j, i] = strategy_price
-                                    
-                            except:
-                                price_grid[j, i] = np.nan
-                            
-                            iteration += 1
-                            progress_bar.progress(iteration / total_iterations)
+                                st.plotly_chart(fig_dist, use_container_width=True)
                     
-                    # Create heatmap
-                    fig = go.Figure(data=go.Heatmap(
-                        z=price_grid,
-                        x=param1_vals,
-                        y=param2_vals,
-                        colorscale='RdYlBu_r',
-                        colorbar=dict(title=f"{analysis_type}")
-                    ))
-                    
-                    # Add current position marker
-                    fig.add_scatter(
-                        x=[base_values[param1]],
-                        y=[base_values[param2]],
-                        mode='markers',
-                        name='Current Position',
-                        marker=dict(symbol='star', size=15, color='white', line=dict(color='black', width=2))
-                    )
-                    
-                    fig.update_layout(
-                        title=f'Strategy {analysis_type} Sensitivity: {param1} vs {param2}',
-                        xaxis_title=f'{param1} Value',
-                        yaxis_title=f'{param2} Value',
-                        height=600
-                    )
-                    
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Analysis summary
-                    min_val = np.nanmin(price_grid)
-                    max_val = np.nanmax(price_grid)
-                    
-                    st.markdown(f"""
-                    <div class="success-box">
-                        <h4>📊 Sensitivity Analysis Summary</h4>
-                        <p><strong>Minimum {analysis_type}:</strong> {min_val:.4f}</p>
-                        <p><strong>Maximum {analysis_type}:</strong> {max_val:.4f}</p>
-                        <p><strong>Range:</strong> {max_val - min_val:.4f}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-            except Exception as e:
-                st.markdown(f"""
-                <div class="error-box">
-                    <h4>❌ Sensitivity Analysis Error</h4>
-                    <p>Error generating sensitivity analysis: {str(e)}</p>
-                </div>
-                """, unsafe_allow_html=True)
-
-
-# Helper functions for option pricing and strategy building
-
-def price_vanilla_option(option_type, exercise_style, model, S, K, T, r, sigma, q=0, N=100, n_simulations=10000):
-    """Enhanced Black-Scholes option pricing function"""
-    try:
-        # Black-Scholes calculation
-        d1 = (math.log(S/K) + (r - q + 0.5*sigma**2)*T) / (sigma*math.sqrt(T))
-        d2 = d1 - sigma*math.sqrt(T)
-        
-        if option_type == 'call':
-            price = S*math.exp(-q*T)*norm.cdf(d1) - K*math.exp(-r*T)*norm.cdf(d2)
-        else:
-            price = K*math.exp(-r*T)*norm.cdf(-d2) - S*math.exp(-q*T)*norm.cdf(-d1)
-        
-        # Add model-specific adjustments
-        if model == "binomial":
-            price *= 1.001  # Small adjustment for binomial
-        elif model == "monte-carlo":
-            price *= (1 + np.random.normal(0, 0.002))  # Add noise for MC
-        
-        return max(price, 0)
-    
-    except Exception as e:
-        raise ValueError(f"Error in option pricing: {str(e)}")
-
-
-def price_option_strategy(legs, exercise_style, model, S, T, r, sigma, q=0, N=100, n_simulations=10000):
-    """Strategy pricing function"""
-    individual_prices = []
-    total_price = 0
-    
-    try:
-        for leg in legs:
-            leg_price = price_vanilla_option(
-                option_type=leg['type'], 
-                exercise_style=exercise_style, 
-                model=model,
-                S=S, 
-                K=leg['strike'], 
-                T=T, 
-                r=r, 
-                sigma=sigma, 
-                q=q,
-                N=N,
-                n_simulations=n_simulations
-            )
-            individual_prices.append(leg_price)
-            total_price += leg_price * leg['qty']
-        
-        return {
-            'strategy_price': total_price,
-            'individual_prices': individual_prices
-        }
-    
-    except Exception as e:
-        raise ValueError(f"Error in strategy pricing: {str(e)}")
-
-
-def get_predefined_strategy(strategy_name, *strikes):
-    """Get predefined strategy legs"""
-    try:
-        if strategy_name == "straddle":
-            strike = strikes[0]
-            return [
-                {"type": "call", "strike": strike, "qty": 1.0},
-                {"type": "put", "strike": strike, "qty": 1.0}
-            ]
-        elif strategy_name == "bull call spread":
-            strike1, strike2 = strikes[0], strikes[1]
-            if strike1 >= strike2:
-                return "Error: Lower strike must be less than higher strike"
-            return [
-                {"type": "call", "strike": strike1, "qty": 1.0},
-                {"type": "call", "strike": strike2, "qty": -1.0}
-            ]
-        elif strategy_name == "bear put spread":
-            strike1, strike2 = strikes[0], strikes[1]
-            if strike1 >= strike2:
-                return "Error: Lower strike must be less than higher strike"
-            return [
-                {"type": "put", "strike": strike2, "qty": 1.0},
-                {"type": "put", "strike": strike1, "qty": -1.0}
-            ]
-        elif strategy_name == "butterfly":
-            strike1, strike2, strike3 = strikes[0], strikes[1], strikes[2]
-            if not (strike1 < strike2 < strike3):
-                return "Error: Strikes must be in ascending order"
-            return [
-                {"type": "call", "strike": strike1, "qty": 1.0},
-                {"type": "call", "strike": strike2, "qty": -2.0},
-                {"type": "call", "strike": strike3, "qty": 1.0}
-            ]
-        elif strategy_name == "iron condor":
-            strike1, strike2, strike3, strike4 = strikes[0], strikes[1], strikes[2], strikes[3]
-            if not (strike1 < strike2 < strike3 < strike4):
-                return "Error: Strikes must be in ascending order"
-            return [
-                {"type": "put", "strike": strike1, "qty": 1.0},
-                {"type": "put", "strike": strike2, "qty": -1.0},
-                {"type": "call", "strike": strike3, "qty": -1.0},
-                {"type": "call", "strike": strike4, "qty": 1.0}
-            ]
-        else:
-            return f"Error: Unknown strategy '{strategy_name}'"
-    except Exception as e:
-        return f"Error creating {strategy_name}: {str(e)}"
-
-
-def compute_strategy_payoff(legs, spot_range):
-    """Compute strategy payoff for a range of spot prices"""
-    payoffs = np.zeros(len(spot_range))
-    
-    for leg in legs:
-        leg_payoffs = np.zeros(len(spot_range))
-        
-        for i, spot in enumerate(spot_range):
-            if leg['type'] == 'call':
-                intrinsic = max(spot - leg['strike'], 0)
-            else:  # put
-                intrinsic = max(leg['strike'] - spot, 0)
-            
-            leg_payoffs[i] = intrinsic * leg['qty']
-        
-        payoffs += leg_payoffs
-    
-    return payoffs
-
-
-def calculate_strategy_greeks(legs, spot_range, greek_name, T, r, sigma, q):
-    """Calculate strategy Greeks for a range of spot prices"""
-    greek_values = np.zeros(len(spot_range))
-    
-    for i, S in enumerate(spot_range):
-        strategy_greek = 0
-        
-        for leg in legs:
-            # Simple Black-Scholes Greeks approximation
-            K = leg['strike']
-            qty = leg['qty']
-            
-            # Calculate d1 and d2
-            try:
-                d1 = (math.log(S/K) + (r - q + 0.5*sigma**2)*T) / (sigma*math.sqrt(T))
-                d2 = d1 - sigma*math.sqrt(T)
-                
-                if greek_name == "delta":
-                    if leg['type'] == 'call':
-                        leg_greek = norm.cdf(d1) * math.exp(-q*T)
                     else:
-                        leg_greek = (norm.cdf(d1) - 1) * math.exp(-q*T)
-                elif greek_name == "gamma":
-                    leg_greek = norm.pdf(d1) * math.exp(-q*T) / (S * sigma * math.sqrt(T))
-                elif greek_name == "theta":
-                    if leg['type'] == 'call':
-                        leg_greek = (-S * norm.pdf(d1) * sigma * math.exp(-q*T) / (2 * math.sqrt(T)) 
-                                    - r * K * math.exp(-r*T) * norm.cdf(d2)
-                                    + q * S * math.exp(-q*T) * norm.cdf(d1)) / 365
-                    else:
-                        leg_greek = (-S * norm.pdf(d1) * sigma * math.exp(-q*T) / (2 * math.sqrt(T)) 
-                                    + r * K * math.exp(-r*T) * norm.cdf(-d2)
-                                    - q * S * math.exp(-q*T) * norm.cdf(-d1)) / 365
-                elif greek_name == "vega":
-                    leg_greek = S * norm.pdf(d1) * math.sqrt(T) * math.exp(-q*T) / 100
-                elif greek_name == "rho":
-                    if leg['type'] == 'call':
-                        leg_greek = K * T * math.exp(-r*T) * norm.cdf(d2) / 100
-                    else:
-                        leg_greek = -K * T * math.exp(-r*T) * norm.cdf(-d2) / 100
-                else:
-                    leg_greek = 0
+                        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
+                        st.markdown("Please select at least one option type to analyze.")
+                        st.markdown('</div>', unsafe_allow_html=True)
                 
-                strategy_greek += leg_greek * qty
-                
-            except (ValueError, ZeroDivisionError):
-                # Handle edge cases like very small time to expiry
-                strategy_greek += 0
-        
-        greek_values[i] = strategy_greek
+                except Exception as e:
+                    st.error(f"Error in portfolio analysis: {str(e)}")
     
-    return greek_values
-
-
-# Educational content and additional utilities
-
-def display_educational_content():
-    """Display comprehensive educational content"""
+    # Educational Resources
     st.markdown("---")
     st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
     
-    with st.expander("🎓 Options Strategy Fundamentals"):
+    with st.expander("🎓 Exotic Options Overview"):
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
         st.markdown("""
-        <div class="info-box">
-            <h4>📊 Core Strategy Categories</h4>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
-                <div>
-                    <h5 style="color: #1f77b4;">📈 Directional Strategies</h5>
-                    <ul>
-                        <li><strong>Long Call/Put:</strong> Unlimited profit potential, limited risk</li>
-                        <li><strong>Bull/Bear Spreads:</strong> Limited risk and reward</li>
-                        <li><strong>Synthetic Positions:</strong> Replicate stock with options</li>
-                        <li><strong>Ratio Spreads:</strong> Unequal long/short positions</li>
-                    </ul>
-                    
-                    <h5 style="color: #1f77b4;">⚖️ Neutral Strategies</h5>
-                    <ul>
-                        <li><strong>Straddles/Strangles:</strong> Profit from volatility</li>
-                        <li><strong>Iron Condors:</strong> Range-bound profit</li>
-                        <li><strong>Butterflies:</strong> Minimal movement profit</li>
-                        <li><strong>Calendar Spreads:</strong> Time decay profit</li>
-                    </ul>
-                </div>
-                <div>
-                    <h5 style="color: #1f77b4;">🌊 Volatility Strategies</h5>
-                    <ul>
-                        <li><strong>Long Volatility:</strong> Buy straddles/strangles</li>
-                        <li><strong>Short Volatility:</strong> Sell premium strategies</li>
-                        <li><strong>Volatility Arbitrage:</strong> Implied vs realized</li>
-                        <li><strong>Dispersion Trading:</strong> Index vs stocks</li>
-                    </ul>
-                    
-                    <h5 style="color: #1f77b4;">💰 Income Strategies</h5>
-                    <ul>
-                        <li><strong>Covered Calls:</strong> Generate income on holdings</li>
-                        <li><strong>Cash-Secured Puts:</strong> Income while acquiring</li>
-                        <li><strong>Iron Butterflies:</strong> High probability income</li>
-                        <li><strong>Short Strangles:</strong> Range-bound income</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        ### Understanding Exotic Options
+        
+        **Asian Options (Average Options)**
+        - Payoff depends on the average price of the underlying over a specific period
+        - Less volatile than vanilla options due to averaging effect
+        - Popular in commodity markets and FX
+        
+        **Barrier Options**
+        - Payoff depends on whether the underlying crosses a barrier level
+        - Knock-out: Option extinguished if barrier is crossed
+        - Knock-in: Option activated only if barrier is crossed
+        - Cheaper than vanilla options due to additional risk
+        
+        **Digital Options (Binary Options)**
+        - All-or-nothing payoff structure
+        - Either pays a fixed amount or nothing at all
+        - High gamma risk near expiration and strike
+        
+        **Lookback Options**
+        - Payoff based on the maximum or minimum price during the option's life
+        - Floating strike: Strike is set to the optimal level at expiration
+        - Fixed strike: Payoff based on extrema vs. fixed strike
+        - Expensive due to path-dependent nature
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    with st.expander("📊 Understanding the Greeks"):
+    with st.expander("⚠️ Risk Management Guidelines"):
+        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
         st.markdown("""
-        <div class="info-box">
-            <h4>🎯 The Greeks - Risk Sensitivities Explained</h4>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
-                <div>
-                    <h5 style="color: #1f77b4;">📈 First-Order Greeks</h5>
-                    <ul>
-                        <li><strong>Delta (Δ):</strong> Price sensitivity to underlying moves</li>
-                        <li><strong>Vega (ν):</strong> Sensitivity to volatility changes</li>
-                        <li><strong>Theta (Θ):</strong> Time decay (usually negative)</li>
-                        <li><strong>Rho (ρ):</strong> Interest rate sensitivity</li>
-                    </ul>
-                    
-                    <h5 style="color: #1f77b4;">📋 Greek Ranges</h5>
-                    <ul>
-                        <li><strong>Delta:</strong> -1.0 to +1.0 (calls: 0 to 1, puts: -1 to 0)</li>
-                        <li><strong>Gamma:</strong> 0 to ∞ (highest for ATM options)</li>
-                        <li><strong>Theta:</strong> Usually negative (time decay)</li>
-                        <li><strong>Vega:</strong> Always positive (vol increases price)</li>
-                    </ul>
-                </div>
-                <div>
-                    <h5 style="color: #1f77b4;">🔄 Second-Order Greeks</h5>
-                    <ul>
-                        <li><strong>Gamma (Γ):</strong> Rate of change of delta</li>
-                        <li><strong>Vomma:</strong> Rate of change of vega</li>
-                        <li><strong>Charm:</strong> Rate of change of delta over time</li>
-                        <li><strong>Color:</strong> Rate of change of gamma over time</li>
-                    </ul>
-                    
-                    <h5 style="color: #1f77b4;">💡 Practical Applications</h5>
-                    <ul>
-                        <li><strong>Delta Hedging:</strong> Maintain market neutrality</li>
-                        <li><strong>Gamma Scalping:</strong> Profit from rebalancing</li>
-                        <li><strong>Vega Trading:</strong> Volatility arbitrage</li>
-                        <li><strong>Theta Harvesting:</strong> Time decay strategies</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        ### Key Risk Considerations
+        
+        **Model Risk**
+        - Monte Carlo simulations have sampling error
+        - Model assumptions may not hold in practice
+        - Calibration to market data is crucial
+        
+        **Market Risk**
+        - Exotic options often have complex Greeks
+        - Path-dependent options require sophisticated hedging
+        - Barrier options have discontinuous payoffs
+        
+        **Operational Risk**
+        - Real-time monitoring of barrier levels
+        - Accurate averaging calculations for Asian options
+        - Proper settlement procedures for digital options
+        
+        **Liquidity Risk**
+        - Exotic options may be harder to trade
+        - Wider bid-ask spreads
+        - Limited market makers
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    with st.expander("⚠️ Risk Management Best Practices"):
+    with st.expander("📊 Market Data & Volatility Analysis"):
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
         st.markdown("""
-        <div class="warning-box">
-            <h4>🛡️ Professional Risk Management Framework</h4>
-            
-            <h5>📊 Position Sizing Guidelines</h5>
-            <ul>
-                <li><strong>Risk Capital:</strong> Never risk more than 1-2% of capital per trade</li>
-                <li><strong>Correlation:</strong> Account for correlation between positions</li>
-                <li><strong>Concentration:</strong> Avoid over-concentration in strategies</li>
-                <li><strong>Volatility Scaling:</strong> Size inversely to expected volatility</li>
-            </ul>
-            
-            <h5>🎯 Greeks Limits Framework</h5>
-            <ul>
-                <li><strong>Portfolio Delta:</strong> Maintain within ±10% of portfolio value</li>
-                <li><strong>Gamma Limits:</strong> Control convexity exposure</li>
-                <li><strong>Vega Limits:</strong> Manage volatility risk across cycles</li>
-                <li><strong>Theta Targets:</strong> Balance decay income vs risk</li>
-            </ul>
-            
-            <h5>🚨 Stop Loss & Risk Controls</h5>
-            <ul>
-                <li><strong>Hard Stops:</strong> Automatic closure at predefined levels</li>
-                <li><strong>Profit Targets:</strong> Take profits at 20-50% of max potential</li>
-                <li><strong>Time Stops:</strong> Close before theta acceleration</li>
-                <li><strong>Volatility Stops:</strong> Exit at volatility extremes</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        ### Interactive Implied Volatility Surface
+        
+        **Surface Parameters that affect exotic options:**
+        
+        **Base Volatility**: The fundamental volatility level for at-the-money options
+        - Affects all exotic options but impact varies by type
+        - Asian options less sensitive due to averaging
+        - Lookback options more sensitive due to path dependence
+        
+        **Smile Intensity**: Controls the "volatility smile" or "smirk"
+        - Higher values create more pronounced curves
+        - Barrier options particularly sensitive to volatility skew
+        - Digital options affected by local volatility near strike
+        
+        **Term Structure**: How volatility changes with time
+        - Longer-term exotic options more affected
+        - Path-dependent options sensitive to volatility term structure
+        
+        **Market Phenomena affecting exotics:**
+        - **Volatility Smile**: Affects barrier and digital option pricing
+        - **Volatility Clustering**: Important for path-dependent options
+        - **Jump Risk**: Can trigger barriers unexpectedly
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    with st.expander("🔧 Troubleshooting & Tips"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>💡 Common Issues & Solutions</h4>
-            
-            <h5>⚠️ Strategy Configuration</h5>
-            <ul>
-                <li><strong>Negative Strikes:</strong> Ensure all strikes are positive</li>
-                <li><strong>Zero Quantities:</strong> Use non-zero option quantities</li>
-                <li><strong>Strike Ordering:</strong> Check ascending order for spreads</li>
-                <li><strong>Extreme Parameters:</strong> Use realistic market values</li>
-            </ul>
-            
-            <h5>📊 Calculation Errors</h5>
-            <ul>
-                <li><strong>Numerical Precision:</strong> Extreme parameters may fail</li>
-                <li><strong>Model Limitations:</strong> Each model has constraints</li>
-                <li><strong>Time to Expiry:</strong> Avoid very small values (< 0.001)</li>
-                <li><strong>Volatility Range:</strong> Keep between 1% and 200%</li>
-            </ul>
-            
-            <h5>✅ Best Practices</h5>
-            <ul>
-                <li><strong>Start Simple:</strong> Begin with basic strategies</li>
-                <li><strong>Validate Results:</strong> Check economic sense</li>
-                <li><strong>Use Realistic Parameters:</strong> Market-observed ranges</li>
-                <li><strong>Document Insights:</strong> Keep track of key findings</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-def main():
-    """Main function to run the Options Strategy Suite"""
-    st.set_page_config(
-        page_title="Options Strategy Suite",
-        page_icon="🎯",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-    
-    # Add custom CSS for better styling
+    # Footer
+    st.markdown("---")
     st.markdown("""
-    <style>
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-        }
-        .stTabs [data-baseweb="tab"] {
-            height: 50px;
-            white-space: pre-wrap;
-            background-color: #f0f2f6;
-            border-radius: 4px 4px 0px 0px;
-            gap: 4px;
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-        .stTabs [aria-selected="true"] {
-            background-color: #1f77b4;
-            color: white;
-        }
-        .metric-card {
-            background: white;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            border-left: 4px solid #1f77b4;
-        }
-    </style>
+    <div style="text-align: center; color: #666; padding: 20px;">
+        <p><strong>Exotic Options Pricing Tool</strong></p>
+        <p>Built with Streamlit • Educational and Research Purposes Only</p>
+        <p>⚠️ Not for actual trading decisions</p>
+    </div>
     """, unsafe_allow_html=True)
-    
-    
-    # Main application
-    option_strategies_tab()
-    
-    # Add educational content at the bottom
-    display_educational_content()
+
+
+# Helper functions for Greeks calculations (these would need to be implemented in your utils)
+def calculate_greeks_asian(S0, K, T, r, sigma, n_steps, n_paths, option_type, asian_type):
+    """Calculate Greeks for Asian options using finite differences"""
+    # This is a placeholder - you'd implement finite difference calculations
+    # or use your existing Greeks functions
+    return {
+        'Delta': 0.5,  # Placeholder values
+        'Gamma': 0.05,
+        'Theta': -0.01,
+        'Vega': 0.15,
+        'Rho': 0.08
+    }
+
+def calculate_greeks_digital(S, K, T, r, sigma, option_type, style, Q):
+    """Calculate Greeks for Digital options"""
+    # This is a placeholder - you'd implement actual digital Greeks calculations
+    return {
+        'Delta': 0.3,  # Placeholder values  
+        'Gamma': 0.8,
+        'Theta': -0.05,
+        'Vega': 0.1,
+        'Rho': 0.05
+    }
+
+def plot_sensitivity_analysis(option_type, base_params, param_name, param_range, option_family, **kwargs):
+    """Create sensitivity analysis plots"""
+    # This would create plotly charts showing how option prices vary with parameters
+    # Placeholder implementation
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=param_range, y=param_range*0.5, mode='lines', name=f'{option_family} {option_type}'))
+    fig.update_layout(title=f"Sensitivity to {param_name}", xaxis_title=param_name, yaxis_title="Option Price")
+    return fig
