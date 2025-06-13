@@ -118,18 +118,18 @@ def _interactive_pricing_lab():
     st.markdown('<div class="sub-header">Pricing Laboratory</div>', unsafe_allow_html=True)
     
     # Option type selector
-    teb1, teb2, teb3, teb4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4)
     
-    with teb1:
+    with col1:
         if st.button("Asian Options", key="select_asian", help="Path-dependent averaging"):
             st.session_state.selected_option = "asian"
-    with teb2:
+    with col2:
         if st.button("Barrier Options", key="select_barrier", help="Knock-in/out features"):
             st.session_state.selected_option = "barrier"
-    with teb3:
+    with col3:
         if st.button("Digital Options", key="select_digital", help="Binary payoffs"):
             st.session_state.selected_option = "digital"
-    with teb4:
+    with col4:
         if st.button("Lookback Options", key="select_lookback", help="Extrema-based"):
             st.session_state.selected_option = "lookback" 
 
