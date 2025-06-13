@@ -727,11 +727,24 @@ def _strategy_builder_tab(params):
             # Price the strategy
             try:
                 with st.spinner("Pricing strategy..."):
+                    strategy_kwargs = {
+                        'S': params['spot_price'],
+                        'T': params['time_to_expiry'],
+                        'r': params['risk_free_rate'],
+                        'sigma': params['volatility'],
+                        'q': params['dividend_yield']
+                    }
+                    
+                    if params['model'] == "binomial":
+                        strategy_kwargs["N"] = params['n_steps']
+                    elif params['model'] == "monte-carlo":
+                        strategy_kwargs["n_simulations"] = params['n_simulations']
+                    
                     strategy_result = price_option_strategy(
                         legs=legs,
                         exercise_style=strategy_exercise,
                         model=params['model'],
-                        **params
+                        **strategy_kwargs
                     )
                 
                 # Store result in session state
@@ -1077,16 +1090,27 @@ def _sensitivity_analysis_tab(params):
                     
                     for i, p1_val in enumerate(param1_vals):
                         for j, p2_val in enumerate(param2_vals):
-                            temp_params = base_values.copy()
-                            temp_params[param1] = p1_val
-                            temp_params[param2] = p2_val
+                            temp_kwargs = {
+                                'S': base_values['S'],
+                                'T': base_values['T'], 
+                                'r': base_values['r'],
+                                'sigma': base_values['sigma'],
+                                'q': base_values['q']
+                            }
+                            temp_kwargs[param1] = p1_val
+                            temp_kwargs[param2] = p2_val
+                            
+                            if params['model'] == "binomial":
+                                temp_kwargs["N"] = params['n_steps']
+                            elif params['model'] == "monte-carlo":
+                                temp_kwargs["n_simulations"] = params['n_simulations']
                             
                             try:
                                 result = price_option_strategy(
                                     legs=legs,
                                     exercise_style=strategy_exercise,
                                     model=params['model'],
-                                    **temp_params
+                                    **temp_kwargs
                                 )
                                 
                                 strategy_price = result["strategy_price"]
@@ -1181,17 +1205,26 @@ def price_vanilla_option(option_type, exercise_style, model, S, K, T, r, sigma, 
         raise ValueError(f"Error in option pricing: {str(e)}")
 
 
-def price_option_strategy(legs, exercise_style, model, **kwargs):
+def price_option_strategy(legs, exercise_style, model, S, T, r, sigma, q=0, N=100, n_simulations=10000):
     """Strategy pricing function"""
     individual_prices = []
     total_price = 0
     
     try:
         for leg in legs:
-            leg_kwargs = kwargs.copy()
-            leg_kwargs['K'] = leg['strike']
-            
-            leg_price = price_vanilla_option(leg['type'], exercise_style, model, **leg_kwargs)
+            leg_price = price_vanilla_option(
+                option_type=leg['type'], 
+                exercise_style=exercise_style, 
+                model=model,
+                S=S, 
+                K=leg['strike'], 
+                T=T, 
+                r=r, 
+                sigma=sigma, 
+                q=q,
+                N=N,
+                n_simulations=n_simulations
+            )
             individual_prices.append(leg_price)
             total_price += leg_price * leg['qty']
         
@@ -1523,7 +1556,6 @@ def main():
         }
     </style>
     """, unsafe_allow_html=True)
-    
     
     
     # Main application
