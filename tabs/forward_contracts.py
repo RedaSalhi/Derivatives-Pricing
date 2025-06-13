@@ -115,14 +115,14 @@ def forward_contracts_tab():
     st.markdown("---")
     
     # Parameter input section
-    st.markdown('<div class="sub-header">📊 Contract Parameters</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Contract Parameters</div>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>💰 Market Prices</h4>
+            <h4>Market Prices</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -145,7 +145,7 @@ def forward_contracts_tab():
     with col2:
         st.markdown("""
         <div class="info-box">
-            <h4>⏰ Time & Rates</h4>
+            <h4>Time & Rates</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -164,7 +164,7 @@ def forward_contracts_tab():
     with col3:
         st.markdown("""
         <div class="info-box">
-            <h4>🔧 Cost Parameters</h4>
+            <h4>Cost Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -183,7 +183,7 @@ def forward_contracts_tab():
         ) / 100
     
     # Time to maturity calculation
-    st.markdown('<div class="sub-header">📅 Maturity Configuration</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Maturity Configuration</div>', unsafe_allow_html=True)
     
     if time_input_method == "Years":
         time_to_maturity = st.number_input(
@@ -227,10 +227,10 @@ def forward_contracts_tab():
     st.divider()
     
     # Main tabs
-    ta1, ta2, ta3, ta4 = st.tabs(["💵 Pricing Results", "📈 Mark-to-Market", "📊 Payout Analysis", "🔬 Sensitivity"])
+    ta1, ta2, ta3, ta4 = st.tabs(["Pricing Results", "Mark-to-Market", "Payout Analysis", "Sensitivity"])
     
     with ta1:
-        st.markdown('<div class="sub-header">💰 Forward Contract Pricing Results</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Forward Contract Pricing Results</div>', unsafe_allow_html=True)
         
         # Key metrics in professional table format
         basis = forward_price - spot_price
@@ -239,7 +239,7 @@ def forward_contracts_tab():
         
         st.markdown(f"""
         <div class="metric-container">
-            <h4>📊 Key Metrics Summary</h4>
+            <h4>Key Metrics Summary</h4>
             <table style="width: 100%; border-collapse: collapse;">
                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                     <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -271,7 +271,7 @@ def forward_contracts_tab():
         """, unsafe_allow_html=True)
         
         # Pricing formula with enhanced formatting
-        st.markdown('<div class="sub-header">📐 Cost of Carry Model</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Cost of Carry Model</div>', unsafe_allow_html=True)
         
         st.markdown("""
         <div class="formula">
@@ -283,7 +283,7 @@ def forward_contracts_tab():
         # Parameter breakdown
         st.markdown(f"""
         <div class="parameter-box">
-            <h4 style="color: #1f77b4; margin-top: 0;">📊 Parameter Breakdown</h4>
+            <h4 style="color: #1f77b4; margin-top: 0;">Parameter Breakdown</h4>
             <table style="width: 100%; border-collapse: collapse;">
                 <tr style="border-bottom: 1px solid #dee2e6;">
                     <td style="padding: 8px; font-weight: bold;">Parameter</td>
@@ -331,37 +331,31 @@ def forward_contracts_tab():
         </div>
         """, unsafe_allow_html=True)
         
-        # Detailed calculation breakdown
         with st.expander("🔍 Step-by-Step Calculation"):
             net_carry = interest_rate + storage_cost - dividend_yield
             exp_factor = np.exp(net_carry * time_to_maturity)
             forward_price_calc = spot_price * exp_factor
-            
+        
             st.markdown("#### Calculation Steps:")
-            
-            st.markdown(f"""
-            <div class="calculation-step">
-                <strong>Step 1:</strong> Calculate Net Carry Rate<br>
-                Net Carry = r + c - q = {interest_rate*100:.2f}% + {storage_cost*100:.2f}% - {dividend_yield*100:.2f}% = {net_carry*100:.2f}%
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown(f"""
-            <div class="calculation-step">
-                <strong>Step 2:</strong> Calculate Exponential Factor<br>
-                e^(Net Carry × T) = e^({net_carry*100:.2f}% × {time_to_maturity:.4f}) = {exp_factor:.6f}
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown(f"""
-            <div class="calculation-step">
-                <strong>Step 3:</strong> Calculate Forward Price<br>
-                F = S₀ × e^((r + c - q) × T) = ${spot_price:.2f} × {exp_factor:.6f} = ${forward_price_calc:.2f}
-            </div>
-            """, unsafe_allow_html=True)
+        
+            st.latex(rf"""
+            \text{{Step 1: Net Carry Rate}} \\
+            r + c - q = {interest_rate:.4f} + {storage_cost:.4f} - {dividend_yield:.4f} = {net_carry:.4f}
+            """)
+        
+            st.latex(rf"""
+            \text{{Step 2: Exponential Factor}} \\
+            e^{{(r + c - q) \cdot T}} = e^{{{net_carry:.4f} \cdot {time_to_maturity:.4f}}} = {exp_factor:.6f}
+            """)
+        
+            st.latex(rf"""
+            \text{{Step 3: Forward Price}} \\
+            F = S_0 \cdot e^{{(r + c - q) \cdot T}} = {spot_price:.2f} \cdot {exp_factor:.6f} = {forward_price_calc:.2f}
+            """)
+
     
     with ta2:
-        st.markdown('<div class="sub-header">📈 Mark-to-Market Analysis</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Mark-to-Market Analysis</div>', unsafe_allow_html=True)
         st.info("**Mark-to-Market Value:** Current value of the forward contract before maturity (t < T)")
         
         try:
@@ -382,7 +376,7 @@ def forward_contracts_tab():
             # Professional metrics display
             st.markdown(f"""
             <div class="metric-container">
-                <h4>📊 Current Position Analysis</h4>
+                <h4>Current Position Analysis</h4>
                 <table style="width: 100%; border-collapse: collapse;">
                     <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                         <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -426,7 +420,7 @@ def forward_contracts_tab():
             else:
                 st.markdown("""
                 <div class="info-box">
-                    <h4>⚖️ Position Status: At-the-Money</h4>
+                    <h4>Position Status: At-the-Money</h4>
                     <p>Your position is currently at breakeven</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -438,19 +432,9 @@ def forward_contracts_tab():
                 <p>Error creating mark-to-market chart: {str(e)}</p>
             </div>
             """, unsafe_allow_html=True)
-        
-        # Original matplotlib chart as fallback
-        try:
-            st.markdown('<div class="sub-header">📊 Alternative Chart View</div>', unsafe_allow_html=True)
-            plot_forward_mark_to_market(
-                strike_price, time_to_maturity, interest_rate, 
-                storage_cost, dividend_yield, position.lower()
-            )
-        except:
-            pass
     
     with ta3:
-        st.markdown('<div class="sub-header">📊 Payout Analysis at Maturity</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Payout Analysis at Maturity</div>', unsafe_allow_html=True)
         st.info("**Payoff Analysis:** Profit/Loss when the forward contract expires (t = T)")
         
         try:
@@ -466,7 +450,7 @@ def forward_contracts_tab():
             """, unsafe_allow_html=True)
         
         # Enhanced scenario analysis
-        st.markdown('<div class="sub-header">💰 Payout Scenarios</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Payout Scenarios</div>', unsafe_allow_html=True)
         
         # Create more comprehensive scenarios
         spot_scenarios = [strike_price * mult for mult in [0.6, 0.7, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.2, 1.3, 1.4]]
@@ -509,13 +493,6 @@ def forward_contracts_tab():
             <p><strong>Breakeven spot price:</strong> ${strike_price:.2f}</p>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Original matplotlib chart as alternative
-        try:
-            st.markdown('<div class="sub-header">Alternative Payout Visualization</div>', unsafe_allow_html=True)
-            plot_forward_payout_and_value(strike_price, position.lower())
-        except:
-            pass
     
     with ta4:
         st.markdown('<div class="sub-header">Sensitivity Analysis</div>', unsafe_allow_html=True)
@@ -549,7 +526,7 @@ def forward_contracts_tab():
         try:
             # Calculate numerical derivatives
             delta_s = 0.01 * spot_price  # 1% change in spot
-            delta_r = 0.0001  # 1 basis point
+            delta_r = 0.01  # 1 basis point
             delta_t = 0.01    # 1% change in time
             
             # Spot sensitivity (Delta equivalent)
@@ -558,7 +535,7 @@ def forward_contracts_tab():
             
             # Rate sensitivity (Rho equivalent)
             rate_up = price_forward_contract(spot_price, interest_rate + delta_r, time_to_maturity, storage_cost, dividend_yield)
-            rate_sensitivity = (rate_up - forward_price) / (100 * delta_r)
+            rate_sensitivity = (rate_up - forward_price) / (delta_r)
             
             # Time sensitivity (Theta equivalent)
             time_up = price_forward_contract(spot_price, interest_rate, time_to_maturity + delta_t, storage_cost, dividend_yield)
