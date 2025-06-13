@@ -1204,6 +1204,8 @@ def _sensitivity_analysis_tab(params):
 
 
 def display_educational_content():
+    """Display comprehensive educational content"""
+    
     # Custom CSS for enhanced styling
     st.markdown("""
     <style>
@@ -1301,7 +1303,6 @@ def display_educational_content():
     </style>
     """, unsafe_allow_html=True)
     
-    """Display comprehensive educational content"""
     st.markdown("---")
     st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
     
@@ -1424,12 +1425,12 @@ def display_educational_content():
         </div>
         """, unsafe_allow_html=True)
     
-    with st.expander("Troubleshooting & Tips"):
+    with st.expander("🔧 Troubleshooting & Tips"):
         st.markdown("""
         <div class="info-box">
-            <h4>Common Issues & Solutions</h4>
+            <h4>💡 Common Issues & Solutions</h4>
             
-            <h5>Strategy Configuration</h5>
+            <h5>⚠️ Strategy Configuration</h5>
             <ul>
                 <li><strong>Negative Strikes:</strong> Ensure all strikes are positive</li>
                 <li><strong>Zero Quantities:</strong> Use non-zero option quantities</li>
@@ -1437,7 +1438,7 @@ def display_educational_content():
                 <li><strong>Extreme Parameters:</strong> Use realistic market values</li>
             </ul>
             
-            <h5>Calculation Errors</h5>
+            <h5>📊 Calculation Errors</h5>
             <ul>
                 <li><strong>Numerical Precision:</strong> Extreme parameters may fail</li>
                 <li><strong>Model Limitations:</strong> Each model has constraints</li>
@@ -1445,13 +1446,114 @@ def display_educational_content():
                 <li><strong>Volatility Range:</strong> Keep between 1% and 200%</li>
             </ul>
             
-            <h5>Best Practices</h5>
+            <h5>✅ Best Practices</h5>
             <ul>
                 <li><strong>Start Simple:</strong> Begin with basic strategies</li>
                 <li><strong>Validate Results:</strong> Check economic sense</li>
                 <li><strong>Use Realistic Parameters:</strong> Market-observed ranges</li>
                 <li><strong>Document Insights:</strong> Keep track of key findings</li>
             </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with st.expander("📐 Mathematical Formulas & Models"):
+        st.markdown("""
+        <div class="info-box">
+            <h4>🧮 Core Mathematical Foundations</h4>
+            
+            <h5>📊 Black-Scholes Formula</h5>
+            <div class="formula">
+                Call: C = S₀e⁻ᵈᵀN(d₁) - Ke⁻ʳᵀN(d₂)
+                <br>
+                Put: P = Ke⁻ʳᵀN(-d₂) - S₀e⁻ᵈᵀN(-d₁)
+            </div>
+            
+            <div class="parameter-box">
+                <strong>Where:</strong><br>
+                d₁ = [ln(S₀/K) + (r - q + σ²/2)T] / (σ√T)<br>
+                d₂ = d₁ - σ√T<br>
+                N(x) = Cumulative standard normal distribution
+            </div>
+            
+            <h5>📈 The Greeks Formulas</h5>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="sensitivity-long">
+                    <strong>Delta (Δ):</strong><br>
+                    Call: Δ = e⁻ᵈᵀN(d₁)<br>
+                    Put: Δ = e⁻ᵈᵀ[N(d₁) - 1]
+                </div>
+                <div class="sensitivity-short">
+                    <strong>Gamma (Γ):</strong><br>
+                    Γ = e⁻ᵈᵀn(d₁) / (S₀σ√T)<br>
+                    (Same for calls and puts)
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="sensitivity-long">
+                    <strong>Theta (Θ):</strong><br>
+                    Complex formula involving<br>
+                    time decay components
+                </div>
+                <div class="sensitivity-short">
+                    <strong>Vega (ν):</strong><br>
+                    ν = S₀e⁻ᵈᵀn(d₁)√T<br>
+                    (Same for calls and puts)
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with st.expander("🎯 Strategy Quick Reference"):
+        st.markdown("""
+        <div class="info-box">
+            <h4>📋 Popular Strategy Combinations</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <div class="parameter-box">
+                    <h5 style="color: #1f77b4;">🐂 Bullish Strategies</h5>
+                    <ul style="font-size: 0.9em;">
+                        <li>Long Call</li>
+                        <li>Bull Call Spread</li>
+                        <li>Bull Put Spread</li>
+                        <li>Covered Call</li>
+                        <li>Protective Put</li>
+                    </ul>
+                </div>
+                
+                <div class="parameter-box">
+                    <h5 style="color: #dc3545;">🐻 Bearish Strategies</h5>
+                    <ul style="font-size: 0.9em;">
+                        <li>Long Put</li>
+                        <li>Bear Put Spread</li>
+                        <li>Bear Call Spread</li>
+                        <li>Protective Call</li>
+                        <li>Collar (Protective)</li>
+                    </ul>
+                </div>
+                
+                <div class="parameter-box">
+                    <h5 style="color: #6c757d;">⚖️ Neutral Strategies</h5>
+                    <ul style="font-size: 0.9em;">
+                        <li>Long/Short Straddle</li>
+                        <li>Long/Short Strangle</li>
+                        <li>Iron Condor</li>
+                        <li>Butterfly Spread</li>
+                        <li>Calendar Spread</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h5>💡 Strategy Selection Tips</h5>
+            <div class="success-box">
+                <ul>
+                    <li><strong>High Volatility Expected:</strong> Buy straddles or strangles</li>
+                    <li><strong>Low Volatility Expected:</strong> Sell premium (iron condors, butterflies)</li>
+                    <li><strong>Moderate Directional View:</strong> Use spreads to reduce cost</li>
+                    <li><strong>Strong Directional View:</strong> Long options or synthetic positions</li>
+                    <li><strong>Income Generation:</strong> Covered calls, cash-secured puts</li>
+                </ul>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
