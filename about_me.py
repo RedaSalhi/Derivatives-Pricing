@@ -226,7 +226,6 @@ with st.container():
 # Form using the exact structure that works
 formsubmit_email = "salhi.reda47@gmail.com"
 form_html = f"""
-<div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
 <form action="https://formsubmit.co/{formsubmit_email}" method="POST">
     <input type="hidden" name="_captcha" value="false">
     <input type="hidden" name="_template" value="table">
@@ -268,8 +267,8 @@ form_code = f"""
     </button>
 </form>
 """
-st.markdown(form_code, unsafe_allow_html=True)
-#st.markdown(form_html, unsafe_allow_html=True)
+#st.markdown(form_code, unsafe_allow_html=True)
+st.markdown(form_html, unsafe_allow_html=True)
 
 # ----------------------
 # Skills & Interests (Additional Section)
