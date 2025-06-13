@@ -213,29 +213,76 @@ with st.container():
 # Contact Form Section
 # ----------------------
 
-st.markdown("---")
-st.subheader("📬 Contact Me")
-st.markdown("If you'd like to get in touch, just fill out the form below:")
-# Obfuscated email (only used in form action, not visible)
-formsubmit_email = "salhi.reda47@gmail.com"
-form_code = f"""
-<form action="https://formsubmit.co/{formsubmit_email}" method="POST">
-    <input type="hidden" name="_captcha" value="false">
-    <input type="hidden" name="_template" value="table">
-    <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
-    <input type="text" name="name" placeholder="Your Name" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;"><br>
-    <input type="email" name="email" placeholder="Your Email" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;"><br>
-    <textarea name="message" placeholder="Your Message" rows="5" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;"></textarea><br>
-    <button type="submit" style="background-color:
-#4CAF50;color:white;padding:0.75rem 1.5rem;border:none;cursor:pointer;">
-        Send Message
-    </button>
-</form>
-"""
-st.markdown(form_code, unsafe_allow_html=True)
+with st.container():
+    st.markdown("---")
+    st.subheader("📬 Contact Me")
+    st.markdown("If you'd like to get in touch, just fill out the form below:")
+    
+    formsubmit_email = "salhi.reda47@gmail.com"
+    
+    # CSS personnalisé pour un look moderne
+    form_css = """
+    <style>
+    .contact-form {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        margin: 1rem 0;
+    }
+    .contact-form input, .contact-form textarea {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        background: rgba(255,255,255,0.9);
+        transition: all 0.3s ease;
+    }
+    .contact-form input:focus, .contact-form textarea:focus {
+        outline: none;
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .contact-form button {
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .contact-form button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    </style>
+    """
+    
+    form_code = f"""
+    {form_css}
+    <div class="contact-form">
+        <form action="https://formsubmit.co/{formsubmit_email}" method="POST">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
+            <input type="text" name="name" placeholder="✨ Your Name" required>
+            <input type="email" name="email" placeholder="📧 Your Email" required>
+            <textarea name="message" placeholder="💬 Your Message" rows="5" required></textarea>
+            <button type="submit">Send Message 🚀</button>
+        </form>
+    </div>
+    """
+    
+    st.markdown(form_code, unsafe_allow_html=True)
 
-
-st.markdown(form_code, unsafe_allow_html=True)
 
 # ----------------------
 # Skills & Interests (Additional Section)
