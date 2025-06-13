@@ -136,13 +136,13 @@ st.markdown('<div class="subtitle">Financial Engineering Student | Quant Researc
 with st.container():
     st.markdown("""
     <div class="profile-box">
-        <div class="section-title">👨‍🎓 Profile</div>
+        <div class="section-title">Profile</div>
         <div class="profile-info">
             <strong>SALHI Reda</strong><br>
-            🎓 Engineering student at <strong>Centrale Méditerranée</strong><br>
-            📈 Passionate about <strong>mathematics</strong>, <strong>financial markets</strong>, and <strong>economic research</strong><br>
-            💡 Specializing in quantitative finance and derivatives pricing<br>
-            🔬 Currently developing advanced pricing models and risk management tools
+            Engineering student at <strong>Centrale Méditerranée</strong><br>
+            Passionate about <strong>mathematics</strong>, <strong>financial markets</strong>, and <strong>quantitative research</strong><br>
+            Specializing in quantitative finance and derivatives pricing<br>
+            Currently developing advanced pricing models and risk management tools
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -153,7 +153,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="download-section">
-        <div class="section-title">📄 Resume Downloads</div>
+        <div class="section-title">Resume Downloads</div>
         <p style="margin-bottom: 1.5rem; color: #6c757d;">Download my latest resume in your preferred language:</p>
     </div>
     """, unsafe_allow_html=True)
@@ -168,27 +168,27 @@ with st.container():
         if os.path.exists(cv_en):
             with open(cv_en, "rb") as f:
                 st.download_button(
-                    label="🇺🇸 Download CV - English Version",
+                    label="Download CV - English Version",
                     data=f,
                     file_name="Reda_Salhi_CV_EN.pdf",
                     mime="application/pdf",
                     use_container_width=True
                 )
         else:
-            st.info("🇺🇸 English CV - Coming Soon")
+            st.info("English CV - Coming Soon")
     
     with col2:
         if os.path.exists(cv_fr):
             with open(cv_fr, "rb") as f:
                 st.download_button(
-                    label="🇫🇷 Download CV - French Version",
+                    label="Download CV - French Version",
                     data=f,
                     file_name="Reda_Salhi_CV_FR.pdf",
                     mime="application/pdf",
                     use_container_width=True
                 )
         else:
-            st.info("🇫🇷 French CV - Coming Soon")
+            st.info("French CV - Coming Soon")
 
 # ----------------------
 # Links Section
@@ -249,17 +249,17 @@ with st.container():
         <div class="section-title">🔗 Connect With Me</div>
         <div class="link-item">
             <a href="https://www.linkedin.com/in/reda-salhi-195297290/" target="_blank">
-                📊 LinkedIn Profile
+                LinkedIn Profile
             </a>
         </div>
         <div class="link-item">
             <a href="https://github.com/RedaSalhi" target="_blank">
-                💻 GitHub Portfolio
+                GitHub Portfolio
             </a>
         </div>
         <div class="link-item">
             <a href="mailto:salhi.reda47@gmail.com" class="email-link">
-                📧 salhi.reda47@gmail.com
+                salhi.reda47@gmail.com
             </a>
         </div>
     </div>
