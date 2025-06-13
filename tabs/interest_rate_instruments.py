@@ -814,152 +814,143 @@ def _greeks_analysis_tab():
     st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
     
     with st.expander("📊 Understanding the Vasicek Model"):
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("#### The Vasicek Interest Rate Model")
+        st.markdown("The Vasicek model is a mathematical model describing the evolution of interest rates. It is a type of 'one-factor short-rate model' as it describes interest rate movements as driven by only one source of market risk.")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="formula">', unsafe_allow_html=True)
+        st.markdown("**dr(t) = a(λ - r(t))dt + σ dW(t)**")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("**🔧 Parameters:**")
         st.markdown("""
-        <div class="info-box">
-            <h4>The Vasicek Interest Rate Model</h4>
-            
-            <p>The Vasicek model is a mathematical model describing the evolution of interest rates. It is a type of "one-factor short-rate model" as it describes interest rate movements as driven by only one source of market risk.</p>
-            
-            <div class="formula">
-                dr(t) = a(λ - r(t))dt + σ dW(t)
-            </div>
-            
-            <div class="section-title">🔧 Parameters:</div>
-            <ul>
-                <li><strong>a</strong>: Speed of mean reversion (how quickly rates return to long-term mean)</li>
-                <li><strong>λ</strong>: Long-term mean level of interest rates</li>
-                <li><strong>σ</strong>: Volatility of interest rate changes</li>
-                <li><strong>r(t)</strong>: Short-term interest rate at time t</li>
-                <li><strong>dW(t)</strong>: Wiener process (random component)</li>
-            </ul>
-            
-            <div class="section-title">✨ Key Features:</div>
-            <ul>
-                <li><strong>Mean Reversion</strong>: Rates tend to drift back toward the long-term mean</li>
-                <li><strong>Analytical Solutions</strong>: Closed-form formulas for bond prices and options</li>
-                <li><strong>Negative Rates</strong>: Model allows for negative interest rates</li>
-                <li><strong>Normal Distribution</strong>: Rate changes are normally distributed</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        - **a**: Speed of mean reversion (how quickly rates return to long-term mean)
+        - **λ**: Long-term mean level of interest rates  
+        - **σ**: Volatility of interest rate changes
+        - **r(t)**: Short-term interest rate at time t
+        - **dW(t)**: Wiener process (random component)
+        """)
+        
+        st.markdown("**✨ Key Features:**")
+        st.markdown("""
+        - **Mean Reversion**: Rates tend to drift back toward the long-term mean
+        - **Analytical Solutions**: Closed-form formulas for bond prices and options
+        - **Negative Rates**: Model allows for negative interest rates
+        - **Normal Distribution**: Rate changes are normally distributed
+        """)
     
     with st.expander("🏦 Bond Pricing Formulas"):
-        st.markdown("""
-        <div class="info-box">
-            <h4>Vasicek Bond Pricing Formulas</h4>
-            
-            <div class="section-title">💰 Zero-Coupon Bond Price:</div>
-            <div class="formula">
-                P(t,T) = A(t,T) × exp(-B(t,T) × r(t))
-            </div>
-            
-            <p><strong>Where:</strong></p>
-            <div class="formula">
-                B(t,T) = (1 - exp(-a(T-t))) / a
-            </div>
-            <div class="formula">
-                A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)
-            </div>
-            
-            <div class="section-title">🎫 Coupon Bond Price:</div>
-            <p>Sum of discounted coupon payments plus principal:</p>
-            <div class="formula">
-                P = Σ C × P(t,Tᵢ) + F × P(t,T)
-            </div>
-            
-            <div class="section-title">📈 Bond Option Price:</div>
-            <p>Uses the Black-Scholes formula adapted for bonds:</p>
-            <div class="formula">
-                Call: P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)<br>
-                Put: K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("#### Vasicek Bond Pricing Formulas")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("**💰 Zero-Coupon Bond Price:**")
+        st.markdown('<div class="formula">', unsafe_allow_html=True)
+        st.markdown("**P(t,T) = A(t,T) × exp(-B(t,T) × r(t))**")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("**Where:**")
+        st.markdown('<div class="formula">', unsafe_allow_html=True)
+        st.markdown("**B(t,T) = (1 - exp(-a(T-t))) / a**")
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="formula">', unsafe_allow_html=True)
+        st.markdown("**A(t,T) = exp((λ - σ²/2a²)(B(t,T) - T + t) - σ²B(t,T)²/4a)**")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("**🎫 Coupon Bond Price:**")
+        st.markdown("Sum of discounted coupon payments plus principal:")
+        st.markdown('<div class="formula">', unsafe_allow_html=True)
+        st.markdown("**P = Σ C × P(t,Tᵢ) + F × P(t,T)**")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("**📈 Bond Option Price:**")
+        st.markdown("Uses the Black-Scholes formula adapted for bonds:")
+        st.markdown('<div class="formula">', unsafe_allow_html=True)
+        st.markdown("**Call:** P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)")
+        st.markdown("**Put:** K × P(t,T₂) × N(-d₂) - P(t,T₁) × N(-d₁)")
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with st.expander("📊 Greeks for Bond Options"):
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("#### Bond Option Greeks")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="greeks-delta">', unsafe_allow_html=True)
+        st.markdown("**📈 Delta (Δ): Sensitivity to Bond Price Changes**")
         st.markdown("""
-        <div class="info-box">
-            <h4>Bond Option Greeks</h4>
-            
-            <div class="greeks-delta">
-                <div class="section-title">📈 Delta (Δ): Sensitivity to Bond Price Changes</div>
-                <ul>
-                    <li>Measures how much the option price changes for a $1 change in bond price</li>
-                    <li><strong>Range:</strong> 0 to 1 for calls, -1 to 0 for puts</li>
-                    <li><strong>Formula:</strong> Δ = ∂V/∂S</li>
-                </ul>
-            </div>
-            
-            <div class="greeks-rho">
-                <div class="section-title">💸 Rho (ρ): Sensitivity to Interest Rate Changes</div>
-                <ul>
-                    <li>Measures how much the option price changes for a 1% change in rates</li>
-                    <li>More important for bond options than equity options</li>
-                    <li><strong>Negative</strong> for calls (higher rates → lower bond prices → lower call values)</li>
-                    <li><strong>Formula:</strong> ρ = ∂V/∂r</li>
-                </ul>
-            </div>
-            
-            <div class="greeks-vega">
-                <div class="section-title">🌊 Vega (ν): Sensitivity to Volatility Changes</div>
-                <ul>
-                    <li>Measures how much the option price changes for a 1% change in volatility</li>
-                    <li><strong>Positive</strong> for both calls and puts (higher volatility → higher option values)</li>
-                    <li><strong>Formula:</strong> ν = ∂V/∂σ</li>
-                </ul>
-            </div>
-            
-            <div class="greeks-theta">
-                <div class="section-title">⏰ Theta (Θ): Time Decay</div>
-                <ul>
-                    <li>Measures how much the option price changes as time passes</li>
-                    <li>Usually <strong>negative</strong> (options lose value as expiration approaches)</li>
-                    <li><strong>Formula:</strong> Θ = ∂V/∂t</li>
-                </ul>
-            </div>
-            
-            <div class="greeks-gamma">
-                <div class="section-title">🎯 Gamma (Γ): Rate of Change of Delta</div>
-                <ul>
-                    <li>Measures the convexity of the option price</li>
-                    <li>Highest for <strong>at-the-money</strong> options near expiration</li>
-                    <li><strong>Formula:</strong> Γ = ∂²V/∂S²</li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        - Measures how much the option price changes for a $1 change in bond price
+        - **Range:** 0 to 1 for calls, -1 to 0 for puts
+        - **Formula:** Δ = ∂V/∂S
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="greeks-rho">', unsafe_allow_html=True)
+        st.markdown("**💸 Rho (ρ): Sensitivity to Interest Rate Changes**")
+        st.markdown("""
+        - Measures how much the option price changes for a 1% change in rates
+        - More important for bond options than equity options
+        - **Negative** for calls (higher rates → lower bond prices → lower call values)
+        - **Formula:** ρ = ∂V/∂r
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="greeks-vega">', unsafe_allow_html=True)
+        st.markdown("**🌊 Vega (ν): Sensitivity to Volatility Changes**")
+        st.markdown("""
+        - Measures how much the option price changes for a 1% change in volatility
+        - **Positive** for both calls and puts (higher volatility → higher option values)
+        - **Formula:** ν = ∂V/∂σ
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="greeks-theta">', unsafe_allow_html=True)
+        st.markdown("**⏰ Theta (Θ): Time Decay**")
+        st.markdown("""
+        - Measures how much the option price changes as time passes
+        - Usually **negative** (options lose value as expiration approaches)
+        - **Formula:** Θ = ∂V/∂t
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown('<div class="greeks-gamma">', unsafe_allow_html=True)
+        st.markdown("**🎯 Gamma (Γ): Rate of Change of Delta**")
+        st.markdown("""
+        - Measures the convexity of the option price
+        - Highest for **at-the-money** options near expiration
+        - **Formula:** Γ = ∂²V/∂S²
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with st.expander("⚠️ Model Limitations & Considerations"):
+        st.markdown('<div class="warning-box">', unsafe_allow_html=True)
+        st.markdown("#### Vasicek Model Limitations")
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("**🔍 Theoretical Limitations:**")
         st.markdown("""
-        <div class="warning-box">
-            <h4>Vasicek Model Limitations</h4>
-            
-            <div class="section-title">🔍 Theoretical Limitations:</div>
-            <ul>
-                <li><strong>Negative Rates:</strong> Model allows unrealistic negative rates (though less problematic now)</li>
-                <li><strong>Constant Parameters:</strong> Assumes constant mean reversion speed and volatility</li>
-                <li><strong>Normal Distribution:</strong> Real rate changes may have fat tails</li>
-                <li><strong>Single Factor:</strong> Ignores multiple sources of interest rate risk</li>
-            </ul>
-            
-            <div class="section-title">⚙️ Practical Considerations:</div>
-            <ul>
-                <li><strong>Parameter Estimation:</strong> Historical data may not reflect future behavior</li>
-                <li><strong>Calibration:</strong> Model may not fit current market prices perfectly</li>
-                <li><strong>Volatility Clustering:</strong> Real rates show periods of high/low volatility</li>
-                <li><strong>Regime Changes:</strong> Central bank policy changes can break model assumptions</li>
-            </ul>
-            
-            <div class="section-title">🛡️ Risk Management Best Practices:</div>
-            <ul>
-                <li>Use multiple models for comparison and validation</li>
-                <li>Regular recalibration with fresh market data</li>
-                <li>Stress testing with extreme market scenarios</li>
-                <li>Consider model uncertainty in risk measures</li>
-                <li>Monitor model performance against market prices</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
+        - **Negative Rates:** Model allows unrealistic negative rates (though less problematic now)
+        - **Constant Parameters:** Assumes constant mean reversion speed and volatility
+        - **Normal Distribution:** Real rate changes may have fat tails
+        - **Single Factor:** Ignores multiple sources of interest rate risk
+        """)
+        
+        st.markdown("**⚙️ Practical Considerations:**")
+        st.markdown("""
+        - **Parameter Estimation:** Historical data may not reflect future behavior
+        - **Calibration:** Model may not fit current market prices perfectly
+        - **Volatility Clustering:** Real rates show periods of high/low volatility
+        - **Regime Changes:** Central bank policy changes can break model assumptions
+        """)
+        
+        st.markdown("**🛡️ Risk Management Best Practices:**")
+        st.markdown("""
+        - Use multiple models for comparison and validation
+        - Regular recalibration with fresh market data
+        - Stress testing with extreme market scenarios
+        - Consider model uncertainty in risk measures
+        - Monitor model performance against market prices
+        """)
     
     # Footer
     st.markdown("""
