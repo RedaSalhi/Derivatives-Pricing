@@ -264,8 +264,7 @@ form_code = f"""
         border: 1px solid #ddd;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }}
-    .styled-form input[type="text"],
-    .styled-form input[type="email"],
+    .styled-form input,
     .styled-form textarea {{
         width: 100%;
         padding: 0.75rem;
@@ -282,7 +281,6 @@ form_code = f"""
         border-radius: 6px;
         cursor: pointer;
         font-size: 1rem;
-        transition: background-color 0.3s ease;
     }}
     .styled-form button:hover {{
         background-color: #45a049;
@@ -301,6 +299,7 @@ form_code = f"""
     <button type="submit">Send Message</button>
 </form>
 """
+
 st.markdown(form_code, unsafe_allow_html=True)
 #st.markdown(form_html, unsafe_allow_html=True)
 
