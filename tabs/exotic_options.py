@@ -117,21 +117,40 @@ def _interactive_pricing_lab():
     
     st.markdown('<div class="sub-header">Pricing Laboratory</div>', unsafe_allow_html=True)
     
-    # Option type selector
-    col1, col2, col3, col4 = st.columns(4)
+"""    # Option type selector
+    teb1, teb2, teb3, teb4 = st.columns(4)
     
-    with col1:
+    with teb1:
         if st.button("Asian Options", key="select_asian", help="Path-dependent averaging"):
             st.session_state.selected_option = "asian"
-    with col2:
+    with teb2:
         if st.button("Barrier Options", key="select_barrier", help="Knock-in/out features"):
             st.session_state.selected_option = "barrier"
-    with col3:
+    with teb3:
         if st.button("Digital Options", key="select_digital", help="Binary payoffs"):
             st.session_state.selected_option = "digital"
-    with col4:
+    with teb4:
         if st.button("Lookback Options", key="select_lookback", help="Extrema-based"):
-            st.session_state.selected_option = "lookback"
+            st.session_state.selected_option = "lookback" """
+
+    # Define tabs
+    tebs = st.tabs(["Asian Options", "Barrier Options", "Digital Options", "Lookback Options"])
+    
+    with tebs[0]:
+        st.session_state.selected_option = "asian"
+        st.markdown("### Asian Options")
+    
+    with tebs[1]:
+        st.session_state.selected_option = "barrier"
+        st.markdown("### Barrier Options")
+    
+    with tebs[2]:
+        st.session_state.selected_option = "digital"
+        st.markdown("### Digital Options")
+    
+    with tebs[3]:
+        st.session_state.selected_option = "lookback"
+        st.markdown("### Lookback Options")
     
     # Initialize session state
     if 'selected_option' not in st.session_state:
@@ -317,40 +336,40 @@ def _live_greeks_analysis():
         with col_g1:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3 style="color: red;">Delta</h3>
-                    <h3 style="color: blue;">{greeks_data['Delta'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: orange;">Delta</h3>
+                    <h3 style="color: SteelBlue;">{greeks_data['Delta'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
             
         with col_g2:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3 style="color: red;">Gamma</h3>
-                    <h3 style="color: blue;">{greeks_data['Gamma'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: orange;">Gamma</h3>
+                    <h3 style="color: SteelBlue;">{greeks_data['Gamma'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
             
         with col_g3:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3 style="color: red;">Theta</h3>
-                    <h3 style="color: blue;">{greeks_data['Theta'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: orange;">Theta</h3>
+                    <h3 style="color: SteelBlue;">{greeks_data['Theta'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
             
         with col_g4:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3 style="color: red;">Vega</h3>
-                    <h3 style="color: blue;">{greeks_data['Vega'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: orange;">Vega</h3>
+                    <h3 style="color: SteelBlue;">{greeks_data['Vega'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
             
         with col_g5:
             st.markdown(f"""
                 <div class="metric-container">
-                    <h3 style="color: red;">Rho</h3>
-                    <h3 style="color: blue;">{greeks_data['Rho'][current_spot_idx]:.2f}</h3>
+                    <h3 style="color: orange;">Rho</h3>
+                    <h3 style="color: SteelBlue;">{greeks_data['Rho'][current_spot_idx]:.2f}</h3>
                 </div>
                 """, unsafe_allow_html=True)
         
