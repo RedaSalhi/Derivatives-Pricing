@@ -846,22 +846,30 @@ def _greeks_analysis_tab():
         st.markdown("""
         <div class="info-box">
             <h4>Vasicek Bond Pricing Formulas</h4>
-    
             <h5>Zero-Coupon Bond:</h5>
-            <div class="formula">P(t,T) = A(t,T) × exp(−B(t,T) × r(t))</div>
-            <div class="formula">B(t,T) = (1 − e^(−a(T−t))) / a</div>
-            <div class="formula">A(t,T) = exp[(λ − σ²/2a²)(B(t,T) − (T−t)) − (σ²B(t,T)²)/(4a)]</div>
+        """, unsafe_allow_html=True)
     
+        st.latex(r"P(t,T) = A(t,T) \cdot \exp(-B(t,T) \cdot r(t))")
+        st.latex(r"B(t,T) = \frac{1 - e^{-a(T - t)}}{a}")
+        st.latex(r"A(t,T) = \exp\left[\left(\lambda - \frac{\sigma^2}{2a^2}\right)(B(t,T) - (T - t)) - \frac{\sigma^2 B(t,T)^2}{4a}\right]")
+    
+        st.markdown("""
             <h5>Coupon Bond:</h5>
             <p>Sum of discounted coupons and principal:</p>
-            <div class="formula">P = Σ C × P(t,Tᵢ) + F × P(t,T)</div>
+        """, unsafe_allow_html=True)
     
+        st.latex(r"P = \sum_i C_i \cdot P(t,T_i) + F \cdot P(t,T)")
+    
+        st.markdown("""
             <h5>Bond Option Price:</h5>
             <p>Black-like formula:</p>
-            <div class="formula">Call = P(t,T₁) × N(d₁) − K × P(t,T₂) × N(d₂)</div>
-            <div class="formula">Put = K × P(t,T₂) × N(−d₂) − P(t,T₁) × N(−d₁)</div>
-        </div>
         """, unsafe_allow_html=True)
+    
+        st.latex(r"\text{Call} = P(t,T_1) \cdot N(d_1) - K \cdot P(t,T_2) \cdot N(d_2)")
+        st.latex(r"\text{Put} = K \cdot P(t,T_2) \cdot N(-d_2) - P(t,T_1) \cdot N(-d_1)")
+    
+        st.markdown("</div>", unsafe_allow_html=True)
+
     
     # --- Greeks ---
     with st.expander("Greeks for Bond Options"):
