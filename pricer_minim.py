@@ -17,7 +17,6 @@ from tabs.swaps import swaps_tab
 from tabs.interest_rate_instruments import interest_rate_instruments_tab
 
 # Custom CSS for enhanced styling
-# --- Custom Styling ---
 st.markdown("""
 <style>
     .main-header {
@@ -52,15 +51,24 @@ st.markdown("""
         font-size: 1.3em;
         font-weight: bold;
         color: #1f77b4;
-        margin: 10px 0;
+        margin: 15px 0;
+        padding: 10px;
+        background-color: #f0f8ff;
+        border-radius: 5px;
+    }
+    .stExpander > div > div > div > div {
+        background-color: #f8f9fa;
+    }
+    h4 {
+        color: #1f77b4 !important;
+        margin-bottom: 15px !important;
+    }
+    h5 {
+        color: #ff7f0e !important;
+        margin-top: 15px !important;
+        margin-bottom: 10px !important;
     }
 </style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<script type="text/javascript"
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
 """, unsafe_allow_html=True)
 
 
