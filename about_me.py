@@ -2,12 +2,6 @@ import streamlit as st
 import sys
 import os
 
-# Page configuration
-st.set_page_config(
-    page_title="About Me - Reda Salhi",
-    page_icon="👨‍💼",
-    layout="wide"
-)
 
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
