@@ -137,8 +137,8 @@ def forward_contracts_tab():
         strike_price = st.number_input(
             "Strike Price ($)", 
             min_value=0.01, 
-            value=105.0, 
-            step=1.0,
+            value=105, 
+            step=1,
             help="Agreed delivery price at maturity"
         )
         
@@ -324,14 +324,14 @@ def forward_contracts_tab():
                 <tr>
                     <td style="padding: 6px;">Time to Maturity</td>
                     <td style="padding: 6px; font-weight: bold; color: #1f77b4;">T</td>
-                    <td style="padding: 6px; font-family: monospace;">{time_to_maturity:.4f} years</td>
+                    <td style="padding: 6px; font-family: monospace;">{time_to_maturity:.2f} years</td>
                     <td style="padding: 6px; font-size: 0.9em;">Contract duration</td>
                 </tr>
             </table>
         </div>
         """, unsafe_allow_html=True)
         
-        with st.expander("🔍 Step-by-Step Calculation"):
+        with st.expander("Step-by-Step Calculation"):
             net_carry = interest_rate + storage_cost - dividend_yield
             exp_factor = np.exp(net_carry * time_to_maturity)
             forward_price_calc = spot_price * exp_factor
@@ -340,17 +340,17 @@ def forward_contracts_tab():
         
             st.latex(rf"""
             \text{{Step 1: Net Carry Rate}} \\
-            r + c - q = {interest_rate:.4f} + {storage_cost:.4f} - {dividend_yield:.4f} = {net_carry:.4f}
+            r + c - q = {interest_rate:.4f} + {storage_cost:.2f} - {dividend_yield:.2f} = {net_carry:.2f}
             """)
         
             st.latex(rf"""
             \text{{Step 2: Exponential Factor}} \\
-            e^{{(r + c - q) \cdot T}} = e^{{{net_carry:.4f} \cdot {time_to_maturity:.4f}}} = {exp_factor:.6f}
+            e^{{(r + c - q) \cdot T}} = e^{{{net_carry:.2f} \cdot {time_to_maturity:.2f}}} = {exp_factor:.3f}
             """)
         
             st.latex(rf"""
             \text{{Step 3: Forward Price}} \\
-            F = S_0 \cdot e^{{(r + c - q) \cdot T}} = {spot_price:.2f} \cdot {exp_factor:.6f} = {forward_price_calc:.2f}
+            F = S_0 \cdot e^{{(r + c - q) \cdot T}} = {spot_price:.2f} \cdot {exp_factor:.3f} = {forward_price_calc:.2f}
             """)
 
     
