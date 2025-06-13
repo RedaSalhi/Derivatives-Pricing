@@ -581,18 +581,18 @@ def vanilla_options_tab():
             • **Best for:** Path-dependent options, complex models
             """)
     
-    with st.expander("📈 Understanding the Greeks"):
+    with st.expander("Understanding the Greeks"):
         st.markdown("#### The Greeks - Risk Sensitivities")
         
         # Delta
         st.markdown(
-            '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>📈 Delta (Δ): Price Sensitivity</strong></div>', 
+            '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>📈 Delta ($\Δ$): Price Sensitivity</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
         • **Definition:** Rate of change of option price with respect to underlying price  
         • **Range:** 0 to 1 (calls), -1 to 0 (puts)  
-        • **Interpretation:** A delta of 0.5 means $0.50 price change per $1 stock move  
+        • **Interpretation:** A delta of 0.5 means \$0.50 price change per $1 stock move  
         • **Use:** Hedge ratio for delta-neutral portfolios
         """)
         
@@ -718,51 +718,57 @@ def vanilla_options_tab():
             • **Gamma Scalping:** Dynamic hedging for profits
             """)
     
-    with st.expander("🔢 Key Formulas & Calculations"):
+    with st.expander("Key Formulas & Calculations"):
         st.markdown("#### Mathematical Foundations")
         
         st.markdown("##### Black-Scholes Formula")
         st.markdown(
-            '<div style="text-align: center; font-size: 1.1em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">Call: C = S₀N(d₁) - Ke^(-rT)N(d₂)<br>Put: P = Ke^(-rT)N(-d₂) - S₀N(-d₁)</div>', 
+            '<div style="text-align: center; font-size: 1.1em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">'
+            'Call: C = S₀N(d₁) - Ke<sup>-rT</sup>N(d₂)<br>'
+            'Put: P = Ke<sup>-rT</sup>N(-d₂) - S₀N(-d₁)'
+            '</div>', 
             unsafe_allow_html=True
         )
         
         st.markdown("##### d₁ and d₂ Parameters")
         st.markdown(
-            '<div style="text-align: center; font-size: 1.0em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">d₁ = [ln(S₀/K) + (r + σ²/2)T] / (σ√T)<br>d₂ = d₁ - σ√T</div>', 
+            '<div style="text-align: center; font-size: 1.0em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">'
+            'd₁ = [ln(S₀/K) + (r + σ²/2)T] / (σ√T)<br>'
+            'd₂ = d₁ - σ√T'
+            '</div>', 
             unsafe_allow_html=True
         )
         
         st.markdown("##### Greeks Formulas")
-        st.code("""
-Delta (Δ):
-  Call: N(d₁)
-  Put: N(d₁) - 1
-
-Gamma (Γ):
-  φ(d₁) / (S₀σ√T)
-
-Theta (Θ):
-  Call: -[S₀φ(d₁)σ/(2√T) + rKe^(-rT)N(d₂)]
-  Put: -[S₀φ(d₁)σ/(2√T) - rKe^(-rT)N(-d₂)]
-
-Vega (ν):
-  S₀φ(d₁)√T
-
-Rho (ρ):
-  Call: KTe^(-rT)N(d₂)
-  Put: -KTe^(-rT)N(-d₂)
-
-Where φ(x) is the standard normal PDF
+        st.latex(r"""
+        \begin{aligned}
+        \Delta: & \quad \text{Call: } N(d_1), \quad \text{Put: } N(d_1) - 1 \\
+        \Gamma: & \quad \frac{\phi(d_1)}{S_0 \sigma \sqrt{T}} \\
+        \Theta: & \quad 
+            \begin{cases}
+            \text{Call: } -\left( \frac{S_0 \phi(d_1) \sigma}{2 \sqrt{T}} + r K e^{-rT} N(d_2) \right) \\
+            \text{Put: } -\left( \frac{S_0 \phi(d_1) \sigma}{2 \sqrt{T}} - r K e^{-rT} N(-d_2) \right)
+            \end{cases} \\
+        \nu: & \quad S_0 \phi(d_1) \sqrt{T} \\
+        \rho: & \quad 
+            \begin{cases}
+            \text{Call: } K T e^{-rT} N(d_2) \\
+            \text{Put: } -K T e^{-rT} N(-d_2)
+            \end{cases}
+        \end{aligned}
         """)
+        st.markdown("*Where* φ(x) *is the standard normal PDF.*")
         
         st.markdown("##### Put-Call Parity")
         st.markdown(
-            '<div style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">C - P = S₀ - Ke^(-rT)</div>', 
+            '<div style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">'
+            'C - P = S₀ - Ke<sup>-rT</sup>'
+            '</div>', 
             unsafe_allow_html=True
         )
         
         st.markdown("This relationship must hold for European options to prevent arbitrage opportunities.")
+
     
     # Final footer
     st.markdown("---")
