@@ -134,27 +134,27 @@ def _interactive_pricing_lab():
             st.session_state.selected_option = "lookback" """
 
     # Define tabs
-tebs = st.tabs(["Asian Options", "Barrier Options", "Digital Options", "Lookback Options"])
+    tebs = st.tabs(["Asian Options", "Barrier Options", "Digital Options", "Lookback Options"])
+        
+    with tebs[0]:
+        st.session_state.selected_option = "asian"
+        st.markdown("### Asian Options")
     
-with tebs[0]:
-    st.session_state.selected_option = "asian"
-    st.markdown("### Asian Options")
-
-with tebs[1]:
-    st.session_state.selected_option = "barrier"
-    st.markdown("### Barrier Options")
-
-with tebs[2]:
-    st.session_state.selected_option = "digital"
-    st.markdown("### Digital Options")
-
-with tebs[3]:
-    st.session_state.selected_option = "lookback"
-    st.markdown("### Lookback Options")
-
-# Initialize session state
-if 'selected_option' not in st.session_state:
-    st.session_state.selected_option = "asian"
+    with tebs[1]:
+        st.session_state.selected_option = "barrier"
+        st.markdown("### Barrier Options")
+    
+    with tebs[2]:
+        st.session_state.selected_option = "digital"
+        st.markdown("### Digital Options")
+    
+    with tebs[3]:
+        st.session_state.selected_option = "lookback"
+        st.markdown("### Lookback Options")
+    
+    # Initialize session state
+    if 'selected_option' not in st.session_state:
+        st.session_state.selected_option = "asian"
     
     # Show current selection
     option_names = {"asian": "Asian Options", "barrier": "Barrier Options", "digital": "Digital Options", "lookback": "Lookback Options"}
