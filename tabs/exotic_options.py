@@ -1625,5 +1625,5 @@ def calculate_greeks_barrier_stable(S0, K, H, T, r, sigma, option_type, barrier_
     
     delta = norm.pdf(d1) * barrier_factor
     gamma = norm.pdf(d1) / (S0 * sigma * np.sqrt(T)) * barrier_factor
-    vega =
+    vega = 0
     return None 
