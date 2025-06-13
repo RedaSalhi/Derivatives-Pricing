@@ -3,6 +3,7 @@ import sys
 import os
 
 
+
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
@@ -223,26 +224,39 @@ with st.container():
     </div>
     """, unsafe_allow_html=True)
     
-    # Contact form
-    formsubmit_email = "salhi.reda47@gmail.com"
-    form_code = f"""
-    <div class="contact-form">
-        <form action="https://formsubmit.co/{formsubmit_email}" method="POST">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="_template" value="table">
-            <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
-            
-            <input type="text" name="name" placeholder="Your Name" required class="form-input">
-            <input type="email" name="email" placeholder="Your Email Address" required class="form-input">
-            <textarea name="message" placeholder="Your Message" rows="5" required class="form-input"></textarea>
-            
-            <button type="submit" class="form-button">
-                🚀 Send Message
-            </button>
-        </form>
-    </div>
-    """
-    st.markdown(form_code, unsafe_allow_html=True)
+    # Using Streamlit's native form components instead of HTML
+    with st.form("contact_form"):
+        st.markdown("### 📝 Contact Form")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            name = st.text_input("Your Name", placeholder="Enter your full name")
+        with col2:
+            email = st.text_input("Your Email", placeholder="your.email@example.com")
+        
+        message = st.text_area("Your Message", placeholder="Tell me about your project, question, or how we can collaborate...", height=120)
+        
+        submitted = st.form_submit_button("🚀 Send Message", use_container_width=True)
+        
+        if submitted:
+            if name and email and message:
+                st.success("✅ Thank you for your message! I'll get back to you soon.")
+                st.info("📧 You can also reach me directly at: salhi.reda47@gmail.com")
+            else:
+                st.error("❌ Please fill in all fields before submitting.")
+    
+    # Alternative contact methods
+    st.markdown("### 📞 Other Ways to Connect")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.info("📧 **Email**\nsalhi.reda47@gmail.com")
+    
+    with col2:
+        st.info("💼 **LinkedIn**\nConnect professionally")
+    
+    with col3:
+        st.info("💻 **GitHub**\nCheck out my projects")
 
 # ----------------------
 # Skills & Interests (Additional Section)
@@ -262,7 +276,7 @@ with st.container():
         """)
     
     with col2:
-        st.markdown("### Areas of Interest")
+        st.markdown("### 📚 Areas of Interest")
         st.markdown("""
         - Quantitative Finance
         - Financial Engineering
@@ -272,7 +286,7 @@ with st.container():
         """)
     
     with col3:
-        st.markdown("### Current Focus")
+        st.markdown("### 🎯 Current Focus")
         st.markdown("""
         - Advanced Derivatives Pricing
         - Monte Carlo Simulations
