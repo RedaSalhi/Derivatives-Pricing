@@ -117,7 +117,7 @@ def _interactive_pricing_lab():
     
     st.markdown('<div class="sub-header">Pricing Laboratory</div>', unsafe_allow_html=True)
     
-"""    # Option type selector
+    # Option type selector
     teb1, teb2, teb3, teb4 = st.columns(4)
     
     with teb1:
@@ -131,30 +131,8 @@ def _interactive_pricing_lab():
             st.session_state.selected_option = "digital"
     with teb4:
         if st.button("Lookback Options", key="select_lookback", help="Extrema-based"):
-            st.session_state.selected_option = "lookback" """
+            st.session_state.selected_option = "lookback" 
 
-    # Define tabs
-    tebs = st.tabs(["Asian Options", "Barrier Options", "Digital Options", "Lookback Options"])
-        
-    with tebs[0]:
-        st.session_state.selected_option = "asian"
-        st.markdown("### Asian Options")
-    
-    with tebs[1]:
-        st.session_state.selected_option = "barrier"
-        st.markdown("### Barrier Options")
-    
-    with tebs[2]:
-        st.session_state.selected_option = "digital"
-        st.markdown("### Digital Options")
-    
-    with tebs[3]:
-        st.session_state.selected_option = "lookback"
-        st.markdown("### Lookback Options")
-    
-    # Initialize session state
-    if 'selected_option' not in st.session_state:
-        st.session_state.selected_option = "asian"
     
     # Show current selection
     option_names = {"asian": "Asian Options", "barrier": "Barrier Options", "digital": "Digital Options", "lookback": "Lookback Options"}
