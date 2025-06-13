@@ -258,20 +258,19 @@ form_code = f"""
     }}
 </style>
 
-<div class="contact-box">
-    <form action="https://formsubmit.co/{formsubmit_email}" method="POST" class="styled-form">
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
+<form action="https://formsubmit.co/{formsubmit_email}" method="POST" class="styled-form">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
 
-        <input type="text" name="name" placeholder="Your Name" required>
-        <input type="email" name="email" placeholder="Your Email" required>
-        <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Your Email" required>
+    <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
 
-        <button type="submit">Send Message</button>
-    </form>
-</div>
+    <button type="submit">Send Message</button>
+</form>
 """
+
 
 st.markdown(form_code, unsafe_allow_html=True)
 
