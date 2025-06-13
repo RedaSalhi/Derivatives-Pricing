@@ -17,7 +17,6 @@ from tabs.swaps import swaps_tab
 from tabs.interest_rate_instruments import interest_rate_instruments_tab
 
 # Custom CSS for enhanced styling
-# Custom CSS for enhanced styling
 st.markdown("""
 <style>
     .main-header {
@@ -58,17 +57,19 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #d0e7ff;
     }
-    .formula-box {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 15px 0;
-        border: 1px solid #dee2e6;
-    }
     .section-title {
         color: #1f77b4;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+    }
+    .info-box h4, .warning-box h4 {
+        color: #1f77b4;
+        margin-bottom: 15px;
+        margin-top: 0;
+    }
+    .warning-box h4 {
+        color: #856404;
     }
 </style>
 """, unsafe_allow_html=True)
