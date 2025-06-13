@@ -148,8 +148,11 @@ def _interactive_pricing_lab():
     col_params, col_results = st.columns([1, 2])
     
     with col_params:
-        st.markdown('<div class="parameter-box">', unsafe_allow_html=True)
-        st.markdown("### Market Parameters")
+        st.markdown("""
+            <div class="sub-header">
+                <h3>Market Parameters</h3>
+            </div>
+            """, unsafe_allow_html=True)
         
         # Common parameters
         S0 = st.slider("Spot Price", 0.0, 200.0, 100.0, 1.0, key="live_S0")
