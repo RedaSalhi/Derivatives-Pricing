@@ -170,14 +170,22 @@ def _interactive_pricing_lab():
         # Option-specific parameters
         params = {}
         if st.session_state.selected_option == "asian":
-            st.markdown("### Asian Parameters")
+            st.markdown("""
+                    <h3 style='color:orange;'>
+                    Asian Parameters
+                    </h3>
+                    """, unsafe_allow_html=True)
             asian_type = st.selectbox("Asian Type", ["average_price", "average_strike"], key="live_asian_type")
             n_steps = st.slider("Time Steps", 50, 500, 252, 10, key="live_asian_steps")
             n_paths = st.slider("MC Paths", 1000, 20000, 5000, 1000, key="live_asian_paths")
             params = {'asian_type': asian_type, 'n_steps': n_steps, 'n_paths': n_paths}
             
         elif st.session_state.selected_option == "barrier":
-            st.markdown("### Barrier Parameters")
+            st.markdown("""
+                    <h3 style='color:orange;'>
+                    Barrier Parameters
+                    </h3>
+                    """, unsafe_allow_html=True)
             H = st.slider("Barrier Level", 10.0, 200.0, 120.0, 1.0, key="live_barrier_H")
             barrier_type = st.selectbox("Barrier Type", 
                                       ["up-and-out", "down-and-out", "up-and-in", "down-and-in"], 
@@ -192,12 +200,22 @@ def _interactive_pricing_lab():
             params = {'H': H, 'barrier_type': barrier_type, 'n_sims': n_sims, 'payout_style': payout_style, 'rebate': rebate}
             
         elif st.session_state.selected_option == "digital":
-            st.markdown("### Digital Parameters")
+            st.markdown("""
+                    <h3 style='color:orange;'>
+                    Digital Parameters
+                    </h3>
+                    """, unsafe_allow_html=True)
             digital_style = st.selectbox("Digital Style", ["Cash", "Asset"], key="live_digital_style").lower()
             
             # FIX #2: Enhanced cash parameter input with freedom
             if digital_style == "cash":
-                st.markdown("#### Cash Payout Configuration")
+                st.markdown("""
+                    <h3 style='color:orange;'>
+                    Cash Payout Configuration
+                    </h3>
+                    """, unsafe_allow_html=True)
+
+                
                 # Free-form text input for maximum flexibility
                 cash_expr = st.text_input(
                     "Cash Payout Expression", 
@@ -217,12 +235,15 @@ def _interactive_pricing_lab():
             params = {'style': digital_style, 'Q': Q}
                 
         elif st.session_state.selected_option == "lookback":
-            st.markdown("### Lookback Parameters")
+            st.markdown("""
+                    <h3 style='color:orange;'>
+                    Lookback Parameters
+                    </h3>
+                    """, unsafe_allow_html=True)
             floating_strike = st.checkbox("Floating Strike", value=True, key="live_lookback_floating")
             n_paths_lb = st.slider("MC Paths", 1000, 50000, 10000, 1000, key="live_lookback_paths")
             params = {'floating': floating_strike, 'n_paths': n_paths_lb}
         
-        st.markdown('</div>', unsafe_allow_html=True)
     
     with col_results:
         # Real-time price calculation and display
@@ -242,18 +263,31 @@ def _interactive_pricing_lab():
             
             # Greeks display in table format
             if greeks:
-                st.markdown("### Option Greeks")
+                st.markdown("""
+                    <h3 style='color:orange;'>
+                        Option Greeks
+                    </h3>
+                    """, unsafe_allow_html=True)
+
                 greeks_df = pd.DataFrame([greeks])
-                greeks_df = greeks_df.round(6)
+                greeks_df = greeks_df.round(2)
                 st.dataframe(greeks_df, use_container_width=True)
             
             # Live payoff diagram
-            st.markdown("### Payoff Analysis")
+            st.markdown("""
+                    <h3 style='color:orange;'>
+                        Payoff Analysis
+                    </h3>
+                    """, unsafe_allow_html=True)
             fig_payoff = create_live_payoff_diagram(S0, K, option_type, st.session_state.selected_option, params)
             st.plotly_chart(fig_payoff, use_container_width=True)
             
             # FIX #1: Continuous price sensitivity analysis with more points
-            st.markdown("### Continuous Price Sensitivity")
+            st.markdown("""
+                    <h3 style='color:orange;'>
+                        Continuous Price Sensitivity
+                    </h3>
+                    """, unsafe_allow_html=True)
             fig_sensitivity = create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, st.session_state.selected_option, params)
             st.plotly_chart(fig_sensitivity, use_container_width=True)
             
