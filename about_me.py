@@ -3,7 +3,6 @@ import sys
 import os
 
 
-
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
@@ -221,24 +220,36 @@ with st.container():
             I'd love to hear from you! Whether it's about collaboration opportunities, 
             questions about my work, or just to connect, feel free to reach out.
         </p>
-        
-        <div class="contact-form">
-            <form action="https://formsubmit.co/salhi.reda47@gmail.com" method="POST">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_template" value="table">
-                <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
-                
-                <input type="text" name="name" placeholder="Your Name" required class="form-input">
-                <input type="email" name="email" placeholder="Your Email Address" required class="form-input">
-                <textarea name="message" placeholder="Your Message" rows="5" required class="form-input"></textarea>
-                
-                <button type="submit" class="form-button">
-                    🚀 Send Message
-                </button>
-            </form>
-        </div>
     </div>
     """, unsafe_allow_html=True)
+
+# Form using the exact structure that works
+formsubmit_email = "salhi.reda47@gmail.com"
+form_html = f"""
+<div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+<form action="https://formsubmit.co/{formsubmit_email}" method="POST">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
+    
+    <input type="text" name="name" placeholder="Your Name" required 
+           style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 2px solid #e9ecef; border-radius: 8px; font-size: 1rem;">
+    
+    <input type="email" name="email" placeholder="Your Email Address" required 
+           style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 2px solid #e9ecef; border-radius: 8px; font-size: 1rem;">
+    
+    <textarea name="message" placeholder="Your Message" rows="5" required 
+              style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 2px solid #e9ecef; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+    
+    <button type="submit" 
+            style="background: linear-gradient(135deg, #1f77b4 0%, #2e86de 100%); color: white; padding: 0.75rem 2rem; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
+        🚀 Send Message
+    </button>
+</form>
+</div>
+"""
+
+st.markdown(form_html, unsafe_allow_html=True)
 
 # ----------------------
 # Skills & Interests (Additional Section)
