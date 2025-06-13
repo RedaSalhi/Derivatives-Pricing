@@ -1327,12 +1327,12 @@ def display_educational_content():
         </div>
         """, unsafe_allow_html=True)
     
-    with st.expander("🔧 Troubleshooting & Tips"):
+    with st.expander("Troubleshooting & Tips"):
         st.markdown("""
         <div class="info-box">
-            <h4>💡 Common Issues & Solutions</h4>
+            <h4>Common Issues & Solutions</h4>
             
-            <h5>⚠️ Strategy Configuration</h5>
+            <h5>Strategy Configuration</h5>
             <ul>
                 <li><strong>Negative Strikes:</strong> Ensure all strikes are positive</li>
                 <li><strong>Zero Quantities:</strong> Use non-zero option quantities</li>
@@ -1340,7 +1340,7 @@ def display_educational_content():
                 <li><strong>Extreme Parameters:</strong> Use realistic market values</li>
             </ul>
             
-            <h5>📊 Calculation Errors</h5>
+            <h5>Calculation Errors</h5>
             <ul>
                 <li><strong>Numerical Precision:</strong> Extreme parameters may fail</li>
                 <li><strong>Model Limitations:</strong> Each model has constraints</li>
@@ -1348,7 +1348,7 @@ def display_educational_content():
                 <li><strong>Volatility Range:</strong> Keep between 1% and 200%</li>
             </ul>
             
-            <h5>✅ Best Practices</h5>
+            <h5>Best Practices</h5>
             <ul>
                 <li><strong>Start Simple:</strong> Begin with basic strategies</li>
                 <li><strong>Validate Results:</strong> Check economic sense</li>
@@ -1359,14 +1359,8 @@ def display_educational_content():
         """, unsafe_allow_html=True)
 
 
-def main():
-    """Main function to run the Options Strategy Suite"""
-    st.set_page_config(
-        page_title="Options Strategy Suite",
-        page_icon="🎯",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
+def main_option_strategies_tab():
+    
     
     # Add custom CSS for better styling
     st.markdown("""
@@ -1400,5 +1394,4 @@ def main():
     # Main application
     option_strategies_tab()
     
-    # Add educational content at the bottom
     display_educational_content()
