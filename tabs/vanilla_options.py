@@ -124,7 +124,7 @@ def vanilla_options_tab():
     st.markdown("---")
     
     # Input Parameters Section
-    st.markdown('<div class="sub-header">📊 Option Parameters</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Option Parameters</div>', unsafe_allow_html=True)
     
     # Create columns for input parameters
     param_col1, param_col2, param_col3 = st.columns(3)
@@ -132,7 +132,7 @@ def vanilla_options_tab():
     with param_col1:
         st.markdown("""
         <div class="info-box">
-            <h4>📋 Option Details</h4>
+            <h4>Option Details</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -141,7 +141,7 @@ def vanilla_options_tab():
         
         st.markdown("""
         <div class="info-box">
-            <h4>💰 Market Parameters</h4>
+            <h4>Market Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -151,7 +151,7 @@ def vanilla_options_tab():
     with param_col2:
         st.markdown("""
         <div class="info-box">
-            <h4>⏰ Time & Risk</h4>
+            <h4>Time & Risk</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -163,7 +163,7 @@ def vanilla_options_tab():
     with param_col3:
         st.markdown("""
         <div class="info-box">
-            <h4>🔧 Model Parameters</h4>
+            <h4>Model Parameters</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -172,7 +172,7 @@ def vanilla_options_tab():
         
         st.markdown("""
         <div class="info-box">
-            <h4>🎯 Model Selection</h4>
+            <h4>Model Selection</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -188,7 +188,7 @@ def vanilla_options_tab():
     col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.markdown('<div class="sub-header">💵 Pricing Results</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Pricing Results</div>', unsafe_allow_html=True)
         
         if models:
             results = {}
@@ -230,7 +230,7 @@ def vanilla_options_tab():
                 results_df.columns = ['Option Price']
                 results_df = results_df.round(4)
                 
-                st.markdown("#### 📊 Pricing Comparison")
+                st.markdown("#### Pricing Comparison")
                 st.markdown('<div class="results-table">', unsafe_allow_html=True)
                 st.dataframe(results_df, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -261,10 +261,10 @@ def vanilla_options_tab():
             """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown('<div class="sub-header">📈 Analysis & Information</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Analysis & Information</div>', unsafe_allow_html=True)
         
         # Option Information
-        st.markdown("#### 📊 Option Metrics")
+        st.markdown("#### Option Metrics")
         moneyness = S / K
         intrinsic_value = max(S - K, 0) if option_type.lower() == "call" else max(K - S, 0)
         time_value = max(results.get("Black-Scholes", 0) - intrinsic_value, 0) if "Black-Scholes" in results and results.get("Black-Scholes") else 0
@@ -298,7 +298,7 @@ def vanilla_options_tab():
         """, unsafe_allow_html=True)
         
         # Greeks Section
-        st.markdown("#### 📊 Greeks Analysis")
+        st.markdown("#### Greeks Analysis")
         greek_model_option = st.selectbox("Model for Greeks:", ["Black-Scholes", "Binomial", "Monte-Carlo"], key="greek_model_option")
         
         if st.button("Calculate Greeks", type="primary"):
@@ -363,13 +363,13 @@ def vanilla_options_tab():
     
     # Sensitivity Analysis Section
     st.divider()
-    st.markdown('<div class="sub-header">🔬 Advanced Analysis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Advanced Analysis</div>', unsafe_allow_html=True)
     
     # Create tabs for different analysis types
     t1, t2 = st.tabs(["Parameter Sensitivity", "Greeks Analysis"])
     
     with t1:
-        st.markdown("#### 📊 Parameter Sensitivity Analysis")
+        st.markdown("#### Parameter Sensitivity Analysis")
         sens_col1, sens_col2, sens_col3 = st.columns([1, 1, 2])
         
         with sens_col1:
@@ -391,11 +391,11 @@ def vanilla_options_tab():
             with st.spinner("Running sensitivity analysis..."):
                 # Define parameter ranges
                 param_ranges = {
-                    "S": (S * 0.5, S * 1.5),
-                    "K": (K * 0.5, K * 1.5),
-                    "T": (0.1, min(2.0, T * 2)),
-                    "r": (0.01, min(0.2, r * 3)),
-                    "sigma": (sigma * 0.5, min(1.0, sigma * 2))
+                    "S": (S * 0.01, S * 1.5),
+                    "K": (K * 0.01, K * 1.5),
+                    "T": (0.1, min(3.0, T * 2)),
+                    "r": (0.01, min(0.01, r * 3)),
+                    "sigma": (0.01, min(1.0, sigma * 2))
                 }
                 
                 param_range = param_ranges[param_to_analyze]
@@ -450,14 +450,13 @@ def vanilla_options_tab():
                     
                     st.markdown(f"""
                     <div class="info-box">
-                        <h4>📊 Sensitivity Metrics</h4>
+                        <h4>Sensitivity Metrics</h4>
                         <p><strong>Price Range:</strong> ${min(prices):.4f} - ${max(prices):.4f}</p>
-                        <p><strong>Price Sensitivity:</strong> {sensitivity:.4f}% per 1% change in {param_to_analyze}</p>
                     </div>
                     """, unsafe_allow_html=True)
     
     with t2:
-        st.markdown("#### 📈 Greeks Sensitivity Analysis")
+        st.markdown("#### Greeks Sensitivity Analysis")
         
         greek_sens_col1, greek_sens_col2, greek_sens_col3 = st.columns([1, 1, 2])
         
@@ -533,9 +532,9 @@ def vanilla_options_tab():
     
     # Footer with educational content
     st.markdown("---")
-    st.markdown('<div class="sub-header">📚 Educational Resources</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)
     
-    with st.expander("📊 Understanding Option Pricing Models"):
+    with st.expander("Understanding Option Pricing Models"):
         st.markdown("#### Option Pricing Models Comparison")
         
         st.markdown(
@@ -547,7 +546,7 @@ def vanilla_options_tab():
         
         with col1:
             st.markdown(
-                '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>📈 Black-Scholes Model</strong></div>', 
+                '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>Black-Scholes Model</strong></div>', 
                 unsafe_allow_html=True
             )
             st.markdown("""
@@ -559,7 +558,7 @@ def vanilla_options_tab():
         
         with col2:
             st.markdown(
-                '<div style="background-color: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;"><strong>🌳 Binomial Tree Model</strong></div>', 
+                '<div style="background-color: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;"><strong>Binomial Tree Model</strong></div>', 
                 unsafe_allow_html=True
             )
             st.markdown("""
@@ -571,7 +570,7 @@ def vanilla_options_tab():
         
         with col3:
             st.markdown(
-                '<div style="background-color: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;"><strong>🎲 Monte Carlo Simulation</strong></div>', 
+                '<div style="background-color: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;"><strong>Monte Carlo Simulation</strong></div>', 
                 unsafe_allow_html=True
             )
             st.markdown("""
@@ -586,7 +585,7 @@ def vanilla_options_tab():
         
         # Delta
         st.markdown(
-            '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>📈 Delta ($\Δ$): Price Sensitivity</strong></div>', 
+            '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>Delta ($\Delta$): Price Sensitivity</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -598,7 +597,7 @@ def vanilla_options_tab():
         
         # Gamma
         st.markdown(
-            '<div style="background-color: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;"><strong>🔄 Gamma (Γ): Delta Acceleration</strong></div>', 
+            '<div style="background-color: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;"><strong>Gamma (Γ): Delta Acceleration</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -610,7 +609,7 @@ def vanilla_options_tab():
         
         # Theta
         st.markdown(
-            '<div style="background-color: #f8d7da; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #dc3545;"><strong>⏰ Theta (Θ): Time Decay</strong></div>', 
+            '<div style="background-color: #f8d7da; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #dc3545;"><strong>Theta (Θ): Time Decay</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -622,7 +621,7 @@ def vanilla_options_tab():
         
         # Vega
         st.markdown(
-            '<div style="background-color: #d1ecf1; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #17a2b8;"><strong>🌊 Vega (ν): Volatility Sensitivity</strong></div>', 
+            '<div style="background-color: #d1ecf1; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #17a2b8;"><strong>Vega (ν): Volatility Sensitivity</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -634,7 +633,7 @@ def vanilla_options_tab():
         
         # Rho
         st.markdown(
-            '<div style="background-color: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;"><strong>💰 Rho (ρ): Interest Rate Sensitivity</strong></div>', 
+            '<div style="background-color: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;"><strong>Rho (ρ): Interest Rate Sensitivity</strong></div>', 
             unsafe_allow_html=True
         )
         st.markdown("""
@@ -644,10 +643,10 @@ def vanilla_options_tab():
         • **Use:** Interest rate risk management
         """)
     
-    with st.expander("⚠️ Risk Management & Trading Tips"):
+    with st.expander("Risk Management & Trading Tips"):
         st.markdown("#### Key Risk Considerations")
         
-        st.markdown("##### 🎯 Model Risk")
+        st.markdown("##### Model Risk")
         st.markdown("""
         • Different models can give different prices  
         • **Validate** results across multiple models  
@@ -655,7 +654,7 @@ def vanilla_options_tab():
         • Be aware of **computational limitations** (steps, simulations)
         """)
         
-        st.markdown("##### 📊 Parameter Risk")
+        st.markdown("##### Parameter Risk")
         st.markdown("""
         • **Volatility** is the most critical and hardest to estimate  
         • Use **implied volatility** from market prices when available  
@@ -663,7 +662,7 @@ def vanilla_options_tab():
         • **Time decay** accelerates near expiration
         """)
         
-        st.markdown("##### 💼 Execution Risk")
+        st.markdown("##### Execution Risk")
         st.markdown("""
         • **Bid-ask spreads** affect real trading costs  
         • **Liquidity** varies significantly across strikes and expirations  
@@ -671,7 +670,7 @@ def vanilla_options_tab():
         • **Assignment risk** for American-style options
         """)
         
-        st.markdown("##### 🛡️ Greeks Management")
+        st.markdown("##### Greeks Management")
         st.markdown("""
         • **Delta hedge** regularly to manage directional risk  
         • Monitor **gamma** for large price moves  
@@ -679,13 +678,13 @@ def vanilla_options_tab():
         • Use **vega** to manage volatility exposure
         """)
     
-    with st.expander("📊 Trading Strategies & Applications"):
+    with st.expander("Trading Strategies & Applications"):
         st.markdown("#### Common Option Strategies")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("##### 📈 Bullish Strategies")
+            st.markdown("##### Bullish Strategies")
             st.markdown("""
             • **Long Call:** Limited risk, unlimited profit potential  
             • **Bull Call Spread:** Lower cost, limited profit  
@@ -693,7 +692,7 @@ def vanilla_options_tab():
             • **Covered Call:** Income on existing stock positions
             """)
             
-            st.markdown("##### 📉 Bearish Strategies")
+            st.markdown("##### Bearish Strategies")
             st.markdown("""
             • **Long Put:** Limited risk, high profit potential  
             • **Bear Put Spread:** Lower cost, limited profit  
@@ -702,7 +701,7 @@ def vanilla_options_tab():
             """)
         
         with col2:
-            st.markdown("##### 🔄 Neutral Strategies")
+            st.markdown("##### Neutral Strategies")
             st.markdown("""
             • **Short Straddle:** Profit from low volatility  
             • **Iron Condor:** Profit from range-bound movement  
@@ -710,7 +709,7 @@ def vanilla_options_tab():
             • **Butterfly Spread:** Profit from minimal movement
             """)
             
-            st.markdown("##### 🌊 Volatility Strategies")
+            st.markdown("##### Volatility Strategies")
             st.markdown("""
             • **Long Straddle:** Profit from high volatility  
             • **Long Strangle:** Lower cost volatility play  
@@ -775,7 +774,7 @@ def vanilla_options_tab():
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.9rem; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 1px solid #dee2e6;'>
         <div style="margin-bottom: 10px;">
-            <span style="font-size: 2rem;">📊</span>
+            <span style="font-size: 2rem;"></span>
         </div>
         <p style="margin: 0; font-size: 1.2em; font-weight: bold; color: #1f77b4;">Vanilla Options Pricing Tool</p>
         <p style="margin: 8px 0; color: #6c757d;">Built with Streamlit & Python</p>
