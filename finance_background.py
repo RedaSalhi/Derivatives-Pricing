@@ -4,7 +4,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 from scipy.stats import norm
 import pandas as pd
-from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize_scalar, brentq
+from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -1134,7 +1135,7 @@ with st.container():
             
             if st.button("Clear Strategy"):
                 st.session_state.strategy_legs = []
-                st.experimental_rerun()
+                st.rerun()
 
 # ----------------------
 # Interactive Volatility Analysis
@@ -1407,6 +1408,8 @@ with st.container():
         stress_df = pd.DataFrame(stress_results)
         st.dataframe(stress_df, use_container_width=True)
         
+        # Stress test visualization
+        pnl_values = [float(row['P&L'].replace('
 
 # ----------------------
 # Educational Hub
@@ -2081,8 +2084,6 @@ with st.container():
         
         # Binary search for required stock price
         def find_required_price(target_price, option_type, K, T, r, sigma, is_call=True):
-            from scipy.optimize import brentq
-            
             def price_difference(S):
                 if is_call:
                     calculated_price = OptionPricer.black_scholes_call(S, K, T, r, sigma)
@@ -2093,12 +2094,12 @@ with st.container():
             try:
                 if is_call:
                     # For calls, price increases with spot price
-                    required_S = brentq(price_difference, 0.1, 1000)
+                    required_S = brentq(price_difference, 1.0, 1000.0)
                 else:
                     # For puts, price decreases with spot price  
-                    required_S = brentq(price_difference, 0.1, 1000)
+                    required_S = brentq(price_difference, 1.0, 1000.0)
                 return required_S
-            except:
+            except ValueError:
                 return None
         
         required_price = find_required_price(target_option_price, target_option, strike_price, 
@@ -2195,13 +2196,16 @@ with st.container():
                 elif strategy == "Long Put":
                     costs.append(put_price)
                 elif strategy == "Bull Call Spread":
-                    costs.append(OptionsStrategy.bull_call_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility))
+                    cost_val = OptionsStrategy.bull_call_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility)
+                    costs.append(cost_val)
                 elif strategy == "Bear Put Spread":
-                    costs.append(OptionsStrategy.bear_put_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility))
+                    cost_val = OptionsStrategy.bear_put_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility)
+                    costs.append(cost_val)
                 elif strategy == "Straddle":
                     costs.append(call_price + put_price)
                 else:  # Strangle
-                    costs.append(OptionsStrategy.strangle(spot_price, strike_price-10, strike_price+10, time_to_maturity, risk_free_rate, volatility))
+                    cost_val = OptionsStrategy.strangle(spot_price, strike_price-10, strike_price+10, time_to_maturity, risk_free_rate, volatility)
+                    costs.append(cost_val)
                 strategy_names.append(strategy)
             
             fig_comparison = go.Figure(data=[
@@ -2265,7 +2269,7 @@ with st.container():
     
     with col2:
         st.markdown("### Risk-Neutral Measure (ℚ)")
-        st.latex(f'dS_t = {risk_free_rate:.2f} \\cdot S_t dt + {volatility:.2f} \\cdot S_t dW_t^{{\\mathbb{{Q}}}}')
+                        st.latex(f'dS_t = {risk_free_rate:.2f} S_t dt + {volatility:.2f} S_t dW_t^{{\\mathbb{{Q}}}}')
         
         st.markdown("""
         <div class="success-box">
