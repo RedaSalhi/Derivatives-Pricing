@@ -8,6 +8,13 @@ from scipy.optimize import minimize_scalar
 import warnings
 warnings.filterwarnings('ignore')
 
+# Page configuration
+st.set_page_config(
+    page_title="Quantitative Finance Platform",
+    page_icon="📊",
+    layout="wide"
+)
+
 # Professional CSS with solid colors
 st.markdown("""
 <style>
@@ -1400,8 +1407,6 @@ with st.container():
         stress_df = pd.DataFrame(stress_results)
         st.dataframe(stress_df, use_container_width=True)
         
-        # Stress test visualization
-        pnl_values = [float(row['P&L'].replace('
 
 # ----------------------
 # Educational Hub
