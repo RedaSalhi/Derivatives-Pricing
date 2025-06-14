@@ -1580,17 +1580,20 @@ def calculate_option_price_and_greeks(option_type, S0, K, T, r, sigma, call_put,
                 method="monte_carlo", option_type=call_put, asian_type=asian_type
             )
             greeks = calculate_greeks_asian_stable(S0, K, T, r, sigma, n_steps, n_paths//2, call_put, asian_type)
-            
+
         elif option_type == "barrier":
             H = params.get('H', S0 * 1.2)
             barrier_type = params.get('barrier_type', 'up-and-out')
             n_sims = params.get('n_sims', 5000)
             rebate = params.get('rebate', 0.0)
+            payout_style = params.get('payout_style', 'cash')  # Ajouté
             
             price, _ = price_barrier_option(
                 S=S0, K=K, H=H, T=T, r=r, sigma=sigma,
-                option_type=call_put, barrier_type=barrier_type, model="monte_carlo",
-                n_simulations=n_sims, n_steps=100, rebate=rebate
+                option_type=call_put, barrier_type=barrier_type, 
+                model="monte_carlo", n_simulations=n_sims, 
+                n_steps=100, rebate=rebate,
+                payout_style=payout_style  # Ajouté
             )
             greeks = calculate_greeks_barrier_stable(S0, K, H, T, r, sigma, call_put, barrier_type)
             
