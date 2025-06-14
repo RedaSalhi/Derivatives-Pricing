@@ -5,13 +5,6 @@ import plotly.express as px
 from scipy.stats import norm
 import pandas as pd
 
-# Page configuration
-st.set_page_config(
-    page_title="Finance Background & Methodology",
-    page_icon="📈",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # Enhanced CSS with modern design and dark mode support
 st.markdown("""
