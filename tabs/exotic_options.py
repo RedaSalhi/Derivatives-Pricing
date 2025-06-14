@@ -287,9 +287,9 @@ def _interactive_pricing_lab():
                     <h3 style='color:orange;'>
                         Continuous Price Sensitivity
                     </h3>
-                    """, unsafe_allow_html=True)
-            # NEW (FAST)
-            fig_sensitivity = create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_type, st.session_state.selected_option, params)
+                    """, unsafe_allow_html=True)# Current (optimized version)
+            # Original (full accuracy version)  
+            fig_sensitivity = create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, st.session_state.selected_option, params)
             st.plotly_chart(fig_sensitivity, use_container_width=True)
             
         except Exception as e:
