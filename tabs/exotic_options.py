@@ -1165,9 +1165,9 @@ def calculate_option_price_single(option_family, S, K, T, r, sigma, option_type,
             H = params.get('H', S*1.2)
             barrier_type = params.get('barrier_type', 'up-and-out')
             n_sims = params.get('n_sims', 1000)
-            style = params.get('style', 'cash')
+            payout_style = params.get('payout_style', 'cash')
             rebate = params.get('rebate', 0.0)
-            price, _ = price_barrier_option(S, K, H, T, r, sigma, option_type, barrier_type, "monte_carlo", n_sims, 252, rebate, style)
+            price, _ = price_barrier_option(S, K, H, T, r, sigma, option_type, barrier_type, "monte_carlo", n_sims, 252, rebate, payout_style)
             return price
             
         elif option_family == "digital":
@@ -1368,7 +1368,8 @@ def calculate_strategy_price_custom_enhanced(strategy, params, S0, K, T, r, sigm
             barrier_multiple = params.get('barrier_multiple', 1.2)
             rebate = params.get('rebate', 0.0)
             H = K * barrier_multiple
-            price, _ = price_barrier_option(S0, K, H, T, r, sigma, "call", barrier_type, "monte_carlo", 3000, 50, rebate)
+            payout_style = params.get('payout_style', 'cash')
+            price, _ = price_barrier_option(S0, K, H, T, r, sigma, "call", barrier_type, "monte_carlo", 3000, 50, rebate, payout_style)
             return price
             
         elif strategy == "Digital":
@@ -1552,7 +1553,7 @@ def get_config_summary_values_enhanced(strategy, params, reference_spot):
         values.append(params.get('barrier_type', 'up-and-out').replace('-', ' ').title())
         barrier_level = reference_spot * params.get('barrier_multiple', 1.2)
         values.append(f"${barrier_level:.1f}")
-        values.append(params.get('payout_style', 'cash').title())
+        values.append(params.get('', 'cash').title())
         values.append(f"${params.get('rebate', 0.0):.2f}")
     elif strategy == "Digital":
         values.append(params.get('style', 'cash').title())
@@ -1638,7 +1639,7 @@ def calculate_option_price_and_greeks(option_type, S0, K, T, r, sigma, call_put,
                 option_type=call_put, barrier_type=barrier_type, 
                 model="monte_carlo", n_simulations=n_sims, 
                 n_steps=100, rebate=rebate,
-                payout_style=payout_style  # Ajouté
+                payout_style=payout_style 
             )
             greeks = calculate_greeks_barrier_stable(S0, K, H, T, r, sigma, call_put, barrier_type)
             
