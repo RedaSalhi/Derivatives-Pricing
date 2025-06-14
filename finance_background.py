@@ -485,7 +485,7 @@ st.markdown('<div class="main-header">Quantitative Finance Platform</div>', unsa
 st.markdown('<div class="subtitle">Advanced Derivatives Pricing & Risk Management System</div>', unsafe_allow_html=True)
 
 # Interactive parameter controls at the top
-st.markdown("## Interactive Controls")
+st.markdown("## Controls")
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
@@ -500,7 +500,6 @@ with col5:
     risk_free_rate = st.number_input("Risk-free Rate (r)", min_value=0.001, max_value=0.20, value=0.05, step=0.01, format="%.3f")
 
 # Quick metrics display
-st.markdown("### Quick Pricing Overview")
 call_price = OptionPricer.black_scholes_call(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
 put_price = OptionPricer.black_scholes_put(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
 delta_call, gamma, theta_call, vega, rho_call = OptionPricer.calculate_greeks(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility, 'call')
