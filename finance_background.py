@@ -8,7 +8,6 @@ from scipy.optimize import minimize_scalar
 import warnings
 warnings.filterwarnings('ignore')
 
-
 # Professional CSS with solid colors
 st.markdown("""
 <style>
@@ -325,35 +324,40 @@ class OptionPricer:
         d = 1 / u
         p = (np.exp(r * dt) - d) / (u - d)
         
-        # Initialize price tree
-        prices = np.zeros((n_steps + 1, n_steps + 1))
-        prices[0, 0] = S
+        # Initialize arrays
+        prices = np.zeros(n_steps + 1)
+        option_values = np.zeros(n_steps + 1)
         
-        # Fill the tree
-        for i in range(1, n_steps + 1):
-            for j in range(i + 1):
-                prices[i, j] = S * (u ** j) * (d ** (i - j))
+        # Calculate final stock prices
+        for j in range(n_steps + 1):
+            prices[j] = S * (u ** j) * (d ** (n_steps - j))
         
         # Calculate option values at expiration
-        option_values = np.zeros((n_steps + 1, n_steps + 1))
         for j in range(n_steps + 1):
             if option_type == 'call':
-                option_values[n_steps, j] = max(0, prices[n_steps, j] - K)
+                option_values[j] = max(0, prices[j] - K)
             else:
-                option_values[n_steps, j] = max(0, K - prices[n_steps, j])
+                option_values[j] = max(0, K - prices[j])
         
         # Backward induction
         for i in range(n_steps - 1, -1, -1):
             for j in range(i + 1):
-                option_values[i, j] = np.exp(-r * dt) * (p * option_values[i + 1, j + 1] + (1 - p) * option_values[i + 1, j])
+                # Calculate stock price at this node
+                current_price = S * (u ** j) * (d ** (i - j))
                 
+                # Calculate discounted expected value
+                option_values[j] = np.exp(-r * dt) * (p * option_values[j + 1] + (1 - p) * option_values[j])
+                
+                # For American options, check early exercise
                 if american:
                     if option_type == 'call':
-                        option_values[i, j] = max(option_values[i, j], prices[i, j] - K)
+                        intrinsic_value = max(0, current_price - K)
+                        option_values[j] = max(option_values[j], intrinsic_value)
                     else:
-                        option_values[i, j] = max(option_values[i, j], K - prices[i, j])
+                        intrinsic_value = max(0, K - current_price)
+                        option_values[j] = max(option_values[j], intrinsic_value)
         
-        return option_values[0, 0]
+        return option_values[0]
 
     @staticmethod
     def monte_carlo_option(S, K, T, r, sigma, n_simulations=10000, n_steps=252, option_type='call', path_dependent=False):
@@ -1126,373 +1130,1089 @@ with st.container():
                 st.experimental_rerun()
 
 # ----------------------
-# Volatility Surface Section
+# Interactive Volatility Analysis
 # ----------------------
 with st.container():
     st.markdown("""
     <div class="volatility-box">
-        <div class="section-title">📈 Volatility Surface Analysis</div>
+        <div class="section-title">📈 Interactive Volatility Analysis</div>
         <div class="content-text">
-            Advanced volatility modeling and implied volatility surface construction.
+            Explore how volatility affects option prices and discover volatility smile patterns.
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Generate implied volatility surface
-    strikes = np.linspace(spot_price * 0.8, spot_price * 1.2, 10)
-    maturities = np.linspace(0.1, 2.0, 8)
+    vol_tab1, vol_tab2 = st.tabs(["🎯 Volatility Impact", "😊 Volatility Smile Builder"])
     
-    # Simulate implied volatility surface (simplified model)
-    def implied_vol_surface(S, K, T):
-        # Simplified volatility smile/skew model
-        moneyness = np.log(K / S)
-        vol = volatility + 0.1 * moneyness**2 + 0.05 * np.exp(-T)
-        return max(0.05, vol)  # Minimum vol of 5%
+    with vol_tab1:
+        st.markdown("### How Volatility Affects Your Options")
+        
+        # Interactive volatility analysis
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            vol_range_min = st.slider("Min Volatility", 0.05, 0.50, 0.10, 0.05)
+            vol_range_max = st.slider("Max Volatility", vol_range_min + 0.05, 1.0, 0.40, 0.05)
+        
+        with col2:
+            analyze_option = st.selectbox("Analyze", ["Call Option", "Put Option", "Both"])
+        
+        # Volatility sensitivity analysis
+        vol_range = np.linspace(vol_range_min, vol_range_max, 50)
+        call_prices_vol = [OptionPricer.black_scholes_call(spot_price, strike_price, time_to_maturity, risk_free_rate, vol) for vol in vol_range]
+        put_prices_vol = [OptionPricer.black_scholes_put(spot_price, strike_price, time_to_maturity, risk_free_rate, vol) for vol in vol_range]
+        
+        fig_vol_impact = go.Figure()
+        
+        if analyze_option in ["Call Option", "Both"]:
+            fig_vol_impact.add_trace(go.Scatter(x=vol_range*100, y=call_prices_vol, name='Call Price', 
+                                              line=dict(color='#38a169', width=3)))
+        
+        if analyze_option in ["Put Option", "Both"]:
+            fig_vol_impact.add_trace(go.Scatter(x=vol_range*100, y=put_prices_vol, name='Put Price', 
+                                              line=dict(color='#e53e3e', width=3)))
+        
+        fig_vol_impact.add_vline(x=volatility*100, line_dash="dash", line_color="#3182ce", 
+                                annotation_text=f"Current Vol: {volatility:.1%}")
+        
+        fig_vol_impact.update_layout(
+            title="Option Price vs Volatility",
+            xaxis_title="Volatility (%)",
+            yaxis_title="Option Price ($)",
+            template="plotly_white",
+            height=400
+        )
+        
+        st.plotly_chart(fig_vol_impact, use_container_width=True)
+        
+        # Show current vega
+        current_vega = vega
+        st.markdown(f"""
+        <div class="info-box">
+            <strong>Current Vega: ${current_vega:.2f}</strong><br>
+            For every 1% increase in volatility, your option value changes by ${current_vega:.2f}
+        </div>
+        """, unsafe_allow_html=True)
     
-    vol_surface = np.zeros((len(maturities), len(strikes)))
-    for i, T in enumerate(maturities):
-        for j, K in enumerate(strikes):
-            vol_surface[i, j] = implied_vol_surface(spot_price, K, T)
-    
-    # 3D volatility surface plot
-    fig_vol_surface = go.Figure(data=[go.Surface(
-        z=vol_surface,
-        x=strikes,
-        y=maturities,
-        colorscale='Viridis',
-        colorbar=dict(title="Implied Volatility")
-    )])
-    
-    fig_vol_surface.update_layout(
-        title='Implied Volatility Surface',
-        scene=dict(
+    with vol_tab2:
+        st.markdown("### Build a Volatility Smile")
+        st.markdown("Create different volatility patterns across strikes to see market-realistic pricing.")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            smile_type = st.selectbox("Smile Pattern", 
+                                    ["Flat (Constant Vol)", "U-Shape (Volatility Smile)", "Skew (Put Skew)", "Custom"])
+            atm_vol = st.slider("ATM Volatility", 0.10, 0.50, 0.20, 0.01)
+        
+        with col2:
+            if smile_type != "Flat (Constant Vol)":
+                smile_intensity = st.slider("Pattern Intensity", 0.0, 0.15, 0.05, 0.01)
+            else:
+                smile_intensity = 0.0
+        
+        # Generate strikes around current spot
+        strikes_smile = np.linspace(spot_price * 0.8, spot_price * 1.2, 15)
+        
+        def generate_vol_pattern(K, S, pattern_type, base_vol, intensity):
+            moneyness = np.log(K / S)
+            
+            if pattern_type == "Flat (Constant Vol)":
+                return base_vol
+            elif pattern_type == "U-Shape (Volatility Smile)":
+                return base_vol + intensity * moneyness**2
+            elif pattern_type == "Skew (Put Skew)":
+                return base_vol + intensity * moneyness
+            else:  # Custom - you can modify this
+                return base_vol + intensity * (moneyness**2 + 0.5 * moneyness)
+        
+        # Calculate implied vols and option prices for each strike
+        implied_vols = [generate_vol_pattern(K, spot_price, smile_type, atm_vol, smile_intensity) for K in strikes_smile]
+        call_prices_smile = [OptionPricer.black_scholes_call(spot_price, K, time_to_maturity, risk_free_rate, vol) 
+                           for K, vol in zip(strikes_smile, implied_vols)]
+        
+        # Plot volatility smile
+        fig_smile = go.Figure()
+        fig_smile.add_trace(go.Scatter(x=strikes_smile, y=[vol*100 for vol in implied_vols], 
+                                     mode='lines+markers', name='Implied Volatility',
+                                     line=dict(color='#3182ce', width=3), marker=dict(size=8)))
+        fig_smile.add_vline(x=spot_price, line_dash="dash", line_color="#e53e3e", annotation_text="ATM")
+        
+        fig_smile.update_layout(
+            title=f'{smile_type} Pattern',
             xaxis_title='Strike Price ($)',
-            yaxis_title='Time to Maturity (Years)',
-            zaxis_title='Implied Volatility'
-        ),
-        height=500
-    )
-    
-    st.plotly_chart(fig_vol_surface, use_container_width=True)
-    
-    # Volatility smile at current maturity
-    current_vols = [implied_vol_surface(spot_price, K, time_to_maturity) for K in strikes]
-    
-    fig_smile = go.Figure()
-    fig_smile.add_trace(go.Scatter(x=strikes, y=current_vols, mode='lines+markers',
-                                  name='Implied Volatility', line=dict(color='#3182ce', width=3)))
-    fig_smile.add_vline(x=spot_price, line_dash="dash", line_color="#e53e3e", annotation_text="ATM")
-    
-    fig_smile.update_layout(
-        title=f'Volatility Smile (T = {time_to_maturity} years)',
-        xaxis_title='Strike Price ($)',
-        yaxis_title='Implied Volatility',
-        template="plotly_white",
-        height=400
-    )
-    
-    st.plotly_chart(fig_smile, use_container_width=True)
+            yaxis_title='Implied Volatility (%)',
+            template="plotly_white",
+            height=300
+        )
+        
+        st.plotly_chart(fig_smile, use_container_width=True)
+        
+        # Plot resulting option prices
+        fig_prices_smile = go.Figure()
+        fig_prices_smile.add_trace(go.Scatter(x=strikes_smile, y=call_prices_smile, 
+                                            mode='lines+markers', name='Call Prices',
+                                            line=dict(color='#38a169', width=3), marker=dict(size=8)))
+        fig_prices_smile.add_vline(x=spot_price, line_dash="dash", line_color="#e53e3e", annotation_text="ATM")
+        
+        fig_prices_smile.update_layout(
+            title='Resulting Call Option Prices',
+            xaxis_title='Strike Price ($)',
+            yaxis_title='Call Price ($)',
+            template="plotly_white",
+            height=300
+        )
+        
+        st.plotly_chart(fig_prices_smile, use_container_width=True)
 
 # ----------------------
-# Risk Management Section
+# Interactive Risk Analysis
 # ----------------------
 with st.container():
     st.markdown("""
     <div class="risk-box">
-        <div class="section-title">⚠️ Risk Management & Portfolio Analysis</div>
+        <div class="section-title">⚠️ Interactive Risk Analysis</div>
         <div class="content-text">
-            Comprehensive risk metrics and portfolio-level analysis tools.
+            Understand the risks of your options positions through interactive stress testing.
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Portfolio risk analysis
-    st.markdown("### Portfolio Risk Metrics")
+    risk_tab1, risk_tab2, risk_tab3 = st.tabs(["📊 Position Risk", "🎯 Stress Testing", "⏰ Time Decay Analysis"])
     
-    # Simulate portfolio returns
-    np.random.seed(42)
-    n_assets = 5
-    n_observations = 252
-    
-    # Generate correlated returns
-    correlation_matrix = np.array([
-        [1.0, 0.3, 0.2, 0.1, 0.4],
-        [0.3, 1.0, 0.5, 0.2, 0.3],
-        [0.2, 0.5, 1.0, 0.3, 0.2],
-        [0.1, 0.2, 0.3, 1.0, 0.6],
-        [0.4, 0.3, 0.2, 0.6, 1.0]
-    ])
-    
-    returns = np.random.multivariate_normal(
-        mean=[0.08, 0.10, 0.12, 0.06, 0.09],
-        cov=correlation_matrix * 0.04,  # Scale by volatilities
-        size=n_observations
-    ) / np.sqrt(252)  # Daily returns
-    
-    # Portfolio weights
-    weights = np.array([0.2, 0.2, 0.2, 0.2, 0.2])
-    portfolio_returns = np.dot(returns, weights)
-    
-    # Risk metrics
-    var_95 = RiskManager.value_at_risk(portfolio_returns, 0.05)
-    var_99 = RiskManager.value_at_risk(portfolio_returns, 0.01)
-    es_95 = RiskManager.expected_shortfall(portfolio_returns, 0.05)
-    es_99 = RiskManager.expected_shortfall(portfolio_returns, 0.01)
-    
-    # Display risk metrics
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <h4>VaR (95%)</h4>
-            <h3>{var_95:.2%}</h3>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <h4>VaR (99%)</h4>
-            <h3>{var_99:.2%}</h3>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <h4>ES (95%)</h4>
-            <h3>{es_95:.2%}</h3>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown(f"""
-        <div class="metric-card">
-            <h4>ES (99%)</h4>
-            <h3>{es_99:.2%}</h3>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Return distribution with VaR
-    fig_risk = go.Figure()
-    fig_risk.add_trace(go.Histogram(x=portfolio_returns, nbinsx=50, name='Portfolio Returns',
-                                   histnorm='probability density', opacity=0.7))
-    fig_risk.add_vline(x=-var_95, line_dash="dash", line_color="#e53e3e", annotation_text="VaR 95%")
-    fig_risk.add_vline(x=-var_99, line_dash="dash", line_color="#9b2c2c", annotation_text="VaR 99%")
-    
-    fig_risk.update_layout(
-        title='Portfolio Return Distribution with VaR',
-        xaxis_title='Daily Returns',
-        yaxis_title='Density',
-        template="plotly_white",
-        height=400
-    )
-    
-    st.plotly_chart(fig_risk, use_container_width=True)
-    
-    # Correlation heatmap
-    fig_corr = go.Figure(data=go.Heatmap(
-        z=correlation_matrix,
-        x=[f'Asset {i+1}' for i in range(n_assets)],
-        y=[f'Asset {i+1}' for i in range(n_assets)],
-        colorscale='RdBu',
-        zmid=0,
-        text=correlation_matrix,
-        texttemplate="%{text:.2f}",
-        textfont={"size": 12}
-    ))
-    
-    fig_corr.update_layout(
-        title='Asset Correlation Matrix',
-        height=400
-    )
-    
-    st.plotly_chart(fig_corr, use_container_width=True)
-
-# ----------------------
-# Advanced Analytics Section
-# ----------------------
-with st.container():
-    st.markdown("""
-    <div class="portfolio-box">
-        <div class="section-title">📊 Advanced Analytics</div>
-        <div class="content-text">
-            Sophisticated analytical tools for quantitative finance professionals.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    analytics_tabs = st.tabs(["🎯 Options Analytics", "📈 Performance Attribution", "🔍 Scenario Analysis"])
-    
-    with analytics_tabs[0]:
-        st.markdown("### Options Portfolio Analytics")
+    with risk_tab1:
+        st.markdown("### Your Current Position Risk")
         
-        # Options portfolio simulation
-        portfolio_options = [
-            {'type': 'call', 'strike': 95, 'quantity': 10, 'position': 'long'},
-            {'type': 'put', 'strike': 105, 'quantity': 5, 'position': 'short'},
-            {'type': 'call', 'strike': 110, 'quantity': 8, 'position': 'short'}
-        ]
-        
-        # Calculate portfolio Greeks
-        total_delta = 0
-        total_gamma = 0
-        total_theta = 0
-        total_vega = 0
-        total_value = 0
-        
-        for option in portfolio_options:
-            if option['type'] == 'call':
-                value = OptionPricer.black_scholes_call(spot_price, option['strike'], time_to_maturity, risk_free_rate, volatility)
-            else:
-                value = OptionPricer.black_scholes_put(spot_price, option['strike'], time_to_maturity, risk_free_rate, volatility)
-            
-            delta, gamma, theta, vega, rho = OptionPricer.calculate_greeks(spot_price, option['strike'], time_to_maturity, risk_free_rate, volatility, option['type'])
-            
-            multiplier = 1 if option['position'] == 'long' else -1
-            total_delta += multiplier * delta * option['quantity']
-            total_gamma += multiplier * gamma * option['quantity']
-            total_theta += multiplier * theta * option['quantity']
-            total_vega += multiplier * vega * option['quantity']
-            total_value += multiplier * value * option['quantity']
-        
-        # Display portfolio Greeks
-        col1, col2, col3, col4, col5 = st.columns(5)
+        # Position size input
+        col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("Portfolio Value", f"${total_value:.0f}")
+            position_size = st.number_input("Position Size", min_value=1, max_value=1000, value=10, step=1)
         with col2:
-            st.metric("Portfolio Delta", f"{total_delta:.1f}")
+            position_type = st.selectbox("Position Type", ["Long Call", "Short Call", "Long Put", "Short Put"])
         with col3:
-            st.metric("Portfolio Gamma", f"{total_gamma:.2f}")
+            portfolio_value = st.number_input("Portfolio Value ($)", min_value=1000, value=100000, step=1000)
+        
+        # Calculate position metrics
+        if "Call" in position_type:
+            option_price = call_price
+            option_delta = delta_call
+        else:
+            option_price = put_price
+            option_delta = delta_call - 1  # Put delta
+        
+        if "Short" in position_type:
+            option_price *= -1
+            option_delta *= -1
+        
+        total_position_value = position_size * option_price
+        total_delta = position_size * option_delta
+        position_percentage = abs(total_position_value) / portfolio_value * 100
+        
+        # Risk metrics display
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Position Value", f"${total_position_value:.0f}")
+        with col2:
+            st.metric("Total Delta", f"{total_delta:.1f}")
+        with col3:
+            st.metric("Portfolio %", f"{position_percentage:.1f}%")
         with col4:
-            st.metric("Portfolio Theta", f"${total_theta:.0f}")
-        with col5:
-            st.metric("Portfolio Vega", f"${total_vega:.0f}")
+            daily_theta = position_size * theta_call
+            st.metric("Daily Theta", f"${daily_theta:.0f}")
         
-        # Portfolio P&L across underlying prices
-        S_portfolio = np.linspace(spot_price * 0.8, spot_price * 1.2, 50)
-        portfolio_pnl = []
+        # Position P&L chart
+        price_changes = np.linspace(-0.3, 0.3, 50)
+        position_pnl = []
         
-        for S in S_portfolio:
-            pnl = 0
-            for option in portfolio_options:
-                if option['type'] == 'call':
-                    current_value = OptionPricer.black_scholes_call(S, option['strike'], time_to_maturity, risk_free_rate, volatility)
-                    initial_value = OptionPricer.black_scholes_call(spot_price, option['strike'], time_to_maturity, risk_free_rate, volatility)
-                else:
-                    current_value = OptionPricer.black_scholes_put(S, option['strike'], time_to_maturity, risk_free_rate, volatility)
-                    initial_value = OptionPricer.black_scholes_put(spot_price, option['strike'], time_to_maturity, risk_free_rate, volatility)
-                
-                multiplier = 1 if option['position'] == 'long' else -1
-                pnl += multiplier * (current_value - initial_value) * option['quantity']
+        for change in price_changes:
+            new_spot = spot_price * (1 + change)
+            if "Call" in position_type:
+                new_option_price = OptionPricer.black_scholes_call(new_spot, strike_price, time_to_maturity, risk_free_rate, volatility)
+                current_option_price = call_price
+            else:
+                new_option_price = OptionPricer.black_scholes_put(new_spot, strike_price, time_to_maturity, risk_free_rate, volatility)
+                current_option_price = put_price
             
-            portfolio_pnl.append(pnl)
+            pnl = position_size * (new_option_price - current_option_price)
+            if "Short" in position_type:
+                pnl *= -1
+            
+            position_pnl.append(pnl)
         
-        fig_portfolio = go.Figure()
-        fig_portfolio.add_trace(go.Scatter(x=S_portfolio, y=portfolio_pnl, name='Portfolio P&L',
-                                         line=dict(color='#3182ce', width=3)))
-        fig_portfolio.add_hline(y=0, line_dash="dash", line_color="#718096")
-        fig_portfolio.add_vline(x=spot_price, line_dash="dot", line_color="#e53e3e", annotation_text="Current Price")
+        fig_position_risk = go.Figure()
+        fig_position_risk.add_trace(go.Scatter(x=[change*100 for change in price_changes], y=position_pnl,
+                                             name='Position P&L', line=dict(color='#3182ce', width=3),
+                                             fill='tonexty'))
+        fig_position_risk.add_hline(y=0, line_dash="dash", line_color="#718096")
         
-        fig_portfolio.update_layout(
-            title='Options Portfolio P&L',
-            xaxis_title='Underlying Price ($)',
+        fig_position_risk.update_layout(
+            title=f'{position_type} Position P&L ({position_size} contracts)',
+            xaxis_title='Underlying Price Change (%)',
             yaxis_title='P&L ($)',
             template="plotly_white",
             height=400
         )
         
-        st.plotly_chart(fig_portfolio, use_container_width=True)
+        st.plotly_chart(fig_position_risk, use_container_width=True)
     
-    with analytics_tabs[1]:
-        st.markdown("### Performance Attribution")
+    with risk_tab2:
+        st.markdown("### Stress Test Your Position")
+        st.markdown("See how extreme market moves would affect your options.")
         
-        # Simulate performance attribution
-        factors = ['Market Beta', 'Sector Allocation', 'Security Selection', 'Currency', 'Residual']
-        contributions = [0.045, 0.012, 0.008, -0.003, 0.002]
-        
-        fig_attribution = go.Figure(data=[
-            go.Bar(x=factors, y=contributions, 
-                  marker_color=['#38a169' if x > 0 else '#e53e3e' for x in contributions])
-        ])
-        
-        fig_attribution.update_layout(
-            title='Performance Attribution Analysis',
-            xaxis_title='Attribution Factors',
-            yaxis_title='Contribution to Return',
-            template="plotly_white",
-            height=400
-        )
-        
-        st.plotly_chart(fig_attribution, use_container_width=True)
-        
-        # Performance metrics table
-        metrics_data = {
-            'Metric': ['Total Return', 'Sharpe Ratio', 'Sortino Ratio', 'Maximum Drawdown', 'Beta', 'Alpha'],
-            'Portfolio': ['12.5%', '1.24', '1.67', '-8.3%', '0.92', '2.1%'],
-            'Benchmark': ['10.2%', '1.15', '1.52', '-12.1%', '1.00', '0.0%']
-        }
-        
-        metrics_df = pd.DataFrame(metrics_data)
-        st.dataframe(metrics_df, use_container_width=True)
-    
-    with analytics_tabs[2]:
-        st.markdown("### Scenario Analysis")
-        
-        # Define scenarios
+        # Stress test scenarios
         scenarios = {
-            'Base Case': {'stock_change': 0.0, 'vol_change': 0.0, 'rate_change': 0.0},
-            'Bull Market': {'stock_change': 0.2, 'vol_change': -0.05, 'rate_change': 0.01},
-            'Bear Market': {'stock_change': -0.3, 'vol_change': 0.1, 'rate_change': -0.02},
-            'High Volatility': {'stock_change': 0.0, 'vol_change': 0.15, 'rate_change': 0.0},
-            'Rate Shock': {'stock_change': -0.1, 'vol_change': 0.05, 'rate_change': 0.03}
+            'Small Move Up': {'price_change': 0.05, 'vol_change': 0.0},
+            'Small Move Down': {'price_change': -0.05, 'vol_change': 0.0},
+            'Large Move Up': {'price_change': 0.20, 'vol_change': -0.05},
+            'Large Move Down': {'price_change': -0.20, 'vol_change': 0.05},
+            'Vol Spike': {'price_change': 0.0, 'vol_change': 0.10},
+            'Vol Crush': {'price_change': 0.0, 'vol_change': -0.10},
+            'Market Crash': {'price_change': -0.30, 'vol_change': 0.15},
+            'Bull Rally': {'price_change': 0.25, 'vol_change': -0.03}
         }
         
-        scenario_results = []
+        stress_results = []
         
         for scenario_name, changes in scenarios.items():
-            new_S = spot_price * (1 + changes['stock_change'])
+            new_spot = spot_price * (1 + changes['price_change'])
             new_vol = max(0.05, volatility + changes['vol_change'])
-            new_rate = max(0.001, risk_free_rate + changes['rate_change'])
             
-            call_value = OptionPricer.black_scholes_call(new_S, strike_price, time_to_maturity, new_rate, new_vol)
-            put_value = OptionPricer.black_scholes_put(new_S, strike_price, time_to_maturity, new_rate, new_vol)
+            call_new = OptionPricer.black_scholes_call(new_spot, strike_price, time_to_maturity, risk_free_rate, new_vol)
+            put_new = OptionPricer.black_scholes_put(new_spot, strike_price, time_to_maturity, risk_free_rate, new_vol)
             
-            call_pnl = call_value - call_price
-            put_pnl = put_value - put_price
+            call_pnl = (call_new - call_price) * (position_size if "Long Call" in position_type else -position_size if "Short Call" in position_type else 0)
+            put_pnl = (put_new - put_price) * (position_size if "Long Put" in position_type else -position_size if "Short Put" in position_type else 0)
             
-            scenario_results.append({
+            total_pnl = call_pnl + put_pnl
+            
+            stress_results.append({
                 'Scenario': scenario_name,
-                'Stock Price': f"${new_S:.2f}",
-                'Call P&L': f"${call_pnl:.2f}",
-                'Put P&L': f"${put_pnl:.2f}",
-                'Volatility': f"{new_vol:.1%}",
-                'Interest Rate': f"{new_rate:.1%}"
+                'Price Change': f"{changes['price_change']:+.1%}",
+                'Vol Change': f"{changes['vol_change']:+.1%}",
+                'New Spot': f"${new_spot:.2f}",
+                'New Vol': f"{new_vol:.1%}",
+                'P&L': f"${total_pnl:.0f}",
+                'P&L %': f"{total_pnl/abs(total_position_value)*100:+.1f}%" if total_position_value != 0 else "N/A"
             })
         
-        scenario_df = pd.DataFrame(scenario_results)
-        st.dataframe(scenario_df, use_container_width=True)
+        stress_df = pd.DataFrame(stress_results)
+        st.dataframe(stress_df, use_container_width=True)
         
-        # Scenario impact chart
-        pnl_values = [float(row['Call P&L'].replace('$', '')) for row in scenario_results]
-        scenario_names = [row['Scenario'] for row in scenario_results]
+        # Stress test visualization
+        pnl_values = [float(row['P&L'].replace('
+
+# ----------------------
+# Educational Hub
+# ----------------------
+with st.container():
+    st.markdown("""
+    <div class="risk-box">
+        <div class="section-title">🎓 Educational Hub</div>
+        <div class="content-text">
+            Learn the fundamentals and advanced concepts behind options pricing.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    edu_tab1, edu_tab2, edu_tab3 = st.tabs(["📚 Core Concepts", "⚖️ Risk-Neutral Pricing", "🧮 Model Comparison"])
+    
+    with edu_tab1:
+        st.markdown("### Options Pricing Fundamentals")
         
-        fig_scenarios = go.Figure(data=[
+        concept_choice = st.selectbox("Choose a concept to explore:", 
+                                    ["Moneyness", "Intrinsic vs Time Value", "Put-Call Parity", "Exercise Styles"])
+        
+        if concept_choice == "Moneyness":
+            moneyness = spot_price / strike_price
+            
+            if moneyness > 1.05:
+                moneyness_desc = "**In-the-Money (ITM)** 💰"
+                explanation = "Your call option has intrinsic value and would be profitable if exercised today."
+            elif moneyness < 0.95:
+                moneyness_desc = "**Out-of-the-Money (OTM)** 📉"
+                explanation = "Your call option has no intrinsic value - it needs the stock to rise to become profitable."
+            else:
+                moneyness_desc = "**At-the-Money (ATM)** 🎯"
+                explanation = "Your call option is right at the strike - maximum time value and gamma."
+            
+            st.markdown(f"""
+            <div class="info-box">
+                <strong>Current Moneyness: {moneyness:.3f}</strong><br>
+                Status: {moneyness_desc}<br><br>
+                {explanation}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Interactive moneyness chart
+            spot_range = np.linspace(strike_price * 0.7, strike_price * 1.3, 100)
+            call_intrinsic = np.maximum(spot_range - strike_price, 0)
+            call_prices_moneyness = [OptionPricer.black_scholes_call(S, strike_price, time_to_maturity, risk_free_rate, volatility) for S in spot_range]
+            time_values = np.array(call_prices_moneyness) - call_intrinsic
+            
+            fig_moneyness = go.Figure()
+            fig_moneyness.add_trace(go.Scatter(x=spot_range, y=call_intrinsic, name='Intrinsic Value', 
+                                             fill='tonexty', line=dict(color='#e53e3e', width=2)))
+            fig_moneyness.add_trace(go.Scatter(x=spot_range, y=time_values, name='Time Value',
+                                             fill='tonexty', line=dict(color='#3182ce', width=2)))
+            fig_moneyness.add_trace(go.Scatter(x=spot_range, y=call_prices_moneyness, name='Total Option Value',
+                                             line=dict(color='#38a169', width=3)))
+            
+            fig_moneyness.add_vline(x=spot_price, line_dash="dash", line_color="#d69e2e", annotation_text="Current Spot")
+            fig_moneyness.add_vline(x=strike_price, line_dash="dot", line_color="#718096", annotation_text="Strike")
+            
+            fig_moneyness.update_layout(
+                title='Call Option Value Components',
+                xaxis_title='Stock Price ($)',
+                yaxis_title='Value ($)',
+                template="plotly_white",
+                height=400
+            )
+            
+            st.plotly_chart(fig_moneyness, use_container_width=True)
+        
+        elif concept_choice == "Intrinsic vs Time Value":
+            call_intrinsic = max(spot_price - strike_price, 0)
+            call_time_value = call_price - call_intrinsic
+            
+            put_intrinsic = max(strike_price - spot_price, 0)
+            put_time_value = put_price - put_intrinsic
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("#### Call Option")
+                st.markdown(f"""
+                <div class="metric-card">
+                    <strong>Total Value: ${call_price:.2f}</strong><br>
+                    Intrinsic: ${call_intrinsic:.2f}<br>
+                    Time Value: ${call_time_value:.2f}
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown("#### Put Option")
+                st.markdown(f"""
+                <div class="metric-card">
+                    <strong>Total Value: ${put_price:.2f}</strong><br>
+                    Intrinsic: ${put_intrinsic:.2f}<br>
+                    Time Value: ${put_time_value:.2f}
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="info-box">
+                <strong>Key Insight:</strong> Time value represents the premium investors pay for the possibility 
+                that the option could become more valuable before expiration. This value decreases as 
+                expiration approaches (time decay/theta).
+            </div>
+            """, unsafe_allow_html=True)
+        
+        elif concept_choice == "Put-Call Parity":
+            # Put-call parity: C - P = S - K*e^(-rT)
+            parity_lhs = call_price - put_price
+            parity_rhs = spot_price - strike_price * np.exp(-risk_free_rate * time_to_maturity)
+            parity_difference = abs(parity_lhs - parity_rhs)
+            
+            st.markdown("""
+            ### Put-Call Parity Relationship
+            For European options: **C - P = S - K·e^(-rT)**
+            """)
+            
+            st.latex(r'C - P = S_0 - K \cdot e^{-rT}')
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Left Side (C - P)", f"${parity_lhs:.4f}")
+            with col2:
+                st.metric("Right Side (S - PV(K))", f"${parity_rhs:.4f}")
+            with col3:
+                st.metric("Difference", f"${parity_difference:.4f}")
+            
+            if parity_difference < 0.01:
+                st.markdown("""
+                <div class="success-box">
+                    ✅ <strong>Put-call parity holds!</strong> The relationship is satisfied within rounding errors.
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <div class="warning-box">
+                    ⚠️ <strong>Parity violation detected.</strong> This could indicate an arbitrage opportunity 
+                    in real markets (though here it's likely due to model assumptions).
+                </div>
+                """, unsafe_allow_html=True)
+        
+        else:  # Exercise Styles
+            st.markdown("### American vs European Options")
+            
+            european_call = call_price
+            american_call = OptionPricer.binomial_tree(spot_price, strike_price, time_to_maturity, 
+                                                      risk_free_rate, volatility, n_steps=100, 
+                                                      option_type='call', american=True)
+            
+            european_put = put_price
+            american_put = OptionPricer.binomial_tree(spot_price, strike_price, time_to_maturity, 
+                                                     risk_free_rate, volatility, n_steps=100, 
+                                                     option_type='put', american=True)
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("#### Call Options")
+                st.markdown(f"""
+                <div class="metric-card">
+                    European: ${european_call:.4f}<br>
+                    American: ${american_call:.4f}<br>
+                    Difference: ${american_call - european_call:.4f}
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown("#### Put Options")
+                st.markdown(f"""
+                <div class="metric-card">
+                    European: ${european_put:.4f}<br>
+                    American: ${american_put:.4f}<br>
+                    Difference: ${american_put - european_put:.4f}
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div class="info-box">
+                <strong>Why the difference?</strong><br>
+                • <strong>American calls on non-dividend stocks:</strong> Usually not optimal to exercise early<br>
+                • <strong>American puts:</strong> May be optimal to exercise early, especially when deep ITM<br>
+                • <strong>Early exercise premium:</strong> The additional value from the flexibility to exercise anytime
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with edu_tab2:
+        st.markdown("### Risk-Neutral Valuation")
+        st.markdown("The mathematical foundation of modern derivatives pricing.")
+        
+        st.latex(r'V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]')
+        
+        # Interactive demonstration
+        demo_choice = st.selectbox("Choose demonstration:", 
+                                 ["Real-World vs Risk-Neutral", "Monte Carlo Pricing", "Drift Impact"])
+        
+        if demo_choice == "Real-World vs Risk-Neutral":
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("#### Real-World Measure (ℙ)")
+                real_drift = st.slider("Expected Return (μ)", 0.05, 0.25, 0.12, 0.01)
+                st.latex(f'dS_t = {real_drift:.2f} S_t dt + {volatility:.2f} S_t dW_t^{{\\mathbb{{P}}}}')
+                
+                st.markdown("""
+                <div class="warning-box">
+                    <strong>Problem:</strong> Option price would depend on investor risk preferences 
+                    and expected returns, making pricing subjective.
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown("#### Risk-Neutral Measure (ℚ)")
+                st.latex(f'dS_t = {risk_free_rate:.2f} S_t dt + {volatility:.2f} S_t dW_t^{{\\mathbb{{Q}}}}')
+                
+                st.markdown("""
+                <div class="success-box">
+                    <strong>Solution:</strong> Under ℚ, all assets earn the risk-free rate, 
+                    making pricing objective and arbitrage-free.
+                </div>
+                """, unsafe_allow_html=True)
+        
+        elif demo_choice == "Monte Carlo Pricing":
+            st.markdown("#### Risk-Neutral Monte Carlo Simulation")
+            
+            mc_sims = st.slider("Number of Simulations", 1000, 10000, 5000, 1000)
+            
+            if st.button("Run Risk-Neutral Simulation"):
+                np.random.seed(42)
+                
+                # Simulate under risk-neutral measure
+                Z = np.random.normal(0, 1, mc_sims)
+                S_T = spot_price * np.exp((risk_free_rate - 0.5*volatility**2)*time_to_maturity + 
+                                        volatility*np.sqrt(time_to_maturity)*Z)
+                
+                # Calculate payoffs
+                call_payoffs = np.maximum(S_T - strike_price, 0)
+                put_payoffs = np.maximum(strike_price - S_T, 0)
+                
+                # Discount back
+                mc_call_price = np.exp(-risk_free_rate * time_to_maturity) * np.mean(call_payoffs)
+                mc_put_price = np.exp(-risk_free_rate * time_to_maturity) * np.mean(put_payoffs)
+                
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric("MC Call Price", f"${mc_call_price:.4f}")
+                with col2:
+                    st.metric("BS Call Price", f"${call_price:.4f}")
+                with col3:
+                    st.metric("MC Put Price", f"${mc_put_price:.4f}")
+                with col4:
+                    st.metric("BS Put Price", f"${put_price:.4f}")
+                
+                # Show distribution of final stock prices
+                fig_mc_dist = go.Figure()
+                fig_mc_dist.add_trace(go.Histogram(x=S_T, nbinsx=50, name='Final Stock Prices',
+                                                 histnorm='probability density', opacity=0.7))
+                fig_mc_dist.add_vline(x=strike_price, line_dash="dash", line_color="#e53e3e", 
+                                     annotation_text="Strike Price")
+                fig_mc_dist.add_vline(x=np.mean(S_T), line_dash="dot", line_color="#38a169", 
+                                     annotation_text=f"Mean: ${np.mean(S_T):.2f}")
+                
+                fig_mc_dist.update_layout(
+                    title='Distribution of Stock Prices at Expiration (Risk-Neutral)',
+                    xaxis_title='Stock Price ($)',
+                    yaxis_title='Probability Density',
+                    template="plotly_white",
+                    height=400
+                )
+                
+                st.plotly_chart(fig_mc_dist, use_container_width=True)
+        
+        else:  # Drift Impact
+            st.markdown("#### Impact of Different Drift Assumptions")
+            
+            drifts = np.linspace(0.0, 0.20, 10)
+            call_prices_drift = []
+            
+            # This demonstrates why we can't use real-world drift for pricing
+            for drift in drifts:
+                # Simulate with different drifts (this is wrong for pricing!)
+                np.random.seed(42)
+                Z = np.random.normal(0, 1, 5000)
+                S_T = spot_price * np.exp((drift - 0.5*volatility**2)*time_to_maturity + 
+                                        volatility*np.sqrt(time_to_maturity)*Z)
+                call_payoffs = np.maximum(S_T - strike_price, 0)
+                wrong_price = np.exp(-risk_free_rate * time_to_maturity) * np.mean(call_payoffs)
+                call_prices_drift.append(wrong_price)
+            
+            fig_drift = go.Figure()
+            fig_drift.add_trace(go.Scatter(x=[d*100 for d in drifts], y=call_prices_drift,
+                                         mode='lines+markers', name='"Option Price"',
+                                         line=dict(color='#e53e3e', width=3)))
+            fig_drift.add_hline(y=call_price, line_dash="dash", line_color="#38a169",
+                               annotation_text=f"Correct BS Price: ${call_price:.2f}")
+            fig_drift.add_vline(x=risk_free_rate*100, line_dash="dot", line_color="#3182ce",
+                               annotation_text="Risk-free rate")
+            
+            fig_drift.update_layout(
+                title='Why We Need Risk-Neutral Pricing',
+                xaxis_title='Assumed Drift Rate (%)',
+                yaxis_title='Calculated Option Price ($)',
+                template="plotly_white",
+                height=400
+            )
+            
+            st.plotly_chart(fig_drift, use_container_width=True)
+            
+            st.markdown("""
+            <div class="warning-box">
+                <strong>Key Insight:</strong> If we used real-world expected returns for pricing, 
+                the option price would vary dramatically based on subjective market views. 
+                Risk-neutral pricing eliminates this problem!
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with edu_tab3:
+        st.markdown("### Model Comparison & When to Use Each")
+        
+        comparison_choice = st.selectbox("Compare models for:", 
+                                       ["European Options", "American Options", "Path-Dependent Options"])
+        
+        if comparison_choice == "European Options":
+            # Compare BS vs Binomial for European options
+            steps_range = [10, 25, 50, 100, 200]
+            binomial_prices = []
+            
+            for steps in steps_range:
+                bin_price = OptionPricer.binomial_tree(spot_price, strike_price, time_to_maturity,
+                                                      risk_free_rate, volatility, steps, 'call', False)
+                binomial_prices.append(bin_price)
+            
+            fig_convergence = go.Figure()
+            fig_convergence.add_trace(go.Scatter(x=steps_range, y=binomial_prices,
+                                               mode='lines+markers', name='Binomial Tree',
+                                               line=dict(color='#3182ce', width=3)))
+            fig_convergence.add_hline(y=call_price, line_dash="dash", line_color="#38a169",
+                                    annotation_text=f"Black-Scholes: ${call_price:.4f}")
+            
+            fig_convergence.update_layout(
+                title='Binomial Tree Convergence to Black-Scholes',
+                xaxis_title='Number of Steps',
+                yaxis_title='Call Option Price ($)',
+                template="plotly_white",
+                height=400
+            )
+            
+            st.plotly_chart(fig_convergence, use_container_width=True)
+            
+            st.markdown("""
+            <div class="info-box">
+                <strong>For European Options:</strong><br>
+                • <strong>Black-Scholes:</strong> Fastest, analytical solution, perfect for vanilla options<br>
+                • <strong>Binomial:</strong> More flexible, good for understanding, converges to BS<br>
+                • <strong>Monte Carlo:</strong> Overkill for vanilla Europeans, but useful for path-dependent features
+            </div>
+            """, unsafe_allow_html=True)
+        
+        elif comparison_choice == "American Options":
+            # Compare European vs American pricing
+            euro_call = call_price
+            amer_call = OptionPricer.binomial_tree(spot_price, strike_price, time_to_maturity,
+                                                  risk_free_rate, volatility, 100, 'call', True)
+            euro_put = put_price
+            amer_put = OptionPricer.binomial_tree(spot_price, strike_price, time_to_maturity,
+                                                 risk_free_rate, volatility, 100, 'put', True)
+            
+            comparison_data = {
+                'Option Type': ['Call', 'Put'],
+                'European Price': [f"${euro_call:.4f}", f"${euro_put:.4f}"],
+                'American Price': [f"${amer_call:.4f}", f"${amer_put:.4f}"],
+                'Early Exercise Premium': [f"${amer_call - euro_call:.4f}", f"${amer_put - euro_put:.4f}"]
+            }
+            
+            comp_df = pd.DataFrame(comparison_data)
+            st.dataframe(comp_df, use_container_width=True)
+            
+            st.markdown("""
+            <div class="info-box">
+                <strong>For American Options:</strong><br>
+                • <strong>Binomial Trees:</strong> Natural choice, handles early exercise easily<br>
+                • <strong>Monte Carlo:</strong> Possible with Longstaff-Schwartz algorithm, but complex<br>
+                • <strong>Black-Scholes:</strong> Cannot handle American features directly
+            </div>
+            """, unsafe_allow_html=True)
+        
+        else:  # Path-Dependent Options
+            st.markdown("#### Path-Dependent Options Require Different Approaches")
+            
+            path_option_type = st.selectbox("Path-dependent type:", 
+                                          ["Asian (Average Price)", "Lookback (Extreme Value)", "Barrier (Knock-out)"])
+            
+            if path_option_type == "Asian (Average Price)":
+                st.markdown("""
+                **Asian Call Payoff:** max(Average(S) - K, 0)
+                
+                **Why different models matter:**
+                """)
+                
+                # Monte Carlo for Asian option
+                mc_asian, mc_se = OptionPricer.monte_carlo_option(spot_price, strike_price, time_to_maturity,
+                                                                 risk_free_rate, volatility, 5000,
+                                                                 option_type='asian_call', path_dependent=True)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("European Call", f"${call_price:.4f}")
+                with col2:
+                    st.metric("Asian Call (MC)", f"${mc_asian:.4f}")
+                
+                st.markdown("""
+                <div class="info-box">
+                    <strong>Asian options are typically cheaper</strong> than European options because 
+                    averaging reduces volatility. Only Monte Carlo (or complex binomial modifications) 
+                    can accurately price these.
+                </div>
+                """, unsafe_allow_html=True)
+            
+            elif path_option_type == "Lookback (Extreme Value)":
+                st.markdown("""
+                **Lookback Call Payoff:** max(Max(S) - K, 0)
+                
+                This option pays based on the highest price reached during the option's life.
+                """)
+                
+                # Monte Carlo for Lookback option
+                mc_lookback, mc_se = OptionPricer.monte_carlo_option(spot_price, strike_price, time_to_maturity,
+                                                                    risk_free_rate, volatility, 5000,
+                                                                    option_type='lookback_call', path_dependent=True)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("European Call", f"${call_price:.4f}")
+                with col2:
+                    st.metric("Lookback Call (MC)", f"${mc_lookback:.4f}")
+                
+                st.markdown("""
+                <div class="info-box">
+                    <strong>Lookback options are more expensive</strong> than European options because 
+                    they guarantee the best possible exercise price. Analytical formulas exist but 
+                    Monte Carlo is more intuitive.
+                </div>
+                """, unsafe_allow_html=True)
+            
+            else:  # Barrier
+                st.markdown("""
+                **Barrier Options** have payoffs that depend on whether the underlying crosses a barrier level.
+                
+                Example: **Knock-out Call** - becomes worthless if stock price hits barrier.
+                """)
+                
+                barrier_level = st.slider("Barrier Level", spot_price * 0.7, spot_price * 1.3, spot_price * 1.2)
+                
+                st.markdown(f"""
+                <div class="warning-box">
+                    <strong>Barrier at ${barrier_level:.2f}</strong><br>
+                    If the stock price reaches this level, a knock-out option becomes worthless.
+                    This requires path monitoring - impossible with standard Black-Scholes.
+                </div>
+                """, unsafe_allow_html=True)
+
+# ----------------------
+# Footer
+# ----------------------
+with st.container():
+    st.markdown("""
+    <div class="footer-section">
+        <div style="font-size: 1.4rem; font-weight: 600; margin-bottom: 1rem; color: #1a365d;">
+            Quantitative Finance Platform
+        </div>
+        <div style="color: #4a5568; font-style: italic; margin-bottom: 1rem;">
+            Professional-Grade Derivatives Pricing & Risk Management
+        </div>
+        <div style="color: #718096; font-size: 0.9rem;">
+            © 2025 | SALHI Reda | Financial Engineering Research | Advanced Analytics Suite
+        </div>
+        <div style="margin-top: 1rem; color: #718096; font-size: 0.8rem;">
+            <strong>Disclaimer:</strong> This platform is for educational and research purposes. 
+            All models are theoretical and should not be used for actual trading without proper validation.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Add some spacing at the bottom
+st.markdown("<br><br>", unsafe_allow_html=True)
+, '').replace(',', '')) for row in stress_results]
+        scenario_names = [row['Scenario'] for row in stress_results]
+        
+        fig_stress = go.Figure(data=[
             go.Bar(x=scenario_names, y=pnl_values,
                   marker_color=['#38a169' if x > 0 else '#e53e3e' for x in pnl_values])
         ])
         
-        fig_scenarios.update_layout(
-            title='Call Option P&L Across Scenarios',
+        fig_stress.update_layout(
+            title='Stress Test Results',
             xaxis_title='Scenario',
             yaxis_title='P&L ($)',
+            template="plotly_white",
+            height=400,
+            xaxis={'tickangle': 45}
+        )
+        
+        st.plotly_chart(fig_stress, use_container_width=True)
+    
+    with risk_tab3:
+        st.markdown("### Time Decay Analysis")
+        st.markdown("Watch how your options lose value over time.")
+        
+        # Time decay analysis
+        days_to_analyze = st.slider("Days to Analyze", 1, 180, 30)
+        
+        time_points = np.linspace(time_to_maturity, 0.01, days_to_analyze)
+        call_values_time = []
+        put_values_time = []
+        
+        for T_remaining in time_points:
+            call_val = OptionPricer.black_scholes_call(spot_price, strike_price, T_remaining, risk_free_rate, volatility)
+            put_val = OptionPricer.black_scholes_put(spot_price, strike_price, T_remaining, risk_free_rate, volatility)
+            call_values_time.append(call_val)
+            put_values_time.append(put_val)
+        
+        days_remaining = [T * 365 for T in time_points]
+        
+        fig_time_decay = go.Figure()
+        fig_time_decay.add_trace(go.Scatter(x=days_remaining, y=call_values_time, name='Call Value',
+                                          line=dict(color='#38a169', width=3)))
+        fig_time_decay.add_trace(go.Scatter(x=days_remaining, y=put_values_time, name='Put Value',
+                                          line=dict(color='#e53e3e', width=3)))
+        
+        current_days = time_to_maturity * 365
+        fig_time_decay.add_vline(x=current_days, line_dash="dash", line_color="#3182ce", 
+                               annotation_text=f"Current: {current_days:.0f} days")
+        
+        fig_time_decay.update_layout(
+            title='Option Value vs Time to Expiration',
+            xaxis_title='Days to Expiration',
+            yaxis_title='Option Value ($)',
             template="plotly_white",
             height=400
         )
         
-        st.plotly_chart(fig_scenarios, use_container_width=True)
+        st.plotly_chart(fig_time_decay, use_container_width=True)
+        
+        # Weekly theta impact
+        weeks_ahead = min(8, int(time_to_maturity * 52))
+        weekly_decay = []
+        
+        for week in range(weeks_ahead + 1):
+            T_week = max(0.01, time_to_maturity - week/52)
+            if "Call" in position_type:
+                week_value = OptionPricer.black_scholes_call(spot_price, strike_price, T_week, risk_free_rate, volatility)
+                current_value = call_price
+            else:
+                week_value = OptionPricer.black_scholes_put(spot_price, strike_price, T_week, risk_free_rate, volatility)
+                current_value = put_price
+            
+            decay_amount = (current_value - week_value) * position_size
+            if "Short" in position_type:
+                decay_amount *= -1
+            
+            weekly_decay.append(decay_amount)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### Weekly Time Decay Impact")
+            for i, decay in enumerate(weekly_decay[:4]):
+                if decay >= 0:
+                    st.markdown(f"**Week {i+1}:** <span style='color: #38a169'>+${decay:.0f}</span>", unsafe_allow_html=True)
+                else:
+                    st.markdown(f"**Week {i+1}:** <span style='color: #e53e3e'>${decay:.0f}</span>", unsafe_allow_html=True)
+        
+        with col2:
+            if len(weekly_decay) > 4:
+                st.markdown("#### Extended Decay")
+                for i, decay in enumerate(weekly_decay[4:8]):
+                    week_num = i + 5
+                    if decay >= 0:
+                        st.markdown(f"**Week {week_num}:** <span style='color: #38a169'>+${decay:.0f}</span>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"**Week {week_num}:** <span style='color: #e53e3e'>${decay:.0f}</span>", unsafe_allow_html=True)
+
+# ----------------------
+# Advanced Calculator
+# ----------------------
+with st.container():
+    st.markdown("""
+    <div class="portfolio-box">
+        <div class="section-title">🧮 Advanced Options Calculator</div>
+        <div class="content-text">
+            Professional tools for complex options analysis and what-if scenarios.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    calc_tab1, calc_tab2, calc_tab3 = st.tabs(["🎯 Breakeven Analysis", "💰 Profit Target Tool", "⚡ Quick Comparisons"])
+    
+    with calc_tab1:
+        st.markdown("### Breakeven Analysis")
+        st.markdown("Find the exact price levels where your position breaks even.")
+        
+        selected_strategy = st.selectbox("Select Strategy for Analysis", 
+                                       ["Long Call", "Long Put", "Bull Call Spread", "Straddle"])
+        
+        if selected_strategy == "Long Call":
+            breakeven = strike_price + call_price
+            st.markdown(f"""
+            <div class="success-box">
+                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
+                Your long call breaks even when the stock reaches ${breakeven:.2f} at expiration.<br>
+                That's a {((breakeven/spot_price - 1)*100):+.1f}% move from current price.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        elif selected_strategy == "Long Put":
+            breakeven = strike_price - put_price
+            st.markdown(f"""
+            <div class="success-box">
+                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
+                Your long put breaks even when the stock falls to ${breakeven:.2f} at expiration.<br>
+                That's a {((breakeven/spot_price - 1)*100):+.1f}% move from current price.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        elif selected_strategy == "Bull Call Spread":
+            K1 = strike_price - 5
+            K2 = strike_price + 5
+            spread_cost = OptionsStrategy.bull_call_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
+            breakeven = K1 + spread_cost
+            st.markdown(f"""
+            <div class="success-box">
+                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
+                Your bull call spread (${K1}-${K2}) breaks even when the stock reaches ${breakeven:.2f}.<br>
+                Maximum profit of ${K2-K1-spread_cost:.2f} achieved above ${K2}.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        else:  # Straddle
+            straddle_cost = call_price + put_price
+            breakeven_up = strike_price + straddle_cost
+            breakeven_down = strike_price - straddle_cost
+            st.markdown(f"""
+            <div class="success-box">
+                <strong>Breakeven Prices: ${breakeven_down:.2f} and ${breakeven_up:.2f}</strong><br>
+                Your straddle breaks even when the stock moves to either ${breakeven_down:.2f} or ${breakeven_up:.2f}.<br>
+                Required move: {((straddle_cost/spot_price)*100):.1f}% in either direction.
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with calc_tab2:
+        st.markdown("### Profit Target Calculator")
+        st.markdown("Set a profit target and see what needs to happen to achieve it.")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            target_profit = st.number_input("Target Profit ($)", min_value=10, value=500, step=50)
+            target_option = st.selectbox("Option to Analyze", ["Call", "Put"])
+        
+        with col2:
+            target_timeframe = st.selectbox("Time Frame", ["1 week", "2 weeks", "1 month", "At expiration"])
+        
+        # Calculate required stock price for target profit
+        time_mapping = {"1 week": 1/52, "2 weeks": 2/52, "1 month": 1/12, "At expiration": 0.01}
+        target_time = time_to_maturity - time_mapping[target_timeframe]
+        target_time = max(0.01, target_time)
+        
+        current_option_price = call_price if target_option == "Call" else put_price
+        target_option_price = current_option_price + target_profit
+        
+        # Binary search for required stock price
+        def find_required_price(target_price, option_type, K, T, r, sigma, is_call=True):
+            from scipy.optimize import brentq
+            
+            def price_difference(S):
+                if is_call:
+                    calculated_price = OptionPricer.black_scholes_call(S, K, T, r, sigma)
+                else:
+                    calculated_price = OptionPricer.black_scholes_put(S, K, T, r, sigma)
+                return calculated_price - target_price
+            
+            try:
+                if is_call:
+                    # For calls, price increases with spot price
+                    required_S = brentq(price_difference, 0.1, 1000)
+                else:
+                    # For puts, price decreases with spot price  
+                    required_S = brentq(price_difference, 0.1, 1000)
+                return required_S
+            except:
+                return None
+        
+        required_price = find_required_price(target_option_price, target_option, strike_price, 
+                                           target_time, risk_free_rate, volatility, target_option == "Call")
+        
+        if required_price:
+            price_change = (required_price / spot_price - 1) * 100
+            st.markdown(f"""
+            <div class="info-box">
+                <strong>Required Stock Price: ${required_price:.2f}</strong><br>
+                To achieve ${target_profit} profit on your {target_option.lower()} option in {target_timeframe},<br>
+                the stock needs to move to ${required_price:.2f} ({price_change:+.1f}% change).
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="warning-box">
+                <strong>Target may not be achievable</strong><br>
+                The profit target might be too high for the given timeframe and option.
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with calc_tab3:
+        st.markdown("### Quick Strategy Comparisons")
+        st.markdown("Compare different strategies side by side.")
+        
+        # Strategy comparison
+        strategies_to_compare = st.multiselect(
+            "Select strategies to compare:",
+            ["Long Call", "Long Put", "Bull Call Spread", "Bear Put Spread", "Straddle", "Strangle"],
+            default=["Long Call", "Long Put"]
+        )
+        
+        if len(strategies_to_compare) >= 2:
+            comparison_data = []
+            
+            for strategy in strategies_to_compare:
+                if strategy == "Long Call":
+                    cost = call_price
+                    max_profit = "Unlimited"
+                    max_loss = call_price
+                    breakeven = strike_price + call_price
+                    
+                elif strategy == "Long Put":
+                    cost = put_price
+                    max_profit = strike_price - put_price
+                    max_loss = put_price
+                    breakeven = strike_price - put_price
+                    
+                elif strategy == "Bull Call Spread":
+                    K1, K2 = strike_price - 5, strike_price + 5
+                    cost = OptionsStrategy.bull_call_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
+                    max_profit = (K2 - K1) - cost
+                    max_loss = cost
+                    breakeven = K1 + cost
+                    
+                elif strategy == "Bear Put Spread":
+                    K1, K2 = strike_price - 5, strike_price + 5
+                    cost = OptionsStrategy.bear_put_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
+                    max_profit = (K2 - K1) - cost
+                    max_loss = cost
+                    breakeven = K2 - cost
+                    
+                elif strategy == "Straddle":
+                    cost = call_price + put_price
+                    max_profit = "Unlimited"
+                    max_loss = cost
+                    breakeven = f"${strike_price - cost:.2f} / ${strike_price + cost:.2f}"
+                    
+                else:  # Strangle
+                    K1, K2 = strike_price - 10, strike_price + 10
+                    cost = OptionsStrategy.strangle(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
+                    max_profit = "Unlimited"
+                    max_loss = cost
+                    breakeven = f"${K1 - cost:.2f} / ${K2 + cost:.2f}"
+                
+                comparison_data.append({
+                    'Strategy': strategy,
+                    'Cost': f"${cost:.2f}",
+                    'Max Profit': max_profit if isinstance(max_profit, str) else f"${max_profit:.2f}",
+                    'Max Loss': f"${max_loss:.2f}",
+                    'Breakeven': breakeven if isinstance(breakeven, str) else f"${breakeven:.2f}",
+                })
+            
+            comparison_df = pd.DataFrame(comparison_data)
+            st.dataframe(comparison_df, use_container_width=True)
+            
+            # Quick visual comparison of costs
+            costs = []
+            strategy_names = []
+            for strategy in strategies_to_compare:
+                if strategy == "Long Call":
+                    costs.append(call_price)
+                elif strategy == "Long Put":
+                    costs.append(put_price)
+                elif strategy == "Bull Call Spread":
+                    costs.append(OptionsStrategy.bull_call_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility))
+                elif strategy == "Bear Put Spread":
+                    costs.append(OptionsStrategy.bear_put_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility))
+                elif strategy == "Straddle":
+                    costs.append(call_price + put_price)
+                else:  # Strangle
+                    costs.append(OptionsStrategy.strangle(spot_price, strike_price-10, strike_price+10, time_to_maturity, risk_free_rate, volatility))
+                strategy_names.append(strategy)
+            
+            fig_comparison = go.Figure(data=[
+                go.Bar(x=strategy_names, y=costs, marker_color='#3182ce')
+            ])
+            
+            fig_comparison.update_layout(
+                title='Strategy Cost Comparison',
+                xaxis_title='Strategy',
+                yaxis_title='Initial Cost ($)',
+                template="plotly_white",
+                height=300,
+                xaxis={'tickangle': 45}
+            )
+            
+            st.plotly_chart(fig_comparison, use_container_width=True)
 
 # ----------------------
 # Risk-Neutral Framework
