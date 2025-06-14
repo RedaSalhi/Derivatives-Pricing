@@ -991,122 +991,59 @@ def _safe_eval_cash_expression(expression, S, K, T, r, sigma):
     except Exception as e:
         raise ValueError(f"Invalid expression: {str(e)}")
 
-def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_type, option_family, params):
+def create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, option_family, params):
     """Create optimized continuous price sensitivity analysis chart - PERFORMANCE FIX"""
     try:
-        if option_family == "barrier":
-            # PERFORMANCE FIX: Drastically reduce computational load for barrier options
-            
-            # Reduce number of points for smooth but fast charts
-            spot_range = np.linspace(K * 0.5, K * 2.0, 50)  # Reduced from 200 to 50 points
-            vol_range = np.linspace(sigma * 0.5, sigma * 2.0, 30)  # Reduced from 100 to 30 points  
-            time_range = np.linspace(0.1, min(T * 1.5, 2.0), 30)  # Reduced from 100 to 30 points
-            
-            # PERFORMANCE FIX: Use much fewer Monte Carlo simulations for sensitivity analysis
-            fast_params = params.copy()
-            fast_params['n_sims'] = 1500  # Reduced from 1000+ to 150
-            fast_params['n_steps'] = 252  # Reduced from 50 to 25
-            
-            st.info("**Performance Mode**: Using optimized parameters for smooth charting (150 sims vs 1000+)")
-            
-            # Calculate prices with progress tracking
-            progress_placeholder = st.empty()
-            
-            # Spot sensitivity with progress
-            spot_prices = []
-            total_calcs = len(spot_range) + len(vol_range) + len(time_range)
-            current_calc = 0
-            
-            progress_placeholder.progress(0, "Calculating spot sensitivity...")
-            for i, spot in enumerate(spot_range):
-                try:
-                    price = calculate_option_price_single_fast(option_family, spot, K, T, r, sigma, option_type, fast_params)
-                    spot_prices.append(max(price, 0))
-                except:
-                    spot_prices.append(0)
-                current_calc += 1
-                if i % 10 == 0:  # Update every 10 calculations
-                    progress_placeholder.progress(current_calc / total_calcs, f"Spot sensitivity: {i+1}/{len(spot_range)}")
-            
-            # Volatility sensitivity
-            vol_prices = []
-            progress_placeholder.progress(current_calc / total_calcs, "Calculating volatility sensitivity...")
-            for i, vol in enumerate(vol_range):
-                try:
-                    price = calculate_option_price_single_fast(option_family, K, K, T, r, vol, option_type, fast_params)
-                    vol_prices.append(max(price, 0))
-                except:
-                    vol_prices.append(0)
-                current_calc += 1
-                if i % 5 == 0:
-                    progress_placeholder.progress(current_calc / total_calcs, f"Vol sensitivity: {i+1}/{len(vol_range)}")
-            
-            # Time sensitivity
-            time_prices = []
-            progress_placeholder.progress(current_calc / total_calcs, "Calculating time sensitivity...")
-            for i, t in enumerate(time_range):
-                try:
-                    price = calculate_option_price_single_fast(option_family, K, K, t, r, sigma, option_type, fast_params)
-                    time_prices.append(max(price, 0))
-                except:
-                    time_prices.append(0)
-                current_calc += 1
-                if i % 5 == 0:
-                    progress_placeholder.progress(current_calc / total_calcs, f"Time sensitivity: {i+1}/{len(time_range)}")
-            
-            progress_placeholder.success("Sensitivity analysis complete!")
-            
-        else:
-            # For non-barrier options, use original logic but with moderate optimization
-            spot_range = np.linspace(K * 0.5, K * 2.0, 100)  # Slightly reduced
-            vol_range = np.linspace(sigma * 0.5, sigma * 2.0, 50)
-            time_range = np.linspace(0.1, min(T * 1.5, 2.0), 50)
-            
-            # Add progress tracking for all option types
-            progress_placeholder = st.empty()
-            total_calcs = len(spot_range) + len(vol_range) + len(time_range)
-            current_calc = 0
-            
-            # Spot sensitivity with progress
-            spot_prices = []
-            progress_placeholder.progress(0, f"Calculating {option_family} spot sensitivity...")
-            for i, spot in enumerate(spot_range):
-                try:
-                    price = calculate_option_price_single(option_family, spot, K, T, r, sigma, option_type, params)
-                    spot_prices.append(max(price, 0))
-                except:
-                    spot_prices.append(0)
-                current_calc += 1
-                if i % 20 == 0:  # Update every 20 calculations (less frequent since these are faster)
-                    progress_placeholder.progress(current_calc / total_calcs, f"Spot sensitivity: {i+1}/{len(spot_range)}")
-            
-            # Volatility sensitivity with progress
-            vol_prices = []
-            progress_placeholder.progress(current_calc / total_calcs, f"Calculating {option_family} volatility sensitivity...")
-            for i, vol in enumerate(vol_range):
-                try:
-                    price = calculate_option_price_single(option_family, K, K, T, r, vol, option_type, params)
-                    vol_prices.append(max(price, 0))
-                except:
-                    vol_prices.append(0)
-                current_calc += 1
-                if i % 10 == 0:  # Update every 10 calculations
-                    progress_placeholder.progress(current_calc / total_calcs, f"Vol sensitivity: {i+1}/{len(vol_range)}")
-            
-            # Time sensitivity with progress
-            time_prices = []
-            progress_placeholder.progress(current_calc / total_calcs, f"Calculating {option_family} time sensitivity...")
-            for i, t in enumerate(time_range):
-                try:
-                    price = calculate_option_price_single(option_family, K, K, t, r, sigma, option_type, params)
-                    time_prices.append(max(price, 0))
-                except:
-                    time_prices.append(0)
-                current_calc += 1
-                if i % 10 == 0:  # Update every 10 calculations
-                    progress_placeholder.progress(current_calc / total_calcs, f"Time sensitivity: {i+1}/{len(time_range)}")
-            
-            progress_placeholder.success(f"{option_family.title()} sensitivity analysis complete!")
+        # For non-barrier options, use original logic but with moderate optimization
+        spot_range = np.linspace(K * 0.5, K * 2.0, 100)  # Slightly reduced
+        vol_range = np.linspace(sigma * 0.5, sigma * 2.0, 50)
+        time_range = np.linspace(0.1, min(T * 1.5, 2.0), 50)
+        
+        # Add progress tracking for all option types
+        progress_placeholder = st.empty()
+        total_calcs = len(spot_range) + len(vol_range) + len(time_range)
+        current_calc = 0
+        
+        # Spot sensitivity with progress
+        spot_prices = []
+        progress_placeholder.progress(0, f"Calculating {option_family} spot sensitivity...")
+        for i, spot in enumerate(spot_range):
+            try:
+                price = calculate_option_price_single(option_family, spot, K, T, r, sigma, option_type, params)
+                spot_prices.append(max(price, 0))
+            except:
+                spot_prices.append(0)
+            current_calc += 1
+            if i % 20 == 0:  # Update every 20 calculations (less frequent since these are faster)
+                progress_placeholder.progress(current_calc / total_calcs, f"Spot sensitivity: {i+1}/{len(spot_range)}")
+        
+        # Volatility sensitivity with progress
+        vol_prices = []
+        progress_placeholder.progress(current_calc / total_calcs, f"Calculating {option_family} volatility sensitivity...")
+        for i, vol in enumerate(vol_range):
+            try:
+                price = calculate_option_price_single(option_family, K, K, T, r, vol, option_type, params)
+                vol_prices.append(max(price, 0))
+            except:
+                vol_prices.append(0)
+            current_calc += 1
+            if i % 10 == 0:  # Update every 10 calculations
+                progress_placeholder.progress(current_calc / total_calcs, f"Vol sensitivity: {i+1}/{len(vol_range)}")
+        
+        # Time sensitivity with progress
+        time_prices = []
+        progress_placeholder.progress(current_calc / total_calcs, f"Calculating {option_family} time sensitivity...")
+        for i, t in enumerate(time_range):
+            try:
+                price = calculate_option_price_single(option_family, K, K, t, r, sigma, option_type, params)
+                time_prices.append(max(price, 0))
+            except:
+                time_prices.append(0)
+            current_calc += 1
+            if i % 10 == 0:  # Update every 10 calculations
+                progress_placeholder.progress(current_calc / total_calcs, f"Time sensitivity: {i+1}/{len(time_range)}")
+        
+        progress_placeholder.success(f"{option_family.title()} sensitivity analysis complete!")
         
         # Create comprehensive sensitivity plot with smooth lines
         fig = make_subplots(
