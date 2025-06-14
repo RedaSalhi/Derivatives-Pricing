@@ -9,12 +9,6 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-# Page configuration
-st.set_page_config(
-    page_title="Quantitative Finance Platform",
-    page_icon="📊",
-    layout="wide"
-)
 
 # Professional CSS with solid colors
 st.markdown("""
