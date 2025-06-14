@@ -5,6 +5,13 @@ import plotly.express as px
 from scipy.stats import norm
 import pandas as pd
 
+# Page configuration
+st.set_page_config(
+    page_title="Finance Background & Methodology",
+    page_icon="📈",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # Enhanced CSS with modern design and dark mode support
 st.markdown("""
@@ -402,45 +409,29 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar for navigation and interactive controls
-with st.sidebar:
-    st.markdown("### 📊 Navigation")
-    selected_section = st.selectbox(
-        "Jump to section:",
-        ["Overview", "Objective", "Methodology", "Models", "Greeks", "Strategies", "Risk-Neutral", "Engineering"]
-    )
-    
-    st.markdown("---")
-    st.markdown("### 🎛️ Interactive Controls")
-    
-    # Interactive parameters for demos
-    spot_price = st.slider("Spot Price (S₀)", 50, 150, 100, 5)
-    strike_price = st.slider("Strike Price (K)", 50, 150, 100, 5)
-    volatility = st.slider("Volatility (σ)", 0.1, 0.5, 0.2, 0.05)
-    time_to_maturity = st.slider("Time to Maturity (T)", 0.1, 2.0, 1.0, 0.1)
-    risk_free_rate = st.slider("Risk-free Rate (r)", 0.01, 0.1, 0.05, 0.01)
-    
-    # Calculate Black-Scholes price for demo
-    def black_scholes_call(S, K, T, r, sigma):
-        d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-        d2 = d1 - sigma*np.sqrt(T)
-        call_price = S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-        return call_price
-    
-    bs_price = black_scholes_call(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
-    
-    st.markdown("### 📈 Live Demo")
-    st.metric("Call Option Price", f"${bs_price:.2f}")
+# Interactive parameters for demos (moved to main area)
+def black_scholes_call(S, K, T, r, sigma):
+    d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+    d2 = d1 - sigma*np.sqrt(T)
+    call_price = S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
+    return call_price
+
+# Set default parameters
+spot_price = 100
+strike_price = 100
+volatility = 0.2
+time_to_maturity = 1.0
+risk_free_rate = 0.05
+
+bs_price = black_scholes_call(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
 
 # Main header with enhanced animation
 st.markdown('<div class="main-header">Finance Background & Methodology</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Advanced Mathematical Models & Quantitative Framework</div>', unsafe_allow_html=True)
 
-# Navigation based on sidebar selection
-if selected_section == "Overview" or selected_section == "Objective":
-    # ----------------------
-    # Objective Section
-    # ----------------------
+# ----------------------
+# Objective Section
+# ----------------------
     with st.container():
         st.markdown("""
         <div class="objective-box">
@@ -460,10 +451,9 @@ if selected_section == "Overview" or selected_section == "Objective":
         </div>
         """, unsafe_allow_html=True)
 
-if selected_section == "Overview" or selected_section == "Methodology":
-    # ----------------------
-    # Methodology Section with Interactive Demo
-    # ----------------------
+# ----------------------
+# Methodology Section with Interactive Demo
+# ----------------------
     with st.container():
         st.markdown("""
         <div class="methodology-box">
@@ -514,10 +504,9 @@ if selected_section == "Overview" or selected_section == "Methodology":
             </div>
             """.format(spot_price, strike_price, volatility, time_to_maturity, risk_free_rate), unsafe_allow_html=True)
 
-if selected_section == "Overview" or selected_section == "Models":
-    # ----------------------
-    # Enhanced Models Section
-    # ----------------------
+# ----------------------
+# Enhanced Models Section
+# ----------------------
     with st.container():
         st.markdown("""
         <div class="model-box">
