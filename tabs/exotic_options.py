@@ -1004,8 +1004,10 @@ def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_t
             
             # PERFORMANCE FIX: Use much fewer Monte Carlo simulations for sensitivity analysis
             fast_params = params.copy()
-            fast_params['n_sims'] = 1000  # Reduced from 1000+ to 150
+            fast_params['n_sims'] = 2000  # Reduced from 1000+ to 150
             fast_params['n_steps'] = 50  # Reduced from 50 to 25
+            
+            st.info("**Performance Mode**: Using optimized parameters for smooth charting (150 sims vs 1000+)")
             
             # Calculate prices with progress tracking
             progress_placeholder = st.empty()
@@ -1052,7 +1054,7 @@ def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_t
                 if i % 5 == 0:
                     progress_placeholder.progress(current_calc / total_calcs, f"Time sensitivity: {i+1}/{len(time_range)}")
             
-            progress_placeholder.success("✅ Sensitivity analysis complete!")
+            progress_placeholder.success("Sensitivity analysis complete!")
             
         else:
             # For non-barrier options, use original logic but with moderate optimization
@@ -1060,30 +1062,51 @@ def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_t
             vol_range = np.linspace(sigma * 0.5, sigma * 2.0, 50)
             time_range = np.linspace(0.1, min(T * 1.5, 2.0), 50)
             
-            # Standard calculation for other option types (they're already fast)
+            # Add progress tracking for all option types
+            progress_placeholder = st.empty()
+            total_calcs = len(spot_range) + len(vol_range) + len(time_range)
+            current_calc = 0
+            
+            # Spot sensitivity with progress
             spot_prices = []
-            for spot in spot_range:
+            progress_placeholder.progress(0, f"Calculating {option_family} spot sensitivity...")
+            for i, spot in enumerate(spot_range):
                 try:
                     price = calculate_option_price_single(option_family, spot, K, T, r, sigma, option_type, params)
                     spot_prices.append(max(price, 0))
                 except:
                     spot_prices.append(0)
+                current_calc += 1
+                if i % 20 == 0:  # Update every 20 calculations (less frequent since these are faster)
+                    progress_placeholder.progress(current_calc / total_calcs, f"Spot sensitivity: {i+1}/{len(spot_range)}")
             
+            # Volatility sensitivity with progress
             vol_prices = []
-            for vol in vol_range:
+            progress_placeholder.progress(current_calc / total_calcs, f"Calculating {option_family} volatility sensitivity...")
+            for i, vol in enumerate(vol_range):
                 try:
                     price = calculate_option_price_single(option_family, K, K, T, r, vol, option_type, params)
                     vol_prices.append(max(price, 0))
                 except:
                     vol_prices.append(0)
+                current_calc += 1
+                if i % 10 == 0:  # Update every 10 calculations
+                    progress_placeholder.progress(current_calc / total_calcs, f"Vol sensitivity: {i+1}/{len(vol_range)}")
             
+            # Time sensitivity with progress
             time_prices = []
-            for t in time_range:
+            progress_placeholder.progress(current_calc / total_calcs, f"Calculating {option_family} time sensitivity...")
+            for i, t in enumerate(time_range):
                 try:
                     price = calculate_option_price_single(option_family, K, K, t, r, sigma, option_type, params)
                     time_prices.append(max(price, 0))
                 except:
                     time_prices.append(0)
+                current_calc += 1
+                if i % 10 == 0:  # Update every 10 calculations
+                    progress_placeholder.progress(current_calc / total_calcs, f"Time sensitivity: {i+1}/{len(time_range)}")
+            
+            progress_placeholder.success(f"{option_family.title()} sensitivity analysis complete!")
         
         # Create comprehensive sensitivity plot with smooth lines
         fig = make_subplots(
@@ -1135,17 +1158,40 @@ def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_t
                 ["MC Simulations", f"{fast_params.get('n_sims', 150)} (fast mode)"],
                 ["Time Steps", f"{fast_params.get('n_steps', 25)} (fast mode)"],
                 ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
-                ["Performance", "🚀 Optimized for speed"]
+                ["Performance", "Optimized for speed"]
             ]
-        else:
+        elif option_family == "asian":
             param_data = [
                 ["Parameter", "Value"],
-                ["Option Type", option_family.title()],
+                ["Option Type", f"{option_family.title()} (Progress Tracked)"],
+                ["Asian Type", params.get('asian_type', 'average_price').replace('_', ' ').title()],
+                ["MC Paths", f"{params.get('n_paths', 5000)}"],
+                ["Time Steps", f"{params.get('n_steps', 252)}"],
+                ["Call/Put", option_type.title()],
+                ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
+                ["Performance", "⚡ Monte Carlo with progress"]
+            ]
+        elif option_family == "lookback":
+            param_data = [
+                ["Parameter", "Value"],
+                ["Option Type", f"{option_family.title()} (Progress Tracked)"],
+                ["Strike Type", "Floating" if params.get('floating', True) else "Fixed"],
+                ["MC Paths", f"{params.get('n_paths', 10000)}"],
+                ["Call/Put", option_type.title()],
+                ["Current Spot", f"${K:.2f}"],
+                ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
+                ["Performance", "⚡ Monte Carlo with progress"]
+            ]
+        else:  # Digital and others
+            param_data = [
+                ["Parameter", "Value"],
+                ["Option Type", f"{option_family.title()} (Progress Tracked)"],
                 ["Call/Put", option_type.title()],
                 ["Current Spot", f"${K:.2f}"],
                 ["Volatility", f"{sigma:.1%}"],
                 ["Time to Expiry", f"{T:.2f} years"],
-                ["Performance", "✅ Standard speed"]
+                ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
+                ["Performance", "Analytical with progress"]
             ]
         
         fig.add_trace(
@@ -1215,6 +1261,7 @@ def calculate_option_price_single_fast(option_family, S, K, T, r, sigma, option_
             return vanilla * barrier_discount
         else:
             return vanilla
+
 
 
 
