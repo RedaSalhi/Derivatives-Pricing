@@ -32,57 +32,175 @@ components.html(
     height=0
 )
 
-# Simple, clean styling
+# Beautiful light theme
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    .stApp {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        font-family: 'Inter', sans-serif;
+    }
+    
     .main .block-container {
-        padding-top: 1rem;
-        max-width: 800px;
+        padding-top: 2rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+        max-width: 900px;
     }
     
     .main-title {
-        color: #2563eb;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 3rem;
+        font-weight: 700;
         text-align: center;
-        font-size: 2.5rem;
         margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
     }
     
     .subtitle {
-        color: #64748b;
+        color: #6b7280;
+        font-size: 1.2rem;
         text-align: center;
-        font-size: 1.1rem;
         margin-bottom: 2rem;
+        font-weight: 400;
     }
     
+    /* Sidebar styling */
+    .css-1d391kg, .css-17eq0hr {
+        background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+        border-right: 1px solid #e5e7eb;
+    }
+    
+    .sidebar-title {
+        color: #1f2937;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    /* Radio buttons */
     .stRadio > div {
-        background: #f8fafc;
-        border-radius: 8px;
+        background: #f9fafb;
+        border-radius: 12px;
         padding: 1rem;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
     
-    /* Hide streamlit branding */
+    .stRadio > div > label {
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin: 0.25rem 0;
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: block;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+    
+    .stRadio > div > label:hover {
+        background: #f0f9ff;
+        border-color: #3b82f6;
+        transform: translateX(2px);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    }
+    
+    .stRadio > div > label > div {
+        color: #374151;
+        font-weight: 500;
+    }
+    
+    /* Feature highlight */
+    .feature-box {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border: 1px solid #bfdbfe;
+        text-align: center;
+    }
+    
+    .feature-title {
+        color: #1e40af;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .feature-text {
+        color: #475569;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    /* Hide streamlit elements */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     .stDeployButton {display:none;}
+    
+    /* Page headers */
+    .page-header {
+        color: #1f2937;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+    
+    .page-subtitle {
+        color: #6b7280;
+        font-style: italic;
+        margin-bottom: 1.5rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Simple header
+# Beautiful header
 st.markdown('<h1 class="main-title">📈 Derivatives Pricing App</h1>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Built for students, quants, and finance enthusiasts</p>', unsafe_allow_html=True)
 
-# Clean sidebar
-st.sidebar.title("Navigation")
-selected_page = st.sidebar.radio(
-    "Select Page",
-    ["Pricer", "About Me", "Finance Background"],
-)
+# Sidebar with clean styling
+with st.sidebar:
+    st.markdown('<h2 class="sidebar-title">📊 Navigation</h2>', unsafe_allow_html=True)
+    
+    selected_page = st.radio(
+        "",
+        ["📈 Pricer", "👤 About Me", "📚 Finance Background"],
+    )
+    
+    # Feature box
+    st.markdown("""
+    <div class="feature-box">
+        <div class="feature-title">🚀 Professional Tools</div>
+        <div class="feature-text">
+            Advanced pricing models with real-time calculations and educational insights
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Simple page routing
-if selected_page == "Pricer":
+# Clean page routing with headers
+if "Pricer" in selected_page:
+    st.markdown('<h2 class="page-header">📈 Derivatives Pricing Engine</h2>', unsafe_allow_html=True)
+    st.markdown('<p class="page-subtitle">Advanced pricing models for financial derivatives</p>', unsafe_allow_html=True)
     runpy.run_path(os.path.join(os.path.dirname(__file__), "pricer_minim.py"))
-elif selected_page == "About Me":
+    
+elif "About Me" in selected_page:
+    st.markdown('<h2 class="page-header">👤 About the Developer</h2>', unsafe_allow_html=True)
+    st.markdown('<p class="page-subtitle">Learn more about the creator of this application</p>', unsafe_allow_html=True)
     runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
-elif selected_page == "Finance Background":
+    
+elif "Finance Background" in selected_page:
+    st.markdown('<h2 class="page-header">📚 Financial Theory & Background</h2>', unsafe_allow_html=True)
+    st.markdown('<p class="page-subtitle">Educational content on derivatives and financial mathematics</p>', unsafe_allow_html=True)
     runpy.run_path(os.path.join(os.path.dirname(__file__), "finance_background.py"))
