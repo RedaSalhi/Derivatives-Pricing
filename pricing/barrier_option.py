@@ -12,44 +12,29 @@ def price_barrier_option(
     barrier_type="up-and-out",
     model="monte_carlo",
     n_simulations=10000,
-    n_steps=100
+    n_steps=100,
+    rebate=0.0
 ):
-
-    """
-    Price a European barrier option using the specified model.
-
-    Parameters:
-        S : float
-            Spot price
-        K : float
-            Strike price
-        H : float
-            Barrier level
-        T : float
-            Time to maturity (in years)
-        r : float
-            Risk-free interest rate
-        sigma : float
-            Volatility
-        option_type : str
-            'call' or 'put'
-        barrier_type : str
-            'up-and-out', 'down-and-out', 'up-and-in', 'down-and-in'
-        model : str
-            Pricing model, currently only 'black_scholes' supported
-
-    Returns:
-        float: barrier option price
-    """
+    # Validate inputs
+    valid_barrier_types = ['up-and-out', 'down-and-out', 'up-and-in', 'down-and-in']
+    if barrier_type.lower() not in valid_barrier_types:
+        raise ValueError(f"Invalid barrier_type. Must be one of: {valid_barrier_types}")
+    
+    if option_type.lower() not in ['call', 'put']:
+        raise ValueError("option_type must be 'call' or 'put'")
+    
     if model == "monte_carlo":
         price, paths = monte_carlo_barrier(
             S0=S, K=K, H=H, T=T, r=r, sigma=sigma,
-            option_type=option_type.lower(), barrier_type=barrier_type.lower(),
-            n_simulations=n_simulations, n_steps=n_steps
+            option_type=option_type.lower(), 
+            barrier_type=barrier_type.lower(),
+            n_simulations=n_simulations, 
+            n_steps=n_steps,
+            rebate=rebate
         )
         return price, paths
     else:
-        raise NotImplementedError(f"Model '{model}' not implemented.")
+        raise NotImplementedError(f"Model '{model}' not implemented. Only 'monte_carlo' is supported.")
 
 
 def plot_barrier_payoff(K, H, option_type="call", barrier_type="up-and-out", S_min=0, S_max=200, num=500):
