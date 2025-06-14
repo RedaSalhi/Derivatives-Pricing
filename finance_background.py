@@ -9,7 +9,6 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
-
 # Professional CSS with solid colors
 st.markdown("""
 <style>
