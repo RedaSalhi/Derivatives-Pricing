@@ -1769,8 +1769,10 @@ def create_live_payoff_diagram(S0, K, option_type, option_family, params):
             H = params.get('H', S0 * 1.2)
             barrier_type = params.get('barrier_type', 'up-and-out')
             rebate = params.get('rebate', 0.0)
+            payout_style = params.get('payout_style', 'cash')
             
-            # Simplified barrier logic
+            # Pour simplifier, on considère que le chemin a touché la barrière
+            # si le spot final est au-delà (pour up) ou en-dessous (pour down)
             knocked_out = False
             if "up" in barrier_type and spot >= H:
                 knocked_out = True
@@ -1782,15 +1784,27 @@ def create_live_payoff_diagram(S0, K, option_type, option_family, params):
                     payoffs.append(rebate)
                 else:
                     if option_type == "call":
-                        payoffs.append(max(0, spot - K))
+                        if payout_style == 'asset':
+                            payoffs.append(spot if spot > K else 0)
+                        else:
+                            payoffs.append(max(0, spot - K))
                     else:
-                        payoffs.append(max(0, K - spot))
+                        if payout_style == 'asset':
+                            payoffs.append(spot if spot < K else 0)
+                        else:
+                            payoffs.append(max(0, K - spot))
             else:  # "in" type
                 if knocked_out:
                     if option_type == "call":
-                        payoffs.append(max(0, spot - K))
+                        if payout_style == 'asset':
+                            payoffs.append(spot if spot > K else 0)
+                        else:
+                            payoffs.append(max(0, spot - K))
                     else:
-                        payoffs.append(max(0, K - spot))
+                        if payout_style == 'asset':
+                            payoffs.append(spot if spot < K else 0)
+                        else:
+                            payoffs.append(max(0, K - spot))
                 else:
                     payoffs.append(rebate)
                     
