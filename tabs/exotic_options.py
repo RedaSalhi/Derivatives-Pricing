@@ -288,7 +288,8 @@ def _interactive_pricing_lab():
                         Continuous Price Sensitivity
                     </h3>
                     """, unsafe_allow_html=True)
-            fig_sensitivity = create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, st.session_state.selected_option, params)
+            # NEW (FAST)
+            fig_sensitivity = create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_type, st.session_state.selected_option, params)
             st.plotly_chart(fig_sensitivity, use_container_width=True)
             
         except Exception as e:
@@ -990,51 +991,112 @@ def _safe_eval_cash_expression(expression, S, K, T, r, sigma):
     except Exception as e:
         raise ValueError(f"Invalid expression: {str(e)}")
 
-def create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, option_family, params):
-    """Create continuous price sensitivity analysis chart - FIX #1"""
+def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_type, option_family, params):
+    """Create optimized continuous price sensitivity analysis chart - PERFORMANCE FIX"""
     try:
-        # FIX #1: Create continuous sensitivity with much more points and bigger range
-        spot_range = np.linspace(K * 0.3, K * 2.5, 200)  # Continuous with 200 points, bigger range
-        vol_range = np.linspace(sigma * 0.3, sigma * 2.5, 100)
-        time_range = np.linspace(0.1, min(T * 2, 3.0), 100)
+        if option_family == "barrier":
+            # PERFORMANCE FIX: Drastically reduce computational load for barrier options
+            
+            # Reduce number of points for smooth but fast charts
+            spot_range = np.linspace(K * 0.5, K * 2.0, 50)  # Reduced from 200 to 50 points
+            vol_range = np.linspace(sigma * 0.5, sigma * 2.0, 30)  # Reduced from 100 to 30 points  
+            time_range = np.linspace(0.1, min(T * 1.5, 2.0), 30)  # Reduced from 100 to 30 points
+            
+            # PERFORMANCE FIX: Use much fewer Monte Carlo simulations for sensitivity analysis
+            fast_params = params.copy()
+            fast_params['n_sims'] = 150  # Reduced from 1000+ to 150
+            fast_params['n_steps'] = 25  # Reduced from 50 to 25
+            
+            st.info("🚀 **Performance Mode**: Using optimized parameters for smooth charting (150 sims vs 1000+)")
+            
+            # Calculate prices with progress tracking
+            progress_placeholder = st.empty()
+            
+            # Spot sensitivity with progress
+            spot_prices = []
+            total_calcs = len(spot_range) + len(vol_range) + len(time_range)
+            current_calc = 0
+            
+            progress_placeholder.progress(0, "Calculating spot sensitivity...")
+            for i, spot in enumerate(spot_range):
+                try:
+                    price = calculate_option_price_single_fast(option_family, spot, K, T, r, sigma, option_type, fast_params)
+                    spot_prices.append(max(price, 0))
+                except:
+                    spot_prices.append(0)
+                current_calc += 1
+                if i % 10 == 0:  # Update every 10 calculations
+                    progress_placeholder.progress(current_calc / total_calcs, f"Spot sensitivity: {i+1}/{len(spot_range)}")
+            
+            # Volatility sensitivity
+            vol_prices = []
+            progress_placeholder.progress(current_calc / total_calcs, "Calculating volatility sensitivity...")
+            for i, vol in enumerate(vol_range):
+                try:
+                    price = calculate_option_price_single_fast(option_family, K, K, T, r, vol, option_type, fast_params)
+                    vol_prices.append(max(price, 0))
+                except:
+                    vol_prices.append(0)
+                current_calc += 1
+                if i % 5 == 0:
+                    progress_placeholder.progress(current_calc / total_calcs, f"Vol sensitivity: {i+1}/{len(vol_range)}")
+            
+            # Time sensitivity
+            time_prices = []
+            progress_placeholder.progress(current_calc / total_calcs, "Calculating time sensitivity...")
+            for i, t in enumerate(time_range):
+                try:
+                    price = calculate_option_price_single_fast(option_family, K, K, t, r, sigma, option_type, fast_params)
+                    time_prices.append(max(price, 0))
+                except:
+                    time_prices.append(0)
+                current_calc += 1
+                if i % 5 == 0:
+                    progress_placeholder.progress(current_calc / total_calcs, f"Time sensitivity: {i+1}/{len(time_range)}")
+            
+            progress_placeholder.success("✅ Sensitivity analysis complete!")
+            
+        else:
+            # For non-barrier options, use original logic but with moderate optimization
+            spot_range = np.linspace(K * 0.5, K * 2.0, 100)  # Slightly reduced
+            vol_range = np.linspace(sigma * 0.5, sigma * 2.0, 50)
+            time_range = np.linspace(0.1, min(T * 1.5, 2.0), 50)
+            
+            # Standard calculation for other option types (they're already fast)
+            spot_prices = []
+            for spot in spot_range:
+                try:
+                    price = calculate_option_price_single(option_family, spot, K, T, r, sigma, option_type, params)
+                    spot_prices.append(max(price, 0))
+                except:
+                    spot_prices.append(0)
+            
+            vol_prices = []
+            for vol in vol_range:
+                try:
+                    price = calculate_option_price_single(option_family, K, K, T, r, vol, option_type, params)
+                    vol_prices.append(max(price, 0))
+                except:
+                    vol_prices.append(0)
+            
+            time_prices = []
+            for t in time_range:
+                try:
+                    price = calculate_option_price_single(option_family, K, K, t, r, sigma, option_type, params)
+                    time_prices.append(max(price, 0))
+                except:
+                    time_prices.append(0)
         
-        # Calculate prices for spot sensitivity
-        spot_prices = []
-        for spot in spot_range:
-            try:
-                price = calculate_option_price_single(option_family, spot, K, T, r, sigma, option_type, params)
-                spot_prices.append(max(price, 0))
-            except:
-                spot_prices.append(0)
-        
-        # Calculate prices for volatility sensitivity  
-        vol_prices = []
-        for vol in vol_range:
-            try:
-                price = calculate_option_price_single(option_family, K, K, T, r, vol, option_type, params)
-                vol_prices.append(max(price, 0))
-            except:
-                vol_prices.append(0)
-        
-        # Calculate prices for time sensitivity
-        time_prices = []
-        for t in time_range:
-            try:
-                price = calculate_option_price_single(option_family, K, K, t, r, sigma, option_type, params)
-                time_prices.append(max(price, 0))
-            except:
-                time_prices.append(0)
-        
-        # Create comprehensive sensitivity plot
+        # Create comprehensive sensitivity plot with smooth lines
         fig = make_subplots(
             rows=2, cols=2,
             subplot_titles=('Spot Price Sensitivity', 'Volatility Sensitivity', 
-                           'Time Sensitivity', 'Current Parameters'),
+                           'Time Sensitivity', 'Parameters & Performance'),
             specs=[[{"type": "xy"}, {"type": "xy"}],
                    [{"type": "xy"}, {"type": "table"}]]
         )
         
-        # Spot sensitivity (continuous smooth line)
+        # Spot sensitivity (smooth line)
         fig.add_trace(
             go.Scatter(x=spot_range, y=spot_prices, mode='lines', name='Price vs Spot',
                       line=dict(color='blue', width=3)),
@@ -1042,12 +1104,13 @@ def create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, optio
         )
         fig.add_vline(x=K, line_dash="dash", line_color="red", annotation_text="Strike", row=1, col=1)
         
-        # Add barrier line for barrier options - FIX #3
+        # Add barrier line for barrier options
         if option_family == "barrier" and 'H' in params:
-            fig.add_vline(x=params['H'], line_dash="dashdot", line_color="orange",
-                         annotation_text=f"Barrier ({params.get('payout_style', 'cash')} paying)", row=1, col=1)
+            barrier_level = params['H']
+            fig.add_vline(x=barrier_level, line_dash="dashdot", line_color="orange",
+                         annotation_text=f"Barrier", row=1, col=1)
         
-        # Volatility sensitivity (continuous smooth line)
+        # Volatility sensitivity
         fig.add_trace(
             go.Scatter(x=vol_range, y=vol_prices, mode='lines', name='Price vs Vol',
                       line=dict(color='green', width=3)),
@@ -1055,7 +1118,7 @@ def create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, optio
         )
         fig.add_vline(x=sigma, line_dash="dash", line_color="red", annotation_text="Current Vol", row=1, col=2)
         
-        # Time sensitivity (continuous smooth line)
+        # Time sensitivity
         fig.add_trace(
             go.Scatter(x=time_range, y=time_prices, mode='lines', name='Price vs Time',
                       line=dict(color='purple', width=3)),
@@ -1063,25 +1126,29 @@ def create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, optio
         )
         fig.add_vline(x=T, line_dash="dash", line_color="red", annotation_text="Current T", row=2, col=1)
         
-        # Parameters table
-        param_data = [
-            ["Parameter", "Value"],
-            ["Option Type", option_family.title()],
-            ["Call/Put", option_type.title()],
-            ["Current Spot", f"${K:.2f}"],
-            ["Volatility", f"{sigma:.1%}"],
-            ["Time to Expiry", f"{T:.2f} years"]
-        ]
-        
-        # Add option-specific parameters
+        # Parameters and performance table
         if option_family == "barrier":
-            param_data.append(["Barrier Level", f"${params.get('H', K*1.2):.2f}"])
-            param_data.append(["Payout Style", params.get('payout_style', 'cash').title()])
-        elif option_family == "digital":
-            param_data.append(["Digital Style", params.get('style', 'cash').title()])
-            param_data.append(["Payout Amount", f"${params.get('Q', 1.0):.2f}"])
-        elif option_family == "asian":
-            param_data.append(["Asian Type", params.get('asian_type', 'average_price').replace('_', ' ').title()])
+            param_data = [
+                ["Parameter", "Value"],
+                ["Option Type", f"{option_family.title()} (Optimized)"],
+                ["Barrier Type", params.get('barrier_type', 'up-and-out')],
+                ["Barrier Level", f"${params.get('H', K*1.2):.2f}"],
+                ["Payout Style", params.get('payout_style', 'cash').title()],
+                ["MC Simulations", f"{fast_params.get('n_sims', 150)} (fast mode)"],
+                ["Time Steps", f"{fast_params.get('n_steps', 25)} (fast mode)"],
+                ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
+                ["Performance", "🚀 Optimized for speed"]
+            ]
+        else:
+            param_data = [
+                ["Parameter", "Value"],
+                ["Option Type", option_family.title()],
+                ["Call/Put", option_type.title()],
+                ["Current Spot", f"${K:.2f}"],
+                ["Volatility", f"{sigma:.1%}"],
+                ["Time to Expiry", f"{T:.2f} years"],
+                ["Performance", "✅ Standard speed"]
+            ]
         
         fig.add_trace(
             go.Table(
@@ -1092,7 +1159,7 @@ def create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, optio
         )
         
         fig.update_layout(
-            title=f"Continuous Price Sensitivity Analysis - {option_family.title()} Option",
+            title=f"Optimized Price Sensitivity Analysis - {option_family.title()} Option",
             height=700,
             showlegend=False
         )
@@ -1103,10 +1170,55 @@ def create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, optio
         # Return simple fallback figure
         fig = go.Figure()
         fig.add_annotation(
-            text=f"Sensitivity analysis temporarily unavailable: {str(e)}",
+            text=f"Sensitivity analysis error: {str(e)}",
             xref="paper", yref="paper", x=0.5, y=0.5, showarrow=False
         )
         return fig
+
+
+def calculate_option_price_single_fast(option_family, S, K, T, r, sigma, option_type, params):
+    """Fast version of option price calculation with reduced Monte Carlo paths"""
+    try:
+        if option_family == "barrier":
+            # PERFORMANCE FIX: Use fast parameters for sensitivity analysis
+            H = params.get('H', S*1.2)
+            barrier_type = params.get('barrier_type', 'up-and-out')
+            n_sims = params.get('n_sims', 150)  # Much fewer simulations
+            n_steps = params.get('n_steps', 25)  # Fewer time steps
+            rebate = params.get('rebate', 0.0)
+            
+            # Import the barrier pricing function
+            from pricing.barrier_option import price_barrier_option
+            
+            price, _ = price_barrier_option(
+                S, K, H, T, r, sigma, option_type, barrier_type, 
+                "monte_carlo", n_sims, n_steps, rebate
+            )
+            return price
+            
+        else:
+            # For other options, use standard calculation (they're already fast)
+            return calculate_option_price_single(option_family, S, K, T, r, sigma, option_type, params)
+            
+    except Exception as e:
+        # Enhanced fallback with barrier-specific logic
+        from scipy.stats import norm
+        d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
+        d2 = d1 - sigma*np.sqrt(T)
+        
+        if option_type == "call":
+            vanilla = S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
+        else:
+            vanilla = K*np.exp(-r*T)*norm.cdf(-d2) - S*norm.cdf(-d1)
+        
+        # Apply barrier discount factor
+        if option_family == "barrier":
+            barrier_discount = 0.7 if "out" in params.get('barrier_type', '') else 0.4
+            return vanilla * barrier_discount
+        else:
+            return vanilla
+
+
 
 def calculate_option_price_single(option_family, S, K, T, r, sigma, option_type, params):
     """Calculate single option price with enhanced error handling"""
