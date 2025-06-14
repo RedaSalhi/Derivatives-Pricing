@@ -826,8 +826,6 @@ with st.container():
         thetas_call.append(tc)
     
     # Create subplots for Greeks
-    from plotly.subplots import make_subplots
-    
     fig_greeks = make_subplots(
         rows=2, cols=2,
         subplot_titles=('Delta', 'Gamma', 'Vega', 'Theta'),
@@ -1402,7 +1400,334 @@ with st.container():
         st.dataframe(stress_df, use_container_width=True)
         
         # Stress test visualization
-        pnl_values = [float(row['P&L'].replace('
+        try:
+            pnl_values = [float(row['P&L'].replace('$', '').replace(',', '')) for row in stress_results]
+            scenario_names = [row['Scenario'] for row in stress_results]
+            
+            fig_stress = go.Figure(data=[
+                go.Bar(x=scenario_names, y=pnl_values,
+                      marker_color=['#38a169' if x > 0 else '#e53e3e' for x in pnl_values])
+            ])
+            
+            fig_stress.update_layout(
+                title='Stress Test Results',
+                xaxis_title='Scenario',
+                yaxis_title='P&L ($)',
+                template="plotly_white",
+                height=400,
+                xaxis={'tickangle': 45}
+            )
+            
+            st.plotly_chart(fig_stress, use_container_width=True)
+        except:
+            st.error("Error creating stress test visualization")
+    
+    with risk_tab3:
+        st.markdown("### Time Decay Analysis")
+        st.markdown("Watch how your options lose value over time.")
+        
+        # Time decay analysis
+        days_to_analyze = st.slider("Days to Analyze", 1, 180, 30)
+        
+        time_points = np.linspace(time_to_maturity, 0.01, days_to_analyze)
+        call_values_time = []
+        put_values_time = []
+        
+        for T_remaining in time_points:
+            call_val = OptionPricer.black_scholes_call(spot_price, strike_price, T_remaining, risk_free_rate, volatility)
+            put_val = OptionPricer.black_scholes_put(spot_price, strike_price, T_remaining, risk_free_rate, volatility)
+            call_values_time.append(call_val)
+            put_values_time.append(put_val)
+        
+        days_remaining = [T * 365 for T in time_points]
+        
+        fig_time_decay = go.Figure()
+        fig_time_decay.add_trace(go.Scatter(x=days_remaining, y=call_values_time, name='Call Value',
+                                          line=dict(color='#38a169', width=3)))
+        fig_time_decay.add_trace(go.Scatter(x=days_remaining, y=put_values_time, name='Put Value',
+                                          line=dict(color='#e53e3e', width=3)))
+        
+        current_days = time_to_maturity * 365
+        fig_time_decay.add_vline(x=current_days, line_dash="dash", line_color="#3182ce", 
+                               annotation_text=f"Current: {current_days:.0f} days")
+        
+        fig_time_decay.update_layout(
+            title='Option Value vs Time to Expiration',
+            xaxis_title='Days to Expiration',
+            yaxis_title='Option Value ($)',
+            template="plotly_white",
+            height=400
+        )
+        
+        st.plotly_chart(fig_time_decay, use_container_width=True)
+        
+        # Weekly theta impact
+        weeks_ahead = min(8, int(time_to_maturity * 52))
+        weekly_decay = []
+        
+        for week in range(weeks_ahead + 1):
+            T_week = max(0.01, time_to_maturity - week/52)
+            if "Call" in position_type:
+                week_value = OptionPricer.black_scholes_call(spot_price, strike_price, T_week, risk_free_rate, volatility)
+                current_value = call_price
+            else:
+                week_value = OptionPricer.black_scholes_put(spot_price, strike_price, T_week, risk_free_rate, volatility)
+                current_value = put_price
+            
+            decay_amount = (current_value - week_value) * position_size
+            if "Short" in position_type:
+                decay_amount *= -1
+            
+            weekly_decay.append(decay_amount)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### Weekly Time Decay Impact")
+            for i, decay in enumerate(weekly_decay[:4]):
+                if decay >= 0:
+                    st.markdown(f"**Week {i+1}:** <span style='color: #38a169'>+${decay:.0f}</span>", unsafe_allow_html=True)
+                else:
+                    st.markdown(f"**Week {i+1}:** <span style='color: #e53e3e'>${decay:.0f}</span>", unsafe_allow_html=True)
+        
+        with col2:
+            if len(weekly_decay) > 4:
+                st.markdown("#### Extended Decay")
+                for i, decay in enumerate(weekly_decay[4:8]):
+                    week_num = i + 5
+                    if decay >= 0:
+                        st.markdown(f"**Week {week_num}:** <span style='color: #38a169'>+${decay:.0f}</span>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"**Week {week_num}:** <span style='color: #e53e3e'>${decay:.0f}</span>", unsafe_allow_html=True)
+
+# ----------------------
+# Advanced Calculator
+# ----------------------
+with st.container():
+    st.markdown("""
+    <div class="portfolio-box">
+        <div class="section-title">🧮 Advanced Options Calculator</div>
+        <div class="content-text">
+            Professional tools for complex options analysis and what-if scenarios.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    calc_tab1, calc_tab2, calc_tab3 = st.tabs(["🎯 Breakeven Analysis", "💰 Profit Target Tool", "⚡ Quick Comparisons"])
+    
+    with calc_tab1:
+        st.markdown("### Breakeven Analysis")
+        st.markdown("Find the exact price levels where your position breaks even.")
+        
+        selected_strategy = st.selectbox("Select Strategy for Analysis", 
+                                       ["Long Call", "Long Put", "Bull Call Spread", "Straddle"])
+        
+        if selected_strategy == "Long Call":
+            breakeven = strike_price + call_price
+            st.markdown(f"""
+            <div class="success-box">
+                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
+                Your long call breaks even when the stock reaches ${breakeven:.2f} at expiration.<br>
+                That's a {((breakeven/spot_price - 1)*100):+.1f}% move from current price.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        elif selected_strategy == "Long Put":
+            breakeven = strike_price - put_price
+            st.markdown(f"""
+            <div class="success-box">
+                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
+                Your long put breaks even when the stock falls to ${breakeven:.2f} at expiration.<br>
+                That's a {((breakeven/spot_price - 1)*100):+.1f}% move from current price.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        elif selected_strategy == "Bull Call Spread":
+            K1 = strike_price - 5
+            K2 = strike_price + 5
+            spread_cost = OptionsStrategy.bull_call_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
+            breakeven = K1 + spread_cost
+            st.markdown(f"""
+            <div class="success-box">
+                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
+                Your bull call spread (${K1}-${K2}) breaks even when the stock reaches ${breakeven:.2f}.<br>
+                Maximum profit of ${K2-K1-spread_cost:.2f} achieved above ${K2}.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        else:  # Straddle
+            straddle_cost = call_price + put_price
+            breakeven_up = strike_price + straddle_cost
+            breakeven_down = strike_price - straddle_cost
+            st.markdown(f"""
+            <div class="success-box">
+                <strong>Breakeven Prices: ${breakeven_down:.2f} and ${breakeven_up:.2f}</strong><br>
+                Your straddle breaks even when the stock moves to either ${breakeven_down:.2f} or ${breakeven_up:.2f}.<br>
+                Required move: {((straddle_cost/spot_price)*100):.1f}% in either direction.
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with calc_tab2:
+        st.markdown("### Profit Target Calculator")
+        st.markdown("Set a profit target and see what needs to happen to achieve it.")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            target_profit = st.number_input("Target Profit ($)", min_value=10, value=500, step=50)
+            target_option = st.selectbox("Option to Analyze", ["Call", "Put"])
+        
+        with col2:
+            target_timeframe = st.selectbox("Time Frame", ["1 week", "2 weeks", "1 month", "At expiration"])
+        
+        # Calculate required stock price for target profit
+        time_mapping = {"1 week": 1/52, "2 weeks": 2/52, "1 month": 1/12, "At expiration": 0.01}
+        target_time = time_to_maturity - time_mapping[target_timeframe]
+        target_time = max(0.01, target_time)
+        
+        current_option_price = call_price if target_option == "Call" else put_price
+        target_option_price = current_option_price + target_profit
+        
+        # Binary search for required stock price
+        def find_required_price(target_price, option_type, K, T, r, sigma, is_call=True):
+            def price_difference(S):
+                if is_call:
+                    calculated_price = OptionPricer.black_scholes_call(S, K, T, r, sigma)
+                else:
+                    calculated_price = OptionPricer.black_scholes_put(S, K, T, r, sigma)
+                return calculated_price - target_price
+            
+            try:
+                if is_call:
+                    # For calls, price increases with spot price
+                    required_S = brentq(price_difference, 1.0, 1000.0)
+                else:
+                    # For puts, price decreases with spot price  
+                    required_S = brentq(price_difference, 1.0, 1000.0)
+                return required_S
+            except ValueError:
+                return None
+        
+        required_price = find_required_price(target_option_price, target_option, strike_price, 
+                                           target_time, risk_free_rate, volatility, target_option == "Call")
+        
+        if required_price:
+            price_change = (required_price / spot_price - 1) * 100
+            st.markdown(f"""
+            <div class="info-box">
+                <strong>Required Stock Price: ${required_price:.2f}</strong><br>
+                To achieve ${target_profit} profit on your {target_option.lower()} option in {target_timeframe},<br>
+                the stock needs to move to ${required_price:.2f} ({price_change:+.1f}% change).
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="warning-box">
+                <strong>Target may not be achievable</strong><br>
+                The profit target might be too high for the given timeframe and option.
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with calc_tab3:
+        st.markdown("### Quick Strategy Comparisons")
+        st.markdown("Compare different strategies side by side.")
+        
+        # Strategy comparison
+        strategies_to_compare = st.multiselect(
+            "Select strategies to compare:",
+            ["Long Call", "Long Put", "Bull Call Spread", "Bear Put Spread", "Straddle", "Strangle"],
+            default=["Long Call", "Long Put"]
+        )
+        
+        if len(strategies_to_compare) >= 2:
+            comparison_data = []
+            
+            for strategy in strategies_to_compare:
+                if strategy == "Long Call":
+                    cost = call_price
+                    max_profit = "Unlimited"
+                    max_loss = call_price
+                    breakeven = strike_price + call_price
+                    
+                elif strategy == "Long Put":
+                    cost = put_price
+                    max_profit = strike_price - put_price
+                    max_loss = put_price
+                    breakeven = strike_price - put_price
+                    
+                elif strategy == "Bull Call Spread":
+                    K1, K2 = strike_price - 5, strike_price + 5
+                    cost = OptionsStrategy.bull_call_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
+                    max_profit = (K2 - K1) - cost
+                    max_loss = cost
+                    breakeven = K1 + cost
+                    
+                elif strategy == "Bear Put Spread":
+                    K1, K2 = strike_price - 5, strike_price + 5
+                    cost = OptionsStrategy.bear_put_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
+                    max_profit = (K2 - K1) - cost
+                    max_loss = cost
+                    breakeven = K2 - cost
+                    
+                elif strategy == "Straddle":
+                    cost = call_price + put_price
+                    max_profit = "Unlimited"
+                    max_loss = cost
+                    breakeven = f"${strike_price - cost:.2f} / ${strike_price + cost:.2f}"
+                    
+                else:  # Strangle
+                    K1, K2 = strike_price - 10, strike_price + 10
+                    cost = OptionsStrategy.strangle(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
+                    max_profit = "Unlimited"
+                    max_loss = cost
+                    breakeven = f"${K1 - cost:.2f} / ${K2 + cost:.2f}"
+                
+                comparison_data.append({
+                    'Strategy': strategy,
+                    'Cost': f"${cost:.2f}",
+                    'Max Profit': max_profit if isinstance(max_profit, str) else f"${max_profit:.2f}",
+                    'Max Loss': f"${max_loss:.2f}",
+                    'Breakeven': breakeven if isinstance(breakeven, str) else f"${breakeven:.2f}",
+                })
+            
+            comparison_df = pd.DataFrame(comparison_data)
+            st.dataframe(comparison_df, use_container_width=True)
+            
+            # Quick visual comparison of costs
+            costs = []
+            strategy_names = []
+            for strategy in strategies_to_compare:
+                if strategy == "Long Call":
+                    costs.append(call_price)
+                elif strategy == "Long Put":
+                    costs.append(put_price)
+                elif strategy == "Bull Call Spread":
+                    cost_val = OptionsStrategy.bull_call_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility)
+                    costs.append(cost_val)
+                elif strategy == "Bear Put Spread":
+                    cost_val = OptionsStrategy.bear_put_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility)
+                    costs.append(cost_val)
+                elif strategy == "Straddle":
+                    costs.append(call_price + put_price)
+                else:  # Strangle
+                    cost_val = OptionsStrategy.strangle(spot_price, strike_price-10, strike_price+10, time_to_maturity, risk_free_rate, volatility)
+                    costs.append(cost_val)
+                strategy_names.append(strategy)
+            
+            fig_comparison = go.Figure(data=[
+                go.Bar(x=strategy_names, y=costs, marker_color='#3182ce')
+            ])
+            
+            fig_comparison.update_layout(
+                title='Strategy Cost Comparison',
+                xaxis_title='Strategy',
+                yaxis_title='Initial Cost ($)',
+                template="plotly_white",
+                height=300,
+                xaxis={'tickangle': 45}
+            )
+            
+            st.plotly_chart(fig_comparison, use_container_width=True)
 
 # ----------------------
 # Educational Hub
@@ -1865,411 +2190,6 @@ with st.container():
                     This requires path monitoring - impossible with standard Black-Scholes.
                 </div>
                 """, unsafe_allow_html=True)
-
-# ----------------------
-# Footer
-# ----------------------
-with st.container():
-    st.markdown("""
-    <div class="footer-section">
-        <div style="font-size: 1.4rem; font-weight: 600; margin-bottom: 1rem; color: #1a365d;">
-            Quantitative Finance Platform
-        </div>
-        <div style="color: #4a5568; font-style: italic; margin-bottom: 1rem;">
-            Professional-Grade Derivatives Pricing & Risk Management
-        </div>
-        <div style="color: #718096; font-size: 0.9rem;">
-            © 2025 | SALHI Reda | Financial Engineering Research | Advanced Analytics Suite
-        </div>
-        <div style="margin-top: 1rem; color: #718096; font-size: 0.8rem;">
-            <strong>Disclaimer:</strong> This platform is for educational and research purposes. 
-            All models are theoretical and should not be used for actual trading without proper validation.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Add some spacing at the bottom
-st.markdown("<br><br>", unsafe_allow_html=True)
-, '').replace(',', '')) for row in stress_results]
-        scenario_names = [row['Scenario'] for row in stress_results]
-        
-        fig_stress = go.Figure(data=[
-            go.Bar(x=scenario_names, y=pnl_values,
-                  marker_color=['#38a169' if x > 0 else '#e53e3e' for x in pnl_values])
-        ])
-        
-        fig_stress.update_layout(
-            title='Stress Test Results',
-            xaxis_title='Scenario',
-            yaxis_title='P&L ($)',
-            template="plotly_white",
-            height=400,
-            xaxis={'tickangle': 45}
-        )
-        
-        st.plotly_chart(fig_stress, use_container_width=True)
-    
-    with risk_tab3:
-        st.markdown("### Time Decay Analysis")
-        st.markdown("Watch how your options lose value over time.")
-        
-        # Time decay analysis
-        days_to_analyze = st.slider("Days to Analyze", 1, 180, 30)
-        
-        time_points = np.linspace(time_to_maturity, 0.01, days_to_analyze)
-        call_values_time = []
-        put_values_time = []
-        
-        for T_remaining in time_points:
-            call_val = OptionPricer.black_scholes_call(spot_price, strike_price, T_remaining, risk_free_rate, volatility)
-            put_val = OptionPricer.black_scholes_put(spot_price, strike_price, T_remaining, risk_free_rate, volatility)
-            call_values_time.append(call_val)
-            put_values_time.append(put_val)
-        
-        days_remaining = [T * 365 for T in time_points]
-        
-        fig_time_decay = go.Figure()
-        fig_time_decay.add_trace(go.Scatter(x=days_remaining, y=call_values_time, name='Call Value',
-                                          line=dict(color='#38a169', width=3)))
-        fig_time_decay.add_trace(go.Scatter(x=days_remaining, y=put_values_time, name='Put Value',
-                                          line=dict(color='#e53e3e', width=3)))
-        
-        current_days = time_to_maturity * 365
-        fig_time_decay.add_vline(x=current_days, line_dash="dash", line_color="#3182ce", 
-                               annotation_text=f"Current: {current_days:.0f} days")
-        
-        fig_time_decay.update_layout(
-            title='Option Value vs Time to Expiration',
-            xaxis_title='Days to Expiration',
-            yaxis_title='Option Value ($)',
-            template="plotly_white",
-            height=400
-        )
-        
-        st.plotly_chart(fig_time_decay, use_container_width=True)
-        
-        # Weekly theta impact
-        weeks_ahead = min(8, int(time_to_maturity * 52))
-        weekly_decay = []
-        
-        for week in range(weeks_ahead + 1):
-            T_week = max(0.01, time_to_maturity - week/52)
-            if "Call" in position_type:
-                week_value = OptionPricer.black_scholes_call(spot_price, strike_price, T_week, risk_free_rate, volatility)
-                current_value = call_price
-            else:
-                week_value = OptionPricer.black_scholes_put(spot_price, strike_price, T_week, risk_free_rate, volatility)
-                current_value = put_price
-            
-            decay_amount = (current_value - week_value) * position_size
-            if "Short" in position_type:
-                decay_amount *= -1
-            
-            weekly_decay.append(decay_amount)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("#### Weekly Time Decay Impact")
-            for i, decay in enumerate(weekly_decay[:4]):
-                if decay >= 0:
-                    st.markdown(f"**Week {i+1}:** <span style='color: #38a169'>+${decay:.0f}</span>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"**Week {i+1}:** <span style='color: #e53e3e'>${decay:.0f}</span>", unsafe_allow_html=True)
-        
-        with col2:
-            if len(weekly_decay) > 4:
-                st.markdown("#### Extended Decay")
-                for i, decay in enumerate(weekly_decay[4:8]):
-                    week_num = i + 5
-                    if decay >= 0:
-                        st.markdown(f"**Week {week_num}:** <span style='color: #38a169'>+${decay:.0f}</span>", unsafe_allow_html=True)
-                    else:
-                        st.markdown(f"**Week {week_num}:** <span style='color: #e53e3e'>${decay:.0f}</span>", unsafe_allow_html=True)
-
-# ----------------------
-# Advanced Calculator
-# ----------------------
-with st.container():
-    st.markdown("""
-    <div class="portfolio-box">
-        <div class="section-title">🧮 Advanced Options Calculator</div>
-        <div class="content-text">
-            Professional tools for complex options analysis and what-if scenarios.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    calc_tab1, calc_tab2, calc_tab3 = st.tabs(["🎯 Breakeven Analysis", "💰 Profit Target Tool", "⚡ Quick Comparisons"])
-    
-    with calc_tab1:
-        st.markdown("### Breakeven Analysis")
-        st.markdown("Find the exact price levels where your position breaks even.")
-        
-        selected_strategy = st.selectbox("Select Strategy for Analysis", 
-                                       ["Long Call", "Long Put", "Bull Call Spread", "Straddle"])
-        
-        if selected_strategy == "Long Call":
-            breakeven = strike_price + call_price
-            st.markdown(f"""
-            <div class="success-box">
-                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
-                Your long call breaks even when the stock reaches ${breakeven:.2f} at expiration.<br>
-                That's a {((breakeven/spot_price - 1)*100):+.1f}% move from current price.
-            </div>
-            """, unsafe_allow_html=True)
-            
-        elif selected_strategy == "Long Put":
-            breakeven = strike_price - put_price
-            st.markdown(f"""
-            <div class="success-box">
-                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
-                Your long put breaks even when the stock falls to ${breakeven:.2f} at expiration.<br>
-                That's a {((breakeven/spot_price - 1)*100):+.1f}% move from current price.
-            </div>
-            """, unsafe_allow_html=True)
-            
-        elif selected_strategy == "Bull Call Spread":
-            K1 = strike_price - 5
-            K2 = strike_price + 5
-            spread_cost = OptionsStrategy.bull_call_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
-            breakeven = K1 + spread_cost
-            st.markdown(f"""
-            <div class="success-box">
-                <strong>Breakeven Price: ${breakeven:.2f}</strong><br>
-                Your bull call spread (${K1}-${K2}) breaks even when the stock reaches ${breakeven:.2f}.<br>
-                Maximum profit of ${K2-K1-spread_cost:.2f} achieved above ${K2}.
-            </div>
-            """, unsafe_allow_html=True)
-            
-        else:  # Straddle
-            straddle_cost = call_price + put_price
-            breakeven_up = strike_price + straddle_cost
-            breakeven_down = strike_price - straddle_cost
-            st.markdown(f"""
-            <div class="success-box">
-                <strong>Breakeven Prices: ${breakeven_down:.2f} and ${breakeven_up:.2f}</strong><br>
-                Your straddle breaks even when the stock moves to either ${breakeven_down:.2f} or ${breakeven_up:.2f}.<br>
-                Required move: {((straddle_cost/spot_price)*100):.1f}% in either direction.
-            </div>
-            """, unsafe_allow_html=True)
-    
-    with calc_tab2:
-        st.markdown("### Profit Target Calculator")
-        st.markdown("Set a profit target and see what needs to happen to achieve it.")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            target_profit = st.number_input("Target Profit ($)", min_value=10, value=500, step=50)
-            target_option = st.selectbox("Option to Analyze", ["Call", "Put"])
-        
-        with col2:
-            target_timeframe = st.selectbox("Time Frame", ["1 week", "2 weeks", "1 month", "At expiration"])
-        
-        # Calculate required stock price for target profit
-        time_mapping = {"1 week": 1/52, "2 weeks": 2/52, "1 month": 1/12, "At expiration": 0.01}
-        target_time = time_to_maturity - time_mapping[target_timeframe]
-        target_time = max(0.01, target_time)
-        
-        current_option_price = call_price if target_option == "Call" else put_price
-        target_option_price = current_option_price + target_profit
-        
-        # Binary search for required stock price
-        def find_required_price(target_price, option_type, K, T, r, sigma, is_call=True):
-            def price_difference(S):
-                if is_call:
-                    calculated_price = OptionPricer.black_scholes_call(S, K, T, r, sigma)
-                else:
-                    calculated_price = OptionPricer.black_scholes_put(S, K, T, r, sigma)
-                return calculated_price - target_price
-            
-            try:
-                if is_call:
-                    # For calls, price increases with spot price
-                    required_S = brentq(price_difference, 1.0, 1000.0)
-                else:
-                    # For puts, price decreases with spot price  
-                    required_S = brentq(price_difference, 1.0, 1000.0)
-                return required_S
-            except ValueError:
-                return None
-        
-        required_price = find_required_price(target_option_price, target_option, strike_price, 
-                                           target_time, risk_free_rate, volatility, target_option == "Call")
-        
-        if required_price:
-            price_change = (required_price / spot_price - 1) * 100
-            st.markdown(f"""
-            <div class="info-box">
-                <strong>Required Stock Price: ${required_price:.2f}</strong><br>
-                To achieve ${target_profit} profit on your {target_option.lower()} option in {target_timeframe},<br>
-                the stock needs to move to ${required_price:.2f} ({price_change:+.1f}% change).
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("""
-            <div class="warning-box">
-                <strong>Target may not be achievable</strong><br>
-                The profit target might be too high for the given timeframe and option.
-            </div>
-            """, unsafe_allow_html=True)
-    
-    with calc_tab3:
-        st.markdown("### Quick Strategy Comparisons")
-        st.markdown("Compare different strategies side by side.")
-        
-        # Strategy comparison
-        strategies_to_compare = st.multiselect(
-            "Select strategies to compare:",
-            ["Long Call", "Long Put", "Bull Call Spread", "Bear Put Spread", "Straddle", "Strangle"],
-            default=["Long Call", "Long Put"]
-        )
-        
-        if len(strategies_to_compare) >= 2:
-            comparison_data = []
-            
-            for strategy in strategies_to_compare:
-                if strategy == "Long Call":
-                    cost = call_price
-                    max_profit = "Unlimited"
-                    max_loss = call_price
-                    breakeven = strike_price + call_price
-                    
-                elif strategy == "Long Put":
-                    cost = put_price
-                    max_profit = strike_price - put_price
-                    max_loss = put_price
-                    breakeven = strike_price - put_price
-                    
-                elif strategy == "Bull Call Spread":
-                    K1, K2 = strike_price - 5, strike_price + 5
-                    cost = OptionsStrategy.bull_call_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
-                    max_profit = (K2 - K1) - cost
-                    max_loss = cost
-                    breakeven = K1 + cost
-                    
-                elif strategy == "Bear Put Spread":
-                    K1, K2 = strike_price - 5, strike_price + 5
-                    cost = OptionsStrategy.bear_put_spread(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
-                    max_profit = (K2 - K1) - cost
-                    max_loss = cost
-                    breakeven = K2 - cost
-                    
-                elif strategy == "Straddle":
-                    cost = call_price + put_price
-                    max_profit = "Unlimited"
-                    max_loss = cost
-                    breakeven = f"${strike_price - cost:.2f} / ${strike_price + cost:.2f}"
-                    
-                else:  # Strangle
-                    K1, K2 = strike_price - 10, strike_price + 10
-                    cost = OptionsStrategy.strangle(spot_price, K1, K2, time_to_maturity, risk_free_rate, volatility)
-                    max_profit = "Unlimited"
-                    max_loss = cost
-                    breakeven = f"${K1 - cost:.2f} / ${K2 + cost:.2f}"
-                
-                comparison_data.append({
-                    'Strategy': strategy,
-                    'Cost': f"${cost:.2f}",
-                    'Max Profit': max_profit if isinstance(max_profit, str) else f"${max_profit:.2f}",
-                    'Max Loss': f"${max_loss:.2f}",
-                    'Breakeven': breakeven if isinstance(breakeven, str) else f"${breakeven:.2f}",
-                })
-            
-            comparison_df = pd.DataFrame(comparison_data)
-            st.dataframe(comparison_df, use_container_width=True)
-            
-            # Quick visual comparison of costs
-            costs = []
-            strategy_names = []
-            for strategy in strategies_to_compare:
-                if strategy == "Long Call":
-                    costs.append(call_price)
-                elif strategy == "Long Put":
-                    costs.append(put_price)
-                elif strategy == "Bull Call Spread":
-                    cost_val = OptionsStrategy.bull_call_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility)
-                    costs.append(cost_val)
-                elif strategy == "Bear Put Spread":
-                    cost_val = OptionsStrategy.bear_put_spread(spot_price, strike_price-5, strike_price+5, time_to_maturity, risk_free_rate, volatility)
-                    costs.append(cost_val)
-                elif strategy == "Straddle":
-                    costs.append(call_price + put_price)
-                else:  # Strangle
-                    cost_val = OptionsStrategy.strangle(spot_price, strike_price-10, strike_price+10, time_to_maturity, risk_free_rate, volatility)
-                    costs.append(cost_val)
-                strategy_names.append(strategy)
-            
-            fig_comparison = go.Figure(data=[
-                go.Bar(x=strategy_names, y=costs, marker_color='#3182ce')
-            ])
-            
-            fig_comparison.update_layout(
-                title='Strategy Cost Comparison',
-                xaxis_title='Strategy',
-                yaxis_title='Initial Cost ($)',
-                template="plotly_white",
-                height=300,
-                xaxis={'tickangle': 45}
-            )
-            
-            st.plotly_chart(fig_comparison, use_container_width=True)
-
-# ----------------------
-# Risk-Neutral Framework
-# ----------------------
-with st.container():
-    st.markdown("""
-    <div class="risk-box">
-        <div class="section-title">⚖️ Risk-Neutral Valuation Framework</div>
-        <div class="content-text">
-            The mathematical foundation underlying all pricing models in this platform.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.latex(r'''
-    V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]
-    ''')
-    
-    st.markdown("""
-    <div class="info-box">
-        <strong>Key Principles:</strong>
-        <ul>
-            <li><strong>Risk-Neutral Measure (ℚ):</strong> Under this probability measure, all assets earn the risk-free rate</li>
-            <li><strong>Martingale Property:</strong> Discounted asset prices are martingales under ℚ</li>
-            <li><strong>No-Arbitrage:</strong> The fundamental assumption preventing risk-free profit opportunities</li>
-            <li><strong>Complete Markets:</strong> Any derivative can be replicated using the underlying and bonds</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Demonstrate risk-neutral vs real-world drift
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### Real-World Measure (ℙ)")
-        real_world_drift = st.slider("Expected Return (μ)", 0.05, 0.20, 0.12, 0.01)
-        st.latex(f'dS_t = {real_world_drift:.2f} \\cdot S_t dt + {volatility:.2f} \\cdot S_t dW_t^{{\\mathbb{{P}}}}')
-        
-        st.markdown("""
-        <div class="warning-box">
-            <strong>Note:</strong> Real-world probabilities incorporate risk premiums and investor preferences.
-            Options pricing under ℙ would require knowledge of market price of risk.
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("### Risk-Neutral Measure (ℚ)")
-                        st.latex(f'dS_t = {risk_free_rate:.2f} S_t dt + {volatility:.2f} S_t dW_t^{{\\mathbb{{Q}}}}')
-        
-        st.markdown("""
-        <div class="success-box">
-            <strong>Advantage:</strong> Risk-neutral valuation eliminates the need to estimate risk premiums,
-            making derivative pricing model-independent of investor risk preferences.
-        </div>
-        """, unsafe_allow_html=True)
 
 # ----------------------
 # Footer
