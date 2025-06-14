@@ -425,223 +425,223 @@ st.markdown('<div class="subtitle">Advanced Mathematical Models & Quantitative F
 # ----------------------
 # Objective Section
 # ----------------------
-    with st.container():
-        st.markdown("""
-        <div class="objective-box">
-            <div class="section-title">🎯 Objective</div>
-            <div class="content-text">
-                The <strong>Derivatives Pricing App</strong> is a comprehensive quantitative platform designed to bridge theoretical finance with practical implementation. Our mission is to democratize access to sophisticated financial modeling tools, enabling students, practitioners, and researchers to explore, understand, and visualize complex derivatives pricing mechanisms through interactive, real-time analysis.
-            </div>
-            <div class="highlight-box">
-                <strong>Key Features:</strong>
-                <ul>
-                    <li><strong>Real-time Pricing:</strong> Interactive parameter adjustment with instant recalculation</li>
-                    <li><strong>Multi-Model Framework:</strong> Black-Scholes, Binomial Trees, Monte Carlo, and more</li>
-                    <li><strong>Risk Analytics:</strong> Comprehensive Greeks calculation and sensitivity analysis</li>
-                    <li><strong>Strategy Builder:</strong> Complex multi-leg options strategies visualization</li>
-                </ul>
-            </div>
+with st.container():
+    st.markdown("""
+    <div class="objective-box">
+        <div class="section-title">🎯 Objective</div>
+        <div class="content-text">
+            The <strong>Derivatives Pricing App</strong> is a comprehensive quantitative platform designed to bridge theoretical finance with practical implementation. Our mission is to democratize access to sophisticated financial modeling tools, enabling students, practitioners, and researchers to explore, understand, and visualize complex derivatives pricing mechanisms through interactive, real-time analysis.
         </div>
-        """, unsafe_allow_html=True)
+        <div class="highlight-box">
+            <strong>Key Features:</strong>
+            <ul>
+                <li><strong>Real-time Pricing:</strong> Interactive parameter adjustment with instant recalculation</li>
+                <li><strong>Multi-Model Framework:</strong> Black-Scholes, Binomial Trees, Monte Carlo, and more</li>
+                <li><strong>Risk Analytics:</strong> Comprehensive Greeks calculation and sensitivity analysis</li>
+                <li><strong>Strategy Builder:</strong> Complex multi-leg options strategies visualization</li>
+            </ul>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ----------------------
 # Methodology Section with Interactive Demo
 # ----------------------
-    with st.container():
+with st.container():
+    st.markdown("""
+    <div class="methodology-box">
+        <div class="section-title">🔬 Methodology & Pricing Models</div>
+        <div class="content-text">
+            Our implementation follows rigorous mathematical foundations under the <strong>risk-neutral measure</strong> (ℚ), where the present value of any derivative represents the discounted expected payoff under risk-neutral probabilities:
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.latex(r'''
+    V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]
+    ''')
+    
+    # Interactive visualization of risk-neutral pricing
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        # Create payoff diagram
+        S_range = np.linspace(50, 150, 100)
+        call_payoffs = np.maximum(S_range - strike_price, 0)
+        put_payoffs = np.maximum(strike_price - S_range, 0)
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=S_range, y=call_payoffs, name='Call Payoff', line=dict(color='#28a745', width=3)))
+        fig.add_trace(go.Scatter(x=S_range, y=put_payoffs, name='Put Payoff', line=dict(color='#dc3545', width=3)))
+        fig.add_vline(x=spot_price, line_dash="dash", line_color="orange", annotation_text=f"S₀ = ${spot_price}")
+        
+        fig.update_layout(
+            title="Option Payoff Diagrams",
+            xaxis_title="Stock Price at Expiration",
+            yaxis_title="Payoff ($)",
+            template="plotly_white",
+            height=400
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
         st.markdown("""
-        <div class="methodology-box">
-            <div class="section-title">🔬 Methodology & Pricing Models</div>
+        <div class="metric-card">
+            <h4>Current Parameters</h4>
+            <p><strong>S₀:</strong> ${}</p>
+            <p><strong>K:</strong> ${}</p>
+            <p><strong>σ:</strong> {:.1%}</p>
+            <p><strong>T:</strong> {:.1f} years</p>
+            <p><strong>r:</strong> {:.1%}</p>
+        </div>
+        """.format(spot_price, strike_price, volatility, time_to_maturity, risk_free_rate), unsafe_allow_html=True)
+
+# ----------------------
+# Enhanced Models Section
+# ----------------------
+with st.container():
+    st.markdown("""
+    <div class="model-box">
+        <div class="section-title">⚙️ Pricing Models</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Tabbed interface for models
+    tab1, tab2, tab3 = st.tabs(["📊 Black-Scholes", "🌳 Binomial Trees", "🎲 Monte Carlo"])
+    
+    with tab1:
+        st.markdown("""
+        <div class="model-card">
+            <div class="subsection-title">Black–Scholes Model</div>
             <div class="content-text">
-                Our implementation follows rigorous mathematical foundations under the <strong>risk-neutral measure</strong> (ℚ), where the present value of any derivative represents the discounted expected payoff under risk-neutral probabilities:
+                The cornerstone of modern derivatives pricing, assuming geometric Brownian motion with constant parameters.
+                <br><br>
+                <strong>Key Assumptions:</strong>
+                <ul>
+                    <li>Constant volatility and risk-free rate</li>
+                    <li>No dividends, transaction costs, or liquidity constraints</li>
+                    <li>Continuous trading and perfect market efficiency</li>
+                    <li>Log-normal distribution of asset prices</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("**European Call Option Price:**")
+        st.latex(r'''
+        C = S_0 N(d_1) - K e^{-rT} N(d_2)
+        ''')
+        
+        st.markdown("**Where:**")
+        st.latex(r'''
+        d_1 = \frac{\ln\left(\frac{S_0}{K}\right) + \left( r + \frac{1}{2}\sigma^2 \right) T}{\sigma \sqrt{T}}, \quad
+        d_2 = d_1 - \sigma \sqrt{T}
+        ''')
+        
+        # Real-time calculation display
+        d1 = (np.log(spot_price/strike_price) + (risk_free_rate + 0.5*volatility**2)*time_to_maturity) / (volatility*np.sqrt(time_to_maturity))
+        d2 = d1 - volatility*np.sqrt(time_to_maturity)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("d₁", f"{d1:.4f}")
+        with col2:
+            st.metric("d₂", f"{d2:.4f}")
+        with col3:
+            st.metric("Call Price", f"${bs_price:.2f}")
+
+    with tab2:
+        st.markdown("""
+        <div class="model-card">
+            <div class="subsection-title">Binomial Tree Model</div>
+            <div class="content-text">
+                Discrete-time lattice model providing intuitive understanding of option pricing dynamics.
+                <br><br>
+                <strong>Model Parameters:</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        n_steps = st.slider("Number of Steps", 5, 50, 20)
+        dt = time_to_maturity / n_steps
+        u = np.exp(volatility * np.sqrt(dt))
+        d = 1 / u
+        p = (np.exp(risk_free_rate * dt) - d) / (u - d)
+        
+        st.latex(f'''
+        u = e^{{\sigma \sqrt{{\Delta t}}}} = {u:.4f}, \quad
+        d = \\frac{{1}}{{u}} = {d:.4f}, \quad
+        p = \\frac{{e^{{r \Delta t}} - d}}{{u - d}} = {p:.4f}
+        ''')
+        
+        # Binomial tree visualization (simplified)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Up Factor (u)", f"{u:.4f}")
+        with col2:
+            st.metric("Down Factor (d)", f"{d:.4f}")
+        with col3:
+            st.metric("Risk-Neutral Prob (p)", f"{p:.4f}")
+
+    with tab3:
+        st.markdown("""
+        <div class="model-card">
+            <div class="subsection-title">Monte Carlo Simulation</div>
+            <div class="content-text">
+                Stochastic simulation method ideal for path-dependent and complex derivatives.
+                <br><br>
+                <strong>Simulation Process:</strong>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
         st.latex(r'''
-        V(t) = \mathbb{E}^{\mathbb{Q}}\left[ e^{-r(T - t)} \cdot \text{Payoff}(S_T) \mid \mathcal{F}_t \right]
+        S_{t+\Delta t} = S_t \cdot \exp\left( \left( r - \frac{1}{2}\sigma^2 \right)\Delta t + \sigma \sqrt{\Delta t} \cdot Z \right)
         ''')
         
-        # Interactive visualization of risk-neutral pricing
-        col1, col2 = st.columns([2, 1])
+        st.markdown("where $Z \\sim \\mathcal{N}(0,1)$")
         
-        with col1:
-            # Create payoff diagram
-            S_range = np.linspace(50, 150, 100)
-            call_payoffs = np.maximum(S_range - strike_price, 0)
-            put_payoffs = np.maximum(strike_price - S_range, 0)
-            
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=S_range, y=call_payoffs, name='Call Payoff', line=dict(color='#28a745', width=3)))
-            fig.add_trace(go.Scatter(x=S_range, y=put_payoffs, name='Put Payoff', line=dict(color='#dc3545', width=3)))
-            fig.add_vline(x=spot_price, line_dash="dash", line_color="orange", annotation_text=f"S₀ = ${spot_price}")
-            
-            fig.update_layout(
-                title="Option Payoff Diagrams",
-                xaxis_title="Stock Price at Expiration",
-                yaxis_title="Payoff ($)",
-                template="plotly_white",
-                height=400
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
+        n_simulations = st.slider("Number of Simulations", 1000, 10000, 5000, 1000)
+        n_time_steps = st.slider("Time Steps", 50, 252, 100)
         
-        with col2:
-            st.markdown("""
-            <div class="metric-card">
-                <h4>Current Parameters</h4>
-                <p><strong>S₀:</strong> ${}</p>
-                <p><strong>K:</strong> ${}</p>
-                <p><strong>σ:</strong> {:.1%}</p>
-                <p><strong>T:</strong> {:.1f} years</p>
-                <p><strong>r:</strong> {:.1%}</p>
-            </div>
-            """.format(spot_price, strike_price, volatility, time_to_maturity, risk_free_rate), unsafe_allow_html=True)
-
-# ----------------------
-# Enhanced Models Section
-# ----------------------
-    with st.container():
-        st.markdown("""
-        <div class="model-box">
-            <div class="section-title">⚙️ Pricing Models</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Tabbed interface for models
-        tab1, tab2, tab3 = st.tabs(["📊 Black-Scholes", "🌳 Binomial Trees", "🎲 Monte Carlo"])
+        # Monte Carlo demonstration
+        np.random.seed(42)
+        dt_mc = time_to_maturity / n_time_steps
         
-        with tab1:
-            st.markdown("""
-            <div class="model-card">
-                <div class="subsection-title">Black–Scholes Model</div>
-                <div class="content-text">
-                    The cornerstone of modern derivatives pricing, assuming geometric Brownian motion with constant parameters.
-                    <br><br>
-                    <strong>Key Assumptions:</strong>
-                    <ul>
-                        <li>Constant volatility and risk-free rate</li>
-                        <li>No dividends, transaction costs, or liquidity constraints</li>
-                        <li>Continuous trading and perfect market efficiency</li>
-                        <li>Log-normal distribution of asset prices</li>
-                    </ul>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("**European Call Option Price:**")
-            st.latex(r'''
-            C = S_0 N(d_1) - K e^{-rT} N(d_2)
-            ''')
-            
-            st.markdown("**Where:**")
-            st.latex(r'''
-            d_1 = \frac{\ln\left(\frac{S_0}{K}\right) + \left( r + \frac{1}{2}\sigma^2 \right) T}{\sigma \sqrt{T}}, \quad
-            d_2 = d_1 - \sigma \sqrt{T}
-            ''')
-            
-            # Real-time calculation display
-            d1 = (np.log(spot_price/strike_price) + (risk_free_rate + 0.5*volatility**2)*time_to_maturity) / (volatility*np.sqrt(time_to_maturity))
-            d2 = d1 - volatility*np.sqrt(time_to_maturity)
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("d₁", f"{d1:.4f}")
-            with col2:
-                st.metric("d₂", f"{d2:.4f}")
-            with col3:
-                st.metric("Call Price", f"${bs_price:.2f}")
-
-        with tab2:
-            st.markdown("""
-            <div class="model-card">
-                <div class="subsection-title">Binomial Tree Model</div>
-                <div class="content-text">
-                    Discrete-time lattice model providing intuitive understanding of option pricing dynamics.
-                    <br><br>
-                    <strong>Model Parameters:</strong>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            n_steps = st.slider("Number of Steps", 5, 50, 20)
-            dt = time_to_maturity / n_steps
-            u = np.exp(volatility * np.sqrt(dt))
-            d = 1 / u
-            p = (np.exp(risk_free_rate * dt) - d) / (u - d)
-            
-            st.latex(f'''
-            u = e^{{\sigma \sqrt{{\Delta t}}}} = {u:.4f}, \quad
-            d = \\frac{{1}}{{u}} = {d:.4f}, \quad
-            p = \\frac{{e^{{r \Delta t}} - d}}{{u - d}} = {p:.4f}
-            ''')
-            
-            # Binomial tree visualization (simplified)
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Up Factor (u)", f"{u:.4f}")
-            with col2:
-                st.metric("Down Factor (d)", f"{d:.4f}")
-            with col3:
-                st.metric("Risk-Neutral Prob (p)", f"{p:.4f}")
-
-        with tab3:
-            st.markdown("""
-            <div class="model-card">
-                <div class="subsection-title">Monte Carlo Simulation</div>
-                <div class="content-text">
-                    Stochastic simulation method ideal for path-dependent and complex derivatives.
-                    <br><br>
-                    <strong>Simulation Process:</strong>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.latex(r'''
-            S_{t+\Delta t} = S_t \cdot \exp\left( \left( r - \frac{1}{2}\sigma^2 \right)\Delta t + \sigma \sqrt{\Delta t} \cdot Z \right)
-            ''')
-            
-            st.markdown("where $Z \\sim \\mathcal{N}(0,1)$")
-            
-            n_simulations = st.slider("Number of Simulations", 1000, 10000, 5000, 1000)
-            n_time_steps = st.slider("Time Steps", 50, 252, 100)
-            
-            # Monte Carlo demonstration
-            np.random.seed(42)
-            dt_mc = time_to_maturity / n_time_steps
-            
-            # Generate sample paths
-            sample_paths = 5  # Show just a few paths for visualization
-            paths = np.zeros((n_time_steps + 1, sample_paths))
-            paths[0] = spot_price
-            
-            for i in range(sample_paths):
-                for t in range(1, n_time_steps + 1):
-                    z = np.random.normal()
-                    paths[t, i] = paths[t-1, i] * np.exp((risk_free_rate - 0.5*volatility**2)*dt_mc + volatility*np.sqrt(dt_mc)*z)
-            
-            # Plot sample paths
-            fig_mc = go.Figure()
-            time_axis = np.linspace(0, time_to_maturity, n_time_steps + 1)
-            
-            for i in range(sample_paths):
-                fig_mc.add_trace(go.Scatter(x=time_axis, y=paths[:, i], 
-                                           name=f'Path {i+1}', 
-                                           line=dict(width=2),
-                                           opacity=0.7))
-            
-            fig_mc.add_hline(y=strike_price, line_dash="dash", line_color="red", 
-                            annotation_text=f"Strike = ${strike_price}")
-            
-            fig_mc.update_layout(
-                title="Sample Monte Carlo Paths",
-                xaxis_title="Time (Years)",
-                yaxis_title="Stock Price",
-                template="plotly_white",
-                height=400,
-                showlegend=True
-            )
-            
-            st.plotly_chart(fig_mc, use_container_width=True)
+        # Generate sample paths
+        sample_paths = 5  # Show just a few paths for visualization
+        paths = np.zeros((n_time_steps + 1, sample_paths))
+        paths[0] = spot_price
+        
+        for i in range(sample_paths):
+            for t in range(1, n_time_steps + 1):
+                z = np.random.normal()
+                paths[t, i] = paths[t-1, i] * np.exp((risk_free_rate - 0.5*volatility**2)*dt_mc + volatility*np.sqrt(dt_mc)*z)
+        
+        # Plot sample paths
+        fig_mc = go.Figure()
+        time_axis = np.linspace(0, time_to_maturity, n_time_steps + 1)
+        
+        for i in range(sample_paths):
+            fig_mc.add_trace(go.Scatter(x=time_axis, y=paths[:, i], 
+                                       name=f'Path {i+1}', 
+                                       line=dict(width=2),
+                                       opacity=0.7))
+        
+        fig_mc.add_hline(y=strike_price, line_dash="dash", line_color="red", 
+                        annotation_text=f"Strike = ${strike_price}")
+        
+        fig_mc.update_layout(
+            title="Sample Monte Carlo Paths",
+            xaxis_title="Time (Years)",
+            yaxis_title="Stock Price",
+            template="plotly_white",
+            height=400,
+            showlegend=True
+        )
+        
+        st.plotly_chart(fig_mc, use_container_width=True)
 
 if selected_section == "Overview" or selected_section == "Greeks":
     # ----------------------
