@@ -546,7 +546,7 @@ def _strategy_comparator():
             st.markdown(f"**{params_b['barrier_type'].replace('-', ' ').title()} call** (barrier at {params_b['barrier_multiple']:.0%}, {params_b['payout_style']} paying)")
             
         elif strategy_b == "Digital":
-            params_b['style'] = st.selectbox("Digital Style B", ["Cash", "Asset"], key="digital_style_b")
+            params_b['style'] = st.selectbox("Digital Style B", ["Cash", "Asset"], key="digital_style_b").lower()
             if params_b['style'] == "cash":
                 expr_b = st.text_input("Cash Expression B", value="1.0", key="cash_expr_b",
                                      help="Use S, K, r, sigma, T")
