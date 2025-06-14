@@ -485,7 +485,7 @@ st.markdown('<div class="main-header">Quantitative Finance Platform</div>', unsa
 st.markdown('<div class="subtitle">Advanced Derivatives Pricing & Risk Management System</div>', unsafe_allow_html=True)
 
 # Interactive parameter controls at the top
-st.markdown("## 🎛️ Interactive Controls")
+st.markdown("## Interactive Controls")
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
@@ -500,47 +500,10 @@ with col5:
     risk_free_rate = st.number_input("Risk-free Rate (r)", min_value=0.001, max_value=0.20, value=0.05, step=0.01, format="%.3f")
 
 # Quick metrics display
-st.markdown("### 📊 Quick Pricing Overview")
+st.markdown("### Quick Pricing Overview")
 call_price = OptionPricer.black_scholes_call(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
 put_price = OptionPricer.black_scholes_put(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
 delta_call, gamma, theta_call, vega, rho_call = OptionPricer.calculate_greeks(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility, 'call')
-
-col1, col2, col3, col4, col5 = st.columns(5)
-with col1:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h4>Call Price</h4>
-        <h3>${call_price:.2f}</h3>
-    </div>
-    """, unsafe_allow_html=True)
-with col2:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h4>Put Price</h4>
-        <h3>${put_price:.2f}</h3>
-    </div>
-    """, unsafe_allow_html=True)
-with col3:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h4>Delta</h4>
-        <h3>{delta_call:.3f}</h3>
-    </div>
-    """, unsafe_allow_html=True)
-with col4:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h4>Gamma</h4>
-        <h3>{gamma:.3f}</h3>
-    </div>
-    """, unsafe_allow_html=True)
-with col5:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h4>Vega</h4>
-        <h3>{vega:.2f}</h3>
-    </div>
-    """, unsafe_allow_html=True)
 
 # ----------------------
 # Objective Section
@@ -548,9 +511,9 @@ with col5:
 with st.container():
     st.markdown("""
     <div class="objective-box">
-        <div class="section-title">🎯 Platform Overview</div>
+        <div class="section-title">Platform Overview</div>
         <div class="content-text">
-            This comprehensive quantitative finance platform provides state-of-the-art tools for derivatives pricing, risk management, and portfolio analysis. Designed for practitioners, researchers, and students, it combines theoretical rigor with practical implementation.
+            This comprehensive quantitative finance platform provides state-of-the-art tools for derivatives pricing, risk management, and portfolio analysis. Designed for quants, researchers, and students.
         </div>
         <div class="highlight-box">
             <strong>Core Capabilities:</strong>
@@ -572,12 +535,12 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="model-box">
-        <div class="section-title">⚙️ Pricing Models Comparison</div>
+        <div class="section-title">Pricing Models Comparison</div>
     </div>
     """, unsafe_allow_html=True)
 
     # Model comparison
-    tab1, tab2, tab3 = st.tabs(["📊 Black-Scholes Analysis", "🌳 Binomial Trees", "🎲 Monte Carlo Methods"])
+    tab1, tab2, tab3 = st.tabs(["Black-Scholes Analysis", "Binomial Trees", "Monte Carlo Methods"])
     
     with tab1:
         st.markdown("""
@@ -742,7 +705,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="greeks-box">
-        <div class="section-title">🇬🇷 Greeks & Risk Sensitivities</div>
+        <div class="section-title">Greeks & Risk Sensitivities</div>
         <div class="content-text">
             Comprehensive analysis of option sensitivities to market parameters.
         </div>
@@ -772,11 +735,11 @@ with st.container():
             <small>Time decay per day</small>
         </div>
         <div class="greek-item">
-            <strong>Vega (ν): ${vega:.2f}</strong><br>
+            <strong>Vega (ν): {vega:.2f}</strong><br>
             <small>Volatility sensitivity (per 1%)</small>
         </div>
         <div class="greek-item">
-            <strong>Rho (ρ): ${rho_call:.2f}</strong><br>
+            <strong>Rho (ρ): {rho_call:.2f}</strong><br>
             <small>Interest rate sensitivity (per 1%)</small>
         </div>
         """, unsafe_allow_html=True)
@@ -862,7 +825,7 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="strategy-box">
-        <div class="section-title">🔄 Options Strategies</div>
+        <div class="section-title">Options Strategies</div>
         <div class="content-text">
             Build and analyze complex multi-leg options strategies with interactive P&L visualization.
         </div>
@@ -870,7 +833,7 @@ with st.container():
     """, unsafe_allow_html=True)
     
     # Strategy selection
-    strategy_tabs = st.tabs(["📈 Directional", "📊 Volatility", "🦋 Complex", "💰 Custom Builder"])
+    strategy_tabs = st.tabs(["Directional", "Volatility", "Complex", "Custom Builder"])
     
     with strategy_tabs[0]:  # Directional strategies
         st.markdown("### Directional Strategies")
@@ -1134,14 +1097,14 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="volatility-box">
-        <div class="section-title">📈 Interactive Volatility Analysis</div>
+        <div class="section-title">Interactive Volatility Analysis</div>
         <div class="content-text">
             Explore how volatility affects option prices and discover volatility smile patterns.
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    vol_tab1, vol_tab2 = st.tabs(["🎯 Volatility Impact", "😊 Volatility Smile Builder"])
+    vol_tab1, vol_tab2 = st.tabs(["Volatility Impact", "Volatility Smile Builder"])
     
     with vol_tab1:
         st.markdown("### How Volatility Affects Your Options")
@@ -1270,14 +1233,14 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="risk-box">
-        <div class="section-title">⚠️ Interactive Risk Analysis</div>
+        <div class="section-title">Interactive Risk Analysis</div>
         <div class="content-text">
             Understand the risks of your options positions through interactive stress testing.
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    risk_tab1, risk_tab2, risk_tab3 = st.tabs(["📊 Position Risk", "🎯 Stress Testing", "⏰ Time Decay Analysis"])
+    risk_tab1, risk_tab2, risk_tab3 = st.tabs(["Position Risk", "Stress Testing", "Time Decay Analysis"])
     
     with risk_tab1:
         st.markdown("### Your Current Position Risk")
@@ -1506,14 +1469,14 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="portfolio-box">
-        <div class="section-title">🧮 Advanced Options Calculator</div>
+        <div class="section-title">Advanced Features</div>
         <div class="content-text">
             Professional tools for complex options analysis and what-if scenarios.
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    calc_tab1, calc_tab2, calc_tab3 = st.tabs(["🎯 Breakeven Analysis", "💰 Profit Target Tool", "⚡ Quick Comparisons"])
+    calc_tab1, calc_tab2, calc_tab3 = st.tabs(["Breakeven Analysis", "Profit Target Tool", "Quick Comparisons"])
     
     with calc_tab1:
         st.markdown("### Breakeven Analysis")
@@ -1735,14 +1698,14 @@ with st.container():
 with st.container():
     st.markdown("""
     <div class="risk-box">
-        <div class="section-title">🎓 Educational Hub</div>
+        <div class="section-title">Educational Hub</div>
         <div class="content-text">
             Learn the fundamentals and advanced concepts behind options pricing.
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    edu_tab1, edu_tab2, edu_tab3 = st.tabs(["📚 Core Concepts", "⚖️ Risk-Neutral Pricing", "🧮 Model Comparison"])
+    edu_tab1, edu_tab2, edu_tab3 = st.tabs(["Core Concepts", "Risk-Neutral Pricing", "Model Comparison"])
     
     with edu_tab1:
         st.markdown("### Options Pricing Fundamentals")
@@ -1754,13 +1717,13 @@ with st.container():
             moneyness = spot_price / strike_price
             
             if moneyness > 1.05:
-                moneyness_desc = "**In-the-Money (ITM)** 💰"
+                moneyness_desc = "**In-the-Money (ITM)**"
                 explanation = "Your call option has intrinsic value and would be profitable if exercised today."
             elif moneyness < 0.95:
-                moneyness_desc = "**Out-of-the-Money (OTM)** 📉"
+                moneyness_desc = "**Out-of-the-Money (OTM)**"
                 explanation = "Your call option has no intrinsic value - it needs the stock to rise to become profitable."
             else:
-                moneyness_desc = "**At-the-Money (ATM)** 🎯"
+                moneyness_desc = "**At-the-Money (ATM)**"
                 explanation = "Your call option is right at the strike - maximum time value and gamma."
             
             st.markdown(f"""
