@@ -1004,10 +1004,8 @@ def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_t
             
             # PERFORMANCE FIX: Use much fewer Monte Carlo simulations for sensitivity analysis
             fast_params = params.copy()
-            fast_params['n_sims'] = 150  # Reduced from 1000+ to 150
-            fast_params['n_steps'] = 25  # Reduced from 50 to 25
-            
-            st.info("🚀 **Performance Mode**: Using optimized parameters for smooth charting (150 sims vs 1000+)")
+            fast_params['n_sims'] = 1000  # Reduced from 1000+ to 150
+            fast_params['n_steps'] = 50  # Reduced from 50 to 25
             
             # Calculate prices with progress tracking
             progress_placeholder = st.empty()
