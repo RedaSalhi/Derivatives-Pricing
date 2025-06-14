@@ -6,35 +6,80 @@ import numpy as np
 from pricing.models.barrier_monte_carlo import monte_carlo_barrier
 
 
-def price_barrier_option(
-    S, K, H, T, r, sigma,
-    option_type="call",
-    barrier_type="up-and-out",
-    model="monte_carlo",
-    n_simulations=10000,
-    n_steps=100,
-    rebate=0.0
-):
-    # Validate inputs
-    valid_barrier_types = ['up-and-out', 'down-and-out', 'up-and-in', 'down-and-in']
-    if barrier_type.lower() not in valid_barrier_types:
-        raise ValueError(f"Invalid barrier_type. Must be one of: {valid_barrier_types}")
-    
-    if option_type.lower() not in ['call', 'put']:
+def price_barrier_option(S, K, H, T, r, sigma, option_type, barrier_type, 
+                        model='monte_carlo', n_simulations=10000, 
+                        n_steps=252, rebate=0.0, payout_style='cash'):
+                            
+    # Input validation
+    if option_type not in ['call', 'put']:
         raise ValueError("option_type must be 'call' or 'put'")
+    if barrier_type not in ['up-and-out', 'down-and-out', 'up-and-in', 'down-and-in']:
+        raise ValueError("Invalid barrier_type")
+    if payout_style not in ['cash', 'asset']:
+        raise ValueError("payout_style must be 'cash' or 'asset'")
     
-    if model == "monte_carlo":
-        price, paths = monte_carlo_barrier(
-            S0=S, K=K, H=H, T=T, r=r, sigma=sigma,
-            option_type=option_type.lower(), 
-            barrier_type=barrier_type.lower(),
-            n_simulations=n_simulations, 
-            n_steps=n_steps,
-            rebate=rebate
-        )
-        return price, paths
-    else:
-        raise NotImplementedError(f"Model '{model}' not implemented. Only 'monte_carlo' is supported.")
+    dt = T / n_steps
+    payoffs = []
+    
+    for _ in range(n_simulations):
+        # Generate price path
+        path = [S]
+        crossed_barrier = False
+        
+        for _ in range(n_steps):
+            z = np.random.normal()
+            St = path[-1] * np.exp((r - 0.5*sigma**2)*dt + sigma*np.sqrt(dt)*z)
+            path.append(St)
+            
+            # Check barrier crossing
+            if not crossed_barrier:
+                if ('up' in barrier_type and St >= H) or ('down' in barrier_type and St <= H):
+                    crossed_barrier = True
+        
+        ST = path[-1]  # Final price
+        
+        # Determine payoff based on barrier type and crossing
+        if 'out' in barrier_type:
+            # Knock-out option
+            if crossed_barrier:
+                payoff = rebate
+            else:
+                # Option survived - calculate vanilla payoff
+                if option_type == 'call':
+                    if payout_style == 'asset':
+                        payoff = ST if ST > K else 0
+                    else:
+                        payoff = max(ST - K, 0)
+                else:  # put
+                    if payout_style == 'asset':
+                        payoff = ST if ST < K else 0
+                    else:
+                        payoff = max(K - ST, 0)
+        else:
+            # Knock-in option
+            if crossed_barrier:
+                # Option activated - calculate vanilla payoff
+                if option_type == 'call':
+                    if payout_style == 'asset':
+                        payoff = ST if ST > K else 0
+                    else:
+                        payoff = max(ST - K, 0)
+                else:  # put
+                    if payout_style == 'asset':
+                        payoff = ST if ST < K else 0
+                    else:
+                        payoff = max(K - ST, 0)
+            else:
+                payoff = rebate  # Option never activated
+        
+        payoffs.append(payoff)
+    
+    # Calculate present value
+    discount_factor = np.exp(-r * T)
+    option_price = discount_factor * np.mean(payoffs)
+    standard_error = discount_factor * np.std(payoffs) / np.sqrt(n_simulations)
+    
+    return option_price, standard_error
 
 
 def plot_barrier_payoff(K, H, option_type="call", barrier_type="up-and-out", S_min=0, S_max=200, num=500):
