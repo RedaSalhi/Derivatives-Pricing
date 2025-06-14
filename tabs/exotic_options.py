@@ -1004,8 +1004,8 @@ def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_t
             
             # PERFORMANCE FIX: Use much fewer Monte Carlo simulations for sensitivity analysis
             fast_params = params.copy()
-            fast_params['n_sims'] = 2000  # Reduced from 1000+ to 150
-            fast_params['n_steps'] = 50  # Reduced from 50 to 25
+            fast_params['n_sims'] = 1500  # Reduced from 1000+ to 150
+            fast_params['n_steps'] = 252  # Reduced from 50 to 25
             
             st.info("**Performance Mode**: Using optimized parameters for smooth charting (150 sims vs 1000+)")
             
@@ -1155,32 +1155,24 @@ def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_t
                 ["Barrier Type", params.get('barrier_type', 'up-and-out')],
                 ["Barrier Level", f"${params.get('H', K*1.2):.2f}"],
                 ["Payout Style", params.get('payout_style', 'cash').title()],
-                ["MC Simulations", f"{fast_params.get('n_sims', 150)} (fast mode)"],
-                ["Time Steps", f"{fast_params.get('n_steps', 25)} (fast mode)"],
                 ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
-                ["Performance", "Optimized for speed"]
             ]
         elif option_family == "asian":
             param_data = [
                 ["Parameter", "Value"],
                 ["Option Type", f"{option_family.title()} (Progress Tracked)"],
                 ["Asian Type", params.get('asian_type', 'average_price').replace('_', ' ').title()],
-                ["MC Paths", f"{params.get('n_paths', 5000)}"],
-                ["Time Steps", f"{params.get('n_steps', 252)}"],
                 ["Call/Put", option_type.title()],
                 ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
-                ["Performance", "⚡ Monte Carlo with progress"]
             ]
         elif option_family == "lookback":
             param_data = [
                 ["Parameter", "Value"],
                 ["Option Type", f"{option_family.title()} (Progress Tracked)"],
                 ["Strike Type", "Floating" if params.get('floating', True) else "Fixed"],
-                ["MC Paths", f"{params.get('n_paths', 10000)}"],
                 ["Call/Put", option_type.title()],
                 ["Current Spot", f"${K:.2f}"],
                 ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
-                ["Performance", "⚡ Monte Carlo with progress"]
             ]
         else:  # Digital and others
             param_data = [
@@ -1191,7 +1183,6 @@ def create_continuous_price_sensitivity_chart_optimized(K, T, r, sigma, option_t
                 ["Volatility", f"{sigma:.1%}"],
                 ["Time to Expiry", f"{T:.2f} years"],
                 ["Total Calculations", f"~{len(spot_range) + len(vol_range) + len(time_range)}"],
-                ["Performance", "Analytical with progress"]
             ]
         
         fig.add_trace(
