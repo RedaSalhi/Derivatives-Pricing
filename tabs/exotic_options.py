@@ -1148,47 +1148,6 @@ def create_continuous_price_sensitivity_chart(K, T, r, sigma, option_type, optio
         return fig
 
 
-def calculate_option_price_single_fast(option_family, S, K, T, r, sigma, option_type, params):
-    """Fast version of option price calculation with reduced Monte Carlo paths"""
-    try:
-        if option_family == "barrier":
-            # PERFORMANCE FIX: Use fast parameters for sensitivity analysis
-            H = params.get('H', S*1.2)
-            barrier_type = params.get('barrier_type', 'up-and-out')
-            n_sims = params.get('n_sims', 150)  # Much fewer simulations
-            n_steps = params.get('n_steps', 25)  # Fewer time steps
-            rebate = params.get('rebate', 0.0)
-            
-            # Import the barrier pricing function
-            from pricing.barrier_option import price_barrier_option
-            
-            price, _ = price_barrier_option(
-                S, K, H, T, r, sigma, option_type, barrier_type, 
-                "monte_carlo", n_sims, n_steps, rebate
-            )
-            return price
-            
-        else:
-            # For other options, use standard calculation (they're already fast)
-            return calculate_option_price_single(option_family, S, K, T, r, sigma, option_type, params)
-            
-    except Exception as e:
-        # Enhanced fallback with barrier-specific logic
-        from scipy.stats import norm
-        d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-        d2 = d1 - sigma*np.sqrt(T)
-        
-        if option_type == "call":
-            vanilla = S*norm.cdf(d1) - K*np.exp(-r*T)*norm.cdf(d2)
-        else:
-            vanilla = K*np.exp(-r*T)*norm.cdf(-d2) - S*norm.cdf(-d1)
-        
-        # Apply barrier discount factor
-        if option_family == "barrier":
-            barrier_discount = 0.7 if "out" in params.get('barrier_type', '') else 0.4
-            return vanilla * barrier_discount
-        else:
-            return vanilla
 
 
 
@@ -1198,7 +1157,7 @@ def calculate_option_price_single(option_family, S, K, T, r, sigma, option_type,
     try:
         if option_family == "asian":
             asian_type = params.get('asian_type', 'average_price')
-            n_steps = params.get('n_steps', 50)
+            n_steps = params.get('n_steps', 252)
             n_paths = params.get('n_paths', 1000)
             return price_asian_option(S, K, T, r, sigma, n_steps, n_paths, "monte_carlo", option_type, asian_type)
             
@@ -1206,8 +1165,9 @@ def calculate_option_price_single(option_family, S, K, T, r, sigma, option_type,
             H = params.get('H', S*1.2)
             barrier_type = params.get('barrier_type', 'up-and-out')
             n_sims = params.get('n_sims', 1000)
+            style = params.get('style', 'cash')
             rebate = params.get('rebate', 0.0)
-            price, _ = price_barrier_option(S, K, H, T, r, sigma, option_type, barrier_type, "monte_carlo", n_sims, 50, rebate)
+            price, _ = price_barrier_option(S, K, H, T, r, sigma, option_type, barrier_type, "monte_carlo", n_sims, 252, rebate, style)
             return price
             
         elif option_family == "digital":
@@ -1219,9 +1179,9 @@ def calculate_option_price_single(option_family, S, K, T, r, sigma, option_type,
             floating = params.get('floating', True)
             n_paths = params.get('n_paths', 1000)
             if floating:
-                price, _ = price_lookback_option(S, None, r, sigma, T, "monte_carlo", option_type, True, n_paths, 50)
+                price, _ = price_lookback_option(S, None, r, sigma, T, "monte_carlo", option_type, True, n_paths, 252)
             else:
-                price, _ = price_lookback_option(S, K, r, sigma, T, "monte_carlo", option_type, False, n_paths, 50)
+                price, _ = price_lookback_option(S, K, r, sigma, T, "monte_carlo", option_type, False, n_paths, 252)
             return price
         else:
             return 0
