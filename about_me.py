@@ -1,12 +1,25 @@
 import streamlit as st
 import streamlit.components.v1 as components
-from styles.app_styles import load_theme
+from styles.app_styles import (
+    load_theme,
+    apply_global_styles,
+    get_component_styles,
+)
 
 def about_me_tab():
     """Professional About Me page with integrated styling"""
-    
-    # Load the theme to ensure consistent styling
+
+    # Configure page and load global styles
+    st.set_page_config(
+        page_title="About Me",
+        page_icon="👋",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
+
     load_theme()
+    apply_global_styles()
+    st.markdown(get_component_styles(), unsafe_allow_html=True)
     
     # Page header with animation
     st.markdown("""
