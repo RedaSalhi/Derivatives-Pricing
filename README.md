@@ -1,9 +1,3 @@
-# Derivatives-Pricing
-
-
-
-To open the app click here
-
 
 
 # Quantitative Finance Platform
