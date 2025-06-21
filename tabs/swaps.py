@@ -513,7 +513,7 @@ def _market_intelligence_tab():
         <div class="info-box">
             <h4>Interest Rate Swaps Fundamentals</h4>
             
-            <h5>Market Structure:</h5>
+            <h4>Market Structure:</h4>
             <p>The interest rate swaps market is the largest derivatives market globally, with over $400 trillion in notional outstanding. 
             It serves as the backbone for:</p>
             <ul>
