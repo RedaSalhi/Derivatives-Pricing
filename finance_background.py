@@ -1045,7 +1045,7 @@ with strategy_tabs[3]:  # Custom Builder
         # Create strategy summary
         strategy_df = pd.DataFrame(st.session_state.strategy_legs)
         strategy_df['Net Cost'] = strategy_df.apply(lambda row: 
-            row['price'] * row['quantity'] * (-1 if row['position'] == 'Long' else 1), axis=1)
+            row['price'] * row['quantity'] * (1 if row['position'] == 'Long' else -1), axis=1)
         
         # Display strategy table
         st.dataframe(strategy_df[['position', 'type', 'quantity', 'strike', 'price', 'Net Cost']], 
@@ -1053,12 +1053,12 @@ with strategy_tabs[3]:  # Custom Builder
         
         # Calculate total cost
         total_cost = strategy_df['Net Cost'].sum()
-        net_position = "Net Credit" if total_cost > 0 else "Net Debit"
+        net_position = "Net Debit" if total_cost > 0 else "Net Credit"
         
         col1, col2, col3 = st.columns(3)
         with col1:
             st.markdown(f"""
-            <div class="{'success-box' if total_cost > 0 else 'danger-box'}">
+            <div class="{'danger-box' if total_cost > 0 else 'success-box'}">
                 <strong>{net_position}: ${abs(total_cost):.2f}</strong>
             </div>
             """, unsafe_allow_html=True)
@@ -1073,7 +1073,7 @@ with strategy_tabs[3]:  # Custom Builder
                 custom_payoffs = []
                 
                 for S in S_exp:
-                    total_payoff = -total_cost  # Start with net cost
+                    total_payoff = 0  # Start with zero, we'll subtract cost at the end
                     
                     for leg in st.session_state.strategy_legs:
                         if leg['type'] == 'Call':
@@ -1086,6 +1086,8 @@ with strategy_tabs[3]:  # Custom Builder
                         else:
                             total_payoff -= intrinsic * leg['quantity']
                     
+                    # Subtract the net cost paid upfront
+                    total_payoff -= total_cost
                     custom_payoffs.append(total_payoff)
                 
                 # Plot custom strategy
@@ -1201,6 +1203,7 @@ with strategy_tabs[3]:  # Custom Builder
                 ]
                 st.rerun()
 
+                
 # ----------------------
 # Footer with enhanced styling
 # ----------------------
