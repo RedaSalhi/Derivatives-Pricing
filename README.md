@@ -7,7 +7,7 @@ A comprehensive derivatives pricing and risk management platform built with **St
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://derivatives-pricing.streamlit.app/)
 
-## 🚀 Live Demo
+## Live Demo
 
 [**Access the Platform**](https://derivatives-pricing.streamlit.app)
 
