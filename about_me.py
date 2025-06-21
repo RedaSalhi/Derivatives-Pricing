@@ -6,13 +6,17 @@ from styles.app_styles import load_theme
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
-load_theme()
-
-# ----------------------
-# Page Header
-# ----------------------
-st.markdown('<div class="main-header animate-fade-in">About Me</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle animate-fade-in-delay">Financial Engineering Student | Quantitative Research Enthusiast</div>', unsafe_allow_html=True)
+def about_me_tab():
+    """About Me Tab Content"""
+    
+    load_theme()
+    
+    # ----------------------
+    # Page Header
+    # ----------------------
+    st.markdown('<div class="main-header">About Me</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Financial Engineering Student | Quantitative Research Enthusiast</div>', unsafe_allow_html=True)
+    st.markdown("---")
 
 # ----------------------
 # Hero Profile Section
