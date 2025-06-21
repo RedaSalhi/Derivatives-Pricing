@@ -618,7 +618,6 @@
 .shadow-hover:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
-}(--space-3) 0;
     border-left: 4px solid var(--warning-yellow);
     box-shadow: var(--shadow-sm);
     font-family: var(--font-family);
