@@ -9,6 +9,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import time
 import math
+from styles.app_styles import load_theme
 
 # Import exotic options pricing functions
 from pricing.asian_option import price_asian_option, plot_asian_option_payoff, plot_monte_carlo_paths
@@ -18,73 +19,10 @@ from pricing.lookback_option import price_lookback_option, plot_payoff, plot_pat
 
 
 def exotic_options_tab():
-    
+
+    load_theme()
+
     # Custom CSS for enhanced styling - matching other tabs
-    st.markdown("""
-    <style>
-        .main-header {
-            font-size: 3rem;
-            font-weight: bold;
-            text-align: center;
-            color: #1f77b4;
-            margin-bottom: 2rem;
-        }
-        .sub-header {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ff7f0e;
-            margin: 1rem 0;
-        }
-        .metric-container {
-            background-color: #f0f2f6;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 0.5rem 0;
-        }
-        .info-box {
-            background-color: #e8f4f8;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #1f77b4;
-            margin: 1rem 0;
-        }
-        .warning-box {
-            background-color: #fff3cd;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #ffc107;
-            margin: 1rem 0;
-        }
-        .success-box {
-            background-color: #d4edda;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #28a745;
-            margin: 1rem 0;
-        }
-        .results-table {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #dee2e6;
-        }
-        .parameter-box {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border: 1px solid #dee2e6;
-        }
-        .price-display {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid #28a745;
-            text-align: center;
-            margin: 1rem 0;
-        }
-    </style>
-    """, unsafe_allow_html=True)
     
     st.markdown('<div class="main-header">Exotic Options Pricing</div>', unsafe_allow_html=True)
     st.markdown("---")

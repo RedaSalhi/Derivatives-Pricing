@@ -8,6 +8,7 @@ It imports the pricing models and utilities from separate modules.
 
 import streamlit as st
 import numpy as np
+from styles.app_styles import load_theme
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
@@ -32,106 +33,9 @@ from pricing.utils.option_strategies_utils import (
 
 def option_strategies_tab():
     """Option Strategies Tab Content"""
+
+    load_theme()
     
-    # Custom CSS for enhanced styling
-    st.markdown("""
-    <style>
-        .main-header {
-            font-size: 3rem;
-            font-weight: bold;
-            text-align: center;
-            color: #1f77b4;
-            margin-bottom: 2rem;
-        }
-        .sub-header {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ff7f0e;
-            margin: 1rem 0;
-        }
-        .metric-container {
-            background-color: #f0f2f6;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin: 0.5rem 0;
-        }
-        .info-box {
-            background-color: #e8f4f8;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #1f77b4;
-            margin: 1rem 0;
-        }
-        .warning-box {
-            background-color: #fff3cd;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #ffc107;
-            margin: 1rem 0;
-        }
-        .success-box {
-            background-color: #d4edda;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #28a745;
-            margin: 1rem 0;
-        }
-        .error-box {
-            background-color: #f8d7da;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #dc3545;
-            margin: 1rem 0;
-        }
-        .setup-incomplete {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            padding: 2rem;
-            border-radius: 15px;
-            border: 2px solid #ffc107;
-            text-align: center;
-        }
-        .setup-complete {
-            background: linear-gradient(135deg, #d4edda 0%, #a8e6cf 100%);
-            padding: 1.5rem;
-            border-radius: 10px;
-            border: 2px solid #28a745;
-            text-align: center;
-            margin: 1rem 0;
-        }
-        .parameter-grid {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
-            margin: 10px 0;
-        }
-        .strategy-leg {
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 5px 0;
-            border-left: 3px solid #17a2b8;
-        }
-        .greek-analysis {
-            background: linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 100%);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #17a2b8;
-        }
-        .payoff-stats {
-            background: linear-gradient(135deg, #f0f2f6 0%, #e9ecef 100%);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #6c757d;
-        }
-        .results-table {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            border: 1px solid #dee2e6;
-        }
-    </style>
-    """, unsafe_allow_html=True)
     
     # Main title
     st.markdown('<div class="main-header">Options Strategy</div>', unsafe_allow_html=True)
@@ -1205,46 +1109,10 @@ def _sensitivity_analysis_tab(params):
 
 def display_educational_content():
     """Display comprehensive educational content"""
+
+    load_theme()
     
-    # Custom CSS for enhanced styling
-    st.markdown("""
-    <style>
-        .main-header {
-            font-size: 3rem;
-            font-weight: bold;
-            text-align: center;
-            color: #1f77b4;
-            margin-bottom: 2rem;
-        }
-        .sub-header {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ff7f0e;
-            margin: 1rem 0;
-        }
-        .info-box {
-            background-color: #e8f4f8;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #1f77b4;
-            margin: 1rem 0;
-        }
-        .warning-box {
-            background-color: #fff3cd;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #ffc107;
-            margin: 1rem 0;
-        }
-        .success-box {
-            background-color: #d4edda;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            border-left: 4px solid #28a745;
-            margin: 1rem 0;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+    
     
     st.markdown("---")
     st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)

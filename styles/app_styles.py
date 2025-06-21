@@ -7,6 +7,15 @@ across all pages and components in the application.
 """
 
 import streamlit as st
+import os
+
+def load_theme():
+    """Load theme_pricer.css and inject it into the app."""
+    css_path = os.path.join(os.path.dirname(__file__), "theme_pricer.css")
+    if os.path.exists(css_path):
+        with open(css_path, "r") as f:
+            css = f.read()
+        st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 def apply_global_styles():
     """Apply global styles that should be consistent across all pages"""
