@@ -151,12 +151,11 @@ with col6:
 
 # Enhanced tabs with better styling and icons
 st.markdown("---")
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "Vanilla Options", 
     "Forward Contracts", 
     "Option Strategies", 
     "Exotic Options",
-    "Swaps",
     "Interest Rate Instruments"
 ])
 
@@ -236,27 +235,8 @@ with tab4:
             </ul>
         </div>
         """, unsafe_allow_html=True)
-
+        
 with tab5:
-    try:
-        st.markdown('<div class="tab-content animate-fade-in">', unsafe_allow_html=True)
-        swaps_tab()
-        st.markdown('</div>', unsafe_allow_html=True)
-    except Exception as e:
-        st.markdown(f"""
-        <div class="danger-box">
-            <h4>❌ Swaps Tab Error</h4>
-            <p>Error loading swaps: {str(e)}</p>
-            <p><strong>Possible Solutions:</strong></p>
-            <ul>
-                <li>Check if pricing.swaps module exists</li>
-                <li>Verify swap pricing models are available</li>
-                <li>Ensure interest rate curve building functions exist</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-with tab6:
     try:
         st.markdown('<div class="tab-content animate-fade-in">', unsafe_allow_html=True)
         interest_rate_instruments_tab()
