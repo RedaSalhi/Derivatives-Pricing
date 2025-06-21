@@ -1,5 +1,5 @@
 # tabs/interest_rate_instruments.py
-# Interest Rate Instruments Tab - Tab 6
+# Interest Rate Instruments Tab - Tab 6 - CORRECTED VERSION
 
 import streamlit as st
 import numpy as np
@@ -12,7 +12,6 @@ from styles.app_styles import load_theme
 # Import your pricing functions
 from pricing.models.interest_rates.analytical_vasicek import *
 from pricing.models.interest_rates.monte_carlo_vasicek import *
-from pricing.utils.greeks_vasicek import *
 
 
 def interest_rate_instruments_tab():
@@ -50,8 +49,8 @@ def interest_rate_instruments_tab():
         st.session_state.vasicek_params = None
     
     # Create tabs for different functionalities
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(
-        ["Parameter Estimation", "Simulation & Yield Curves", "Bond Pricing", "Bond Options", "Greeks Analysis"]
+    tab1, tab2, tab3, tab4 = st.tabs(
+        ["Parameter Estimation", "Simulation & Yield Curves", "Bond Pricing", "Bond Options"]
     )
     
     with tab1:
@@ -65,9 +64,6 @@ def interest_rate_instruments_tab():
     
     with tab4:
         _bond_options_tab()
-    
-    with tab5:
-        _greeks_analysis_tab()
 
 
 def _parameter_estimation_tab():
@@ -118,19 +114,18 @@ def _parameter_estimation_tab():
                             'a': a, 'lambda': lam, 'sigma': sigma, 'dt': dt, 'r0': r0, 'ticker': ticker
                         }
                         st.markdown("""
-                        <div class="info-box">
+                        <div class="success-box">
                             <h4>✅ Success!</h4>
                             <p>Parameters successfully estimated!</p>
                         </div>
                         """, unsafe_allow_html=True)
 
                     except Exception as e:
-                        import traceback
                         st.markdown(f"""
                         <div class="warning-box">
                             <h4>❌ Estimation Error</h4>
-                            <p>Error during estimation:</p>
-                            <pre>{traceback.format_exc()}</pre>
+                            <p>Error during estimation: {str(e)}</p>
+                            <p>Please try with different data or parameters.</p>
                         </div>
                         """, unsafe_allow_html=True)
 
@@ -233,7 +228,7 @@ def _simulation_yield_curves_tab():
 
         T = st.slider("Time horizon (years)", min_value=1, max_value=30, value=10)
         dt = st.slider("Time step (Δt)", min_value=0.01, max_value=1.0, value=float(params["dt"]), step=0.01)
-        n_paths = st.slider("Number of simulated paths", 100, 10000, 1000, step=100)
+        n_paths = st.slider("Number of simulated paths", 100, 5000, 1000, step=100)
 
         st.markdown("""
         <div class="info-box">
@@ -245,95 +240,123 @@ def _simulation_yield_curves_tab():
         default_maturities = [m for m in [1, 2, 5, 10] if m <= T]
         maturities = st.multiselect("Maturities (years)", options=available_maturities, default=default_maturities)
 
-        # Generate readable and valid snapshot times
-        max_snapshots = int(T / dt)
-        raw_snapshots = [round(i * dt, 2) for i in range(max_snapshots + 1)]
-
-        # Format for display
-        labelled_snapshots = {f"{s:.2f} years": s for s in raw_snapshots}
-
-        # User selection (pretty labels, float values)
-        default_keys = [k for k in labelled_snapshots if float(k.split()[0]) in [0.0, 2.0, 5.0, 10.0]]
-        selected_keys = st.multiselect("Snapshot times (years)", options=list(labelled_snapshots.keys()), default=default_keys)
-
-        # Convert for technical use
-        snapshot_times = [labelled_snapshots[k] for k in selected_keys]
+        # Simplified snapshot times
+        max_snapshots = min(10, int(T))
+        snapshot_options = [f"{i} years" for i in range(0, max_snapshots + 1, max(1, max_snapshots // 5))]
+        selected_snapshots = st.multiselect("Snapshot times", options=snapshot_options, default=snapshot_options[:4])
+        
+        # Convert back to numeric values
+        snapshot_times = [float(s.split()[0]) for s in selected_snapshots]
 
         simulate_btn = st.button("Run Simulation", type="primary")
 
     with col2:
-        if simulate_btn:
+        if simulate_btn and maturities and snapshot_times:
             with st.spinner("Running simulation..."):
+                try:
+                    # Run the simulation
+                    time_vec, r_paths = simulate_vasicek_paths(
+                        a=params['a'],
+                        lam=params['lambda'],
+                        sigma=params['sigma'],
+                        r0=params['r0'],
+                        T=T,
+                        dt=dt,
+                        n_paths=n_paths
+                    )
 
-                # Run the simulation
-                time_vec, r_paths = simulate_vasicek_paths(
-                    a=params['a'],
-                    lam=params['lambda'],
-                    sigma=params['sigma'],
-                    r0=params['r0'],
-                    T=T,
-                    dt=dt,
-                    n_paths=n_paths
-                )
+                    # Calculate yield curves for average path
+                    avg_path = np.mean(r_paths, axis=1)
+                    yield_curves = {}
+                    
+                    for t_snap in snapshot_times:
+                        if t_snap < len(avg_path) * dt:
+                            idx = int(t_snap / dt)
+                            r_t = avg_path[idx] if idx < len(avg_path) else avg_path[-1]
+                            yields = []
+                            
+                            for m in maturities:
+                                T_target = t_snap + m
+                                try:
+                                    P = vasicek_zero_coupon_price(r_t, t_snap, T_target, params['a'], params['lambda'], params['sigma'])
+                                    y = -np.log(P) / m if m > 0 else r_t
+                                    yields.append(y)
+                                except:
+                                    yields.append(r_t)
+                            
+                            yield_curves[t_snap] = yields
 
-                # Yield curves: average over all paths
-                yield_curves = generate_yield_curves(
-                    r_path=np.mean(r_paths, axis=1),
-                    snapshot_times=snapshot_times,
-                    maturities=maturities,
-                    a=params['a'],
-                    theta=params['lambda'],
-                    sigma=params['sigma'],
-                    dt=dt
-                )
+                    # Plot yield curves
+                    if yield_curves:
+                        fig = go.Figure()
+                        
+                        colors = ['blue', 'red', 'green', 'orange', 'purple']
+                        for i, (t_snap, yields) in enumerate(yield_curves.items()):
+                            fig.add_trace(go.Scatter(
+                                x=maturities,
+                                y=yields,
+                                mode='lines+markers',
+                                name=f'Time {t_snap:.1f}y',
+                                line=dict(color=colors[i % len(colors)], width=2)
+                            ))
+                        
+                        fig.update_layout(
+                            title='Simulated Yield Curves under Vasicek Model',
+                            xaxis_title='Maturity (years)',
+                            yaxis_title='Yield (continuously compounded)',
+                            height=500
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
 
-                st.pyplot(plot_yield_curves(yield_curves, maturities))
+                    # Final short rate distribution
+                    r_final = r_paths[-1, :]
+                    fig_hist = px.histogram(
+                        r_final,
+                        nbins=50,
+                        title="Final Short Rate Distribution",
+                        labels={'value': 'Rate', 'count': 'Frequency'}
+                    )
+                    fig_hist.add_vline(x=np.mean(r_final), line_dash="dash", line_color="red",
+                                       annotation_text=f"Mean: {np.mean(r_final):.4f}")
+                    st.plotly_chart(fig_hist, use_container_width=True)
 
-                # Final short rate distribution
-                r_final = r_paths[-1, :]
-                fig_hist = px.histogram(
-                    r_final,
-                    nbins=50,
-                    title="Final Short Rate Distribution",
-                    labels={'value': 'Rate', 'count': 'Frequency'}
-                )
-                fig_hist.add_vline(x=np.mean(r_final), line_dash="dash", line_color="red",
-                                   annotation_text=f"Mean: {np.mean(r_final):.4f}")
-                st.plotly_chart(fig_hist, use_container_width=True)
+                    # Statistics
+                    st.markdown(f"""
+                    <div class="metric-container">
+                        <h4>Final Rate Statistics</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
+                                <td style="padding: 12px; font-weight: bold;">Statistic</td>
+                                <td style="padding: 12px; font-weight: bold;">Value</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 10px; font-weight: bold;">Mean</td>
+                                <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #2E8B57;">{np.mean(r_final):.4f}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 10px; font-weight: bold;">Std Dev</td>
+                                <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #2E8B57;">{np.std(r_final):.4f}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 10px; font-weight: bold;">Minimum</td>
+                                <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #FF6347;">{np.min(r_final):.4f}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; font-weight: bold;">Maximum</td>
+                                <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #FF6347;">{np.max(r_final):.4f}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                # Descriptive statistics
-                st.markdown(f"""
-                <div class="metric-container">
-                    <h4>Final Rate Statistics</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
-                            <td style="padding: 12px; font-weight: bold;">Statistic</td>
-                            <td style="padding: 12px; font-weight: bold;">Value</td>
-                            <td style="padding: 12px; font-weight: bold;">Formula</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 10px; font-weight: bold;">Mean (r̄)</td>
-                            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #2E8B57;">{np.mean(r_final):.4f}</td>
-                            <td style="padding: 10px; font-style: italic;">(1/n) × Σ rᵢ</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 10px; font-weight: bold;">Std Dev (σᵣ)</td>
-                            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #2E8B57;">{np.std(r_final):.4f}</td>
-                            <td style="padding: 10px; font-style: italic;">√[(1/n-1) × Σ(rᵢ - r̄)²]</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 10px; font-weight: bold;">Minimum</td>
-                            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #FF6347;">{np.min(r_final):.4f}</td>
-                            <td style="padding: 10px; font-style: italic;">min(r₁, r₂, ..., rₙ)</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px; font-weight: bold;">Maximum</td>
-                            <td style="padding: 10px; font-family: monospace; font-weight: bold; color: #FF6347;">{np.max(r_final):.4f}</td>
-                            <td style="padding: 10px; font-style: italic;">max(r₁, r₂, ..., rₙ)</td>
-                        </tr>
-                    </table>
-                </div>
-                """, unsafe_allow_html=True)
+                except Exception as e:
+                    st.markdown(f"""
+                    <div class="warning-box">
+                        <h4>❌ Simulation Error</h4>
+                        <p>Error during simulation: {str(e)}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
 
 
 def _bond_pricing_tab():
@@ -362,31 +385,38 @@ def _bond_pricing_tab():
 
         bond_type = st.radio("Bond type", ["Zero-Coupon", "With Coupons"])
 
-        r_current = st.number_input("Current interest rate (r)", min_value=0.0, max_value=0.20, value=params['r0'], step=0.001, format="%.4f")
+        r_current = st.number_input(
+            "Current interest rate (r)", 
+            min_value=0.0, 
+            max_value=0.20, 
+            value=max(0.001, params['r0']), 
+            step=0.001, 
+            format="%.4f"
+        )
         t_current = st.number_input("Current time (t)", min_value=0.0, max_value=30.0, value=0.0, step=0.1)
         maturity = st.number_input("Maturity (T)", min_value=t_current + 0.1, max_value=30.0, value=5.0, step=0.1)
-        face_value = st.number_input("Face value", min_value=100, max_value=10000, value=100, step=10)
+        face_value = st.number_input("Face value", min_value=10, max_value=10000, value=100, step=10)
 
         if bond_type == "With Coupons":
             coupon_rate = st.number_input("Coupon rate (%)", min_value=0.0, max_value=20.0, value=5.0, step=0.1) / 100
             freq = st.selectbox("Payment frequency", ["Annual", "Semi-Annual"])
             dt_coupon = 1.0 if freq == "Annual" else 0.5
 
-        st.markdown("""
-        <div class="info-box">
-            <h4>Sensitivity Analysis</h4>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        sensitivity_param = st.selectbox("Parameter to test", ["Current rate (r)", "Maturity (T)", "Volatility (σ)"])
-
         price_btn = st.button("Compute Price", type="primary")
 
     with col2:
         if price_btn:
             with st.spinner("Calculating..."):
-
                 try:
+                    # Validate parameters
+                    if r_current <= 0:
+                        st.error("Interest rate must be positive")
+                        return
+                    
+                    if maturity <= t_current:
+                        st.error("Maturity must be greater than current time")
+                        return
+
                     if bond_type == "Zero-Coupon":
                         price = vasicek_zero_coupon_price(
                             r_t=r_current,
@@ -400,6 +430,11 @@ def _bond_pricing_tab():
                         
                         ytm = -np.log(price / face_value) / (maturity - t_current)
                         
+                        # Validate results
+                        if price <= 0 or price > face_value:
+                            st.error(f"Invalid bond price: ${price:.2f}. Check parameters.")
+                            return
+                        
                         st.markdown(f"""
                         <div class="metric-container">
                             <h4>Zero-Coupon Bond Pricing Results</h4>
@@ -407,23 +442,24 @@ def _bond_pricing_tab():
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
                                     <td style="padding: 12px; font-weight: bold;">Value</td>
-                                    <td style="padding: 12px; font-weight: bold;">Formula</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Bond Price</td>
                                     <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">${price:.2f}</td>
-                                    <td style="padding: 10px; font-style: italic;">P(t,T) = A(t,T) × exp(-B(t,T) × r(t))</td>
                                 </tr>
-                                <tr>
+                                <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Yield to Maturity</td>
                                     <td style="padding: 10px; font-family: monospace; color: #FF6347; font-weight: bold;">{ytm:.4f} ({ytm*100:.2f}%)</td>
-                                    <td style="padding: 10px; font-style: italic;">YTM = -ln(P/F) / (T-t)</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px; font-weight: bold;">Discount Factor</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #1f77b4; font-weight: bold;">{price/face_value:.4f}</td>
                                 </tr>
                             </table>
                         </div>
                         """, unsafe_allow_html=True)
 
-                    else:
+                    else:  # Coupon bond
                         price = price_coupon_bond(
                             r0=r_current,
                             t=t_current,
@@ -435,6 +471,11 @@ def _bond_pricing_tab():
                             coupon=coupon_rate,
                             dt=dt_coupon
                         )
+                        
+                        # Validate results
+                        if price <= 0:
+                            st.error(f"Invalid bond price: ${price:.2f}. Check parameters.")
+                            return
                         
                         st.markdown(f"""
                         <div class="metric-container">
@@ -457,79 +498,84 @@ def _bond_pricing_tab():
                                     <td style="padding: 10px; font-family: monospace; font-weight: bold;">{freq}</td>
                                 </tr>
                             </table>
-                            <br>
-                            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; text-align: center;">
-                                <p style="margin: 0; font-style: italic; color: #1f77b4;">
-                                    <strong>Formula:</strong> P = Σ C × P(t,Tᵢ) + F × P(t,T)
-                                </p>
-                            </div>
                         </div>
                         """, unsafe_allow_html=True)
 
                     # Sensitivity Analysis
-                    st.markdown('<div class="sub-header">Sensitivity Analysis</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="sub-header">Price Sensitivity Analysis</div>', unsafe_allow_html=True)
 
-                    fig = go.Figure()
+                    # Interest rate sensitivity
+                    r_vals = np.linspace(max(0.001, r_current - 0.03), r_current + 0.03, 50)
+                    prices = []
 
-                    if sensitivity_param == "Current rate (r)":
-                        r_vals = np.linspace(max(0.001, r_current - 0.05), r_current + 0.05, 100)
-                        prices = []
-
-                        for r in r_vals:
+                    for r in r_vals:
+                        try:
                             if bond_type == "Zero-Coupon":
                                 p = vasicek_zero_coupon_price(r, t_current, maturity, params['a'], params['lambda'], params['sigma'], face_value)
                             else:
                                 p = price_coupon_bond(r, t_current, params['a'], params['lambda'], params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
-                            prices.append(p)
+                            prices.append(max(0, p))  # Ensure non-negative prices
+                        except:
+                            prices.append(0)
 
-                        fig.add_trace(go.Scatter(x=r_vals * 100, y=prices, mode="lines", name="Price", line=dict(width=3, color="#1f77b4")))
-                        fig.add_vline(x=r_current * 100, line_dash="dash", line_color="red", annotation_text=f"Current rate: {r_current*100:.2f}%")
-                        fig.update_layout(title="Price Sensitivity to Interest Rate", xaxis_title="Rate (%)", yaxis_title="Price ($)")
-
-                    elif sensitivity_param == "Maturity (T)":
-                        T_vals = np.linspace(t_current + 0.1, 30, 100)
-                        prices = []
-
-                        for T_val in T_vals:
-                            if bond_type == "Zero-Coupon":
-                                p = vasicek_zero_coupon_price(r_current, t_current, T_val, params['a'], params['lambda'], params['sigma'], face_value)
-                            else:
-                                p = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], params['sigma'], T_val, face_value, coupon_rate, dt_coupon)
-                            prices.append(p)
-
-                        fig.add_trace(go.Scatter(x=T_vals, y=prices, mode="lines", name="Price", line=dict(width=3, color="#1f77b4")))
-                        fig.add_vline(x=maturity, line_dash="dash", line_color="red", annotation_text=f"Current maturity: {maturity:.1f} years")
-                        fig.update_layout(title="Price Sensitivity to Maturity", xaxis_title="Maturity (years)", yaxis_title="Price ($)")
-
-                    elif sensitivity_param == "Volatility (σ)":
-                        sigma_vals = np.linspace(0.001, params['sigma'] * 2, 100)
-                        prices = []
-
-                        for sig in sigma_vals:
-                            if bond_type == "Zero-Coupon":
-                                p = vasicek_zero_coupon_price(r_current, t_current, maturity, params['a'], params['lambda'], sig, face_value)
-                            else:
-                                p = price_coupon_bond(r_current, t_current, params['a'], params['lambda'], sig, maturity, face_value, coupon_rate, dt_coupon)
-                            prices.append(p)
-
-                        fig.add_trace(go.Scatter(x=sigma_vals * 100, y=prices, mode="lines", name="Price", line=dict(width=3, color="#1f77b4")))
-                        fig.add_vline(x=params['sigma'] * 100, line_dash="dash", line_color="red", annotation_text=f"Current σ: {params['sigma']*100:.2f}%")
-                        fig.update_layout(title="Price Sensitivity to Volatility", xaxis_title="Volatility (%)", yaxis_title="Price ($)")
-
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(
+                        x=r_vals * 100, 
+                        y=prices, 
+                        mode="lines", 
+                        name="Price", 
+                        line=dict(width=3, color="#1f77b4")
+                    ))
+                    fig.add_vline(
+                        x=r_current * 100, 
+                        line_dash="dash", 
+                        line_color="red", 
+                        annotation_text=f"Current rate: {r_current*100:.2f}%"
+                    )
+                    fig.update_layout(
+                        title="Bond Price Sensitivity to Interest Rate", 
+                        xaxis_title="Interest Rate (%)", 
+                        yaxis_title="Bond Price ($)",
+                        height=400
+                    )
                     st.plotly_chart(fig, use_container_width=True)
 
+                    # Duration calculation
+                    try:
+                        dr = 0.0001  # 1 basis point
+                        if bond_type == "Zero-Coupon":
+                            price_up = vasicek_zero_coupon_price(r_current + dr, t_current, maturity, params['a'], params['lambda'], params['sigma'], face_value)
+                            price_down = vasicek_zero_coupon_price(r_current - dr, t_current, maturity, params['a'], params['lambda'], params['sigma'], face_value)
+                        else:
+                            price_up = price_coupon_bond(r_current + dr, t_current, params['a'], params['lambda'], params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
+                            price_down = price_coupon_bond(r_current - dr, t_current, params['a'], params['lambda'], params['sigma'], maturity, face_value, coupon_rate, dt_coupon)
+                        
+                        duration = -(price_up - price_down) / (2 * dr * price)
+                        convexity = (price_up + price_down - 2 * price) / (dr**2 * price)
+                        
+                        st.markdown(f"""
+                        <div class="info-box">
+                            <h4>Risk Metrics</h4>
+                            <p><strong>Modified Duration:</strong> {duration:.2f} years</p>
+                            <p><strong>Convexity:</strong> {convexity:.2f}</p>
+                            <p><strong>Price Change per 100bp:</strong> ${-duration * price * 0.01:.2f}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    except:
+                        st.warning("Could not calculate duration metrics")
+
                 except Exception as e:
-                    import traceback
                     st.markdown(f"""
                     <div class="warning-box">
                         <h4>❌ Calculation Error</h4>
-                        <pre>{traceback.format_exc()}</pre>
+                        <p>Error: {str(e)}</p>
+                        <p>Please check your parameters and try again.</p>
                     </div>
                     """, unsafe_allow_html=True)
 
 
 def _bond_options_tab():
-    """Bond Options Pricing Tab"""
+    """Bond Options Pricing Tab - CORRECTED VERSION"""
     st.markdown('<div class="sub-header">Bond Option Pricing</div>', unsafe_allow_html=True)
 
     if not st.session_state.vasicek_params:
@@ -543,9 +589,6 @@ def _bond_options_tab():
 
     params = st.session_state.vasicek_params
 
-    from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option_price as analytical_option_price
-    from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc as mc_option_price
-
     col1, col2 = st.columns([1, 2])
 
     with col1:
@@ -558,22 +601,42 @@ def _bond_options_tab():
         option_type = st.radio("Option type", ["Call", "Put"], key="opt_type")
         model_type = st.radio("Calculation method", ["Analytical", "Monte Carlo"], key="opt_model")
 
-        r_current = st.number_input("Current rate (r)", 0.0, 0.20, params['r0'], step=0.001, format="%.4f", key="opt_r")
+        r_current = st.number_input(
+            "Current rate (r)", 
+            0.0, 
+            0.20, 
+            max(0.001, params['r0']), 
+            step=0.001, 
+            format="%.4f", 
+            key="opt_r"
+        )
         T1 = st.number_input("Option maturity (T₁)", 0.1, 10.0, 1.0, step=0.1, key="opt_T1")
         T2 = st.number_input("Bond maturity (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="opt_T2")
 
-        K = st.number_input("Strike price (K)", 0.1, 2.0, 0.8, step=0.01, key="opt_K")
+        # Calculate reasonable strike range based on current bond price
+        try:
+            current_bond_price = vasicek_zero_coupon_price(r_current, 0, T2, params['a'], params['lambda'], params['sigma'], 1.0)
+            default_strike = current_bond_price * 0.95  # Slightly OTM
+        except:
+            default_strike = 0.8
+
+        K = st.number_input(
+            "Strike price (K)", 
+            0.1, 
+            2.0, 
+            min(1.0, max(0.1, default_strike)), 
+            step=0.01, 
+            key="opt_K"
+        )
         face_value = st.number_input("Face value", 100, 10000, 1000, step=100, key="opt_face")
 
         if model_type == "Monte Carlo":
-            n_paths = st.number_input("Number of simulations", 1000, 100000, 10000, step=1000, key="opt_n_paths")
-            default_dt = round(params['dt'], 3) if 'dt' in params else 0.01
-
+            n_paths = st.number_input("Number of simulations", 1000, 50000, 10000, step=1000, key="opt_n_paths")
             dt_mc = st.number_input(
                 "Time step (Δt)",
                 min_value=0.001,
                 max_value=0.1,
-                value=default_dt,
+                value=min(0.01, T1/50),  # Adaptive default
                 step=0.001,
                 format="%.3f",
                 key="opt_dt"
@@ -594,8 +657,28 @@ def _bond_options_tab():
 
             with st.spinner("Computing option price..."):
                 try:
+                    # Validate inputs
+                    if r_current <= 0:
+                        st.error("Interest rate must be positive")
+                        return
+                    
+                    if K <= 0:
+                        st.error("Strike price must be positive")
+                        return
+
+                    # Show underlying bond price for reference
+                    try:
+                        underlying_bond_price = vasicek_zero_coupon_price(
+                            r_current, 0, T2, params['a'], params['lambda'], params['sigma'], face_value
+                        )
+                        st.info(f"Underlying bond current price: ${underlying_bond_price:.4f}")
+                    except:
+                        st.warning("Could not calculate underlying bond price")
+
                     if model_type == "Analytical":
-                        price = analytical_option_price(
+                        from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option_price
+                        
+                        price = vasicek_bond_option_price(
                             r_t=r_current,
                             t=0,
                             T1=T1,
@@ -608,6 +691,23 @@ def _bond_options_tab():
                             option_type=option_type.lower()
                         )
                         
+                        # Validate result
+                        if price < 0:
+                            st.error("Negative option price calculated. Check parameters.")
+                            return
+                        
+                        # Calculate some additional metrics
+                        bond_price_at_T1 = vasicek_zero_coupon_price(
+                            r_current, 0, T1, params['a'], params['lambda'], params['sigma'], 1.0
+                        )
+                        intrinsic_value = 0
+                        if option_type.lower() == "call":
+                            intrinsic_value = max(0, underlying_bond_price - K)
+                        else:
+                            intrinsic_value = max(0, K - underlying_bond_price)
+                        
+                        time_value = max(0, price - intrinsic_value)
+                        
                         st.markdown(f"""
                         <div class="metric-container">
                             <h4>{option_type} Option Pricing Results (Analytical)</h4>
@@ -615,19 +715,31 @@ def _bond_options_tab():
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
                                     <td style="padding: 12px; font-weight: bold;">Value</td>
-                                    <td style="padding: 12px; font-weight: bold;">Formula</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px; font-weight: bold;">Option Price</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">{price:.6f}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px; font-weight: bold;">Intrinsic Value</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #1f77b4; font-weight: bold;">{intrinsic_value:.6f}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px; font-weight: bold;">Time Value</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #FF6347; font-weight: bold;">{time_value:.6f}</td>
                                 </tr>
                                 <tr>
-                                    <td style="padding: 10px; font-weight: bold;">Option Price</td>
-                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">{price:.4f}</td>
-                                    <td style="padding: 10px; font-style: italic;">P(t,T₁) × N(d₁) - K × P(t,T₂) × N(d₂)</td>
+                                    <td style="padding: 10px; font-weight: bold;">Moneyness (S/K)</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #6c757d; font-weight: bold;">{underlying_bond_price/K:.4f}</td>
                                 </tr>
                             </table>
                         </div>
                         """, unsafe_allow_html=True)
 
-                    else:
-                        price, std = mc_option_price(
+                    else:  # Monte Carlo
+                        from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc
+                        
+                        price, std = vasicek_bond_option_price_mc(
                             r0=r_current,
                             a=params['a'],
                             lam=params['lambda'],
@@ -641,7 +753,12 @@ def _bond_options_tab():
                             option_type=option_type.lower()
                         )
                         
-                        ci_lower = price - 1.96*std
+                        # Validate result
+                        if price < 0:
+                            st.error("Negative option price calculated. Check parameters.")
+                            return
+                        
+                        ci_lower = max(0, price - 1.96*std)
                         ci_upper = price + 1.96*std
                         
                         st.markdown(f"""
@@ -651,22 +768,22 @@ def _bond_options_tab():
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
                                     <td style="padding: 12px; font-weight: bold;">Value</td>
-                                    <td style="padding: 12px; font-weight: bold;">Formula</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Option Price</td>
-                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">{price:.4f}</td>
-                                    <td style="padding: 10px; font-style: italic;">(1/N) × Σ max(Sᵢ - K, 0)</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">{price:.6f}</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Standard Error</td>
-                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">± {std:.4f}</td>
-                                    <td style="padding: 10px; font-style: italic;">σ / √N</td>
+                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">± {std:.6f}</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px; font-weight: bold;">95% Confidence Interval</td>
+                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">[{ci_lower:.6f}, {ci_upper:.6f}]</td>
                                 </tr>
                                 <tr>
-                                    <td style="padding: 10px; font-weight: bold;">95% Confidence Interval</td>
-                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">[{ci_lower:.4f}, {ci_upper:.4f}]</td>
-                                    <td style="padding: 10px; font-style: italic;">X̄ ± 1.96 × SE</td>
+                                    <td style="padding: 10px; font-weight: bold;">Simulation Quality</td>
+                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">{"Good" if std/price < 0.05 else "Fair" if std/price < 0.1 else "Poor"}</td>
                                 </tr>
                             </table>
                         </div>
@@ -679,140 +796,115 @@ def _bond_options_tab():
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                 <td style="padding: 10px; font-weight: bold;">Parameter</td>
-                                <td style="padding: 10px; font-weight: bold;">Symbol</td>
                                 <td style="padding: 10px; font-weight: bold;">Value</td>
                             </tr>
                             <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 8px;">Option Type</td>
-                                <td style="padding: 8px;">-</td>
                                 <td style="padding: 8px; font-weight: bold; color: #1f77b4;">{option_type}</td>
                             </tr>
                             <tr style="border-bottom: 1px solid #eee;">
-                                <td style="padding: 8px;">Calculation Method</td>
-                                <td style="padding: 8px;">-</td>
-                                <td style="padding: 8px; font-weight: bold; color: #1f77b4;">{model_type}</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 8px;">Current Rate</td>
-                                <td style="padding: 8px; font-weight: bold;">r</td>
-                                <td style="padding: 8px; font-family: monospace;">{r_current:.4f}</td>
+                                <td style="padding: 8px; font-family: monospace;">{r_current:.4f} ({r_current*100:.2f}%)</td>
                             </tr>
                             <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 8px;">Option Maturity</td>
-                                <td style="padding: 8px; font-weight: bold;">T₁</td>
                                 <td style="padding: 8px; font-family: monospace;">{T1:.2f} years</td>
                             </tr>
                             <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 8px;">Bond Maturity</td>
-                                <td style="padding: 8px; font-weight: bold;">T₂</td>
                                 <td style="padding: 8px; font-family: monospace;">{T2:.2f} years</td>
                             </tr>
                             <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 8px;">Strike Price</td>
-                                <td style="padding: 8px; font-weight: bold;">K</td>
-                                <td style="padding: 8px; font-family: monospace;">{K:.2f}</td>
+                                <td style="padding: 8px; font-family: monospace;">{K:.4f}</td>
                             </tr>
                             <tr>
                                 <td style="padding: 8px;">Face Value</td>
-                                <td style="padding: 8px; font-weight: bold;">F</td>
                                 <td style="padding: 8px; font-family: monospace;">{face_value}</td>
                             </tr>
                         </table>
                     </div>
                     """, unsafe_allow_html=True)
 
-                except Exception as e:
-                    import traceback
-                    st.markdown(f"""
-                    <div class="warning-box">
-                        <h4>❌ Calculation Error</h4>
-                        <pre>{traceback.format_exc()}</pre>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-
-def _greeks_analysis_tab():
-    """Greeks Analysis Tab"""
-    st.markdown('<div class="sub-header">Greeks Analysis for Bond Options</div>', unsafe_allow_html=True)
-
-    if not st.session_state.vasicek_params:
-        st.markdown("""
-        <div class="warning-box">
-            <h4>⚠️ Parameters Required</h4>
-            <p>Please estimate the parameters in the <strong>Parameter Estimation</strong> tab first.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        return
-
-    params = st.session_state.vasicek_params
-
-    # Import Greeks computation
-    from pricing.utils.greeks_vasicek import compute_greek_vs_spot
-
-    col1, col2 = st.columns([1, 2])
-
-    with col1:
-        st.markdown("""
-        <div class="info-box">
-            <h4>Greeks Configuration</h4>
-        </div>
-        """, unsafe_allow_html=True)
-
-        greek_type = st.selectbox("Greek to analyze", ["price", "delta", "vega", "rho"], key="ir_greek_type")
-        option_type = st.radio("Option type", ["call", "put"], key="greek_opt_type")
-        model_type = st.radio("Calculation method", ["Analytical", "Monte Carlo"], key="greek_model")
-
-        T1 = st.number_input("Option maturity (T₁)", 0.1, 10.0, 1.0, step=0.1, key="greek_T1")
-        T2 = st.number_input("Bond maturity (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="greek_T2")
-
-        K = st.number_input("Strike price (K)", 0.1, 2.0, 0.8, step=0.01, key="ir_greek_K")
-        face_value = st.number_input("Face value", 100, 10000, 1000, step=100, key="greek_face")
-
-        # Suggest dt from Tab 1
-        default_dt = round(params['dt'], 3) if 'dt' in params else 0.01
-
-        if model_type == "Monte Carlo":
-            n_paths = st.number_input("Number of Monte Carlo simulations", 1000, 50000, 5000, step=1000, key="greek_npaths")
-            dt = st.number_input("Time step (Δt)", 0.001, 0.1, default_dt, step=0.001, format="%.3f", key="greek_dt")
-        else:
-            dt = default_dt
-            n_paths = 10000  # default value for analytical, ignored
-
-        compute_btn = st.button("Compute Greeks", type="primary", key="greek_btn")
-
-    with col2:
-        if compute_btn:
-            with st.spinner("Computing Greeks..."):
-
-                try:
-                    fig = compute_greek_vs_spot(
-                        greek=greek_type,
-                        t=0,
-                        T1=T1,
-                        T2=T2,
-                        K=K,
-                        a=params['a'],
-                        lam=params['lambda'],
-                        sigma=params['sigma'],
-                        face=face_value,
-                        dt=dt,
-                        option_type=option_type,
-                        n_paths=n_paths,
-                        model=model_type,
-                    )
+                    # Strike sensitivity analysis
+                    st.markdown('<div class="sub-header">Strike Sensitivity Analysis</div>', unsafe_allow_html=True)
                     
-                    st.pyplot(fig)
+                    try:
+                        strike_range = np.linspace(K * 0.8, K * 1.2, 20)
+                        option_prices = []
+                        
+                        for strike in strike_range:
+                            try:
+                                if model_type == "Analytical":
+                                    opt_price = vasicek_bond_option_price(
+                                        r_current, 0, T1, T2, strike, params['a'], params['lambda'], 
+                                        params['sigma'], face_value, option_type.lower()
+                                    )
+                                else:
+                                    opt_price, _ = vasicek_bond_option_price_mc(
+                                        r_current, params['a'], params['lambda'], params['sigma'], 
+                                        T1, T2, strike, dt_mc, min(5000, n_paths), face_value, option_type.lower()
+                                    )
+                                option_prices.append(max(0, opt_price))
+                            except:
+                                option_prices.append(0)
+                        
+                        fig = go.Figure()
+                        fig.add_trace(go.Scatter(
+                            x=strike_range,
+                            y=option_prices,
+                            mode='lines+markers',
+                            name=f'{option_type} Option Price',
+                            line=dict(color='blue', width=3),
+                            marker=dict(size=6)
+                        ))
+                        
+                        fig.add_vline(
+                            x=K, 
+                            line_dash="dash", 
+                            line_color="red",
+                            annotation_text=f"Current Strike: {K:.4f}"
+                        )
+                        
+                        if 'underlying_bond_price' in locals():
+                            fig.add_vline(
+                                x=underlying_bond_price,
+                                line_dash="dot",
+                                line_color="green", 
+                                annotation_text=f"Bond Price: {underlying_bond_price:.4f}"
+                            )
+                        
+                        fig.update_layout(
+                            title=f'{option_type} Option Price vs Strike ({model_type})',
+                            xaxis_title='Strike Price',
+                            yaxis_title='Option Price',
+                            height=400
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                    except Exception as e:
+                        st.warning(f"Could not generate sensitivity analysis: {str(e)}")
 
                 except Exception as e:
-                    import traceback
                     st.markdown(f"""
                     <div class="warning-box">
                         <h4>❌ Calculation Error</h4>
-                        <pre>{traceback.format_exc()}</pre>
+                        <p>Error: {str(e)}</p>
+                        <p>Suggestions:</p>
+                        <ul>
+                            <li>Check that T₂ > T₁</li>
+                            <li>Ensure strike price is reasonable (typically 0.5 to 1.2)</li>
+                            <li>Verify interest rate is positive</li>
+                            <li>For Monte Carlo: try fewer simulations or larger time step</li>
+                        </ul>
                     </div>
                     """, unsafe_allow_html=True)
-    
-    # Educational content
+
+
+# Educational content and footer remain the same...
+def _display_educational_content():
+    """Display educational content about Vasicek model"""
     st.markdown("---")
     st.markdown('<div class="sub-header">Educational Resources</div>', unsafe_allow_html=True)
     
@@ -834,14 +926,14 @@ def _greeks_analysis_tab():
             st.markdown("• **σ**: Volatility of rate changes")
         with col2:
             st.markdown("• **r(t)**: Interest rate at time t")
-            st.markdown("• **dW(t)**: Wiener process")
+            st.markdown("• **dW(t)**: Wiener process (random walk)")
         
         st.markdown("#### Key Features:")
         st.markdown("""
         • **Mean Reversion**: Rates tend to drift back toward the long-term mean  
         • **Analytical Solutions**: Closed-form formulas for bond prices and options  
-        • **Negative Rates**: Model allows for negative interest rates  
-        • **Normal Distribution**: Rate changes are normally distributed
+        • **Normal Distribution**: Rate changes are normally distributed  
+        • **Tractable Mathematics**: Allows for exact pricing formulas
         """)
     
     with st.expander("Bond Pricing Formulas"):
@@ -859,14 +951,6 @@ B(t,T) = \frac{1 - e^{-a(T - t)}}{a} \\
 A(t,T) = \exp\left( \left( \lambda - \frac{\sigma^2}{2a^2} \right)(B(t,T) - (T - t)) - \frac{\sigma^2 B(t,T)^2}{4a} \right)
 """)
 
-        
-        st.markdown("##### Coupon Bond Price:")
-        st.markdown("Sum of discounted coupon payments plus principal:")
-        st.markdown(
-            '<div style="text-align: center; font-size: 1.2em; font-weight: bold; color: #1f77b4; margin: 15px 0; padding: 15px; background-color: #f0f8ff; border-radius: 8px; border: 1px solid #d0e7ff;">P = Σ C × P(t,Tᵢ) + F × P(t,T)</div>', 
-            unsafe_allow_html=True
-        )
-        
         st.markdown("##### Bond Option Price:")
         st.markdown("Uses the Black-Scholes formula adapted for bonds:")
         st.latex(r"""
@@ -874,94 +958,36 @@ A(t,T) = \exp\left( \left( \lambda - \frac{\sigma^2}{2a^2} \right)(B(t,T) - (T -
 \text{Put: } K \cdot P(t,T_2) \cdot N(-d_2) - P(t,T_1) \cdot N(-d_1)
 """)
     
-    with st.expander("Greeks for Bond Options"):
-        st.markdown("#### Bond Option Greeks")
-        
-        # Delta
-        st.markdown(
-            '<div style="background-color: #e8f4f8; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #1f77b4;"><strong>Delta (Δ): Sensitivity to Bond Price Changes</strong></div>', 
-            unsafe_allow_html=True
-        )
-        st.markdown("""
-        • Measures how much the option price changes for a $1 change in bond price  
-        • **Range:** 0 to 1 for calls, -1 to 0 for puts  
-        • **Formula:** Δ = ∂V/∂S
-        """)
-        
-        # Rho
-        st.markdown(
-            '<div style="background-color: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #ffc107;"><strong>Rho (ρ): Sensitivity to Interest Rate Changes</strong></div>', 
-            unsafe_allow_html=True
-        )
-        st.markdown("""
-        • Measures how much the option price changes for a 1% change in rates  
-        • More important for bond options than equity options  
-        • **Negative** for calls (higher rates → lower bond prices → lower call values)  
-        • **Formula:** ρ = ∂V/∂r
-        """)
-        
-        # Vega
-        st.markdown(
-            '<div style="background-color: #d1ecf1; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #17a2b8;"><strong>Vega (ν): Sensitivity to Volatility Changes</strong></div>', 
-            unsafe_allow_html=True
-        )
-        st.markdown("""
-        • Measures how much the option price changes for a 1% change in volatility  
-        • **Positive** for both calls and puts (higher volatility → higher option values)  
-        • **Formula:** ν = ∂V/∂σ
-        """)
-        
-        # Theta
-        st.markdown(
-            '<div style="background-color: #f8d7da; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #dc3545;"><strong>Theta (Θ): Time Decay</strong></div>', 
-            unsafe_allow_html=True
-        )
-        st.markdown("""
-        • Measures how much the option price changes as time passes  
-        • Usually **negative** (options lose value as expiration approaches)  
-        • **Formula:** Θ = ∂V/∂t
-        """)
-        
-        # Gamma
-        st.markdown(
-            '<div style="background-color: #d4edda; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #28a745;"><strong>Gamma (Γ): Rate of Change of Delta</strong></div>', 
-            unsafe_allow_html=True
-        )
-        st.markdown("""
-        • Measures the convexity of the option price  
-        • Highest for **at-the-money** options near expiration  
-        • **Formula:** Γ = ∂²V/∂S²
-        """)
-    
-    with st.expander("⚠️ Model Limitations & Considerations"):
+    with st.expander("⚠️ Model Limitations & Best Practices"):
         st.warning("#### Vasicek Model Limitations")
         
         st.markdown("##### Theoretical Limitations:")
         st.markdown("""
-        • **Negative Rates:** Model allows unrealistic negative rates (though less problematic now)  
-        • **Constant Parameters:** Assumes constant mean reversion speed and volatility  
-        • **Normal Distribution:** Real rate changes may have fat tails  
-        • **Single Factor:** Ignores multiple sources of interest rate risk
+        • **Negative Rates**: Model allows negative rates (which can be unrealistic)  
+        • **Constant Parameters**: Assumes constant mean reversion speed and volatility  
+        • **Normal Distribution**: Real rate changes may have fat tails  
+        • **Single Factor**: Ignores multiple sources of interest rate risk
         """)
         
         st.markdown("##### Practical Considerations:")
         st.markdown("""
-        • **Parameter Estimation:** Historical data may not reflect future behavior  
-        • **Calibration:** Model may not fit current market prices perfectly  
-        • **Volatility Clustering:** Real rates show periods of high/low volatility  
-        • **Regime Changes:** Central bank policy changes can break model assumptions
+        • **Parameter Estimation**: Historical data may not reflect future behavior  
+        • **Calibration**: Model may not fit current market prices perfectly  
+        • **Volatility**: Interest rate volatility changes over time  
+        • **Regime Changes**: Central bank policy changes can break model assumptions
         """)
         
-        st.markdown("##### Risk Management Best Practices:")
+        st.markdown("##### Best Practices:")
         st.markdown("""
         • Use multiple models for comparison and validation  
         • Regular recalibration with fresh market data  
-        • Stress testing with extreme market scenarios  
+        • Stress testing with extreme scenarios  
         • Consider model uncertainty in risk measures  
-        • Monitor model performance against market prices
+        • Validate results against market prices when available
         """)
-    
+
     # Footer
+    st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: #666; font-size: 0.9rem; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 15px; border: 1px solid #dee2e6;'>
         <div style="margin-bottom: 10px;">
@@ -972,3 +998,10 @@ A(t,T) = \exp\left( \left( \lambda - \frac{\sigma^2}{2a^2} \right)(B(t,T) - (T -
         <p style="margin: 0; color: #dc3545; font-weight: bold;">⚠️ For educational and research purposes only</p>
     </div>
     """, unsafe_allow_html=True)
+
+# Add the educational content call at the end of the main function
+def interest_rate_instruments_tab():
+    # ... existing code ...
+    
+    # Add educational content at the end
+    _display_educational_content()
