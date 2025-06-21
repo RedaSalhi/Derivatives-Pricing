@@ -635,9 +635,8 @@ def _bond_options_tab():
             step=0.01, 
             key="opt_K",
             help=(
-                f"**Current bond price:** "
+                "Pick a strike reasonably close to the bond price."
                 f"${current_bond_price:,.4f}\n\n"
-                "Pick a strike reasonably close to that price."
             ),
         )
             
