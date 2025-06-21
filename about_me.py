@@ -173,7 +173,6 @@ with st.container():
     
     st.markdown(form_code, unsafe_allow_html=True)
 
-components.html(contact_form, height=450)
 
 
 # Footer
