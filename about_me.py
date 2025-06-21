@@ -1,199 +1,174 @@
 import streamlit as st
-import sys
-import os
+import streamlit.components.v1 as components
 from styles.app_styles import load_theme
 
-
-# Allow importing from the pricing directory
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
-
 def about_me_tab():
-    """Main about me function that can be called from main.py"""
+    """Professional About Me page with integrated styling"""
     
+    # Load the theme to ensure consistent styling
     load_theme()
-
-    # Main header with enhanced styling
-    st.markdown('<div class="main-header animate-fade-in-about">About Me</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle animate-fade-in-delay-about">Financial Engineering Student | Quantitative Researcher</div>', unsafe_allow_html=True)
-
-    # ----------------------
-    # Profile Section with Animation
-    # ----------------------
-    with st.container():
+    
+    # Page header with animation
+    st.markdown("""
+    <div class="animate-fade-in-about">
+        <h1 class="section-title">👋 About Me</h1>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Profile section
+    st.markdown("""
+    <div class="profile-box animate-fade-in-about">
+        <h2 class="section-title">🎯 Professional Profile</h2>
+        <div class="profile-info">
+            <strong>Welcome to my Derivatives Pricing Application!</strong> I'm passionate about quantitative finance and building tools that make complex financial concepts accessible to students, practitioners, and enthusiasts alike.
+            <br><br>
+            This application demonstrates <strong>advanced derivatives pricing models</strong> including Black-Scholes for European options, binomial trees for American options, and Monte Carlo simulations for exotic derivatives. Each model includes educational insights to help users understand the underlying mathematics and financial theory.
+            <br><br>
+            I believe in making <strong>quantitative finance education</strong> more interactive and practical, bridging the gap between academic theory and real-world application through clean, professional tools.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Skills and Interests section
+    col1, col2 = st.columns(2)
+    
+    with col1:
         st.markdown("""
-        <div class="profile-box animate-fade-in-about">
-            <div class="section-title">👤 Profile</div>
-            <div class="profile-info">
-                <strong>SALHI Reda</strong><br>
-                Engineering student at <strong>Centrale Méditerranée</strong><br>
-                Passionate about <strong>mathematics</strong>, <strong>financial markets</strong>, and <strong>quantitative research</strong><br>
-                Specializing in quantitative finance and derivatives pricing<br>
-                Currently developing advanced pricing models and risk management tools
-            </div>
+        <div class="skills-section animate-fade-in-delay-about">
+            <h3>🔧 Technical Skills</h3>
+            <ul>
+                <li><strong>Programming:</strong> Python, R, SQL, MATLAB</li>
+                <li><strong>Finance:</strong> Derivatives Pricing, Risk Management</li>
+                <li><strong>Analytics:</strong> Monte Carlo Simulation, Statistical Modeling</li>
+                <li><strong>Tools:</strong> Streamlit, NumPy, SciPy, Pandas</li>
+                <li><strong>Visualization:</strong> Plotly, Matplotlib, Financial Charts</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
-
-    # ----------------------
-    # CV Downloads Section with Enhanced Styling
-    # ----------------------
-    with st.container():
+    
+    with col2:
         st.markdown("""
-        <div class="download-section animate-fade-in-delay-about">
-            <div class="section-title">📄 Resume Downloads</div>
-            <p style="margin-bottom: 1.5rem; color: var(--gray-600); font-family: var(--font-family);">
-                Download my latest resume in your preferred language:
-            </p>
+        <div class="skills-section animate-fade-in-delay-about">
+            <h3>💡 Interests & Focus</h3>
+            <ul>
+                <li><strong>Quantitative Finance:</strong> Options pricing and risk metrics</li>
+                <li><strong>Financial Engineering:</strong> Model development and validation</li>
+                <li><strong>Education:</strong> Making finance accessible through technology</li>
+                <li><strong>Open Source:</strong> Building tools for the finance community</li>
+                <li><strong>Research:</strong> Market volatility and pricing accuracy</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
-        
-        # CV download buttons with better styling
-        col1, col2 = st.columns(2)
-        
-        cv_en = "assets/Reda_Salhi_CV_EN.pdf"
-        cv_fr = "assets/Reda_Salhi_CV_FR.pdf"
-        
-        with col1:
-            if os.path.exists(cv_en):
-                with open(cv_en, "rb") as f:
-                    st.download_button(
-                        label="📋 Download CV - English Version",
-                        data=f,
-                        file_name="Reda_Salhi_CV_EN.pdf",
-                        mime="application/pdf",
-                        use_container_width=True,
-                        help="Download my resume in English"
-                    )
-            else:
-                st.info("📋 English CV - Coming Soon")
-        
-        with col2:
-            if os.path.exists(cv_fr):
-                with open(cv_fr, "rb") as f:
-                    st.download_button(
-                        label="📋 Download CV - French Version",
-                        data=f,
-                        file_name="Reda_Salhi_CV_FR.pdf",
-                        mime="application/pdf",
-                        use_container_width=True,
-                        help="Télécharger mon CV en français"
-                    )
-            else:
-                st.info("📋 French CV - Coming Soon")
-
-    # ----------------------
-    # Links Section with Enhanced Styling
-    # ----------------------
-    with st.container():
-        st.markdown("""
-        <div class="links-box animate-fade-in-about">
-            <div class="section-title">🔗 Connect With Me</div>
-            <div class="link-item">
-                <a href="https://www.linkedin.com/in/reda-salhi-195297290/" target="_blank">
-                    💼 LinkedIn Profile
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="https://github.com/RedaSalhi" target="_blank">
-                    🐙 GitHub Portfolio
-                </a>
-            </div>
-            <div class="link-item">
-                <a href="mailto:salhi.reda47@gmail.com" class="email-link">
-                    📧 salhi.reda47@gmail.com
-                </a>
-            </div>
+    
+    # Downloads section
+    st.markdown("""
+    <div class="download-section animate-fade-in-delay-about">
+        <h2 class="section-title">📄 Download Resources</h2>
+        <p>Get my CV and project documentation to learn more about my background and this application.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Create download buttons
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # CV Download (placeholder - you'll need to add your actual CV file)
+        with open("README.md", "rb") as file:  # Using README as placeholder
+            st.download_button(
+                label="📋 Download CV",
+                data=file,
+                file_name="CV_Reda_Salhi.pdf",
+                mime="application/pdf",
+                help="Download my professional CV"
+            )
+    
+    with col2:
+        # Project documentation
+        with open("README.md", "rb") as file:
+            st.download_button(
+                label="📖 Project Documentation",
+                data=file,
+                file_name="Derivatives_Pricing_Guide.md",
+                mime="text/markdown",
+                help="Comprehensive guide to this derivatives pricing tool"
+            )
+    
+    # Links section
+    st.markdown("""
+    <div class="links-box animate-fade-in-delay-about">
+        <h2 class="section-title">🔗 Connect & Explore</h2>
+        <div class="link-item">
+            <a href="https://github.com/your-username" target="_blank">🐙 GitHub Portfolio</a>
         </div>
-        """, unsafe_allow_html=True)
-
-    # ----------------------
-    # Contact Form Section with Enhanced Styling
-    # ----------------------
-    with st.container():
-        st.markdown("---")
-        st.markdown('<div class="sub-header animate-fade-in-delay-about">📬 Contact Me</div>', unsafe_allow_html=True)
-        st.markdown('<p style="color: var(--gray-600); font-family: var(--font-family); margin-bottom: var(--space-6);">If you\'d like to get in touch, just fill out the form below:</p>', unsafe_allow_html=True)
-
-        formsubmit_email = "salhi.reda47@gmail.com"
-
-        form_code = f"""
-        <div class="contact-form animate-fade-in-about">
-            <form action="https://formsubmit.co/{formsubmit_email}" method="POST">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_template" value="table">
-                <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
-                <input type="text" name="name" placeholder="Your Name" required>
-                <input type="email" name="email" placeholder="Your Email" required>
-                <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
-                <button type="submit">Send Message 📨</button>
-            </form>
+        <div class="link-item">
+            <a href="https://linkedin.com/in/your-profile" target="_blank">💼 LinkedIn Profile</a>
         </div>
-        """
-
-        st.markdown(form_code, unsafe_allow_html=True)
-
-    # ----------------------
-    # Skills & Interests Section with Enhanced Styling
-    # ----------------------
-    with st.container():
-        st.markdown("---")
+        <div class="link-item">
+            <a href="https://derivatives-pricing.streamlit.app" target="_blank">🚀 Live Application</a>
+        </div>
+        <div class="link-item">
+            <a href="mailto:salhi.reda47@gmail.com" class="email-link">📧 Professional Email</a>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Contact form section
+    st.markdown("""
+    <div class="contact-form animate-fade-in-delay-about">
+        <h2 class="section-title">💬 Get In Touch</h2>
+        <p>Have questions about derivatives pricing, want to collaborate, or interested in discussing quantitative finance? I'd love to hear from you!</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Contact form using FormSubmit
+    contact_form = f"""
+    <form action="https://formsubmit.co/salhi.reda47@gmail.com" method="POST" class="contact-form">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_subject" value="New Contact from Derivatives Pricing App">
+        <input type="hidden" name="_next" value="https://derivatives-pricing.streamlit.app">
         
-        col1, col2, col3 = st.columns(3)
+        <input type="text" name="name" placeholder="Your Name" required class="form-input">
+        <input type="email" name="email" placeholder="Your Email" required class="form-input">
+        <input type="text" name="subject" placeholder="Subject" required class="form-input">
+        <textarea name="message" placeholder="Your Message" rows="5" required class="form-input"></textarea>
         
-        with col1:
-            st.markdown("""
-            <div class="skills-section animate-fade-in-about">
-                <h3>🛠️ Technical Skills</h3>
-                <ul>
-                    <li><strong>Programming:</strong> Python, SQL, MATLAB, Excel</li>
-                    <li><strong>Finance:</strong> Derivatives Pricing, Risk Management, Portfolio Optimization</li>
-                    <li><strong>Tools:</strong> Streamlit, NumPy, Pandas</li>
-                    <li><strong>Mathematics:</strong> Stochastic Calculus, Statistics</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+        <button type="submit" class="form-button">Send Message 📧</button>
+    </form>
+    """
+    
+    components.html(contact_form, height=400)
+    
+    # Application insights
+    st.markdown("""
+    <div class="info-box animate-fade-in-delay-about">
+        <h2 class="section-title">🔍 About This Application</h2>
+        <p><strong>Purpose:</strong> This derivatives pricing tool was built to provide accurate, educational, and accessible financial modeling for students, professionals, and enthusiasts.</p>
         
-        with col2:
-            st.markdown("""
-            <div class="skills-section animate-fade-in-delay-about">
-                <h3>🎯 Areas of Interest</h3>
-                <ul>
-                    <li>Quantitative Finance</li>
-                    <li>Financial Engineering</li>
-                    <li>Risk Management</li>
-                    <li>Economic Research</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+        <p><strong>Key Features:</strong></p>
+        <ul>
+            <li>Multiple pricing models (Black-Scholes, Binomial, Monte Carlo)</li>
+            <li>Real-time Greeks calculation and visualization</li>
+            <li>Interactive parameter adjustment with instant results</li>
+            <li>Educational content explaining each model's assumptions</li>
+            <li>Professional-grade accuracy with academic transparency</li>
+        </ul>
         
-        with col3:
-            st.markdown("""
-            <div class="skills-section animate-fade-in-delay-about">
-                <h3>🔍 Current Focus</h3>
-                <ul>
-                    <li>Derivatives Pricing</li>
-                    <li>Monte Carlo Simulations</li>
-                    <li>Interest Rate Models</li>
-                    <li>Portfolio Optimization</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-
-    # Footer with enhanced styling
-    st.markdown("---")
+        <p><strong>Technology Stack:</strong> Built with Python, Streamlit, NumPy, and SciPy for robust mathematical computations and an intuitive user interface.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Footer
     st.markdown("""
     <div class="footer-section animate-fade-in-delay-about">
         <div>
-            Thank you for visiting my profile! Looking forward to connecting with you. 🚀
+            🎯 "Making quantitative finance accessible through technology and education"
+        </div>
+        <br>
+        <div style="font-size: 0.9em; color: #666;">
+            Built with ❤️ using Streamlit | © 2024 Reda Salhi
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-
-# If the file is run directly (for testing)
 if __name__ == "__main__":
-    st.set_page_config(
-        page_title="About Me - Reda SALHI", 
-        layout="centered",
-        page_icon="👤"
-    )
     about_me_tab()
