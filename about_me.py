@@ -99,34 +99,84 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Contact form section with enhanced styling
-st.markdown("""
-<div class="contact-box animate-fade-in-delay">
-    <h2 class="section-title">Get In Touch</h2>
-    <div class="content-text">
-        Have questions about derivatives pricing, want to collaborate, or interested in discussing quantitative finance? I'd love to hear from you!
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
-# Enhanced contact form using FormSubmit with proper CSS classes
-contact_form = """
-<form action="https://formsubmit.co/salhi.reda47@gmail.com" method="POST" class="contact-form">
-    <input type="hidden" name="_captcha" value="false">
-    <input type="hidden" name="_subject" value="New Contact from Derivatives Pricing App">
-    <input type="hidden" name="_next" value="https://derivatives-pricing.streamlit.app">
+# Contact form section with enhanced styling
+with st.container():
+    st.subheader("Contact Me")
+    st.markdown("Have questions about derivatives pricing, want to collaborate, or interested in discussing quantitative finance? I'd love to hear from you!")
     
-    <input type="text" name="name" placeholder="Your Name" required class="form-input">
-    <input type="email" name="email" placeholder="Your Email" required class="form-input">
-    <input type="text" name="subject" placeholder="Subject" required class="form-input">
-    <textarea name="message" placeholder="Your Message" rows="5" required class="form-input"></textarea>
+    formsubmit_email = "salhi.reda47@gmail.com"
     
-    <button type="submit" class="form-button">Send Message 📧</button>
-</form>
-"""
+    # CSS personnalisé pour un look moderne et sobre
+    form_css = """
+    <style>
+    .contact-form {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin: 1rem 0;
+        border: 1px solid #dee2e6;
+    }
+    .contact-form input, .contact-form textarea {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        font-size: 16px;
+        background: white;
+        transition: all 0.3s ease;
+        color: #495057;
+    }
+    .contact-form input:focus, .contact-form textarea:focus {
+        outline: none;
+        border-color: #6c757d;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.15);
+    }
+    .contact-form button {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: none;
+        letter-spacing: 0.5px;
+    }
+    .contact-form button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+        background: linear-gradient(45deg, #495057, #343a40);
+    }
+    </style>
+    """
+    
+    form_code = f"""
+    {form_css}
+    <div class="contact-form">
+        <form action="https://formsubmit.co/{formsubmit_email}" method="POST">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_autoresponse" value="Thanks for reaching out! I'll respond as soon as possible.">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="email" name="email" placeholder="Your Email" required>
+            <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+    </div>
+    """
+    
+    st.markdown(form_code, unsafe_allow_html=True)
 
 components.html(contact_form, height=450)
 
+
+# Footer
 st.markdown("""
 <div class="footer-section animate-fade-in">
     <div style="font-size: 1.4rem; font-weight: 600; margin-bottom: 1rem; color: #1a365d;">
