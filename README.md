@@ -11,7 +11,7 @@ A comprehensive derivatives pricing and risk management platform built with **St
 
 [**Access the Platform**](https://derivatives-pricing.streamlit.app)
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Features](#-features)
 - [Installation](#-installation)
@@ -23,33 +23,33 @@ A comprehensive derivatives pricing and risk management platform built with **St
 - [License](#-license)
 - [Disclaimer](#-disclaimer)
 
-## ✨ Features
+## Features
 
-### 🔬 **Advanced Pricing Models**
+### **Advanced Pricing Models**
 - **Black-Scholes**: Analytical solutions for European options
 - **Binomial Trees**: American options with early exercise
 - **Monte Carlo**: Complex payoffs and path-dependent derivatives
 - **Vasicek Model**: Interest rate modeling and bond pricing
 
-### 📈 **Complete Greeks Suite**
+### **Complete Greeks Suite**
 - Real-time calculation of Delta, Gamma, Theta, Vega, Rho
 - Interactive sensitivity analysis and visualization
 - Continuous Greeks plotting with smooth curves
 - Multi-parameter sensitivity heatmaps
 
-### 🎯 **Strategy Builder**
+### **Strategy Builder**
 - 10+ pre-defined options strategies
 - Custom multi-leg strategy constructor
 - Interactive P&L visualization
 - Breakeven analysis and risk metrics
 
-### 💼 **Professional Risk Management**
+### **Professional Risk Management**
 - VaR and Expected Shortfall calculations
 - Stress testing scenarios
 - Portfolio-level analytics
 - Model comparison and validation
 
-### 🌐 **Multi-Asset Coverage**
+### **Multi-Asset Coverage**
 - Vanilla Options (European & American)
 - Exotic Options (Asian, Barrier, Digital, Lookback)
 - Forward Contracts with cost-of-carry
@@ -57,7 +57,7 @@ A comprehensive derivatives pricing and risk management platform built with **St
 - Currency Swaps
 - Bond Pricing and Options
 
-## 🛠 Installation
+## Installation
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -99,7 +99,7 @@ pip install -r requirements.txt
 streamlit run main.py
 ```
 
-## 🎮 Usage
+## Usage
 
 ### Quick Start Guide
 
@@ -136,7 +136,7 @@ price = price_vanilla_option(
 3. Estimate **Vasicek model parameters**
 4. Price bonds and bond options
 
-## 🧮 Pricing Models
+## Pricing Models
 
 ### **Black-Scholes Model**
 - **Formula**: `C = S₀N(d₁) - Ke^(-rT)N(d₂)`
@@ -158,7 +158,7 @@ price = price_vanilla_option(
 - **Applications**: Bond pricing, interest rate derivatives
 - **Features**: Mean reversion, analytical solutions
 
-## 🎛 Supported Instruments
+## Supported Instruments
 
 ### **Vanilla Options**
 - European & American calls/puts
