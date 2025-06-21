@@ -53,7 +53,7 @@ render_app_header(
 # Add platform overview with enhanced styling
 st.markdown("""
 <div class="objective-box animate-fade-in">
-    <div class="section-title">🚀 Platform Capabilities</div>
+    <div class="section-title">Platform Capabilities</div>
     <div class="content-text">
         Comprehensive derivatives pricing platform combining theoretical accuracy with practical usability.
         Built for quantitative analysts, traders, risk managers, and finance students.
@@ -61,7 +61,7 @@ st.markdown("""
     <div class="highlight-box">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
             <div>
-                <h4 style="color: #2563eb; margin-bottom: 10px;">🎯 Pricing Models</h4>
+                <h4 style="color: #2563eb; margin-bottom: 10px;">Pricing Models</h4>
                 <ul style="margin: 0; padding-left: 20px;">
                     <li><strong>Black-Scholes:</strong> Analytical solutions for European options</li>
                     <li><strong>Binomial Trees:</strong> American options & flexible modeling</li>
@@ -70,7 +70,7 @@ st.markdown("""
                 </ul>
             </div>
             <div>
-                <h4 style="color: #10b981; margin-bottom: 10px;">📊 Risk Analytics</h4>
+                <h4 style="color: #10b981; margin-bottom: 10px;">Risk Analytics</h4>
                 <ul style="margin: 0; padding-left: 20px;">
                     <li><strong>Complete Greeks:</strong> Delta, Gamma, Theta, Vega, Rho</li>
                     <li><strong>Scenario Analysis:</strong> Stress testing & what-if scenarios</li>
@@ -79,7 +79,7 @@ st.markdown("""
                 </ul>
             </div>
             <div>
-                <h4 style="color: #f59e0b; margin-bottom: 10px;">🛠️ Professional Tools</h4>
+                <h4 style="color: #f59e0b; margin-bottom: 10px;">Professional Tools</h4>
                 <ul style="margin: 0; padding-left: 20px;">
                     <li><strong>Strategy Builder:</strong> Multi-leg option strategies</li>
                     <li><strong>Payoff Diagrams:</strong> Interactive visualizations</li>
@@ -152,12 +152,12 @@ with col6:
 # Enhanced tabs with better styling and icons
 st.markdown("---")
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "🎯 Vanilla Options", 
-    "📈 Forward Contracts", 
-    "🔧 Option Strategies", 
-    "🌟 Exotic Options",
-    "🔄 Swaps",
-    "📊 Interest Rate Instruments"
+    "Vanilla Options", 
+    "Forward Contracts", 
+    "Option Strategies", 
+    "Exotic Options",
+    "Swaps",
+    "Interest Rate Instruments"
 ])
 
 # Execute each tab with enhanced error handling and styling
@@ -314,7 +314,7 @@ st.markdown("""
 <div class="footer-section animate-fade-in">
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 2rem;">
         <div>
-            <h4 style="color: #2563eb; margin-bottom: 10px;">📈 Platform Features</h4>
+            <h4 style="color: #2563eb; margin-bottom: 10px;">Platform Features</h4>
             <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #4a5568;">
                 <li>Real-time option pricing across multiple models</li>
                 <li>Interactive Greeks analysis with live updates</li>
@@ -324,7 +324,7 @@ st.markdown("""
             </ul>
         </div>
         <div>
-            <h4 style="color: #10b981; margin-bottom: 10px;">🎯 Use Cases</h4>
+            <h4 style="color: #10b981; margin-bottom: 10px;">Use Cases</h4>
             <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #4a5568;">
                 <li><strong>Trading:</strong> Strategy evaluation & optimization</li>
                 <li><strong>Risk Management:</strong> Portfolio hedging analysis</li>
@@ -334,7 +334,7 @@ st.markdown("""
             </ul>
         </div>
         <div>
-            <h4 style="color: #f59e0b; margin-bottom: 10px;">🛡️ Risk Disclaimer</h4>
+            <h4 style="color: #f59e0b; margin-bottom: 10px;">Risk Disclaimer</h4>
             <div style="font-size: 0.9rem; color: #4a5568;">
                 <p><strong>Educational Purpose:</strong> This platform is designed for educational and research purposes.</p>
                 <p><strong>Not Financial Advice:</strong> All calculations and analyses should be independently verified before use in trading or investment decisions.</p>
