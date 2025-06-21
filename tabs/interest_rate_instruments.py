@@ -65,6 +65,8 @@ def interest_rate_instruments_tab():
     with tab4:
         _bond_options_tab()
 
+    _display_educational_content()
+
 
 def _parameter_estimation_tab():
     """Parameter Estimation Tab"""
@@ -999,9 +1001,3 @@ A(t,T) = \exp\left( \left( \lambda - \frac{\sigma^2}{2a^2} \right)(B(t,T) - (T -
     </div>
     """, unsafe_allow_html=True)
 
-# Add the educational content call at the end of the main function
-def interest_rate_instruments_tab():
-    # ... existing code ...
-    
-    # Add educational content at the end
-    _display_educational_content()
