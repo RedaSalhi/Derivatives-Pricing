@@ -1,4 +1,681 @@
-# tabs/swaps.py
+def _get_indicative_fx_rate(quote_ccy: str, base_ccy: str) -> float:
+    """Get indicative FX rates for major currency pairs"""
+    
+    fx_rates = {
+        ("EUR", "USD"): 1.0850,
+        ("GBP", "USD"): 1.2650,
+        ("USD", "JPY"): 150.25,
+        ("USD", "CHF"): 0.8890,
+        ("USD", "CAD"): 1.3520,
+        ("AUD", "USD"): 0.6750,
+        ("USD", "SEK"): 10.45,
+        ("USD", "NOK"): 10.85,
+        ("EUR", "GBP"): 0.8580,
+        ("EUR", "JPY"): 163.50,
+        ("GBP", "JPY"): 190.60
+    }
+    
+    # Try direct lookup
+    if (quote_ccy, base_ccy) in fx_rates:
+        return fx_rates[(quote_ccy, base_ccy)]
+    
+    # Try inverse
+    if (base_ccy, quote_ccy) in fx_rates:
+        return 1.0 / fx_rates[(base_ccy, quote_ccy)]
+    
+    # Cross rates via USD
+    if quote_ccy != "USD" and base_ccy != "USD":
+        quote_usd = _get_indicative_fx_rate(quote_ccy, "USD")
+        base_usd = _get_indicative_fx_rate(base_ccy, "USD")
+        return quote_usd / base_usd
+    
+    # Default
+    return 1.0
+
+
+def _get_indicative_rate(currency: str) -> float:
+    """Get indicative interest rates by currency"""
+    
+    rates = {
+        "USD": 3.50,
+        "EUR": 2.25,
+        "GBP": 4.75,
+        "JPY": 0.50,
+        "CHF": 1.25,
+        "CAD": 3.25,
+        "AUD": 3.85,
+        "SEK": 2.75,
+        "NOK": 3.15
+    }
+    
+    return rates.get(currency, 3.00)
+
+
+def _get_indicative_fx_vol(quote_ccy: str, base_ccy: str) -> float:
+    """Get indicative FX volatilities"""
+    
+    vols = {
+        ("EUR", "USD"): 12.0,
+        ("GBP", "USD"): 15.0,
+        ("USD", "JPY"): 10.5,
+        ("USD", "CHF"): 11.0,
+        ("USD", "CAD"): 8.5,
+        ("AUD", "USD"): 18.0,
+        ("USD", "SEK"): 13.5,
+        ("USD", "NOK"): 14.0
+    }
+    
+    pair = (quote_ccy, base_ccy)
+    if pair in vols:
+        return vols[pair]
+    
+    # Try inverse
+    inverse_pair = (base_ccy, quote_ccy)
+    if inverse_pair in vols:
+        return vols[inverse_pair]
+    
+    # Default
+    return 15.0
+
+
+def _build_currency_curve(currency: str, base_rate: float, credit_spread: float = 0.0):
+    """Build simplified currency discount curve"""
+    
+    # Add country risk premiums
+    risk_premiums = {
+        "USD": 0.0,
+        "EUR": 0.001,
+        "GBP": 0.002,
+        "JPY": 0.0005,
+        "CHF": -0.0005,
+        "CAD": 0.0015,
+        "AUD": 0.003,
+        "SEK": 0.0025,
+        "NOK": 0.0035
+    }
+    
+    risk_premium = risk_premiums.get(currency, 0.002)
+    adjusted_rate = base_rate + credit_spread + risk_premium
+    
+    def curve(t):
+        # Simple term structure adjustment
+        term_adjustment = 0.001 * np.sqrt(t)  # Slight upward slope
+        return np.exp(-(adjusted_rate + term_adjustment) * t)
+    
+    return curve
+
+
+def _build_fx_forward_curve(fx_spot: float, base_curve, quote_curve, fx_vol: float, xccy_basis: float):
+    """Build FX forward curve using interest rate parity with adjustments"""
+    
+    def fx_forward(t):
+        if t <= 0:
+            return fx_spot
+        
+        # Interest rate parity
+        base_df = base_curve(t)
+        quote_df = quote_curve(t)
+        
+        # Basic forward rate
+        forward = fx_spot * (base_df / quote_df)
+        
+        # Cross-currency basis adjustment
+        basis_adjustment = np.exp(-xccy_basis * t)
+        
+        # Volatility adjustment (simplified quanto effect)
+        vol_adjustment = np.exp(-0.5 * fx_vol**2 * t)
+        
+        return forward * basis_adjustment * vol_adjustment
+    
+    return fx_forward
+
+
+def price_currency_swap_enhanced(
+    base_notional: float,
+    quote_notional: float,
+    base_rate: float,
+    quote_rate: float,
+    payment_times: list,
+    base_curve,
+    quote_curve,
+    fx_spot: float,
+    fx_forward_curve,
+    base_currency: str,
+    quote_currency: str,
+    swap_type: str = "Fixed-Fixed",
+    include_principal: bool = True
+):
+    """Enhanced currency swap pricing with comprehensive analytics"""
+    
+    year_fractions = np.diff([0] + payment_times)
+    
+    # Base currency leg (what we pay)
+    pv_base_leg = 0.0
+    base_cashflows = []
+    
+    for i, (yf, t) in enumerate(zip(year_fractions, payment_times)):
+        if swap_type in ["Fixed-Fixed", "Fixed-Float"]:
+            cashflow = base_notional * base_rate * yf
+        else:  # Float-Float
+            # Use forward rate for floating
+            forward_rate = -np.log(base_curve(t) / base_curve(max(0.001, t - yf))) / yf
+            cashflow = base_notional * forward_rate * yf
+        
+        pv = cashflow * base_curve(t)
+        pv_base_leg += pv
+        
+        base_cashflows.append({
+            'payment_date': t,
+            'year_fraction': yf,
+            'rate': base_rate if swap_type != "Float-Float" else forward_rate,
+            'cashflow': cashflow,
+            'discount_factor': base_curve(t),
+            'pv': pv
+        })
+    
+    # Quote currency leg (what we receive, converted to base currency)
+    pv_quote_leg = 0.0
+    quote_cashflows = []
+    
+    for i, (yf, t) in enumerate(zip(year_fractions, payment_times)):
+        if swap_type == "Fixed-Fixed":
+            rate = quote_rate
+        else:  # Fixed-Float or Float-Float
+            # Use forward rate for floating
+            rate = -np.log(quote_curve(t) / quote_curve(max(0.001, t - yf))) / yf
+        
+        cashflow_quote = quote_notional * rate * yf
+        fx_forward = fx_forward_curve(t)
+        cashflow_base = cashflow_quote * fx_forward
+        
+        pv = cashflow_base * base_curve(t)  # Discount in base currency
+        pv_quote_leg += pv
+        
+        quote_cashflows.append({
+            'payment_date': t,
+            'year_fraction': yf,
+            'rate': rate,
+            'cashflow_quote': cashflow_quote,
+            'fx_forward': fx_forward,
+            'cashflow_base': cashflow_base,
+            'discount_factor': base_curve(t),
+            'pv': pv
+        })
+    
+    # Principal exchanges
+    pv_principal = 0.0
+    if include_principal:
+        # Initial exchange: receive quote currency, pay base currency
+        initial_exchange = quote_notional * fx_spot - base_notional
+        
+        # Final exchange: pay quote currency, receive base currency
+        final_fx = fx_forward_curve(payment_times[-1])
+        final_exchange = base_notional - quote_notional * final_fx
+        final_exchange_pv = final_exchange * base_curve(payment_times[-1])
+        
+        pv_principal = initial_exchange + final_exchange_pv
+    
+    # Total NPV (positive = favorable to receiver of quote currency)
+    npv = pv_quote_leg - pv_base_leg + pv_principal
+    
+    # Calculate par rates
+    base_annuity = sum([yf * base_curve(t) for yf, t in zip(year_fractions, payment_times)])
+    quote_annuity = sum([yf * quote_curve(t) for yf, t in zip(year_fractions, payment_times)])
+    
+    par_base_rate = (pv_quote_leg + pv_principal) / (base_notional * base_annuity) if base_annuity > 0 else base_rate
+    par_quote_rate = (pv_base_leg - pv_principal) / (quote_notional * quote_annuity * fx_spot) if quote_annuity > 0 else quote_rate
+    
+    # Risk metrics
+    fx_delta = pv_quote_leg / fx_spot  # FX sensitivity
+    
+    return {
+        'npv': npv,
+        'pv_base_leg': pv_base_leg,
+        'pv_quote_leg': pv_quote_leg,
+        'pv_principal': pv_principal,
+        'par_base_rate': par_base_rate,
+        'par_quote_rate': par_quote_rate,
+        'fx_delta': fx_delta,
+        'base_cashflows': base_cashflows,
+        'quote_cashflows': quote_cashflows,
+        'current_fx': fx_spot,
+        'final_fx': fx_forward_curve(payment_times[-1]) if payment_times else fx_spot
+    }
+
+
+def _display_currency_swap_results(result: dict, base_ccy: str, quote_ccy: str, fx_spot: float, tenor_years: int):
+    """Display currency swap pricing results"""
+    
+    npv = result['npv']
+    
+    # Determine swap direction and color
+    if npv > 0:
+        direction = f"Receive {quote_ccy}, Pay {base_ccy}"
+        color = "#2E8B57"  # Green
+        status = "✅ Positive NPV"
+    elif npv < 0:
+        direction = f"Pay {quote_ccy}, Receive {base_ccy}"
+        color = "#DC143C"  # Red  
+        status = "❌ Negative NPV"
+    else:
+        direction = "At Par"
+        color = "#4682B4"  # Blue
+        status = "⚖️ Fair Value"
+    
+    st.markdown(f"""
+    <div class="metric-container">
+        <h4>💱 Currency Swap Pricing Results</h4>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
+                <td style="padding: 12px; font-weight: bold;">Metric</td>
+                <td style="padding: 12px; font-weight: bold;">Value</td>
+                <td style="padding: 12px; font-weight: bold;">Description</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">NPV ({base_ccy})</td>
+                <td style="padding: 10px; font-family: monospace; color: {color}; font-weight: bold; font-size: 1.2em;">{npv:,.0f}</td>
+                <td style="padding: 10px; font-style: italic;">Net Present Value</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">Status</td>
+                <td style="padding: 10px; font-weight: bold; color: {color};">{status}</td>
+                <td style="padding: 10px; font-style: italic;">{direction}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">Par {base_ccy} Rate</td>
+                <td style="padding: 10px; font-family: monospace; font-weight: bold;">{result['par_base_rate']*100:.4f}%</td>
+                <td style="padding: 10px; font-style: italic;">Fair {base_ccy} swap rate</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">Par {quote_ccy} Rate</td>
+                <td style="padding: 10px; font-family: monospace; font-weight: bold;">{result['par_quote_rate']*100:.4f}%</td>
+                <td style="padding: 10px; font-style: italic;">Fair {quote_ccy} swap rate</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px; font-weight: bold;">FX Delta</td>
+                <td style="padding: 10px; font-family: monospace; font-weight: bold;">{result['fx_delta']:,.0f}</td>
+                <td style="padding: 10px; font-style: italic;">FX sensitivity (1 unit move)</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-weight: bold;">Maturity FX</td>
+                <td style="padding: 10px; font-family: monospace; font-weight: bold;">{result['final_fx']:.4f}</td>
+                <td style="padding: 10px; font-style: italic;">Forward FX at maturity</td>
+            </tr>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Leg breakdown
+    col_leg1, col_leg2, col_leg3 = st.columns(3)
+    
+    with col_leg1:
+        st.markdown(f"""
+        <div class="greeks-delta">
+            <h4>📤 {base_ccy} Leg (Pay)</h4>
+            <p><strong>Present Value:</strong> {result['pv_base_leg']:,.0f}</p>
+            <p><strong>Par Rate:</strong> {result['par_base_rate']*100:.3f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col_leg2:
+        st.markdown(f"""
+        <div class="greeks-gamma">
+            <h4>📥 {quote_ccy} Leg (Receive)</h4>
+            <p><strong>Present Value:</strong> {result['pv_quote_leg']:,.0f}</p>
+            <p><strong>Par Rate:</strong> {result['par_quote_rate']*100:.3f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col_leg3:
+        st.markdown(f"""
+        <div class="greeks-theta">
+            <h4>💰 Principal Exchange</h4>
+            <p><strong>PV Impact:</strong> {result['pv_principal']:,.0f}</p>
+            <p><strong>FX Forward:</strong> {result['final_fx']:.4f}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+def _display_currency_swap_risk_metrics(result: dict, base_notional: float, quote_notional: float, 
+                                       fx_spot: float, base_ccy: str, quote_ccy: str, payment_times: list):
+    """Display currency swap risk metrics"""
+    
+    st.markdown('<div class="sub-header">⚡ Multi-Currency Risk Analytics</div>', unsafe_allow_html=True)
+    
+    # Calculate additional risk metrics
+    duration_years = np.mean(payment_times) if payment_times else 0
+    fx_exposure = result['fx_delta']
+    
+    col_risk1, col_risk2 = st.columns(2)
+    
+    with col_risk1:
+        st.markdown(f"""
+        <div class="info-box">
+            <h4>📊 Interest Rate Risk</h4>
+            <p><strong>{base_ccy} Duration:</strong> {duration_years:.2f} years</p>
+            <p><strong>{quote_ccy} Duration:</strong> {duration_years:.2f} years</p>
+            <p><strong>{base_ccy} DV01:</strong> {base_notional * duration_years * 0.0001:,.0f}</p>
+            <p><strong>{quote_ccy} DV01:</strong> {quote_notional * duration_years * 0.0001:,.0f}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col_risk2:
+        st.markdown(f"""
+        <div class="warning-box">
+            <h4>💱 FX & Credit Risk</h4>
+            <p><strong>FX Delta:</strong> {fx_exposure:,.0f} {base_ccy}</p>
+            <p><strong>FX Gamma:</strong> {abs(fx_exposure) * 0.01:,.0f} per 1% FX move</p>
+            <p><strong>Credit Exposure:</strong> {max(result['npv'], 0):,.0f}</p>
+            <p><strong>CVA Estimate:</strong> {max(result['npv'], 0) * 0.001:,.0f}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+def _display_fx_sensitivity_analysis(base_notional, quote_notional, base_rate, quote_rate,
+                                    payment_times, base_curve, quote_curve, fx_spot,
+                                    base_ccy, quote_ccy, swap_type, include_principal):
+    """Display FX sensitivity analysis with charts"""
+    
+    st.markdown('<div class="sub-header">📈 FX Sensitivity Analysis</div>', unsafe_allow_html=True)
+    
+    # FX sensitivity
+    fx_shifts = np.linspace(-20, 20, 21)  # -20% to +20%
+    npvs = []
+    
+    for shift_pct in fx_shifts:
+        shifted_fx = fx_spot * (1 + shift_pct / 100)
+        
+        # Rebuild FX forward curve with shifted spot
+        shifted_fx_curve = _build_fx_forward_curve(
+            shifted_fx, base_curve, quote_curve, 0.15, 0.0
+        )
+        
+        try:
+            result = price_currency_swap_enhanced(
+                base_notional=base_notional,
+                quote_notional=quote_notional,
+                base_rate=base_rate,
+                quote_rate=quote_rate,
+                payment_times=payment_times,
+                base_curve=base_curve,
+                quote_curve=quote_curve,
+                fx_spot=shifted_fx,
+                fx_forward_curve=shifted_fx_curve,
+                base_currency=base_ccy,
+                quote_currency=quote_ccy,
+                swap_type=swap_type,
+                include_principal=include_principal
+            )
+            npvs.append(result['npv'])
+        except:
+            npvs.append(0)
+    
+    # Create FX sensitivity chart
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=fx_shifts,
+        y=npvs,
+        mode='lines+markers',
+        name='NPV',
+        line=dict(color='#1f77b4', width=3),
+        marker=dict(size=6)
+    ))
+    
+    fig.add_hline(y=0, line_dash="dash", line_color="red", annotation_text="Break-even")
+    fig.add_vline(x=0, line_dash="dot", line_color="gray", annotation_text="Current FX")
+    
+    fig.update_layout(
+        title=f'{quote_ccy}{base_ccy} FX Sensitivity Analysis',
+        xaxis_title='FX Rate Shift (%)',
+        yaxis_title=f'NPV ({base_ccy})',
+        height=400,
+        showlegend=True
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Scenario analysis
+    scenarios = {
+        "Base Case": 0,
+        f"{quote_ccy} Strengthens (+10%)": 10,
+        f"{quote_ccy} Weakens (-10%)": -10,
+        f"Crisis Scenario (-20%)": -20,
+        f"Rally Scenario (+20%)": 20
+    }
+    
+    scenario_results = []
+    base_npv = npvs[10]  # Base case (0% shift)
+    
+    for scenario_name, shift_pct in scenarios.items():
+        npv_idx = 10 + shift_pct  # Index in npvs array
+        if 0 <= npv_idx < len(npvs):
+            npv = npvs[npv_idx]
+        else:
+            npv = base_npv
+        
+        scenario_results.append({
+            'Scenario': scenario_name,
+            'FX Shift (%)': shift_pct,
+            f'NPV ({base_ccy})': f"{npv:,.0f}",
+            'P&L vs Base': f"{npv - base_npv:,.0f}" if scenario_name != "Base Case" else "0"
+        })
+    
+    st.markdown('<div class="sub-header">🎭 FX Scenario Analysis</div>', unsafe_allow_html=True)
+    scenario_df = pd.DataFrame(scenario_results)
+    st.dataframe(scenario_df, use_container_width=True, hide_index=True)
+
+
+def _display_currency_market_overview():
+    """Display currency market overview when not pricing"""
+    
+    st.markdown('<div class="sub-header">🌍 Currency Markets Overview</div>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="info-box">
+            <h4>💱 Major FX Rates (Indicative)</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
+                    <td style="padding: 10px; font-weight: bold;">Currency Pair</td>
+                    <td style="padding: 10px; font-weight: bold;">Rate</td>
+                    <td style="padding: 10px; font-weight: bold;">Vol (%)</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">EUR/USD</td>
+                    <td style="padding: 8px; font-family: monospace;">1.0850</td>
+                    <td style="padding: 8px; font-family: monospace;">12.0</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">GBP/USD</td>
+                    <td style="padding: 8px; font-family: monospace;">1.2650</td>
+                    <td style="padding: 8px; font-family: monospace;">15.0</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">USD/JPY</td>
+                    <td style="padding: 8px; font-family: monospace;">150.25</td>
+                    <td style="padding: 8px; font-family: monospace;">10.5</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">USD/CHF</td>
+                    <td style="padding: 8px; font-family: monospace;">0.8890</td>
+                    <td style="padding: 8px; font-family: monospace;">11.0</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px;">AUD/USD</td>
+                    <td style="padding: 8px; font-family: monospace;">0.6750</td>
+                    <td style="padding: 8px; font-family: monospace;">18.0</td>
+                </tr>
+            </table>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="warning-box">
+            <h4>💰 Interest Rate Environment</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 2px solid #f59e0b; background-color: #fef3c7;">
+                    <td style="padding: 10px; font-weight: bold;">Currency</td>
+                    <td style="padding: 10px; font-weight: bold;">Policy Rate</td>
+                    <td style="padding: 10px; font-weight: bold;">5Y Swap</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">USD</td>
+                    <td style="padding: 8px; font-family: monospace;">3.50%</td>
+                    <td style="padding: 8px; font-family: monospace;">3.75%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">EUR</td>
+                    <td style="padding: 8px; font-family: monospace;">2.25%</td>
+                    <td style="padding: 8px; font-family: monospace;">2.50%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">GBP</td>
+                    <td style="padding: 8px; font-family: monospace;">4.75%</td>
+                    <td style="padding: 8px; font-family: monospace;">4.25%</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 8px;">JPY</td>
+                    <td style="padding: 8px; font-family: monospace;">0.50%</td>
+                    <td style="padding: 8px; font-family: monospace;">0.75%</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px;">CHF</td>
+                    <td style="padding: 8px; font-family: monospace;">1.25%</td>
+                    <td style="padding: 8px; font-family: monospace;">1.50%</td>
+                </tr>
+            </table>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Currency swap education
+    st.markdown('<div class="sub-header">📚 Currency Swaps Fundamentals</div>', unsafe_allow_html=True)
+    
+    with st.expander("💱 Understanding Cross-Currency Swaps"):
+        st.markdown("""
+        <div class="info-box">
+            <h4>What are Currency Swaps?</h4>
+            
+            <p><strong>Currency swaps</strong> are agreements between two parties to exchange cash flows in different currencies. 
+            They serve multiple purposes in international finance:</p>
+            
+            <h5>🔄 Key Features:</h5>
+            <ul>
+                <li><strong>Principal Exchange:</strong> Initial and final exchange of notional amounts</li>
+                <li><strong>Interest Payments:</strong> Periodic exchange of interest in respective currencies</li>
+                <li><strong>FX Risk:</strong> Exposure to currency movements over the swap life</li>
+                <li><strong>Cross-Currency Basis:</strong> Additional spread reflecting funding costs</li>
+            </ul>
+            
+            <h5>📊 Common Structures:</h5>
+            <ul>
+                <li><strong>Fixed-Fixed:</strong> Fixed rates in both currencies</li>
+                <li><strong>Fixed-Float:</strong> Fixed rate in one currency, floating in other</li>
+                <li><strong>Float-Float:</strong> Floating rates in both currencies</li>
+            </ul>
+            
+            <h5>💼 Market Applications:</h5>
+            <ul>
+                <li><strong>Funding Arbitrage:</strong> Access cheaper funding in foreign markets</li>
+                <li><strong>FX Hedging:</strong> Hedge long-term foreign currency exposure</li>
+                <li><strong>Asset-Liability Matching:</strong> Match currency of assets and liabilities</li>
+                <li><strong>Regulatory Capital:</strong> Optimize regulatory capital requirements</li>
+            </ul>
+            
+            <h5>⚠️ Key Risks:</h5>
+            <ul>
+                <li><strong>FX Risk:</strong> Currency movements affect swap value</li>
+                <li><strong>Interest Rate Risk:</strong> Rate changes in both currencies</li>
+                <li><strong>Credit Risk:</strong> Counterparty default risk</li>
+                <li><strong>Basis Risk:</strong> Cross-currency basis spread changes</li>
+                <li><strong>Liquidity Risk:</strong> Difficulty unwinding positions</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with st.expander("📈 Pricing Methodology"):
+        st.markdown("""
+        <div class="info-box">
+            <h4>Currency Swap Valuation</h4>
+            
+            <h5>💰 Present Value Calculation:</h5>
+            <p>The NPV of a currency swap is calculated as:</p>
+            <div class="formula">
+                NPV = PV(Foreign Leg) - PV(Domestic Leg) + PV(Principal Exchanges)
+            </div>
+            
+            <h5>🔄 Each Leg Valuation:</h5>
+            <ul>
+                <li><strong>Fixed Leg:</strong> PV = Σ[Coupon × DF(t)]</li>
+                <li><strong>Floating Leg:</strong> PV = Σ[Forward Rate × DF(t)]</li>
+                <li><strong>FX Conversion:</strong> Foreign cashflows × FX Forward</li>
+            </ul>
+            
+            <h5>💱 FX Forward Calculation:</h5>
+            <div class="formula">
+                F(t) = S(0) × [DF_foreign(t) / DF_domestic(t)] × Basis_Adjustment(t)
+            </div>
+            
+            <h5>📊 Risk Metrics:</h5>
+            <ul>
+                <li><strong>FX Delta:</strong> Sensitivity to spot FX movements</li>
+                <li><strong>IR DV01:</strong> Interest rate sensitivity in each currency</li>
+                <li><strong>Cross Gamma:</strong> Cross-currency second-order effects</li>
+                <li><strong>Vega:</strong> Sensitivity to FX volatility (for embedded options)</li>
+            </ul>
+            
+            <h5>🏦 Market Conventions:</h5>
+            <ul>
+                <li><strong>Day Count:</strong> Usually ACT/360 for USD, ACT/365 for GBP</li>
+                <li><strong>Payment Frequency:</strong> Semi-annual is standard</li>
+                <li><strong>Business Days:</strong> Modified following convention</li>
+                <li><strong>Reset:</strong> 2 business days before payment</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with st.expander("🌍 Market Structure & Trends"):
+        st.markdown("""
+        <div class="info-box">
+            <h4>Currency Swap Market Dynamics</h4>
+            
+            <h5>📊 Market Size & Activity:</h5>
+            <ul>
+                <li><strong>Outstanding Notional:</strong> ~$25 trillion globally</li>
+                <li><strong>Daily Trading:</strong> ~$200-300 billion average</li>
+                <li><strong>Major Pairs:</strong> USD/EUR, USD/JPY, USD/GBP dominate</li>
+                <li><strong>Tenor Distribution:</strong> 70% under 5 years, 20% 5-10 years</li>
+            </ul>
+            
+            <h5>🏛️ Key Market Participants:</h5>
+            <ul>
+                <li><strong>Central Banks:</strong> Liquidity provision, policy implementation</li>
+                <li><strong>Commercial Banks:</strong> Market making, client flow</li>
+                <li><strong>Corporations:</strong> Hedging, funding optimization</li>
+                <li><strong>Asset Managers:</strong> Currency hedging, relative value trades</li>
+                <li><strong>Hedge Funds:</strong> Speculation, arbitrage strategies</li>
+            </ul>
+            
+            <h5>🔄 Current Market Themes:</h5>
+            <ul>
+                <li><strong>Central Bank Divergence:</strong> Fed vs ECB vs BOJ policy paths</li>
+                <li><strong>USD Strength:</strong> Impact on cross-currency basis</li>
+                <li><strong>Emerging Markets:</strong> Increased hedging demand</li>
+                <li><strong>Regulatory Changes:</strong> Basel III impact on pricing</li>
+                <li><strong>Digital Currencies:</strong> Potential future disruption</li>
+            </ul>
+            
+            <h5>📈 Cross-Currency Basis Trends:</h5>
+            <ul>
+                <li><strong>USD Premium:</strong> Persistent demand for USD funding</li>
+                <li><strong>Quarter-End Effects:</strong> Regulatory capital impacts</li>
+                <li><strong>Crisis Periods:</strong> Basis can widen dramatically</li>
+                <li><strong>Central Bank Actions:</strong> Swap lines affect basis levels</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)# tabs/swaps.py
 # Enhanced Swaps Tab with Professional Pricing Models
 
 import streamlit as st
@@ -10,9 +687,9 @@ from datetime import datetime, timedelta, date
 from styles.app_styles import load_theme
 
 # Enhanced pricing functions
-from pricing.models.swaps.dcf import *
-from pricing.models.swaps.lmm import *
-from pricing.models.swaps.curves import *
+from pricing.models.swaps.enhanced_dcf import *
+from pricing.models.swaps.enhanced_lmm import *
+from pricing.models.swaps.enhanced_curves import *
 
 
 def swaps_tab():
@@ -78,17 +755,17 @@ def _interest_rate_swaps_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>Swap Configuration</h4>
+            <h4>🔧 Swap Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
         
         # Enhanced parameters with validation
         notional = st.number_input(
             "Notional Amount (USD)", 
-            min_value=100, 
+            min_value=1_000_000, 
             max_value=10_000_000_000, 
-            value=1_000_000, 
-            step=1000,
+            value=100_000_000, 
+            step=1_000_000,
             format="%d"
         )
         
@@ -105,7 +782,7 @@ def _interest_rate_swaps_tab():
         fixed_rate = st.slider(
             "Fixed Rate (%)", 
             min_value=0.0, 
-            max_value=100.0, 
+            max_value=10.0, 
             value=3.5, 
             step=0.01,
             format="%.2f"
@@ -113,8 +790,8 @@ def _interest_rate_swaps_tab():
         
         floating_spread = st.slider(
             "Floating Spread (bps)", 
-            min_value=-10000, 
-            max_value=50000, 
+            min_value=-100, 
+            max_value=500, 
             value=0, 
             step=5,
             help="Spread over benchmark rate"
@@ -123,7 +800,7 @@ def _interest_rate_swaps_tab():
         # Model selection
         st.markdown("""
         <div class="info-box">
-            <h4>Pricing Model</h4>
+            <h4>📈 Pricing Model</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -141,14 +818,14 @@ def _interest_rate_swaps_tab():
         # Current market environment
         st.markdown("""
         <div class="info-box">
-            <h4>Market Environment</h4>
+            <h4>🌍 Market Environment</h4>
         </div>
         """, unsafe_allow_html=True)
         
-        current_libor = st.slider("Current 3M LIBOR (%)", 0.0, 100.0, 2.5, 0.01) / 100
-        fed_funds = st.slider("Fed Funds Rate (%)", 0.0, 100.0, 2.0, 0.01) / 100
+        current_libor = st.slider("Current 3M LIBOR (%)", 0.0, 8.0, 2.5, 0.01) / 100
+        fed_funds = st.slider("Fed Funds Rate (%)", 0.0, 8.0, 2.0, 0.01) / 100
         
-        price_btn = st.button("Price Swap", type="primary", use_container_width=True)
+        price_btn = st.button("🔢 Price Swap", type="primary", use_container_width=True)
     
     with col2:
         if price_btn:
@@ -237,7 +914,7 @@ def _display_irs_results(result, notional, fixed_rate, payment_times, model):
     
     st.markdown(f"""
     <div class="metric-container">
-        <h4>Swap Pricing Results ({model})</h4>
+        <h4>🎯 Swap Pricing Results ({model})</h4>
         <table style="width: 100%; border-collapse: collapse;">
             <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                 <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -277,7 +954,7 @@ def _display_irs_results(result, notional, fixed_rate, payment_times, model):
 def _display_irs_risk_metrics(result, notional, fixed_rate, current_rate, payment_times):
     """Display comprehensive risk metrics"""
     
-    st.markdown('<div class="sub-header">Risk Analytics</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">⚡ Risk Analytics</div>', unsafe_allow_html=True)
     
     # Calculate risk metrics
     duration = sum([t * 0.25 for t in range(1, len(payment_times) + 1)]) / len(payment_times)
@@ -697,7 +1374,7 @@ def _market_intelligence_tab():
         <div class="info-box">
             <h4>Interest Rate Swaps Fundamentals</h4>
             
-            <h4>Market Structure:</h4>
+            <h5>Market Structure:</h5>
             <p>The interest rate swaps market is the largest derivatives market globally, with over $400 trillion in notional outstanding. 
             It serves as the backbone for:</p>
             <ul>
