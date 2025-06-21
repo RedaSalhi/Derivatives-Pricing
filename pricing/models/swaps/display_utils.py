@@ -1,587 +1,688 @@
-# pricing/models/display_utils.py
-# Clean Display Utilities for Swaps
+# Enhanced Display Manager with Educational Content
+# File: pricing/models/enhanced_display_utils.py
 
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 import numpy as np
-from .market_data import market_data_manager
+from datetime import datetime
+from typing import Dict, List, Optional
 
 
-class SwapDisplayManager:
-    """Centralized display management for swaps"""
+class EducationalSwapDisplayManager:
+    """Enhanced display manager with educational explanations and accurate visualizations"""
     
     @staticmethod
-    def display_irs_results(result, notional, fixed_rate, tenor_years, model, market_rate=None):
-        """Display IRS pricing results"""
+    def display_swap_explanation(swap_type: str):
+        """Display educational explanation for swap mechanics"""
         
-        npv = result.npv
-        par_rate = result.par_rate
+        explanations = {
+            "interest_rate": {
+                "title": "🔄 Interest Rate Swap Fundamentals",
+                "description": """
+                An Interest Rate Swap (IRS) is an agreement to exchange interest payments between two parties.
+                """,
+                "mechanics": [
+                    "**Fixed Leg**: One party pays a predetermined fixed rate",
+                    "**Floating Leg**: Other party pays a variable rate (usually SOFR/LIBOR + spread)",
+                    "**Notional**: Principal amount (not exchanged, used for calculation)",
+                    "**Payment Frequency**: Typically quarterly or semi-annual",
+                    "**Settlement**: Only net payment is exchanged"
+                ],
+                "use_cases": [
+                    "**Interest Rate Risk Management**: Convert fixed-rate debt to floating or vice versa",
+                    "**Speculation**: Bet on interest rate direction",
+                    "**Asset-Liability Matching**: Align cash flows with obligations",
+                    "**Cost Reduction**: Potentially lower financing costs"
+                ]
+            },
+            "currency": {
+                "title": "💱 Cross-Currency Swap Fundamentals", 
+                "description": """
+                A Currency Swap involves exchanging principal and interest payments in different currencies.
+                """,
+                "mechanics": [
+                    "**Principal Exchange**: Initial and final exchange of notional amounts",
+                    "**Interest Payments**: Periodic payments in each currency",
+                    "**FX Risk**: Exposure to exchange rate movements",
+                    "**Cross-Currency Basis**: Additional spread reflecting funding costs",
+                    "**Dual Curve Pricing**: Separate discount curves for each currency"
+                ],
+                "use_cases": [
+                    "**Currency Hedging**: Eliminate FX exposure from foreign investments",
+                    "**Funding Arbitrage**: Access cheaper funding in foreign markets",
+                    "**Asset-Liability Matching**: Match foreign currency assets with liabilities",
+                    "**Synthetic Foreign Investment**: Create foreign exposure without direct investment"
+                ]
+            },
+            "equity": {
+                "title": "📈 Equity Swap Fundamentals",
+                "description": """
+                An Equity Swap exchanges the returns of an equity position for fixed or floating interest payments.
+                """,
+                "mechanics": [
+                    "**Equity Leg**: Returns based on equity performance (price + dividends)",
+                    "**Fixed/Floating Leg**: Traditional interest payment (SOFR + spread)",
+                    "**Total Return**: Includes capital appreciation and dividend income",
+                    "**Reset Periods**: Performance calculated over specific intervals",
+                    "**No Physical Ownership**: Synthetic exposure without buying shares"
+                ],
+                "use_cases": [
+                    "**Synthetic Equity Exposure**: Gain equity exposure without buying shares",
+                    "**Leverage**: Amplify equity exposure beyond available capital",
+                    "**Tax Efficiency**: Potentially favorable tax treatment",
+                    "**Regulatory Capital**: Reduce balance sheet impact vs. physical holdings"
+                ]
+            }
+        }
         
-        # Market comparison
-        if market_rate:
-            rate_diff_bp = (fixed_rate - market_rate) * 10000
-        else:
-            rate_diff_bp = 0
+        content = explanations.get(swap_type, explanations["interest_rate"])
         
         st.markdown(f"""
-        <div class="metric-container">
-            <h4>🎯 Swap Pricing Results ({model})</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #007bff;">
-                    <h5 style="color: #007bff; margin-bottom: 10px;">💰 Valuation</h5>
-                    <p><strong>NPV:</strong> <span style="color: {'green' if npv > 0 else 'red'}; font-size: 1.2em;">${npv:,.0f}</span></p>
-                    <p><strong>Par Rate:</strong> {par_rate*100:.4f}%</p>
-                    <p><strong>DV01:</strong> ${result.dv01:,.0f}</p>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    padding: 25px; border-radius: 15px; margin-bottom: 25px; color: white;">
+            <h3 style="margin: 0 0 15px 0; color: white;">{content['title']}</h3>
+            <p style="font-size: 1.1em; margin-bottom: 20px; color: #f8f9fa;">{content['description']}</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #ffd700; margin-bottom: 10px;">💡 How It Works</h4>
+                    {''.join([f'<p style="margin: 5px 0; font-size: 0.9em;">• {item}</p>' for item in content['mechanics']])}
                 </div>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #28a745;">
-                    <h5 style="color: #28a745; margin-bottom: 10px;">📊 Market</h5>
-                    <p><strong>Your Rate:</strong> {fixed_rate*100:.3f}%</p>
-                    <p><strong>Market Rate:</strong> {market_rate:.3f}% {f'({rate_diff_bp:+.1f}bp)' if market_rate else ''}</p>
-                    <p><strong>Duration:</strong> {result.duration:.2f} years</p>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #98fb98; margin-bottom: 10px;">🎯 Common Uses</h4>
+                    {''.join([f'<p style="margin: 5px 0; font-size: 0.9em;">• {item}</p>' for item in content['use_cases']])}
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
     
     @staticmethod
-    def display_currency_swap_results(result, base_currency, quote_currency, fx_spot, tenor_years):
-        """Display currency swap results"""
+    def display_enhanced_irs_results(result, notional: float, fixed_rate: float, 
+                                   tenor_years: float, model: str, market_data: Dict):
+        """Display comprehensive IRS results with educational context"""
+        
+        # Main results display
+        npv = result.npv
+        par_rate = result.par_rate
+        market_rate = market_data.get('market_rate', par_rate)
+        
+        # Determine swap favorability
+        rate_diff_bp = (fixed_rate - market_rate) * 10000
+        npv_color = "#28a745" if npv > 0 else "#dc3545"
+        npv_status = "Favorable" if npv > 0 else "Unfavorable"
+        
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+                    padding: 25px; border-radius: 15px; border-left: 5px solid #007bff; margin-bottom: 20px;">
+            <h3 style="color: #007bff; margin-bottom: 20px;">💰 Swap Valuation Results</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">💵 Net Present Value</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: {npv_color};">${npv:,.0f}</div>
+                    <div style="color: {npv_color}; font-weight: bold;">● {npv_status}</div>
+                    <small style="color: #6c757d;">
+                        {"You receive more than you pay" if npv > 0 else "You pay more than you receive"}
+                    </small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">📊 Par Rate (Fair Value)</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #007bff;">{par_rate*100:.4f}%</div>
+                    <div style="color: #6c757d;">vs Your Rate: {fixed_rate*100:.3f}%</div>
+                    <small style="color: #6c757d;">
+                        Rate that makes NPV = 0
+                    </small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">⚡ DV01 (Risk)</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #28a745;">${result.dv01:,.0f}</div>
+                    <div style="color: #6c757d;">Per 1bp rate change</div>
+                    <small style="color: #6c757d;">
+                        Dollar sensitivity to rates
+                    </small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">⏰ Duration</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #ffc107;">{result.duration:.2f}</div>
+                    <div style="color: #6c757d;">years</div>
+                    <small style="color: #6c757d;">
+                        Average time to cash flows
+                    </small>
+                </div>
+                
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Educational explanation of results
+        st.markdown(f"""
+        <div style="background: #d1ecf1; padding: 20px; border-radius: 10px; border-left: 4px solid #17a2b8; margin-bottom: 20px;">
+            <h4 style="color: #0c5460;">📚 Understanding Your Results</h4>
+            
+            <div style="margin: 15px 0;">
+                <strong>NPV Interpretation:</strong>
+                <p style="margin: 5px 0;">
+                    Your swap has an NPV of <strong>${npv:,.0f}</strong>. This means:
+                    {'The present value of cash flows you receive exceeds what you pay by this amount.' if npv > 0 else 'The present value of cash flows you pay exceeds what you receive by this amount.'}
+                </p>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <strong>Par Rate vs Your Rate:</strong>
+                <p style="margin: 5px 0;">
+                    The market fair value (par rate) is <strong>{par_rate*100:.4f}%</strong> vs your fixed rate of <strong>{fixed_rate*100:.3f}%</strong>.
+                    You are paying <strong>{rate_diff_bp:+.1f} basis points</strong> {'above' if rate_diff_bp > 0 else 'below'} fair value.
+                </p>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <strong>Risk Metrics:</strong>
+                <p style="margin: 5px 0;">
+                    <strong>DV01:</strong> If interest rates rise by 1 basis point, your swap value will {'decrease' if npv > 0 else 'increase'} by approximately ${result.dv01:,.0f}.<br>
+                    <strong>Duration:</strong> Your swap behaves like a bond with {result.duration:.2f} years to maturity in terms of interest rate sensitivity.
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Market context
+        if 'curve_data' in market_data:
+            EducationalSwapDisplayManager._display_yield_curve_context(market_data['curve_data'], tenor_years, fixed_rate)
+    
+    @staticmethod
+    def _display_yield_curve_context(curve_data: Dict[float, float], tenor: float, fixed_rate: float):
+        """Display yield curve context"""
+        
+        tenors = sorted(curve_data.keys())
+        rates = [curve_data[t] * 100 for t in tenors]
+        
+        fig = go.Figure()
+        
+        # Add yield curve
+        fig.add_trace(go.Scatter(
+            x=tenors,
+            y=rates,
+            mode='lines+markers',
+            name='Market Yield Curve',
+            line=dict(color='#007bff', width=3),
+            marker=dict(size=8, color='#007bff')
+        ))
+        
+        # Highlight swap tenor and rate
+        if tenor in curve_data:
+            market_rate_at_tenor = curve_data[tenor] * 100
+            fig.add_trace(go.Scatter(
+                x=[tenor],
+                y=[market_rate_at_tenor],
+                mode='markers',
+                name='Market Rate at Tenor',
+                marker=dict(size=15, color='#28a745', symbol='circle')
+            ))
+        
+        # Add user's fixed rate
+        fig.add_trace(go.Scatter(
+            x=[tenor],
+            y=[fixed_rate * 100],
+            mode='markers',
+            name='Your Fixed Rate',
+            marker=dict(size=15, color='#dc3545', symbol='x')
+        ))
+        
+        fig.update_layout(
+            title='Your Swap Rate vs Market Yield Curve',
+            xaxis_title='Maturity (Years)',
+            yaxis_title='Rate (%)',
+            height=400,
+            hovermode='x unified'
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Curve analysis
+        if len(rates) >= 2:
+            curve_slope = rates[-1] - rates[0]
+            curve_shape = "Normal (upward sloping)" if curve_slope > 0 else \
+                         "Inverted (downward sloping)" if curve_slope < -0.1 else "Flat"
+            
+            st.info(f"📈 **Yield Curve Analysis**: {curve_shape} | "
+                   f"Slope: {curve_slope:.0f}bp | "
+                   f"Your rate vs {tenor}Y market: {(fixed_rate - curve_data.get(tenor, fixed_rate)) * 10000:+.1f}bp")
+    
+    @staticmethod
+    def display_enhanced_currency_swap_results(result, base_currency: str, quote_currency: str, 
+                                             fx_spot: float, market_data: Dict):
+        """Display comprehensive currency swap results with educational context"""
         
         npv_domestic = result.npv_domestic
         fx_delta = result.fx_delta
         
-        color = "#2E8B57" if npv_domestic > 0 else "#DC143C"
+        # Determine favorability
+        color = "#28a745" if npv_domestic > 0 else "#dc3545"
         status = "✅ Favorable" if npv_domestic > 0 else "❌ Unfavorable"
         
         st.markdown(f"""
-        <div class="metric-container">
-            <h4>💱 Currency Swap Results</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
-                    <td style="padding: 12px; font-weight: bold;">Metric</td>
-                    <td style="padding: 12px; font-weight: bold;">Value</td>
-                    <td style="padding: 12px; font-weight: bold;">Description</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; font-weight: bold;">NPV ({base_currency})</td>
-                    <td style="padding: 10px; font-family: monospace; color: {color}; font-weight: bold; font-size: 1.2em;">{base_currency} {npv_domestic:,.0f}</td>
-                    <td style="padding: 10px; font-style: italic;">Net Present Value</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; font-weight: bold;">Status</td>
-                    <td style="padding: 10px; font-weight: bold; color: {color};">{status}</td>
-                    <td style="padding: 10px; font-style: italic;">From {base_currency} perspective</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; font-weight: bold;">FX Delta</td>
-                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">{base_currency} {fx_delta:,.0f}</td>
-                    <td style="padding: 10px; font-style: italic;">Sensitivity to 1% FX move</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; font-weight: bold;">FX Rate</td>
-                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">{fx_spot:.4f}</td>
-                    <td style="padding: 10px; font-style: italic;">Current market rate</td>
-                </tr>
-            </table>
+        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+                    padding: 25px; border-radius: 15px; border-left: 5px solid #17a2b8; margin-bottom: 20px;">
+            <h3 style="color: #17a2b8; margin-bottom: 20px;">💱 Cross-Currency Swap Results</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">💰 NPV ({base_currency})</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: {color};">{base_currency} {npv_domestic:,.0f}</div>
+                    <div style="color: {color}; font-weight: bold;">{status}</div>
+                    <small style="color: #6c757d;">Net present value in base currency</small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">💱 Current FX Rate</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #007bff;">{fx_spot:.4f}</div>
+                    <div style="color: #6c757d;">{quote_currency}{base_currency}</div>
+                    <small style="color: #6c757d;">
+                        Change: {market_data.get('fx_change', 0):+.2f}%
+                    </small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">⚡ FX Delta</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #ffc107;">{base_currency} {fx_delta:,.0f}</div>
+                    <div style="color: #6c757d;">Per 1% FX move</div>
+                    <small style="color: #6c757d;">Currency exposure sensitivity</small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">📊 Cross Gamma</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #28a745;">{base_currency} {result.cross_gamma:,.0f}</div>
+                    <div style="color: #6c757d;">Second-order risk</div>
+                    <small style="color: #6c757d;">FX convexity measure</small>
+                </div>
+                
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Risk breakdown
+        st.markdown(f"""
+        <div style="background: #fff3cd; padding: 20px; border-radius: 10px; border-left: 4px solid #ffc107; margin-bottom: 20px;">
+            <h4 style="color: #856404;">⚡ Risk Breakdown</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                <div>
+                    <h5 style="color: #856404;">Interest Rate Risk</h5>
+                    <p><strong>{base_currency} DV01:</strong> {base_currency} {result.domestic_dv01:,.0f}</p>
+                    <p><strong>{quote_currency} DV01:</strong> {base_currency} {result.foreign_dv01:,.0f}</p>
+                    <small>Sensitivity to 1bp rate change in each currency</small>
+                </div>
+                
+                <div>
+                    <h5 style="color: #856404;">Currency Risk</h5>
+                    <p><strong>FX Delta:</strong> {base_currency} {fx_delta:,.0f}</p>
+                    <p><strong>Volatility:</strong> {market_data.get('fx_volatility', 10.0):.1f}%</p>
+                    <small>FX exposure and market volatility</small>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Educational explanation
+        st.markdown(f"""
+        <div style="background: #d1ecf1; padding: 20px; border-radius: 10px; border-left: 4px solid #17a2b8; margin-bottom: 20px;">
+            <h4 style="color: #0c5460;">📚 Understanding Currency Swap Risk</h4>
+            
+            <div style="margin: 15px 0;">
+                <strong>NPV Interpretation:</strong>
+                <p style="margin: 5px 0;">
+                    Your currency swap has an NPV of <strong>{base_currency} {npv_domestic:,.0f}</strong>. 
+                    {'This represents the present value advantage of receiving ' + quote_currency + ' payments vs paying ' + base_currency + ' payments.' if npv_domestic > 0 else 'This represents the present value cost of the swap structure.'}
+                </p>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <strong>FX Risk Management:</strong>
+                <p style="margin: 5px 0;">
+                    <strong>FX Delta:</strong> If {quote_currency} strengthens by 1% vs {base_currency}, your swap value will {'increase' if fx_delta > 0 else 'decrease'} by approximately {base_currency} {abs(fx_delta * 0.01):,.0f}.<br>
+                    <strong>Current Volatility:</strong> {market_data.get('fx_volatility', 10.0):.1f}% indicates {'high' if market_data.get('fx_volatility', 10.0) > 15 else 'moderate' if market_data.get('fx_volatility', 10.0) > 8 else 'low'} FX risk.
+                </p>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <strong>Dual Currency Exposure:</strong>
+                <p style="margin: 5px 0;">
+                    You have interest rate risk in both currencies. Rate changes in {base_currency} affect your swap by {base_currency} {result.domestic_dv01:,.0f} per basis point, 
+                    while {quote_currency} rate changes affect it by {base_currency} {result.foreign_dv01:,.0f} per basis point.
+                </p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
     
     @staticmethod
-    def display_equity_swap_results(result, reference_asset, notional, swap_direction, tenor_years):
-        """Display equity swap results"""
+    def display_enhanced_equity_swap_results(result, reference_asset: str, notional: float, 
+                                           swap_direction: str, market_data: Dict):
+        """Display comprehensive equity swap results with educational context"""
         
         npv = result.npv
-        color = "#2E8B57" if npv > 0 else "#DC143C"
+        equity_price = market_data.get('price', 100.0)
+        volatility = market_data.get('volatility', 25.0)
+        dividend_yield = market_data.get('dividend_yield', 2.0)
+        
+        color = "#28a745" if npv > 0 else "#dc3545"
         status = "✅ Favorable" if npv > 0 else "❌ Unfavorable"
         
         st.markdown(f"""
-        <div class="metric-container">
-            <h4>📈 Equity Swap Results</h4>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
-                    <td style="padding: 12px; font-weight: bold;">Metric</td>
-                    <td style="padding: 12px; font-weight: bold;">Value</td>
-                    <td style="padding: 12px; font-weight: bold;">Description</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; font-weight: bold;">NPV</td>
-                    <td style="padding: 10px; font-family: monospace; color: {color}; font-weight: bold; font-size: 1.2em;">${npv:,.0f}</td>
-                    <td style="padding: 10px; font-style: italic;">Net Present Value</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; font-weight: bold;">Status</td>
-                    <td style="padding: 10px; font-weight: bold; color: {color};">{status}</td>
-                    <td style="padding: 10px; font-style: italic;">{swap_direction}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; font-weight: bold;">Equity PV</td>
-                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">${result.pv_floating:,.0f}</td>
-                    <td style="padding: 10px; font-style: italic;">Equity leg value</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; font-weight: bold;">Fixed PV</td>
-                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">${result.pv_fixed:,.0f}</td>
-                    <td style="padding: 10px; font-style: italic;">Fixed leg value</td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; font-weight: bold;">Reference</td>
-                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">{reference_asset}</td>
-                    <td style="padding: 10px; font-style: italic;">Underlying asset</td>
-                </tr>
-            </table>
+        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+                    padding: 25px; border-radius: 15px; border-left: 5px solid #28a745; margin-bottom: 20px;">
+            <h3 style="color: #28a745; margin-bottom: 20px;">📈 Equity Swap Results</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">💰 NPV</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: {color};">${npv:,.0f}</div>
+                    <div style="color: {color}; font-weight: bold;">{status}</div>
+                    <small style="color: #6c757d;">Net present value of swap</small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">📊 Current Price</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #007bff;">${equity_price:.2f}</div>
+                    <div style="color: #6c757d;">{reference_asset}</div>
+                    <small style="color: #6c757d;">
+                        Change: {market_data.get('change_pct', 0):+.2f}%
+                    </small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">⚡ Volatility</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #ffc107;">{volatility:.1f}%</div>
+                    <div style="color: #6c757d;">Annualized</div>
+                    <small style="color: #6c757d;">
+                        Risk level: {'High' if volatility > 30 else 'Medium' if volatility > 20 else 'Low'}
+                    </small>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h5 style="color: #6c757d; margin-bottom: 10px;">💸 Dividend Yield</h5>
+                    <div style="font-size: 2em; font-weight: bold; color: #17a2b8;">{dividend_yield:.2f}%</div>
+                    <div style="color: #6c757d;">Annual yield</div>
+                    <small style="color: #6c757d;">Income component</small>
+                </div>
+                
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Greeks and risk metrics
+        if result.greeks:
+            st.markdown(f"""
+            <div style="background: #e7f3ff; padding: 20px; border-radius: 10px; border-left: 4px solid #007bff; margin-bottom: 20px;">
+                <h4 style="color: #004085;">🔬 Risk Analytics (Greeks)</h4>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 15px;">
+                    <div style="text-align: center;">
+                        <h5 style="color: #004085;">Delta</h5>
+                        <div style="font-size: 1.5em; font-weight: bold;">{result.greeks.get('equity_delta', 0):,.0f}</div>
+                        <small>Shares equivalent exposure</small>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <h5 style="color: #004085;">Vega</h5>
+                        <div style="font-size: 1.5em; font-weight: bold;">${result.greeks.get('equity_vega', 0):,.0f}</div>
+                        <small>Volatility sensitivity</small>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <h5 style="color: #004085;">Beta</h5>
+                        <div style="font-size: 1.5em; font-weight: bold;">{market_data.get('beta', 1.0):.2f}</div>
+                        <small>Market correlation</small>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Educational explanation
+        st.markdown(f"""
+        <div style="background: #d1ecf1; padding: 20px; border-radius: 10px; border-left: 4px solid #17a2b8; margin-bottom: 20px;">
+            <h4 style="color: #0c5460;">📚 Understanding Equity Swap Exposure</h4>
+            
+            <div style="margin: 15px 0;">
+                <strong>Position Analysis:</strong>
+                <p style="margin: 5px 0;">
+                    You are <strong>{swap_direction.lower()}</strong> on {reference_asset}. 
+                    {'You benefit if the equity outperforms the fixed rate.' if 'receive equity' in swap_direction.lower() else 'You benefit if the fixed rate outperforms the equity.'}
+                </p>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <strong>Risk Factors:</strong>
+                <p style="margin: 5px 0;">
+                    <strong>Price Risk:</strong> With {volatility:.1f}% volatility, daily moves could be ±{volatility/np.sqrt(252):.1f}%.<br>
+                    <strong>Dividend Risk:</strong> Current yield of {dividend_yield:.2f}% affects total return calculations.<br>
+                    <strong>Market Risk:</strong> Beta of {market_data.get('beta', 1.0):.2f} means the asset is {'more volatile than' if market_data.get('beta', 1.0) > 1.0 else 'less volatile than' if market_data.get('beta', 1.0) < 1.0 else 'as volatile as'} the overall market.
+                </p>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <strong>Synthetic vs Physical:</strong>
+                <p style="margin: 5px 0;">
+                    This swap gives you synthetic exposure equivalent to owning {abs(result.greeks.get('equity_delta', notional/equity_price)):,.0f} shares without:
+                    • Physical settlement • Voting rights • Direct dividend payments • Full regulatory capital requirements
+                </p>
+            </div>
         </div>
         """, unsafe_allow_html=True)
     
     @staticmethod
-    def display_risk_analytics(result, swap_type="IRS", **kwargs):
-        """Display risk analytics"""
+    def display_comprehensive_risk_analytics(result, swap_type: str, scenario_analysis: pd.DataFrame = None):
+        """Display comprehensive risk analytics with scenario analysis"""
         
-        st.markdown('<div class="sub-header">⚡ Risk Analytics</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #495057; font-size: 1.5em; font-weight: bold; margin: 25px 0 15px 0;">⚡ Advanced Risk Analytics</div>', unsafe_allow_html=True)
         
-        col1, col2 = st.columns(2)
-        
-        if swap_type == "IRS":
-            with col1:
-                st.markdown(f"""
-                <div class="greeks-delta">
-                    <h4>📊 Interest Rate Risk</h4>
-                    <p><strong>DV01:</strong> ${result.dv01:,.0f}</p>
-                    <p><strong>Duration:</strong> {result.duration:.2f} years</p>
-                    <p><strong>Convexity:</strong> {(result.duration ** 2 * 0.5):.2f}</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col2:
-                if hasattr(result, 'greeks') and result.greeks:
-                    model_info = result.greeks.get('model', 'DCF')
-                    paths = result.greeks.get('monte_carlo_paths', 'N/A')
-                    
-                    st.markdown(f"""
-                    <div class="greeks-gamma">
-                        <h4>🔧 Model Details</h4>
-                        <p><strong>Model:</strong> {model_info}</p>
-                        <p><strong>Paths:</strong> {paths}</p>
-                        <p><strong>Par Rate:</strong> {result.par_rate*100:.4f}%</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-        
-        elif swap_type == "Currency":
-            base_currency = kwargs.get('base_currency', 'USD')
-            quote_currency = kwargs.get('quote_currency', 'EUR')
+        # Scenario analysis
+        if scenario_analysis is not None and not scenario_analysis.empty:
+            col1, col2 = st.columns(2)
             
             with col1:
-                st.markdown(f"""
-                <div class="greeks-delta">
-                    <h4>💱 FX Risk</h4>
-                    <p><strong>FX Delta:</strong> {base_currency} {result.fx_delta:,.0f}</p>
-                    <p><strong>Cross Gamma:</strong> {base_currency} {result.cross_gamma:,.0f}</p>
-                </div>
-                """, unsafe_allow_html=True)
+                # P&L scenario chart
+                fig = go.Figure()
+                fig.add_trace(go.Bar(
+                    x=scenario_analysis['Rate_Shock_bp'],
+                    y=scenario_analysis['PnL'],
+                    marker_color=['red' if x < 0 else 'green' for x in scenario_analysis['PnL']],
+                    name='P&L by Scenario'
+                ))
+                
+                fig.update_layout(
+                    title='P&L Sensitivity to Rate Shocks',
+                    xaxis_title='Rate Shock (bp)',
+                    yaxis_title='P&L ($)',
+                    height=400
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
             
             with col2:
-                st.markdown(f"""
-                <div class="greeks-gamma">
-                    <h4>📊 Rate Risk</h4>
-                    <p><strong>{base_currency} DV01:</strong> {base_currency} {result.domestic_dv01:,.0f}</p>
-                    <p><strong>{quote_currency} DV01:</strong> {base_currency} {result.foreign_dv01:,.0f}</p>
-                </div>
-                """, unsafe_allow_html=True)
+                # Scenario table
+                st.markdown("**Scenario Analysis**")
+                scenario_display = scenario_analysis.copy()
+                scenario_display['New_NPV'] = scenario_display['New_NPV'].apply(lambda x: f"${x:,.0f}")
+                scenario_display['PnL'] = scenario_display['PnL'].apply(lambda x: f"${x:,.0f}")
+                scenario_display['PnL_Percent'] = scenario_display['PnL_Percent'].apply(lambda x: f"{x:.1f}%")
+                
+                st.dataframe(scenario_display, use_container_width=True, hide_index=True)
         
-        elif swap_type == "Equity":
-            equity_data = kwargs.get('equity_data', {})
+        # Risk metrics explanation
+        st.markdown(f"""
+        <div style="background: #f8d7da; padding: 20px; border-radius: 10px; border-left: 4px solid #dc3545; margin: 20px 0;">
+            <h4 style="color: #721c24;">⚠️ Risk Management Guidelines</h4>
             
-            with col1:
-                st.markdown(f"""
-                <div class="greeks-delta">
-                    <h4>📊 Market Risk</h4>
-                    <p><strong>Equity Delta:</strong> {result.greeks.get('equity_delta', 0):,.0f} shares</p>
-                    <p><strong>Equity Vega:</strong> ${result.greeks.get('equity_vega', 0):,.0f}</p>
-                </div>
-                """, unsafe_allow_html=True)
+            <div style="margin: 15px 0;">
+                <strong>Daily Monitoring:</strong>
+                <ul>
+                    <li>Track NPV changes and market moves</li>
+                    <li>Monitor key risk metrics (DV01, Delta, Vega)</li>
+                    <li>Check correlation breakdowns in stress scenarios</li>
+                </ul>
+            </div>
             
-            with col2:
-                st.markdown(f"""
-                <div class="greeks-gamma">
-                    <h4>💰 Live Data</h4>
-                    <p><strong>Price:</strong> ${equity_data.get('price', 0):.2f}</p>
-                    <p><strong>Volatility:</strong> {equity_data.get('volatility', 0):.1f}%</p>
-                </div>
-                """, unsafe_allow_html=True)
+            <div style="margin: 15px 0;">
+                <strong>Hedging Considerations:</strong>
+                <ul>
+                    <li>Consider delta hedging for large positions</li>
+                    <li>Monitor cross-asset correlations</li>
+                    <li>Set appropriate stop-loss levels</li>
+                </ul>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <strong>Regulatory & Accounting:</strong>
+                <ul>
+                    <li>Ensure proper hedge accounting designation</li>
+                    <li>Meet collateral and margin requirements</li>
+                    <li>Document business purpose and risk management</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     @staticmethod
-    def display_market_comparison(result, market_rate, fixed_rate):
-        """Display market comparison chart"""
+    def display_market_intelligence_dashboard():
+        """Display comprehensive market intelligence dashboard"""
         
-        st.markdown('<div class="sub-header">📈 Market Analysis</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color: #495057; font-size: 1.8em; font-weight: bold; margin: 25px 0 15px 0;">📊 Live Market Intelligence</div>', unsafe_allow_html=True)
         
-        metrics = ['Your Rate', 'Market Rate', 'Par Rate']
-        values = [fixed_rate * 100, market_rate, result.par_rate * 100]
+        # Market overview cards
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    padding: 25px; border-radius: 15px; margin-bottom: 25px; color: white;">
+            <h3 style="margin: 0 0 15px 0; color: white;">🌍 Global Markets Overview</h3>
+            <p style="font-size: 1.1em; margin-bottom: 20px; color: #f8f9fa;">
+                Real-time market data and analysis for informed swap pricing decisions
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
+                    <h4 style="color: #ffd700; margin-bottom: 10px;">🏦 Interest Rates</h4>
+                    <p style="margin: 5px 0; font-size: 0.9em;">Live yield curves</p>
+                    <p style="margin: 5px 0; font-size: 0.9em;">Central bank policy</p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
+                    <h4 style="color: #98fb98; margin-bottom: 10px;">💱 FX Markets</h4>
+                    <p style="margin: 5px 0; font-size: 0.9em;">Major currency pairs</p>
+                    <p style="margin: 5px 0; font-size: 0.9em;">Volatility surfaces</p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
+                    <h4 style="color: #87ceeb; margin-bottom: 10px;">📈 Equity Markets</h4>
+                    <p style="margin: 5px 0; font-size: 0.9em;">Index performance</p>
+                    <p style="margin: 5px 0; font-size: 0.9em;">Sector rotation</p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center;">
+                    <h4 style="color: #dda0dd; margin-bottom: 10px;">⚡ Volatility</h4>
+                    <p style="margin: 5px 0; font-size: 0.9em;">VIX and term structure</p>
+                    <p style="margin: 5px 0; font-size: 0.9em;">Cross-asset vol</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    @staticmethod
+    def display_educational_methodology():
+        """Display educational content about swap pricing methodology"""
         
-        fig = go.Figure(data=[
-            go.Bar(
-                x=metrics,
-                y=values,
-                marker_color=['blue', 'green', 'orange'],
-                text=[f'{v:.3f}%' for v in values],
-                textposition='auto'
-            )
+        st.markdown('<div style="color: #495057; font-size: 1.8em; font-weight: bold; margin: 25px 0 15px 0;">📚 Pricing Methodology & Education</div>', unsafe_allow_html=True)
+        
+        # Tabbed educational content
+        method_tab1, method_tab2, method_tab3, method_tab4 = st.tabs([
+            "🔢 Pricing Models", "📊 Risk Metrics", "🎯 Market Data", "⚠️ Limitations"
         ])
         
-        fig.update_layout(
-            title='Rate Comparison Analysis',
-            yaxis_title='Rate (%)',
-            height=300
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-    
-    @staticmethod
-    def display_live_yield_curve():
-        """Display live yield curve"""
-        
-        st.markdown('<div class="sub-header">📈 Live USD Yield Curve</div>', unsafe_allow_html=True)
-        
-        treasury_data = market_data_manager.get_treasury_curve_data()
-        
-        if treasury_data is not None:
-            try:
-                tenors = [0.25, 2, 10, 30]
-                treasury_symbols = ["^IRX", "^FVX", "^TNX", "^TYX"]
-                yields = [treasury_data.get(symbol, 4.0) for symbol in treasury_symbols]
-                
-                fig = go.Figure()
-                fig.add_trace(go.Scatter(
-                    x=tenors,
-                    y=yields,
-                    mode='lines+markers',
-                    name='US Treasury Yield Curve',
-                    line=dict(color='blue', width=3),
-                    marker=dict(size=8)
-                ))
-                
-                fig.update_layout(
-                    title='Live US Treasury Yield Curve',
-                    xaxis_title='Maturity (Years)',
-                    yaxis_title='Yield (%)',
-                    height=400
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Curve analysis
-                curve_slope = yields[-1] - yields[0]
-                st.info(f"📊 Curve slope (30Y-3M): {curve_slope:.0f} basis points")
-                
-            except Exception as e:
-                st.info("Error displaying yield curve")
-        else:
-            st.info("Live yield curve data temporarily unavailable")
-    
-    @staticmethod
-    def display_fx_market_overview():
-        """Display FX market overview"""
-        
-        st.markdown('<div class="sub-header">🌍 FX Market Overview</div>', unsafe_allow_html=True)
-        
-        indices_data = market_data_manager.get_major_indices_data()
-        
-        if indices_data is not None:
-            try:
-                major_pairs = ["EURUSD=X", "GBPUSD=X", "USDJPY=X", "USDCHF=X"]
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.metric("EUR/USD", f"{1.0850:.4f}")  # Would use real data
-                    st.metric("USD/JPY", f"{150.0:.2f}")
-                
-                with col2:
-                    st.metric("GBP/USD", f"{1.2650:.4f}")
-                    st.metric("USD/CHF", f"{0.8890:.4f}")
-                    
-            except Exception as e:
-                st.info("FX data temporarily unavailable")
-        else:
-            st.info("Live FX data temporarily unavailable")
-    
-    @staticmethod
-    def display_equity_market_overview():
-        """Display equity market overview"""
-        
-        st.markdown('<div class="sub-header">📈 Equity Market Overview</div>', unsafe_allow_html=True)
-        
-        indices_data = market_data_manager.get_major_indices_data()
-        
-        if indices_data is not None:
-            try:
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.metric("S&P 500", f"{indices_data.get('^GSPC', 4500):.0f}")
-                    st.metric("NASDAQ", f"{indices_data.get('^IXIC', 14000):.0f}")
-                
-                with col2:
-                    st.metric("Dow Jones", f"{indices_data.get('^DJI', 35000):.0f}")
-                    st.metric("VIX", f"{indices_data.get('^VIX', 20):.1f}")
-                    
-            except Exception as e:
-                st.info("Equity data temporarily unavailable")
-        else:
-            st.info("Live equity data temporarily unavailable")
-    
-    @staticmethod
-    def display_portfolio_analytics(analytics):
-        """Display portfolio analytics"""
-        
-        st.markdown('<div class="sub-header">📊 Portfolio Analytics</div>', unsafe_allow_html=True)
-        
-        # Summary metrics
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("Total Notional", f"${analytics['total_notional']:,.0f}")
-        
-        with col2:
-            st.metric("Portfolio NPV", f"${analytics['portfolio_npv']:,.0f}")
-        
-        with col3:
-            st.metric("Portfolio DV01", f"${analytics['portfolio_dv01']:,.0f}")
-        
-        with col4:
-            st.metric("Number of Swaps", f"{analytics['num_swaps']}")
-        
-        # Risk breakdown
-        if analytics['total_notional'] > 0:
-            st.markdown('<div class="sub-header">🎯 Risk Breakdown</div>', unsafe_allow_html=True)
-            
-            risk_data = pd.DataFrame({
-                'Asset Class': ['Interest Rate', 'FX', 'Equity'],
-                'Exposure': [analytics['ir_exposure'], analytics['fx_exposure'], analytics['equity_exposure']]
-            })
-            
-            # Only show chart if there's meaningful data
-            if risk_data['Exposure'].sum() > 0:
-                fig = px.pie(
-                    risk_data,
-                    values='Exposure',
-                    names='Asset Class',
-                    title='Portfolio Exposure by Asset Class'
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("No portfolio exposure data to display")
-        else:
-            st.info("No portfolio data to analyze")
-
-
-class MarketIntelligenceDisplay:
-    """Display utilities for market intelligence"""
-    
-    @staticmethod
-    def display_global_rates_dashboard():
-        """Display global rates dashboard"""
-        
-        st.markdown('<div class="sub-header">🌐 Global Interest Rates</div>', unsafe_allow_html=True)
-        
-        treasury_data = market_data_manager.get_treasury_curve_data()
-        
-        if treasury_data is not None:
-            try:
-                tenors = [0.25, 2, 10, 30]
-                treasury_symbols = ["^IRX", "^FVX", "^TNX", "^TYX"]
-                
-                fig = go.Figure()
-                fig.add_trace(go.Scatter(
-                    x=tenors,
-                    y=[treasury_data.get(symbol, 4.0) for symbol in treasury_symbols],
-                    mode='lines+markers',
-                    name='US Treasury Yield Curve',
-                    line=dict(color='blue', width=3)
-                ))
-                
-                fig.update_layout(
-                    title='US Treasury Yield Curve',
-                    xaxis_title='Maturity (Years)',
-                    yaxis_title='Yield (%)',
-                    height=400
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
-                
-            except Exception as e:
-                st.info("Live rates data temporarily unavailable")
-        
-        # Display static rates table
-        rates_data = pd.DataFrame({
-            'Country': ['United States', 'Germany', 'United Kingdom', 'Japan', 'Canada'],
-            '2Y': ['4.20%', '2.85%', '4.45%', '0.15%', '4.10%'],
-            '5Y': ['4.15%', '2.65%', '4.25%', '0.35%', '3.95%'],
-            '10Y': ['4.10%', '2.45%', '4.15%', '0.75%', '3.85%']
-        })
-        
-        st.dataframe(rates_data, use_container_width=True, hide_index=True)
-    
-    @staticmethod
-    def display_fx_markets_dashboard():
-        """Display FX markets dashboard"""
-        
-        st.markdown('<div class="sub-header">💱 FX Markets Dashboard</div>', unsafe_allow_html=True)
-        
-        pairs = ["EURUSD=X", "GBPUSD=X", "USDJPY=X", "USDCHF=X"]
-        correlation_data = market_data_manager.get_fx_correlation_data(pairs)
-        
-        if correlation_data is not None:
-            try:
-                fig = px.imshow(
-                    correlation_data.values,
-                    labels=dict(x="Currency Pair", y="Currency Pair", color="Correlation"),
-                    x=[pair.replace('=X', '') for pair in correlation_data.columns],
-                    y=[pair.replace('=X', '') for pair in correlation_data.index],
-                    color_continuous_scale='RdBu_r',
-                    title='FX Correlation Matrix (30D)'
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
-                
-            except Exception as e:
-                st.info("FX correlation data temporarily unavailable")
-        else:
-            st.info("FX correlation data temporarily unavailable")
-    
-    @staticmethod
-    def display_volatility_dashboard():
-        """Display volatility dashboard"""
-        
-        st.markdown('<div class="sub-header">📊 Volatility Analysis</div>', unsafe_allow_html=True)
-        
-        vix_data = market_data_manager.get_vix_data()
-        
-        if vix_data is not None:
-            try:
-                fig = go.Figure()
-                fig.add_trace(go.Scatter(
-                    x=vix_data.index,
-                    y=vix_data['Close'],
-                    mode='lines',
-                    name='VIX',
-                    line=dict(color='red', width=2)
-                ))
-                
-                fig.update_layout(
-                    title='VIX - Market Volatility Index (90 Days)',
-                    xaxis_title='Date',
-                    yaxis_title='VIX Level',
-                    height=400
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # VIX level analysis
-                current_vix = vix_data['Close'].iloc[-1]
-                if current_vix > 25:
-                    st.warning(f"⚠️ High volatility: VIX at {current_vix:.1f}")
-                elif current_vix < 15:
-                    st.info(f"📉 Low volatility: VIX at {current_vix:.1f}")
-                else:
-                    st.success(f"✅ Normal volatility: VIX at {current_vix:.1f}")
-                    
-            except Exception as e:
-                st.info("Volatility data temporarily unavailable")
-        else:
-            st.info("Volatility data temporarily unavailable")
-    
-    @staticmethod
-    def display_research_insights():
-        """Display market research and insights"""
-        
-        st.markdown('<div class="sub-header">📚 Market Research & Insights</div>', unsafe_allow_html=True)
-        
-        # Current market themes
-        st.markdown("""
-        <div class="info-box">
-            <h4>🔍 Current Market Themes</h4>
-            <ul>
-                <li><strong>Central Bank Policy:</strong> Fed pause vs ECB/BoE divergence</li>
-                <li><strong>Yield Curves:</strong> Monitoring inversion signals globally</li>
-                <li><strong>Credit Markets:</strong> Widening spreads in corporate bonds</li>
-                <li><strong>FX Volatility:</strong> Dollar strength pressuring emerging markets</li>
-                <li><strong>Equity Valuations:</strong> Growth vs value rotation continues</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Educational content
-        col1, col2 = st.columns(2)
-        
-        with col1:
+        with method_tab1:
             st.markdown("""
-            <div class="success-box">
-                <h4>📖 Swap Fundamentals</h4>
-                <h5>Key Concepts:</h5>
-                <ul>
-                    <li><strong>Par Rate:</strong> Break-even swap rate</li>
-                    <li><strong>DV01:</strong> Dollar value per basis point</li>
-                    <li><strong>Cross-Currency Basis:</strong> FX swap premium</li>
-                    <li><strong>Equity Risk Premium:</strong> Expected excess return</li>
-                </ul>
+            <div style="background: #e7f3ff; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                <h3 style="color: #004085;">🔢 Swap Pricing Models Explained</h3>
                 
-                <h5>Risk Management:</h5>
-                <ul>
-                    <li><strong>Delta Hedging:</strong> Neutralize price sensitivity</li>
-                    <li><strong>Duration Matching:</strong> Asset-liability alignment</li>
-                    <li><strong>Stress Testing:</strong> Scenario analysis</li>
-                </ul>
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #004085;">1. Discounted Cash Flow (DCF)</h4>
+                    <p><strong>Method:</strong> Calculate present value of all future cash flows</p>
+                    <p><strong>Formula:</strong> NPV = Σ(CF_i × DF_i) where CF = cash flow, DF = discount factor</p>
+                    <p><strong>Use Case:</strong> Standard pricing for most swaps</p>
+                    <p><strong>Advantages:</strong> Transparent, easy to understand, industry standard</p>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #004085;">2. Monte Carlo Simulation</h4>
+                    <p><strong>Method:</strong> Simulate thousands of interest rate paths</p>
+                    <p><strong>Process:</strong> Generate random paths → Calculate payoffs → Average results</p>
+                    <p><strong>Use Case:</strong> Complex swaps with path-dependent features</p>
+                    <p><strong>Advantages:</strong> Handles complex payoffs, incorporates volatility</p>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #004085;">3. Hull-White Model</h4>
+                    <p><strong>Method:</strong> One-factor interest rate model with mean reversion</p>
+                    <p><strong>SDE:</strong> dr = α(θ(t) - r)dt + σdW</p>
+                    <p><strong>Use Case:</strong> When mean reversion is important</p>
+                    <p><strong>Advantages:</strong> Fits current term structure, analytical solutions available</p>
+                </div>
             </div>
             """, unsafe_allow_html=True)
         
-        with col2:
+        with method_tab2:
             st.markdown("""
-            <div class="warning-box">
-                <h4>⚠️ Risk Considerations</h4>
-                <h5>Market Risks:</h5>
-                <ul>
-                    <li><strong>Interest Rate Risk:</strong> Duration exposure</li>
-                    <li><strong>FX Risk:</strong> Currency fluctuations</li>
-                    <li><strong>Credit Risk:</strong> Counterparty exposure</li>
-                    <li><strong>Liquidity Risk:</strong> Market depth concerns</li>
-                </ul>
+            <div style="background: #fff3cd; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                <h3 style="color: #856404;">📊 Risk Metrics Explained</h3>
                 
-                <h5>Model Risks:</h5>
-                <ul>
-                    <li><strong>Parameter Risk:</strong> Volatility estimates</li>
-                    <li><strong>Model Risk:</strong> Pricing assumptions</li>
-                    <li><strong>Correlation Risk:</strong> Breakdown scenarios</li>
-                </ul>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #856404;">First-Order Greeks</h4>
+                        <p><strong>DV01 (Dollar Value 01):</strong><br>
+                        Change in swap value for 1bp rate move<br>
+                        <em>Formula: DV01 = |dNPV/dr| × 0.0001</em></p>
+                        
+                        <p><strong>Delta (Equity):</strong><br>
+                        Change in swap value for 1% equity move<br>
+                        <em>Equivalent shares exposure</em></p>
+                        
+                        <p><strong>FX Delta:</strong><br>
+                        Change in swap value for 1% FX move<br>
+                        <em>Currency exposure amount</em></p>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #856404;">Second-Order Greeks</h4>
+                        <p><strong>Convexity:</strong><br>
+                        Curvature of price-yield relationship<br>
+                        <em>Measures gamma risk</em></p>
+                        
+                        <p><strong>Vega (Equity):</strong><br>
+                        Sensitivity to volatility changes<br>
+                        <em>Important for equity swaps</em></p>
+                        
+                        <p><strong>Cross Gamma:</strong><br>
+                        Cross-derivative sensitivities<br>
+                        <em>Currency-interest rate interactions</em></p>
+                    </div>
+                </div>
             </div>
             """, unsafe_allow_html=True)
         
-        # Methodology
-        with st.expander("📊 Methodology & Data Sources"):
+        with method_tab3:
             st.markdown("""
-            <div class="info-box">
-                <h4>Pricing Methodology</h4>
+            <div style="background: #d1ecf1; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                <h3 style="color: #0c5460;">🎯 Market Data Sources & Quality</h3>
                 
-                <h5>Data Sources:</h5>
-                <ul>
-                    <li><strong>Yahoo Finance:</strong> Real-time market data</li>
-                    <li><strong>FRED:</strong> Economic indicators (when available)</li>
-                    <li><strong>Live Feeds:</strong> Continuous updates</li>
-                </ul>
-                
-                <h5>Models:</h5>
-                <ul>
-                    <li><strong>DCF:</strong> Discounted cash flow analysis</li>
-                    <li><strong>Monte Carlo:</strong> Stochastic simulation</li>
-                    <li><strong>Hull-White:</strong> Mean-reverting rates</li>
-                </ul>
-                
-                <h5>Risk Metrics:</h5>
-                <ul>
-                    <li><strong>Greeks:</strong> First/second order sensitivities</li>
-                    <li><strong>VaR:</strong> Value-at-Risk calculations</li>
-                    <li><strong>Stress Tests:</strong> Scenario analysis</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #0c5460;">Data Hierarchy</h4>
+                    <ol>
+                        <li><strong>Primary Sources:</strong> FRED (Federal Reserve), ECB, BoE official rates</li>
+                        <li><strong>Financial Data:</strong> Yahoo Finance for real-time quotes</li>
+                        <li><strong>
