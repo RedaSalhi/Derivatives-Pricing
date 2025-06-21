@@ -6,6 +6,7 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import streamlit as st
+from styles.app_styles import load_theme
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -36,46 +37,10 @@ from pricing.utils.greeks_vasicek import *
 # Allow importing from the pricing directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
+load_theme()
+
     
 
-# Custom CSS for enhanced styling
-st.markdown("""
-<style>
-    .main-header {
-        font-size: 3rem;
-        font-weight: bold;
-        text-align: center;
-        color: #1f77b4;
-        margin-bottom: 2rem;
-    }
-    .sub-header {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #ff7f0e;
-        margin: 1rem 0;
-    }
-    .metric-container {
-        background-color: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin: 0.5rem 0;
-    }
-    .info-box {
-        background-color: #e8f4f8;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #1f77b4;
-        margin: 1rem 0;
-    }
-    .warning-box {
-        background-color: #fff3cd;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #ffc107;
-        margin: 1rem 0;
-    }
-</style>
-""", unsafe_allow_html=True)
 
 
 

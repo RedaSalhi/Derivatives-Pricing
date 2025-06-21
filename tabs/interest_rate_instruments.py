@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta, date
+from styles.app_styles import load_theme
 
 # Import your pricing functions
 from pricing.models.interest_rates.analytical_vasicek import *
@@ -16,6 +17,8 @@ from pricing.utils.greeks_vasicek import *
 
 def interest_rate_instruments_tab():
     """Interest Rate Instruments Tab Content"""
+
+    load_theme()
     
     st.markdown('<div class="main-header">Interest Rate Model Selector</div>', 
                 unsafe_allow_html=True)

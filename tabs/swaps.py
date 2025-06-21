@@ -4,6 +4,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+from styles.app_styles import load_theme
 
 # Import your pricing functions
 from pricing.swaps import *
@@ -15,6 +16,8 @@ from pricing.models.swaps.ois_fx import (
 
 def swaps_tab():
     """Swaps Tab Content"""
+
+    load_theme()
     
     st.markdown('<div class="main-header">Swap Pricer (In Progress)</div>', 
                 unsafe_allow_html=True)

@@ -6,6 +6,10 @@ To open the app click here
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://derivatives-pricing.streamlit.app/#about-me)
 
+The app's look-and-feel is centralized in `styles/theme_pricer.css`. This
+stylesheet defines the main color palette, typography and component margins.
+Each page loads it by calling `load_theme()` from `styles/app_styles.py`.
+
 
 | **Derivative Type**        | **Sub-type / Feature**           | **Common Pricing Models**                                                             |
 | -------------------------- | -------------------------------- | ------------------------------------------------------------------------------------- |
