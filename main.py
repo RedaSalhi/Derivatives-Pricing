@@ -17,11 +17,6 @@ st.set_page_config(
 
 load_theme()
 
-
-# Beautiful header
-st.markdown('<h1 class="main-title">Derivatives Pricing App</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Built for students, quants, and finance enthusiasts</p>', unsafe_allow_html=True)
-
 # Sidebar with clean styling
 with st.sidebar:
     st.markdown('<h2 class="sidebar-title">Navigation</h2>', unsafe_allow_html=True)
