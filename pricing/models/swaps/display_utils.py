@@ -674,15 +674,65 @@ class EducationalSwapDisplayManager:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-        
+
         with method_tab3:
             st.markdown("""
             <div style="background: #d1ecf1; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
                 <h3 style="color: #0c5460;">🎯 Market Data Sources & Quality</h3>
-                
+
                 <div style="margin: 20px 0;">
                     <h4 style="color: #0c5460;">Data Hierarchy</h4>
                     <ol>
                         <li><strong>Primary Sources:</strong> FRED (Federal Reserve), ECB, BoE official rates</li>
                         <li><strong>Financial Data:</strong> Yahoo Finance for real-time quotes</li>
-                        <li><strong>
+                        <li><strong>Market Vendors:</strong> Bloomberg, Reuters, ICE Data</li>
+                        <li><strong>Fallback:</strong> Interpolated or simulated data when live sources fail</li>
+                    </ol>
+                </div>
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #0c5460;">Data Quality</h4>
+                    <p>Cross-check sources and validate data before use.</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with method_tab4:
+            st.markdown("""
+            <div style="background: #f8d7da; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                <h3 style="color: #721c24;">⚠️ Important Disclaimers and Limitations</h3>
+
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #721c24;">Educational Purpose Only</h4>
+                    <p>This platform is for educational and research use only and should not guide actual trading decisions.</p>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #721c24;">Model Limitations</h4>
+                    <ul>
+                        <li>Simplified assumptions about market behavior</li>
+                        <li>Historical data does not guarantee future results</li>
+                        <li>Real conditions may differ from model assumptions</li>
+                        <li>Liquidity constraints often not fully captured</li>
+                    </ul>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #721c24;">Risk Warnings</h4>
+                    <ul>
+                        <li>Derivative instruments carry significant risk of loss</li>
+                        <li>Consult qualified professionals for real trading decisions</li>
+                        <li>Ensure compliance with all applicable regulations</li>
+                        <li>Counterparty credit risk not fully modeled</li>
+                    </ul>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <h4 style="color: #721c24;">Data Disclaimers</h4>
+                    <ul>
+                        <li>Data may be delayed, estimated, or simulated</li>
+                        <li>No warranty of accuracy or completeness</li>
+                        <li>Third-party data subject to provider terms</li>
+                    </ul>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
