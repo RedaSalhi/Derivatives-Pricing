@@ -9,19 +9,31 @@ if current_dir not in sys.path:
     sys.path.append(current_dir)
 
 try:
-    from styles.app_styles import load_theme
+    from styles.app_styles import (
+        load_theme,
+        apply_global_styles,
+        get_component_styles,
+    )
 except ImportError:
-    # Fallback if import fails
+    # Fallbacks if import fails
     def load_theme():
         pass
+
+    def apply_global_styles():
+        pass
+
+    def get_component_styles():
+        return ""
 
 def about_me_tab():
     """Professional About Me page with integrated styling"""
     
-    # Load the theme to ensure consistent styling
+    # Load the theme and global styles to ensure consistent styling
     try:
         load_theme()
-    except:
+        apply_global_styles()
+        st.markdown(get_component_styles(), unsafe_allow_html=True)
+    except Exception:
         # Fallback CSS if theme loading fails
         st.markdown("""
         <style>
@@ -114,14 +126,14 @@ def about_me_tab():
     
     # Page header with animation
     st.markdown("""
-    <div class="animate-fade-in-about">
-        <h1 class="section-title">👋 About Me</h1>
+    <div class="animate-fade-in">
+        <h1 class="page-title">👋 About Me</h1>
     </div>
     """, unsafe_allow_html=True)
     
     # Profile section
     st.markdown("""
-    <div class="profile-box animate-fade-in-about">
+    <div class="profile-box animate-fade-in">
         <h2 class="section-title">🎯 Professional Profile</h2>
         <div class="profile-info">
             <strong>Welcome to my Derivatives Pricing Application!</strong> I'm passionate about quantitative finance and building tools that make complex financial concepts accessible to students, practitioners, and enthusiasts alike.
@@ -138,7 +150,7 @@ def about_me_tab():
     
     with col1:
         st.markdown("""
-        <div class="skills-section animate-fade-in-delay-about">
+        <div class="skills-section animate-fade-in-delay">
             <h3>🔧 Technical Skills</h3>
             <ul>
                 <li><strong>Programming:</strong> Python, R, SQL, MATLAB</li>
@@ -152,7 +164,7 @@ def about_me_tab():
     
     with col2:
         st.markdown("""
-        <div class="skills-section animate-fade-in-delay-about">
+        <div class="skills-section animate-fade-in-delay">
             <h3>💡 Interests & Focus</h3>
             <ul>
                 <li><strong>Quantitative Finance:</strong> Options pricing and risk metrics</li>
@@ -166,7 +178,7 @@ def about_me_tab():
     
     # Downloads section
     st.markdown("""
-    <div class="download-section animate-fade-in-delay-about">
+    <div class="download-section animate-fade-in-delay">
         <h2 class="section-title">📄 Download Resources</h2>
         <p>Get my CV and project documentation to learn more about my background and this application.</p>
     </div>
@@ -220,7 +232,7 @@ def about_me_tab():
     
     # Links section
     st.markdown("""
-    <div class="links-box animate-fade-in-delay-about">
+    <div class="links-box animate-fade-in-delay">
         <h2 class="section-title">🔗 Connect & Explore</h2>
         <div class="link-item">
             <a href="https://github.com/your-username" target="_blank">🐙 GitHub Portfolio</a>
@@ -239,7 +251,7 @@ def about_me_tab():
     
     # Contact form section
     st.markdown("""
-    <div class="contact-form animate-fade-in-delay-about">
+    <div class="contact-form animate-fade-in-delay">
         <h2 class="section-title">💬 Get In Touch</h2>
         <p>Have questions about derivatives pricing, want to collaborate, or interested in discussing quantitative finance? I'd love to hear from you!</p>
     </div>
@@ -265,7 +277,7 @@ def about_me_tab():
     
     # Application insights
     st.markdown("""
-    <div class="info-box animate-fade-in-delay-about">
+    <div class="info-box animate-fade-in-delay">
         <h2 class="section-title">🔍 About This Application</h2>
         <p><strong>Purpose:</strong> This derivatives pricing tool was built to provide accurate, educational, and accessible financial modeling for students, professionals, and enthusiasts.</p>
         
@@ -284,7 +296,7 @@ def about_me_tab():
     
     # Footer
     st.markdown("""
-    <div class="footer-section animate-fade-in-delay-about">
+    <div class="footer-section animate-fade-in-delay">
         <div>
             🎯 "Making quantitative finance accessible through technology and education"
         </div>
