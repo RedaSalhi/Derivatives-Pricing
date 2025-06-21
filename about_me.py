@@ -34,7 +34,7 @@ st.markdown("""
 
 # Profile section
 st.markdown("""
-<div class="profile-box animate-fade-in">
+<div class="objective-box animate-fade-in">
     <h2 class="section-title">🎯 Professional Profile</h2>
     <div class="profile-info">
         <strong>Welcome to my Derivatives Pricing Application!</strong> I'm passionate about quantitative finance and building tools that make complex financial concepts accessible to students, practitioners, and enthusiasts alike.
