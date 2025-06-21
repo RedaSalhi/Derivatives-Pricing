@@ -758,9 +758,7 @@ def _greeks_analysis_tab():
         </div>
         """, unsafe_allow_html=True)
 
-        greek_type1 = st.selectbox(
-            "Greek to analyze", ["price", "delta", "vega", "rho"], key="ir_greek_type"
-        )
+        greek_type = st.selectbox("Greek to analyze", ["price", "delta", "vega", "rho"], key="ir_greek_type")
         option_type = st.radio("Option type", ["call", "put"], key="greek_opt_type")
         model_type = st.radio("Calculation method", ["Analytical", "Monte Carlo"], key="greek_model")
 
@@ -788,7 +786,7 @@ def _greeks_analysis_tab():
 
                 try:
                     fig = compute_greek_vs_spot(
-                        greek=greek_type1,
+                        greek=greek_type,
                         t=0,
                         T1=T1,
                         T2=T2,
