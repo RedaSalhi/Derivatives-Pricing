@@ -399,21 +399,205 @@ def _display_irs_sensitivity(notional, fixed_rate, payment_times, discount_curve
 
 def _currency_swaps_tab():
     """Enhanced Currency Swaps Interface"""
-    st.markdown('<div class="sub-header">Cross-Currency Swap Pricing</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Cross-Currency Swap Pricing & Analytics</div>', unsafe_allow_html=True)
     
-    st.markdown("""
-    <div class="info-box">
-        <h4>🚧 Currency Swaps - Professional Implementation</h4>
-        <p>Advanced cross-currency swap pricing with:</p>
-        <ul>
-            <li><strong>Multi-Currency Curves:</strong> USD, EUR, GBP, JPY, CHF</li>
-            <li><strong>Cross-Currency Basis:</strong> Market-consistent basis adjustments</li>
-            <li><strong>FX Volatility:</strong> Quanto adjustments for FX risk</li>
-            <li><strong>Collateral Effects:</strong> CSA and funding considerations</li>
-        </ul>
-        <p><em>Coming in next release with full FX derivatives suite...</em></p>
-    </div>
-    """, unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown("""
+        <div class="info-box">
+            <h4>💱 Currency Swap Configuration</h4>
+            <p>Professional cross-currency swap pricing with market-standard conventions</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Currency selection
+        currencies = ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "SEK", "NOK"]
+        
+        base_currency = st.selectbox("Base Currency (Pay)", currencies, index=0)
+        quote_currency = st.selectbox("Quote Currency (Receive)", currencies, index=1)
+        
+        if base_currency == quote_currency:
+            st.error("Base and Quote currencies must be different")
+            return
+        
+        # Notional amounts
+        st.markdown("**Notional Amounts:**")
+        base_notional = st.number_input(
+            f"Base Notional ({base_currency})", 
+            min_value=1_000_000, 
+            max_value=10_000_000_000, 
+            value=100_000_000, 
+            step=1_000_000,
+            format="%d"
+        )
+        
+        # FX spot rate
+        fx_pair = f"{quote_currency}{base_currency}"
+        current_fx = _get_indicative_fx_rate(quote_currency, base_currency)
+        
+        fx_spot = st.number_input(
+            f"FX Spot Rate ({fx_pair})", 
+            min_value=0.0001, 
+            max_value=1000.0, 
+            value=current_fx, 
+            step=0.0001,
+            format="%.4f",
+            help=f"How many {base_currency} per 1 {quote_currency}"
+        )
+        
+        quote_notional = base_notional / fx_spot
+        st.metric(f"Implied {quote_currency} Notional", f"{quote_notional:,.0f}")
+        
+        # Swap structure
+        st.markdown("""
+        <div class="info-box">
+            <h4>🔧 Swap Structure</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        swap_type = st.radio(
+            "Swap Type",
+            ["Fixed-Fixed", "Fixed-Float", "Float-Float"],
+            help="Structure of the currency swap"
+        )
+        
+        tenor_years = st.selectbox("Swap Tenor", [1, 2, 3, 5, 7, 10, 15, 20], index=4)
+        
+        payment_freq = st.selectbox(
+            "Payment Frequency", 
+            ["Quarterly", "Semi-Annual", "Annual"], 
+            index=1,
+            help="Standard is Semi-Annual for cross-currency swaps"
+        )
+        
+        # Interest rates
+        st.markdown("**Interest Rates:**")
+        
+        base_rate = st.slider(
+            f"{base_currency} Rate (%)", 
+            min_value=0.0, 
+            max_value=10.0, 
+            value=_get_indicative_rate(base_currency), 
+            step=0.01,
+            format="%.2f"
+        ) / 100
+        
+        if swap_type == "Fixed-Fixed":
+            quote_rate = st.slider(
+                f"{quote_currency} Rate (%)", 
+                min_value=0.0, 
+                max_value=10.0, 
+                value=_get_indicative_rate(quote_currency), 
+                step=0.01,
+                format="%.2f"
+            ) / 100
+        else:
+            quote_rate = _get_indicative_rate(quote_currency) / 100
+            st.info(f"Using indicative {quote_currency} rate: {quote_rate:.2%}")
+        
+        # Advanced parameters
+        with st.expander("🔬 Advanced Parameters"):
+            include_principal = st.checkbox("Include Principal Exchange", value=True)
+            
+            fx_vol = st.slider(
+                "FX Volatility (%)", 
+                min_value=5.0, 
+                max_value=50.0, 
+                value=_get_indicative_fx_vol(quote_currency, base_currency), 
+                step=1.0
+            ) / 100
+            
+            xccy_basis = st.slider(
+                "Cross-Currency Basis (bps)", 
+                min_value=-100, 
+                max_value=100, 
+                value=0, 
+                step=5,
+                help="Cross-currency basis spread"
+            )
+            
+            credit_spread_base = st.slider(
+                f"{base_currency} Credit Spread (bps)", 
+                min_value=0, 
+                max_value=500, 
+                value=50, 
+                step=10
+            )
+            
+            credit_spread_quote = st.slider(
+                f"{quote_currency} Credit Spread (bps)", 
+                min_value=0, 
+                max_value=500, 
+                value=50, 
+                step=10
+            )
+        
+        price_btn = st.button("💱 Price Currency Swap", type="primary", use_container_width=True)
+    
+    with col2:
+        if price_btn:
+            with st.spinner("Calculating cross-currency swap price and risk metrics..."):
+                try:
+                    # Build currency curves
+                    base_curve = _build_currency_curve(base_currency, base_rate, credit_spread_base / 10000)
+                    quote_curve = _build_currency_curve(quote_currency, quote_rate, credit_spread_quote / 10000)
+                    
+                    # Create payment schedule
+                    freq_map = {"Quarterly": 0.25, "Semi-Annual": 0.5, "Annual": 1.0}
+                    dt = freq_map[payment_freq]
+                    payment_times = [dt * i for i in range(1, int(tenor_years / dt) + 1)]
+                    
+                    # FX forward curve
+                    fx_forward_curve = _build_fx_forward_curve(
+                        fx_spot, base_curve, quote_curve, fx_vol, xccy_basis / 10000
+                    )
+                    
+                    # Price currency swap
+                    result = price_currency_swap_enhanced(
+                        base_notional=base_notional,
+                        quote_notional=quote_notional,
+                        base_rate=base_rate,
+                        quote_rate=quote_rate,
+                        payment_times=payment_times,
+                        base_curve=base_curve,
+                        quote_curve=quote_curve,
+                        fx_spot=fx_spot,
+                        fx_forward_curve=fx_forward_curve,
+                        base_currency=base_currency,
+                        quote_currency=quote_currency,
+                        swap_type=swap_type,
+                        include_principal=include_principal
+                    )
+                    
+                    # Display results
+                    _display_currency_swap_results(result, base_currency, quote_currency, fx_spot, tenor_years)
+                    
+                    # Risk analytics
+                    _display_currency_swap_risk_metrics(
+                        result, base_notional, quote_notional, fx_spot, 
+                        base_currency, quote_currency, payment_times
+                    )
+                    
+                    # FX sensitivity analysis
+                    _display_fx_sensitivity_analysis(
+                        base_notional, quote_notional, base_rate, quote_rate,
+                        payment_times, base_curve, quote_curve, fx_spot,
+                        base_currency, quote_currency, swap_type, include_principal
+                    )
+                    
+                except Exception as e:
+                    st.markdown(f"""
+                    <div class="warning-box">
+                        <h4>❌ Pricing Error</h4>
+                        <p>Error during calculation: {str(e)}</p>
+                        <p>Please check your parameters and try again.</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+        
+        else:
+            # Display market overview when not pricing
+            _display_currency_market_overview()
 
 
 def _equity_swaps_tab():
