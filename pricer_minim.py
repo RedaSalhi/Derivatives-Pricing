@@ -93,7 +93,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Quick stats display
-col1, col2, col3, col4, col5, col6 = st.columns(6)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
     st.markdown(f"""
@@ -132,15 +132,6 @@ with col4:
     """, unsafe_allow_html=True)
 
 with col5:
-    st.markdown(f"""
-    <div class="metric-card animate-fade-in">
-        <div style="color: {COLORS['danger']}; font-size: 1rem; font-weight: 600;">Swaps</div>
-        <div style="font-size: 1.5rem; font-weight: bold; color: {COLORS['gray_800']};">IRS/FX/Equity</div>
-        <div style="color: {COLORS['gray_500']}; font-size: 0.8rem;">DCF/LMM Models</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col6:
     st.markdown(f"""
     <div class="metric-card animate-fade-in-delay">
         <div style="color: {COLORS['secondary']}; font-size: 1rem; font-weight: 600;">Interest Rates</div>
