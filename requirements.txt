@@ -11,3 +11,4 @@ plotly
 seaborn
 streamlit_option_menu
 psutil
+setuptools
