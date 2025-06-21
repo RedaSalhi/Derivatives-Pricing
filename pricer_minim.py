@@ -38,7 +38,6 @@ try:
     from tabs.forward_contracts import forward_contracts_tab
     from tabs.option_strategies import main_option_strategies_tab
     from tabs.exotic_options import exotic_options_tab
-    from tabs.swaps import swaps_tab
     from tabs.interest_rate_instruments import interest_rate_instruments_tab
 except ImportError as e:
     st.error(f"Error importing tabs: {e}")
@@ -47,7 +46,7 @@ except ImportError as e:
 # Enhanced main header with professional styling
 render_app_header(
     "Professional Derivatives Pricing Suite",
-    "Advanced Quantitative Finance Tools for Options, Forwards, Swaps & Interest Rate Instruments"
+    "Advanced Quantitative Finance Tools for Options, Forwards & Interest Rate Instruments"
 )
 
 # Add platform overview with enhanced styling
