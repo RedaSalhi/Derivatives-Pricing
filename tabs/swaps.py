@@ -10,9 +10,9 @@ from datetime import datetime, timedelta, date
 from styles.app_styles import load_theme
 
 # Enhanced pricing functions
-from pricing.models.swaps.enhanced_dcf import *
-from pricing.models.swaps.enhanced_lmm import *
-from pricing.models.swaps.enhanced_curves import *
+from pricing.models.swaps.dcf import *
+from pricing.models.swaps.lmm import *
+from pricing.models.swaps.curves import *
 
 
 def swaps_tab():
