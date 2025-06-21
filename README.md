@@ -4,7 +4,7 @@
 
 A comprehensive derivatives pricing and risk management platform built with **Streamlit** and **Python**. This educational tool provides state-of-the-art pricing models, Greeks analysis, and portfolio optimization for various financial instruments.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-Apache-yellow.svg)](./LICENSE)
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://derivatives-pricing.streamlit.app/)
 
 ## Live Demo
