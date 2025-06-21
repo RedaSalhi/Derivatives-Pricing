@@ -36,7 +36,7 @@ render_app_header(
 # Professional Profile section using enhanced CSS
 st.markdown("""
 <div class="profile-box animate-fade-in">
-    <h2 class="section-title">🎯 Professional Profile</h2>
+    <h2 class="section-title">Professional Profile</h2>
     <div class="profile-info">
         <strong>Welcome to my Derivatives Pricing Application!</strong> I'm passionate about quantitative finance and building tools that make complex financial concepts accessible to students, practitioners, and enthusiasts alike.
         <br><br>
@@ -53,7 +53,7 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("""
     <div class="skills-section animate-fade-in-delay">
-        <h3 class="section-title">🔧 Technical Skills</h3>
+        <h3 class="section-title">Technical Skills</h3>
         <div class="content-text">
             <ul>
                 <li><strong>Programming:</strong> Python, R, SQL, MATLAB</li>
@@ -69,7 +69,7 @@ with col1:
 with col2:
     st.markdown("""
     <div class="skills-section animate-fade-in-delay">
-        <h3 class="section-title">💡 Interests & Focus</h3>
+        <h3 class="section-title">Interests & Focus</h3>
         <div class="content-text">
             <ul>
                 <li><strong>Quantitative Finance:</strong> Options pricing and risk metrics</li>
@@ -82,78 +82,19 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
-# Enhanced downloads section with proper styling
-st.markdown("""
-<div class="download-section animate-fade-in-delay">
-    <h2 class="section-title">📄 Download Resources</h2>
-    <div class="content-text">
-        Get my CV and project documentation to learn more about my background and this application.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# Download buttons with enhanced styling
-col1, col2 = st.columns(2)
-
-with col1:
-    try:
-        if os.path.exists("CV_Reda_Salhi.pdf"):
-            with open("CV_Reda_Salhi.pdf", "rb") as file:
-                st.download_button(
-                    label="📋 Download CV",
-                    data=file,
-                    file_name="CV_Reda_Salhi.pdf",
-                    mime="application/pdf",
-                    help="Download my professional CV",
-                    use_container_width=True
-                )
-        elif os.path.exists("README.md"):
-            with open("README.md", "rb") as file:
-                st.download_button(
-                    label="📋 Download CV",
-                    data=file,
-                    file_name="CV_Reda_Salhi.pdf",
-                    mime="application/pdf",
-                    help="Download my professional CV (placeholder)",
-                    use_container_width=True
-                )
-        else:
-            st.markdown('<div class="info-box">CV download will be available soon</div>', unsafe_allow_html=True)
-    except Exception as e:
-        st.markdown('<div class="warning-box">CV download temporarily unavailable</div>', unsafe_allow_html=True)
-
-with col2:
-    try:
-        if os.path.exists("README.md"):
-            with open("README.md", "rb") as file:
-                st.download_button(
-                    label="📖 Project Documentation",
-                    data=file,
-                    file_name="Derivatives_Pricing_Guide.md",
-                    mime="text/markdown",
-                    help="Comprehensive guide to this derivatives pricing tool",
-                    use_container_width=True
-                )
-        else:
-            st.markdown('<div class="info-box">Documentation download will be available soon</div>', unsafe_allow_html=True)
-    except Exception as e:
-        st.markdown('<div class="warning-box">Documentation download temporarily unavailable</div>', unsafe_allow_html=True)
 
 # Links section with enhanced styling
 st.markdown("""
 <div class="links-box animate-fade-in-delay">
-    <h2 class="section-title">🔗 Connect & Explore</h2>
+    <h2 class="section-title">Connect & Explore</h2>
     <div class="link-item shadow-hover">
-        <a href="https://github.com/your-username" target="_blank">🐙 GitHub Portfolio</a>
+        <a href="https://github.com/RedaSalhi" target="_blank">GitHub Portfolio</a>
     </div>
     <div class="link-item shadow-hover">
-        <a href="https://linkedin.com/in/your-profile" target="_blank">💼 LinkedIn Profile</a>
+        <a href="https://www.linkedin.com/in/reda-salhi-195297290/" target="_blank">LinkedIn Profile</a>
     </div>
     <div class="link-item shadow-hover">
-        <a href="https://derivatives-pricing.streamlit.app" target="_blank">🚀 Live Application</a>
-    </div>
-    <div class="link-item shadow-hover">
-        <a href="mailto:salhi.reda47@gmail.com" class="email-link">📧 Professional Email</a>
+        <a href="mailto:salhi.reda47@gmail.com" class="email-link">Email</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -161,7 +102,7 @@ st.markdown("""
 # Contact form section with enhanced styling
 st.markdown("""
 <div class="contact-box animate-fade-in-delay">
-    <h2 class="section-title">💬 Get In Touch</h2>
+    <h2 class="section-title">Get In Touch</h2>
     <div class="content-text">
         Have questions about derivatives pricing, want to collaborate, or interested in discussing quantitative finance? I'd love to hear from you!
     </div>
@@ -186,17 +127,23 @@ contact_form = """
 
 components.html(contact_form, height=450)
 
-# Enhanced footer with proper styling
 st.markdown("""
-<div class="footer-section animate-fade-in-delay">
-    <div class="text-center">
-        <h3 class="text-primary">🎯 "Making quantitative finance accessible through technology and education"</h3>
+<div class="footer-section animate-fade-in">
+    <div style="font-size: 1.4rem; font-weight: 600; margin-bottom: 1rem; color: #1a365d;">
+        📊 Quantitative Finance Platform
     </div>
-    <br>
-    <div class="content-text text-center">
-        Built with ❤️ using Streamlit | © 2024 Reda Salhi
-        <br><br>
-        <em>Empowering the next generation of quantitative finance professionals</em>
+    <div style="color: #4a5568; font-style: italic; margin-bottom: 1rem;">
+        Professional-Grade Derivatives Pricing & Risk Management
+    </div>
+    <div style="color: #718096; font-size: 0.9rem;">
+        © 2025 | SALHI Reda | Financial Engineering Research | Advanced Analytics Suite
+    </div>
+    <div style="margin-top: 1rem; color: #718096; font-size: 0.8rem;">
+        <strong>Disclaimer:</strong> This platform is for educational and research purposes. 
+        All models are theoretical and should not be used for actual trading without proper validation.
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Add some spacing at the bottom
+st.markdown("<br><br>", unsafe_allow_html=True)
