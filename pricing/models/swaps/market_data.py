@@ -54,17 +54,17 @@ class MarketDataManager:
         except Exception as e:
             return self._get_fallback_overview()
     
-    def get_live_fx_rate(self, base_currency, quote_currency):
-        """Get live FX rate and statistics"""
+    def get_live_fx_rate(self, from_currency: str, to_currency: str):
+        """Get live FX rate for converting from ``from_currency`` into ``to_currency``."""
         if not YFINANCE_AVAILABLE:
             return {'rate': 1.0, 'change': 0.0, 'volatility': 15.0}
-        
-        cache_key = f"fx_{base_currency}{quote_currency}"
+
+        cache_key = f"fx_{from_currency}{to_currency}"
         if self._is_cached(cache_key):
             return self.cache[cache_key]['data']
-        
+
         try:
-            symbol = f"{base_currency}{quote_currency}=X"
+            symbol = f"{from_currency}{to_currency}=X"
             ticker = yf.Ticker(symbol)
             hist = ticker.history(period="30d")
             

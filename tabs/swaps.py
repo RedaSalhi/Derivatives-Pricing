@@ -258,7 +258,10 @@ def currency_swaps_interface():
             return
         
         # Live FX data
-        fx_data = market_data_manager.get_live_fx_rate(quote_currency, base_currency)
+        fx_data = market_data_manager.get_live_fx_rate(
+            from_currency=quote_currency,
+            to_currency=base_currency,
+        )
         
         st.markdown(f"""
         <div class="success-box">
