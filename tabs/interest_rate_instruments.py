@@ -577,7 +577,7 @@ def _bond_pricing_tab():
 
 
 def _bond_options_tab():
-    """Bond Options Pricing Tab - CORRECTED VERSION"""
+    """Bond Options Pricing Tab - FIXED VERSION"""
     st.markdown('<div class="sub-header">Bond Option Pricing</div>', unsafe_allow_html=True)
 
     if not st.session_state.vasicek_params:
@@ -605,7 +605,7 @@ def _bond_options_tab():
 
         r_current = st.number_input(
             "Current rate (r)", 
-            0.0, 
+            0.001, 
             0.20, 
             max(0.001, params['r0']), 
             step=0.001, 
@@ -615,22 +615,28 @@ def _bond_options_tab():
         T1 = st.number_input("Option maturity (T₁)", 0.1, 10.0, 1.0, step=0.1, key="opt_T1")
         T2 = st.number_input("Bond maturity (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="opt_T2")
 
-        # Calculate reasonable strike range based on current bond price
+        # Calculate reasonable strike range based on current bond price (normalized to face=1)
         try:
             current_bond_price = vasicek_zero_coupon_price(r_current, 0, T2, params['a'], params['lambda'], params['sigma'], 1.0)
-            default_strike = current_bond_price * 0.95  # Slightly OTM
+            default_strike = round(current_bond_price * 0.95, 4)  # Slightly OTM
+            st.info(f"Current bond price (per $1 face): ${current_bond_price:.4f}")
         except:
             default_strike = 0.8
+            current_bond_price = 0.8
 
+        # Strike should be reasonable relative to bond price
         K = st.number_input(
-            "Strike price (K)", 
+            "Strike price (per $1 face value)", 
             0.1, 
-            2.0, 
+            1.5, 
             min(1.0, max(0.1, default_strike)), 
             step=0.01, 
-            key="opt_K"
+            key="opt_K",
+            help=f"Current bond price per $1 face: ${current_bond_price:.4f}"
         )
-        face_value = st.number_input("Face value", 100, 10000, 1000, step=100, key="opt_face")
+        
+        # Face value for final scaling
+        face_value = st.number_input("Face value ($)", 100, 10000, 1000, step=100, key="opt_face")
 
         if model_type == "Monte Carlo":
             n_paths = st.number_input("Number of simulations", 1000, 50000, 10000, step=1000, key="opt_n_paths")
@@ -668,19 +674,27 @@ def _bond_options_tab():
                         st.error("Strike price must be positive")
                         return
 
-                    # Show underlying bond price for reference
-                    try:
-                        underlying_bond_price = vasicek_zero_coupon_price(
-                            r_current, 0, T2, params['a'], params['lambda'], params['sigma'], face_value
-                        )
-                        st.info(f"Underlying bond current price: ${underlying_bond_price:.4f}")
-                    except:
-                        st.warning("Could not calculate underlying bond price")
+                    # Calculate underlying bond price for reference (normalized)
+                    underlying_bond_price = vasicek_zero_coupon_price(
+                        r_current, 0, T2, params['a'], params['lambda'], params['sigma'], 1.0
+                    )
+                    
+                    # Show current market info
+                    st.markdown(f"""
+                    <div class="info-box">
+                        <h4>📊 Market Information</h4>
+                        <p><strong>Bond price (per $1 face):</strong> ${underlying_bond_price:.4f}</p>
+                        <p><strong>Strike price (per $1 face):</strong> ${K:.4f}</p>
+                        <p><strong>Moneyness (S/K):</strong> {underlying_bond_price/K:.4f}</p>
+                        <p><strong>Status:</strong> {"ITM" if (option_type=="Call" and underlying_bond_price > K) or (option_type=="Put" and underlying_bond_price < K) else "OTM"}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
 
                     if model_type == "Analytical":
                         from pricing.models.interest_rates.analytical_vasicek import vasicek_bond_option_price
                         
-                        price = vasicek_bond_option_price(
+                        # Calculate option price per $1 face value first
+                        price_per_dollar = vasicek_bond_option_price(
                             r_t=r_current,
                             t=0,
                             T1=T1,
@@ -689,26 +703,28 @@ def _bond_options_tab():
                             a=params['a'],
                             lam=params['lambda'],
                             sigma=params['sigma'],
-                            face=face_value,
+                            face=1.0,  # Normalized to $1
                             option_type=option_type.lower()
                         )
                         
+                        # Scale by actual face value
+                        total_option_price = price_per_dollar * face_value
+                        
                         # Validate result
-                        if price < 0:
+                        if price_per_dollar < 0:
                             st.error("Negative option price calculated. Check parameters.")
                             return
                         
-                        # Calculate some additional metrics
-                        bond_price_at_T1 = vasicek_zero_coupon_price(
-                            r_current, 0, T1, params['a'], params['lambda'], params['sigma'], 1.0
-                        )
-                        intrinsic_value = 0
+                        # Calculate additional metrics
+                        intrinsic_per_dollar = 0
                         if option_type.lower() == "call":
-                            intrinsic_value = max(0, underlying_bond_price - K)
+                            intrinsic_per_dollar = max(0, underlying_bond_price - K)
                         else:
-                            intrinsic_value = max(0, K - underlying_bond_price)
+                            intrinsic_per_dollar = max(0, K - underlying_bond_price)
                         
-                        time_value = max(0, price - intrinsic_value)
+                        total_intrinsic = intrinsic_per_dollar * face_value
+                        time_value_per_dollar = max(0, price_per_dollar - intrinsic_per_dollar)
+                        total_time_value = time_value_per_dollar * face_value
                         
                         st.markdown(f"""
                         <div class="metric-container">
@@ -716,23 +732,27 @@ def _bond_options_tab():
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
-                                    <td style="padding: 12px; font-weight: bold;">Value</td>
+                                    <td style="padding: 12px; font-weight: bold;">Per $1 Face</td>
+                                    <td style="padding: 12px; font-weight: bold;">Total (${face_value:,})</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Option Price</td>
-                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">{price:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold;">${price_per_dollar:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">${total_option_price:.2f}</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Intrinsic Value</td>
-                                    <td style="padding: 10px; font-family: monospace; color: #1f77b4; font-weight: bold;">{intrinsic_value:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #1f77b4; font-weight: bold;">${intrinsic_per_dollar:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #1f77b4; font-weight: bold;">${total_intrinsic:.2f}</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Time Value</td>
-                                    <td style="padding: 10px; font-family: monospace; color: #FF6347; font-weight: bold;">{time_value:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #FF6347; font-weight: bold;">${time_value_per_dollar:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #FF6347; font-weight: bold;">${total_time_value:.2f}</td>
                                 </tr>
                                 <tr>
-                                    <td style="padding: 10px; font-weight: bold;">Moneyness (S/K)</td>
-                                    <td style="padding: 10px; font-family: monospace; color: #6c757d; font-weight: bold;">{underlying_bond_price/K:.4f}</td>
+                                    <td style="padding: 10px; font-weight: bold;">Option Delta</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #6c757d; font-weight: bold;" colspan="2">{"N/A" if abs(time_value_per_dollar) < 1e-8 else f"{(price_per_dollar/underlying_bond_price):.4f}"}</td>
                                 </tr>
                             </table>
                         </div>
@@ -741,7 +761,8 @@ def _bond_options_tab():
                     else:  # Monte Carlo
                         from pricing.models.interest_rates.monte_carlo_vasicek import vasicek_bond_option_price_mc
                         
-                        price, std = vasicek_bond_option_price_mc(
+                        # Calculate option price per $1 face value first
+                        price_per_dollar, std_per_dollar = vasicek_bond_option_price_mc(
                             r0=r_current,
                             a=params['a'],
                             lam=params['lambda'],
@@ -751,17 +772,23 @@ def _bond_options_tab():
                             K=K,
                             dt=dt_mc,
                             n_paths=int(n_paths),
-                            face=face_value,
+                            face=1.0,  # Normalized to $1
                             option_type=option_type.lower()
                         )
                         
+                        # Scale by actual face value
+                        total_option_price = price_per_dollar * face_value
+                        total_std = std_per_dollar * face_value
+                        
                         # Validate result
-                        if price < 0:
+                        if price_per_dollar < 0:
                             st.error("Negative option price calculated. Check parameters.")
                             return
                         
-                        ci_lower = max(0, price - 1.96*std)
-                        ci_upper = price + 1.96*std
+                        ci_lower_per_dollar = max(0, price_per_dollar - 1.96*std_per_dollar)
+                        ci_upper_per_dollar = price_per_dollar + 1.96*std_per_dollar
+                        ci_lower_total = ci_lower_per_dollar * face_value
+                        ci_upper_total = ci_upper_per_dollar * face_value
                         
                         st.markdown(f"""
                         <div class="metric-container">
@@ -769,23 +796,27 @@ def _bond_options_tab():
                             <table style="width: 100%; border-collapse: collapse;">
                                 <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                                     <td style="padding: 12px; font-weight: bold;">Metric</td>
-                                    <td style="padding: 12px; font-weight: bold;">Value</td>
+                                    <td style="padding: 12px; font-weight: bold;">Per $1 Face</td>
+                                    <td style="padding: 12px; font-weight: bold;">Total (${face_value:,})</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Option Price</td>
-                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">{price:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold;">${price_per_dollar:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; color: #2E8B57; font-weight: bold; font-size: 1.2em;">${total_option_price:.2f}</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">Standard Error</td>
-                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">± {std:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">± ${std_per_dollar:.6f}</td>
+                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">± ${total_std:.2f}</td>
                                 </tr>
                                 <tr style="border-bottom: 1px solid #eee;">
                                     <td style="padding: 10px; font-weight: bold;">95% Confidence Interval</td>
-                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">[{ci_lower:.6f}, {ci_upper:.6f}]</td>
+                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">[${ci_lower_per_dollar:.6f}, ${ci_upper_per_dollar:.6f}]</td>
+                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">[${ci_lower_total:.2f}, ${ci_upper_total:.2f}]</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 10px; font-weight: bold;">Simulation Quality</td>
-                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;">{"Good" if std/price < 0.05 else "Fair" if std/price < 0.1 else "Poor"}</td>
+                                    <td style="padding: 10px; font-family: monospace; font-weight: bold;" colspan="2">{"Excellent" if std_per_dollar/price_per_dollar < 0.02 else "Good" if std_per_dollar/price_per_dollar < 0.05 else "Fair" if std_per_dollar/price_per_dollar < 0.1 else "Poor"}</td>
                                 </tr>
                             </table>
                         </div>
@@ -818,11 +849,11 @@ def _bond_options_tab():
                             </tr>
                             <tr style="border-bottom: 1px solid #eee;">
                                 <td style="padding: 8px;">Strike Price</td>
-                                <td style="padding: 8px; font-family: monospace;">{K:.4f}</td>
+                                <td style="padding: 8px; font-family: monospace;">${K:.4f} per $1 face</td>
                             </tr>
                             <tr>
                                 <td style="padding: 8px;">Face Value</td>
-                                <td style="padding: 8px; font-family: monospace;">{face_value}</td>
+                                <td style="padding: 8px; font-family: monospace;">${face_value:,}</td>
                             </tr>
                         </table>
                     </div>
@@ -832,7 +863,7 @@ def _bond_options_tab():
                     st.markdown('<div class="sub-header">Strike Sensitivity Analysis</div>', unsafe_allow_html=True)
                     
                     try:
-                        strike_range = np.linspace(K * 0.8, K * 1.2, 20)
+                        strike_range = np.linspace(max(0.1, underlying_bond_price * 0.7), underlying_bond_price * 1.3, 20)
                         option_prices = []
                         
                         for strike in strike_range:
@@ -840,12 +871,12 @@ def _bond_options_tab():
                                 if model_type == "Analytical":
                                     opt_price = vasicek_bond_option_price(
                                         r_current, 0, T1, T2, strike, params['a'], params['lambda'], 
-                                        params['sigma'], face_value, option_type.lower()
+                                        params['sigma'], 1.0, option_type.lower()  # Use face=1.0
                                     )
                                 else:
                                     opt_price, _ = vasicek_bond_option_price_mc(
                                         r_current, params['a'], params['lambda'], params['sigma'], 
-                                        T1, T2, strike, dt_mc, min(5000, n_paths), face_value, option_type.lower()
+                                        T1, T2, strike, dt_mc, min(5000, n_paths), 1.0, option_type.lower()  # Use face=1.0
                                     )
                                 option_prices.append(max(0, opt_price))
                             except:
@@ -856,7 +887,7 @@ def _bond_options_tab():
                             x=strike_range,
                             y=option_prices,
                             mode='lines+markers',
-                            name=f'{option_type} Option Price',
+                            name=f'{option_type} Option Price (per $1)',
                             line=dict(color='blue', width=3),
                             marker=dict(size=6)
                         ))
@@ -865,21 +896,20 @@ def _bond_options_tab():
                             x=K, 
                             line_dash="dash", 
                             line_color="red",
-                            annotation_text=f"Current Strike: {K:.4f}"
+                            annotation_text=f"Current Strike: ${K:.4f}"
                         )
                         
-                        if 'underlying_bond_price' in locals():
-                            fig.add_vline(
-                                x=underlying_bond_price,
-                                line_dash="dot",
-                                line_color="green", 
-                                annotation_text=f"Bond Price: {underlying_bond_price:.4f}"
-                            )
+                        fig.add_vline(
+                            x=underlying_bond_price,
+                            line_dash="dot",
+                            line_color="green", 
+                            annotation_text=f"Bond Price: ${underlying_bond_price:.4f}"
+                        )
                         
                         fig.update_layout(
-                            title=f'{option_type} Option Price vs Strike ({model_type})',
-                            xaxis_title='Strike Price',
-                            yaxis_title='Option Price',
+                            title=f'{option_type} Option Price vs Strike ({model_type}) - Per $1 Face Value',
+                            xaxis_title='Strike Price ($)',
+                            yaxis_title='Option Price ($)',
                             height=400
                         )
                         
@@ -896,13 +926,12 @@ def _bond_options_tab():
                         <p>Suggestions:</p>
                         <ul>
                             <li>Check that T₂ > T₁</li>
-                            <li>Ensure strike price is reasonable (typically 0.5 to 1.2)</li>
+                            <li>Ensure strike price is reasonable (typically 0.5 to 1.2 for bonds)</li>
                             <li>Verify interest rate is positive</li>
                             <li>For Monte Carlo: try fewer simulations or larger time step</li>
                         </ul>
                     </div>
                     """, unsafe_allow_html=True)
-
 
 # Educational content and footer remain the same...
 def _display_educational_content():
