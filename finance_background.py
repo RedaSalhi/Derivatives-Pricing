@@ -209,7 +209,7 @@ render_app_header(
 
 # Interactive parameter controls with enhanced styling
 st.markdown('<div class="animate-fade-in">', unsafe_allow_html=True)
-render_section_title("🎛️ Controls")
+render_section_title("Controls")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -275,19 +275,18 @@ with col4:
 # ----------------------
 st.markdown("""
 <div class="objective-box animate-fade-in">
-    <div class="section-title">🎯 Platform Overview</div>
+    <div class="section-title">Platform Overview</div>
     <div class="content-text">
-        This comprehensive quantitative finance platform provides state-of-the-art tools for derivatives pricing, risk management, and portfolio analysis. Designed for quants, researchers, and students.
+        This quantitative finance platform provides tools for derivatives pricing, risk management, and portfolio analysis. Designed for quants, researchers, and students.
     </div>
     <div class="highlight-box">
         <strong>Core Capabilities:</strong>
         <ul style="margin-top: 1rem;">
             <li><strong>Multi-Model Pricing:</strong> Black-Scholes, Binomial Trees, Monte Carlo simulations</li>
-            <li><strong>Complete Greeks Suite:</strong> Delta, Gamma, Theta, Vega, Rho with sensitivity analysis</li>
+            <li><strong>Complete Greeks Calculation:</strong> Delta, Gamma, Theta, Vega, Rho with sensitivity analysis</li>
             <li><strong>Strategy Builder:</strong> 10+ options strategies with P&L visualization</li>
             <li><strong>Risk Management:</strong> VaR, Expected Shortfall, stress testing</li>
             <li><strong>Portfolio Analytics:</strong> Multi-asset portfolio optimization and analysis</li>
-            <li><strong>Volatility Modeling:</strong> Surface construction and implied volatility analysis</li>
         </ul>
     </div>
 </div>
@@ -298,15 +297,15 @@ st.markdown("""
 # ----------------------
 st.markdown("""
 <div class="model-box animate-fade-in">
-    <div class="section-title">📊 Pricing Models Comparison</div>
+    <div class="section-title">Pricing Models Comparison</div>
     <div class="content-text">
-        Compare different pricing methodologies and understand their applications in modern finance.
+        Compare different pricing methodologies and understand their applications.
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # Model comparison with enhanced tabs
-tab1, tab2, tab3 = st.tabs(["🔢 Black-Scholes Analysis", "🌳 Binomial Trees", "🎲 Monte Carlo Methods"])
+tab1, tab2, tab3 = st.tabs(["Black-Scholes Analysis", "Binomial Trees", "Monte Carlo Methods"])
 
 with tab1:
     st.markdown("""
@@ -543,7 +542,7 @@ with tab3:
 # ----------------------
 st.markdown("""
 <div class="greeks-box animate-fade-in">
-    <div class="section-title">📈 Greeks & Risk Sensitivities</div>
+    <div class="section-title">Greeks & Risk Sensitivities</div>
     <div class="content-text">
         Comprehensive analysis of option sensitivities to market parameters.
     </div>
@@ -558,7 +557,7 @@ delta_put, _, theta_put, _, rho_put = OptionPricer.calculate_greeks(spot_price, 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("### 📞 Call Option Greeks")
+    st.markdown("### Call Option Greeks")
     st.markdown(f"""
     <div class="greeks-delta">
         <strong>Delta (Δ): {delta_call:.4f}</strong><br>
@@ -569,21 +568,21 @@ with col1:
         <small>Rate of change of Delta</small>
     </div>
     <div class="greeks-theta">
-        <strong>Theta (Θ): ${theta_call:.2f}</strong><br>
+        <strong>Theta (Θ): ${theta_call:.4f}</strong><br>
         <small>Time decay per day</small>
     </div>
     <div class="greeks-vega">
-        <strong>Vega (ν): {vega:.2f}</strong><br>
+        <strong>Vega (ν): {vega:.4f}</strong><br>
         <small>Volatility sensitivity (per 1%)</small>
     </div>
     <div class="greeks-rho">
-        <strong>Rho (ρ): {rho_call:.2f}</strong><br>
+        <strong>Rho (ρ): {rho_call:.4f}</strong><br>
         <small>Interest rate sensitivity (per 1%)</small>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
-    st.markdown("### 📉 Put Option Greeks")
+    st.markdown("### Put Option Greeks")
     st.markdown(f"""
     <div class="greeks-delta">
         <strong>Delta (Δ): {delta_put:.4f}</strong><br>
@@ -594,21 +593,21 @@ with col2:
         <small>Rate of change of Delta (same as call)</small>
     </div>
     <div class="greeks-theta">
-        <strong>Theta (Θ): ${theta_put:.2f}</strong><br>
+        <strong>Theta (Θ): ${theta_put:.4f}</strong><br>
         <small>Time decay per day</small>
     </div>
     <div class="greeks-vega">
-        <strong>Vega (ν): {vega:.2f}</strong><br>
+        <strong>Vega (ν): {vega:.4f}</strong><br>
         <small>Volatility sensitivity (same as call)</small>
     </div>
     <div class="greeks-rho">
-        <strong>Rho (ρ): {rho_put:.2f}</strong><br>
+        <strong>Rho (ρ): {rho_put:.4f}</strong><br>
         <small>Interest rate sensitivity (per 1%)</small>
     </div>
     """, unsafe_allow_html=True)
 
 # Greeks visualization
-st.markdown("### 📊 Greeks Sensitivity Charts")
+st.markdown("### Greeks Sensitivity Charts")
 
 S_range = np.linspace(spot_price * 0.7, spot_price * 1.3, 50)
 deltas_call = []
@@ -690,7 +689,7 @@ st.plotly_chart(fig_greeks, use_container_width=True)
 # ----------------------
 st.markdown("""
 <div class="strategy-box animate-fade-in">
-    <div class="section-title">🎯 Options Strategies</div>
+    <div class="section-title">Options Strategies</div>
     <div class="content-text">
         Build and analyze complex multi-leg options strategies with interactive P&L visualization.
     </div>
@@ -698,15 +697,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Strategy selection with enhanced tabs
-strategy_tabs = st.tabs(["📈 Directional", "📊 Volatility", "🔧 Complex", "🏗️ Custom Builder"])
+strategy_tabs = st.tabs(["Directional", "Volatility", "Complex", "Custom Builder"])
 
 with strategy_tabs[0]:  # Directional strategies
-    st.markdown("### 📈 Directional Strategies")
+    st.markdown("### Directional Strategies")
     
     strategy_col1, strategy_col2 = st.columns(2)
     
     with strategy_col1:
-        st.markdown("#### 🐂 Bull Call Spread")
+        st.markdown("#### Bull Call Spread")
         K1_bull = st.number_input("Lower Strike (K1)", value=strike_price-10, key="bull_k1")
         K2_bull = st.number_input("Higher Strike (K2)", value=strike_price+10, key="bull_k2")
         
@@ -747,7 +746,7 @@ with strategy_tabs[0]:  # Directional strategies
         st.plotly_chart(fig_bull, use_container_width=True)
     
     with strategy_col2:
-        st.markdown("#### 🐻 Bear Put Spread")
+        st.markdown("#### Bear Put Spread")
         K1_bear = st.number_input("Lower Strike (K1)", value=strike_price-10, key="bear_k1")
         K2_bear = st.number_input("Higher Strike (K2)", value=strike_price+10, key="bear_k2")
         
@@ -787,12 +786,12 @@ with strategy_tabs[0]:  # Directional strategies
         st.plotly_chart(fig_bear, use_container_width=True)
 
 with strategy_tabs[1]:  # Volatility strategies
-    st.markdown("### 📊 Volatility Strategies")
+    st.markdown("### Volatility Strategies")
     
     vol_col1, vol_col2 = st.columns(2)
     
     with vol_col1:
-        st.markdown("#### 🎯 Long Straddle")
+        st.markdown("#### Long Straddle")
         straddle_strike = st.number_input("Strike Price", value=strike_price, key="straddle_k")
         
         straddle_price = OptionsStrategy.straddle(spot_price, straddle_strike, time_to_maturity, risk_free_rate, volatility)
@@ -840,7 +839,7 @@ with strategy_tabs[1]:  # Volatility strategies
         st.plotly_chart(fig_straddle, use_container_width=True)
     
     with vol_col2:
-        st.markdown("#### 🎪 Long Strangle")
+        st.markdown("#### Long Strangle")
         K1_strangle = st.number_input("Put Strike (K1)", value=strike_price-10, key="strangle_k1")
         K2_strangle = st.number_input("Call Strike (K2)", value=strike_price+10, key="strangle_k2")
         
@@ -889,12 +888,12 @@ with strategy_tabs[1]:  # Volatility strategies
         st.plotly_chart(fig_strangle, use_container_width=True)
 
 with strategy_tabs[2]:  # Complex strategies
-    st.markdown("### 🔧 Complex Strategies")
+    st.markdown("### Complex Strategies")
     
     complex_col1, complex_col2 = st.columns(2)
     
     with complex_col1:
-        st.markdown("#### 🦋 Butterfly Spread")
+        st.markdown("#### Butterfly Spread")
         st.markdown("*Long 2 middle strikes, Short 1 lower + 1 higher*")
         
         K1_butterfly = st.number_input("Lower Strike", value=strike_price-15, key="butterfly_k1")
@@ -945,7 +944,7 @@ with strategy_tabs[2]:  # Complex strategies
         st.plotly_chart(fig_butterfly, use_container_width=True)
     
     with complex_col2:
-        st.markdown("#### 🪃 Iron Condor")
+        st.markdown("#### Iron Condor")
         st.markdown("*Sell Put Spread + Sell Call Spread*")
         
         K1_condor = st.number_input("Long Put Strike", value=strike_price-20, key="condor_k1")
@@ -1017,7 +1016,7 @@ with strategy_tabs[2]:  # Complex strategies
         st.plotly_chart(fig_condor, use_container_width=True)
 
 with strategy_tabs[3]:  # Custom Builder
-    st.markdown("### 🏗️ Custom Strategy Builder")
+    st.markdown("### Custom Strategy Builder")
     st.markdown("Build your own multi-leg options strategy")
     
     # Initialize session state for legs
@@ -1058,7 +1057,7 @@ with strategy_tabs[3]:  # Custom Builder
     
     # Display current strategy
     if st.session_state.strategy_legs:
-        st.markdown("#### 📋 Current Strategy")
+        st.markdown("#### Current Strategy")
         
         # Create strategy summary
         strategy_df = pd.DataFrame(st.session_state.strategy_legs)
@@ -1081,11 +1080,11 @@ with strategy_tabs[3]:  # Custom Builder
             </div>
             """, unsafe_allow_html=True)
         with col2:
-            if st.button("🗑️ Clear Strategy", type="secondary"):
+            if st.button("Clear Strategy", type="secondary"):
                 st.session_state.strategy_legs = []
                 st.rerun()
         with col3:
-            if st.button("📊 Analyze Strategy", type="primary"):
+            if st.button("Analyze Strategy", type="primary"):
                 # Calculate custom strategy P&L
                 S_exp = np.linspace(spot_price*0.6, spot_price*1.4, 100)
                 custom_payoffs = []
@@ -1183,12 +1182,12 @@ with strategy_tabs[3]:  # Custom Builder
         st.info("No strategy legs added yet. Add your first leg above to get started!")
         
         # Show some example strategies
-        st.markdown("#### 💡 Example Strategies")
+        st.markdown("#### Example Strategies")
         
         example_col1, example_col2, example_col3 = st.columns(3)
         
         with example_col1:
-            if st.button("📈 Load Bull Call Spread"):
+            if st.button("Bull Call Spread"):
                 st.session_state.strategy_legs = [
                     {'type': 'Call', 'position': 'Long', 'strike': strike_price-5, 'quantity': 1, 
                      'price': OptionPricer.black_scholes_call(spot_price, strike_price-5, time_to_maturity, risk_free_rate, volatility)},
@@ -1198,7 +1197,7 @@ with strategy_tabs[3]:  # Custom Builder
                 st.rerun()
         
         with example_col2:
-            if st.button("🎯 Load Long Straddle"):
+            if st.button("Long Straddle"):
                 call_price = OptionPricer.black_scholes_call(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
                 put_price = OptionPricer.black_scholes_put(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
                 st.session_state.strategy_legs = [
@@ -1208,7 +1207,7 @@ with strategy_tabs[3]:  # Custom Builder
                 st.rerun()
         
         with example_col3:
-            if st.button("🦋 Load Iron Butterfly"):
+            if st.button("Iron Butterfly"):
                 st.session_state.strategy_legs = [
                     {'type': 'Put', 'position': 'Long', 'strike': strike_price-10, 'quantity': 1, 
                      'price': OptionPricer.black_scholes_put(spot_price, strike_price-10, time_to_maturity, risk_free_rate, volatility)},
