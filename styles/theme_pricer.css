@@ -353,6 +353,355 @@
 }
 
 /* ===================
+   ABOUT ME PAGE SPECIFIC ENHANCEMENTS
+   Add these styles to your theme_pricer.css file
+=================== */
+
+/* Enhanced Profile Box with hover effects */
+.profile-box {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    border-left: 6px solid var(--primary-blue);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-lg);
+    font-family: var(--font-family);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.profile-box:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl);
+}
+
+.profile-box:hover::before {
+    left: 100%;
+}
+
+.profile-info {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+    color: var(--gray-700);
+    margin-top: var(--space-4);
+    font-family: var(--font-family);
+}
+
+.profile-info strong {
+    color: var(--primary-blue-dark);
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Enhanced Download Section */
+.download-section {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    border-left: 6px solid var(--info-cyan);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-md);
+    font-family: var(--font-family);
+    position: relative;
+}
+
+.download-section .section-title {
+    color: var(--info-cyan);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* Enhanced Links Box */
+.links-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    border-left: 6px solid var(--success-green);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-md);
+    font-family: var(--font-family);
+}
+
+.links-box .section-title {
+    color: var(--success-green);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+}
+
+.link-item {
+    margin: var(--space-4) 0;
+    padding: var(--space-3);
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-lg);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.link-item:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateX(8px);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+}
+
+.link-item a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: var(--text-lg);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    transition: color 0.3s ease;
+}
+
+.link-item a:hover {
+    color: var(--primary-blue-dark);
+    text-decoration: underline;
+}
+
+.email-link {
+    color: var(--success-green) !important;
+}
+
+.email-link:hover {
+    color: var(--success-green) !important;
+    filter: brightness(0.8);
+}
+
+/* Contact Form Styling - NEW ADDITION */
+.contact-form {
+    background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 100%);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    border-left: 6px solid var(--secondary-orange);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-md);
+    font-family: var(--font-family);
+}
+
+.contact-form form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: var(--space-4);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-family: var(--font-family);
+    transition: all 0.3s ease;
+    background: white;
+    outline: none;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    transform: translateY(-1px);
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+    color: var(--gray-400);
+    font-style: italic;
+}
+
+.contact-form button {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    color: white;
+    padding: var(--space-4) var(--space-6);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+}
+
+.contact-form button:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Skills Section Styling - NEW ADDITION */
+.skills-section {
+    margin: var(--space-8) 0;
+}
+
+.skills-section h3 {
+    color: var(--primary-blue);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+    font-family: var(--font-family);
+    border-bottom: 2px solid var(--gray-200);
+    padding-bottom: var(--space-2);
+}
+
+.skills-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.skills-section li {
+    padding: var(--space-2) 0;
+    color: var(--gray-700);
+    font-family: var(--font-family);
+    position: relative;
+    padding-left: var(--space-6);
+}
+
+.skills-section li::before {
+    content: '▸';
+    color: var(--primary-blue);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    top: var(--space-2);
+}
+
+.skills-section strong {
+    color: var(--primary-blue-dark);
+    font-weight: 600;
+}
+
+/* Footer Section Enhancement */
+.footer-section {
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+    border: 2px solid var(--gray-200);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    margin: var(--space-8) 0;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    font-family: var(--font-family);
+}
+
+.footer-section div {
+    color: var(--gray-600);
+    font-style: italic;
+    font-size: var(--text-lg);
+}
+
+/* Responsive Design for About Me */
+@media (max-width: 768px) {
+    .profile-box,
+    .download-section,
+    .links-box,
+    .contact-form {
+        padding: var(--space-6);
+        margin: var(--space-4) 0;
+    }
+    
+    .profile-info {
+        font-size: var(--text-base);
+        line-height: 1.6;
+    }
+    
+    .link-item a {
+        font-size: var(--text-base);
+    }
+    
+    .contact-form input,
+    .contact-form textarea {
+        padding: var(--space-3);
+        font-size: var(--text-sm);
+    }
+    
+    .contact-form button {
+        font-size: var(--text-base);
+        padding: var(--space-3) var(--space-5);
+    }
+}
+
+/* Animation Classes for About Me */
+.animate-fade-in-about {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.animate-fade-in-delay-about {
+    animation: fadeInUp 0.8s ease-out 0.3s both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Section Title Enhancement for About Me */
+.section-title {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-4);
+    font-family: var(--font-family);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* Add subtle background pattern for visual interest */
+.profile-box,
+.download-section,
+.links-box,
+.contact-form {
+    position: relative;
+}
+
+.profile-box::after,
+.download-section::after,
+.links-box::after,
+.contact-form::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 10px 10px;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* ===================
    FORMULA STYLING
 =================== */
 
