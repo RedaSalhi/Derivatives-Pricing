@@ -28,12 +28,10 @@ load_theme()
 apply_global_styles()
 
 # Page header with proper CSS classes
-st.markdown("""
-<div class="animate-fade-in">
-    <h1 class="main-header">👋 About Me</h1>
-    <p class="subtitle">Quantitative Finance Developer & Derivatives Pricing Specialist</p>
-</div>
-""", unsafe_allow_html=True)
+render_app_header(
+    "About Me",
+    "Advanced Quantitative Finance Tools for Options, Forwards, Swaps & Interest Rate Instruments"
+)
 
 # Professional Profile section using enhanced CSS
 st.markdown("""
