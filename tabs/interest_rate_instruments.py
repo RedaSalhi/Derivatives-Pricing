@@ -765,7 +765,7 @@ def _greeks_analysis_tab():
         T1 = st.number_input("Option maturity (T₁)", 0.1, 10.0, 1.0, step=0.1, key="greek_T1")
         T2 = st.number_input("Bond maturity (T₂)", T1 + 0.1, 30.0, 5.0, step=0.1, key="greek_T2")
 
-        K = st.number_input("Strike price (K)", 0.1, 2.0, 0.8, step=0.01, key="greek_K")
+        K = st.number_input("Strike price (K)", 0.1, 2.0, 0.8, step=0.01, key="ir_greek_K")
         face_value = st.number_input("Face value", 100, 10000, 1000, step=100, key="greek_face")
 
         # Suggest dt from Tab 1
