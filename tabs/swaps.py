@@ -8,9 +8,9 @@ import yfinance as yf
 from styles.app_styles import load_theme
 
 # Enhanced pricing functions
-from pricing.models.swaps.enhanced_dcf import *
-from pricing.models.swaps.enhanced_lmm import *
-from pricing.models.swaps.enhanced_curves import *
+from pricing.models.swaps.dcf import *
+from pricing.models.swaps.lmm import *
+from pricing.models.swaps.curves import *
 
 
 def _get_fx_rate(quote_ccy: str, base_ccy: str) -> float:
