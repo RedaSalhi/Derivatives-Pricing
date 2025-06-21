@@ -619,7 +619,9 @@ def _bond_options_tab():
         try:
             current_bond_price = vasicek_zero_coupon_price(r_current, 0, T2, params['a'], params['lambda'], params['sigma'], 1.0)
             default_strike = round(current_bond_price * 0.95, 4)  # Slightly OTM
-            st.info(f"Current bond price (per $1 face): ${current_bond_price:.4f}")
+            st.info(f"**Current bond price:** "
+                f"${current_bond_price:,.4f}\n\n"
+                "Pick a strike reasonably close to that price.")
         except:
             default_strike = 0.8
             current_bond_price = 0.8
