@@ -45,7 +45,8 @@ if "Pricer" in selected_page:
     runpy.run_path(os.path.join(os.path.dirname(__file__), "pricer_minim.py"))
     
 elif "About Me" in selected_page:
-    runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
+    from about_me import about_me_tab
+    about_me_tab()
     
 elif "Finance Background" in selected_page:
     runpy.run_path(os.path.join(os.path.dirname(__file__), "finance_background.py"))
