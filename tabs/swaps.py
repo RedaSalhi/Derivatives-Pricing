@@ -78,17 +78,17 @@ def _interest_rate_swaps_tab():
     with col1:
         st.markdown("""
         <div class="info-box">
-            <h4>🔧 Swap Configuration</h4>
+            <h4>Swap Configuration</h4>
         </div>
         """, unsafe_allow_html=True)
         
         # Enhanced parameters with validation
         notional = st.number_input(
             "Notional Amount (USD)", 
-            min_value=1_000_000, 
+            min_value=100, 
             max_value=10_000_000_000, 
-            value=100_000_000, 
-            step=1_000_000,
+            value=1_000_000, 
+            step=1000,
             format="%d"
         )
         
@@ -105,7 +105,7 @@ def _interest_rate_swaps_tab():
         fixed_rate = st.slider(
             "Fixed Rate (%)", 
             min_value=0.0, 
-            max_value=10.0, 
+            max_value=100.0, 
             value=3.5, 
             step=0.01,
             format="%.2f"
@@ -113,8 +113,8 @@ def _interest_rate_swaps_tab():
         
         floating_spread = st.slider(
             "Floating Spread (bps)", 
-            min_value=-100, 
-            max_value=500, 
+            min_value=-10000, 
+            max_value=50000, 
             value=0, 
             step=5,
             help="Spread over benchmark rate"
@@ -123,7 +123,7 @@ def _interest_rate_swaps_tab():
         # Model selection
         st.markdown("""
         <div class="info-box">
-            <h4>📈 Pricing Model</h4>
+            <h4>Pricing Model</h4>
         </div>
         """, unsafe_allow_html=True)
         
@@ -141,14 +141,14 @@ def _interest_rate_swaps_tab():
         # Current market environment
         st.markdown("""
         <div class="info-box">
-            <h4>🌍 Market Environment</h4>
+            <h4>Market Environment</h4>
         </div>
         """, unsafe_allow_html=True)
         
-        current_libor = st.slider("Current 3M LIBOR (%)", 0.0, 8.0, 2.5, 0.01) / 100
-        fed_funds = st.slider("Fed Funds Rate (%)", 0.0, 8.0, 2.0, 0.01) / 100
+        current_libor = st.slider("Current 3M LIBOR (%)", 0.0, 100.0, 2.5, 0.01) / 100
+        fed_funds = st.slider("Fed Funds Rate (%)", 0.0, 100.0, 2.0, 0.01) / 100
         
-        price_btn = st.button("🔢 Price Swap", type="primary", use_container_width=True)
+        price_btn = st.button("Price Swap", type="primary", use_container_width=True)
     
     with col2:
         if price_btn:
@@ -237,7 +237,7 @@ def _display_irs_results(result, notional, fixed_rate, payment_times, model):
     
     st.markdown(f"""
     <div class="metric-container">
-        <h4>🎯 Swap Pricing Results ({model})</h4>
+        <h4>Swap Pricing Results ({model})</h4>
         <table style="width: 100%; border-collapse: collapse;">
             <tr style="border-bottom: 2px solid #1f77b4; background-color: #f0f2f6;">
                 <td style="padding: 12px; font-weight: bold;">Metric</td>
@@ -277,7 +277,7 @@ def _display_irs_results(result, notional, fixed_rate, payment_times, model):
 def _display_irs_risk_metrics(result, notional, fixed_rate, current_rate, payment_times):
     """Display comprehensive risk metrics"""
     
-    st.markdown('<div class="sub-header">⚡ Risk Analytics</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Risk Analytics</div>', unsafe_allow_html=True)
     
     # Calculate risk metrics
     duration = sum([t * 0.25 for t in range(1, len(payment_times) + 1)]) / len(payment_times)
