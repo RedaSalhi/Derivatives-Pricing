@@ -736,3 +736,34 @@ class EducationalSwapDisplayManager:
                 </div>
             </div>
             """, unsafe_allow_html=True)
+
+
+class PortfolioAnalyticsDisplay:
+    """Display a high level summary of portfolio analytics.
+
+    If this class cannot be imported, you may be running a reduced
+    version of the project that omits advanced portfolio tools.
+    """
+
+    @staticmethod
+    def display_portfolio_summary(analytics: Dict[str, float]):
+        """Show an overview of the portfolio in Streamlit."""
+        if not analytics:
+            st.info("No portfolio analytics available.")
+            return
+
+        st.markdown(
+            "<div style='background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>",
+            unsafe_allow_html=True,
+        )
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Notional", f"${analytics.get('total_notional', 0):,.0f}")
+        col2.metric("Portfolio NPV", f"${analytics.get('portfolio_npv', 0):,.0f}")
+        col3.metric("Number of Swaps", analytics.get('num_swaps', 0))
+
+        col4, col5, col6 = st.columns(3)
+        col4.metric("DV01", f"${analytics.get('portfolio_dv01', 0):,.0f}")
+        col5.metric("Vega", f"${analytics.get('portfolio_vega', 0):,.0f}")
+        col6.metric("Concentration", f"{analytics.get('concentration_risk', 0):.1%}")
+
+        st.markdown("</div>", unsafe_allow_html=True)
