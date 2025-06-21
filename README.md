@@ -20,7 +20,6 @@ A comprehensive derivatives pricing and risk management platform built with **St
 - [Pricing Models](#-pricing-models)
 - [Supported Instruments](#-supported-instruments)
 - [Educational Resources](#-educational-resources)
-- [Screenshots](#-screenshots)
 - [Contributing](#-contributing)
 - [License](#-license)
 - [Disclaimer](#-disclaimer)
