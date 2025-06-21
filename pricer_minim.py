@@ -24,7 +24,7 @@ st.set_page_config(
     page_title="Derivatives Pricer Suite",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="collapsed"  # Collapse sidebar since we're not using it
+    initial_sidebar_state="expanded"  # Collapse sidebar since we're not using it
 )
 
 # Apply comprehensive styling
