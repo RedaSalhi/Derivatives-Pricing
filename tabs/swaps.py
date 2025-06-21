@@ -10,13 +10,16 @@ warnings.filterwarnings('ignore')
 
 # Enhanced imports
 try:
-    from pricing.models.swap_pricing import (
-        EnhancedInterestRateSwapPricer, EnhancedCurrencySwapPricer, 
-        AccurateDiscountCurve, EducationalSwapCalculator
+    from pricing.models.swaps.swap_pricing import (
+        EnhancedInterestRateSwapPricer,
+        EnhancedCurrencySwapPricer,
+        AccurateDiscountCurve,
+        EducationalSwapCalculator,
     )
-    from pricing.models.market_data import enhanced_market_data_manager
-    from pricing.models.display_utils import (
-        EducationalSwapDisplayManager, PortfolioAnalyticsDisplay
+    from pricing.models.swaps.market_data import enhanced_market_data_manager
+    from pricing.models.swaps.display_utils import (
+        EducationalSwapDisplayManager,
+        PortfolioAnalyticsDisplay,
     )
     ENHANCED_PRICING_AVAILABLE = True
 except ImportError as e:
@@ -934,3 +937,8 @@ st.markdown(f"""
     </p>
 </div>
 """, unsafe_allow_html=True)
+
+
+def swaps_tab():
+    """Wrapper for backward compatibility."""
+    enhanced_swaps_tab()
