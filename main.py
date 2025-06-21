@@ -23,7 +23,7 @@ with st.sidebar:
     
     selected_page = st.radio(
         "",
-        ["Pricer", "About Me", "Finance Background"],
+        ["Pricer", "Finance Background"],
     )
     
     # Feature box
@@ -39,8 +39,8 @@ with st.sidebar:
 if "Pricer" in selected_page:
     runpy.run_path(os.path.join(os.path.dirname(__file__), "pricer_minim.py"))
     
-elif "About Me" in selected_page:
-    runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
+#elif "About Me" in selected_page:
+#    runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
     
 elif "Finance Background" in selected_page:
     runpy.run_path(os.path.join(os.path.dirname(__file__), "finance_background.py"))
