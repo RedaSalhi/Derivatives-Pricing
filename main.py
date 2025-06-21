@@ -41,18 +41,11 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# Clean page routing with headers
 if "Pricer" in selected_page:
-    st.markdown('<h2 class="main-title">Derivatives Pricing Engine</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="page-subtitle">Advanced pricing models for financial derivatives</p>', unsafe_allow_html=True)
     runpy.run_path(os.path.join(os.path.dirname(__file__), "pricer_minim.py"))
     
 elif "About Me" in selected_page:
-    st.markdown('<h2 class="main-title">About the Developer</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="page-subtitle">Learn more about the creator of this application</p>', unsafe_allow_html=True)
     runpy.run_path(os.path.join(os.path.dirname(__file__), "about_me.py"))
     
 elif "Finance Background" in selected_page:
-    st.markdown('<h2 class="main-title">Financial Theory & Background</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="page-subtitle">Educational content on derivatives and financial mathematics</p>', unsafe_allow_html=True)
     runpy.run_path(os.path.join(os.path.dirname(__file__), "finance_background.py"))
