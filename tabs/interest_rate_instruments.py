@@ -758,7 +758,7 @@ def _greeks_analysis_tab():
         </div>
         """, unsafe_allow_html=True)
 
-        greek_type = st.selectbox("Greek to analyze", ["price", "delta", "vega", "rho"], key="greek_type_irv")
+        greek_type = st.selectbox("Greek to analyze", ["price", "delta", "vega", "rho"], key="greek_type")
         option_type = st.radio("Option type", ["call", "put"], key="greek_opt_type")
         model_type = st.radio("Calculation method", ["Analytical", "Monte Carlo"], key="greek_model")
 
