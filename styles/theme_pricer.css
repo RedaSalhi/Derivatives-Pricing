@@ -159,6 +159,200 @@
 }
 
 /* ===================
+   ABOUT ME PAGE SPECIFIC STYLES
+=================== */
+
+.profile-box {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    border-left: 6px solid var(--primary-blue);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-lg);
+    font-family: var(--font-family);
+    transition: all 0.3s ease;
+}
+
+.profile-box:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl);
+}
+
+.profile-info {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+    color: var(--gray-700);
+    margin-top: var(--space-4);
+    font-family: var(--font-family);
+}
+
+.profile-info strong {
+    color: var(--primary-blue-dark);
+    font-weight: 600;
+}
+
+.download-section {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    border-left: 6px solid var(--info-cyan);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-md);
+    font-family: var(--font-family);
+}
+
+.links-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    border-left: 6px solid var(--success-green);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-md);
+    font-family: var(--font-family);
+}
+
+.link-item {
+    margin: var(--space-4) 0;
+    padding: var(--space-3);
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-lg);
+    transition: all 0.3s ease;
+}
+
+.link-item:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateX(8px);
+    box-shadow: var(--shadow-sm);
+}
+
+.link-item a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: var(--text-lg);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    transition: color 0.3s ease;
+}
+
+.link-item a:hover {
+    color: var(--primary-blue-dark);
+    text-decoration: underline;
+}
+
+.email-link {
+    color: var(--success-green) !important;
+}
+
+.email-link:hover {
+    color: var(--success-green-dark) !important;
+}
+
+/* Contact Form Styling */
+.contact-form {
+    background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 100%);
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    border: 2px solid var(--gray-200);
+    margin: var(--space-6) 0;
+    box-shadow: var(--shadow-lg);
+    font-family: var(--font-family);
+}
+
+.contact-form form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: var(--space-4);
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-base);
+    font-family: var(--font-family);
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.contact-form button {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    color: white;
+    padding: var(--space-4) var(--space-6);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+}
+
+.contact-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+}
+
+.contact-form button:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Enhanced Download Buttons */
+.stDownloadButton > button {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-6);
+    font-weight: 600;
+    font-family: var(--font-family);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    margin: var(--space-2) 0;
+}
+
+.stDownloadButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+}
+
+/* Skills Section Enhancement */
+.stColumns > div {
+    padding: var(--space-2);
+}
+
+.stColumns > div > div {
+    background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 100%);
+    padding: var(--space-6);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.stColumns > div > div:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-blue-light);
+}
+
+/* ===================
    FORMULA STYLING
 =================== */
 
@@ -377,7 +571,11 @@
     .info-box,
     .warning-box,
     .success-box,
-    .danger-box {
+    .danger-box,
+    .profile-box,
+    .download-section,
+    .links-box,
+    .contact-form {
         padding: var(--space-4);
         margin: var(--space-3) 0;
     }
@@ -385,6 +583,16 @@
     .formula {
         font-size: var(--text-lg);
         padding: var(--space-4);
+    }
+    
+    .contact-form input,
+    .contact-form textarea,
+    .contact-form button {
+        font-size: var(--text-sm);
+    }
+    
+    .link-item a {
+        font-size: var(--text-base);
     }
 }
 
