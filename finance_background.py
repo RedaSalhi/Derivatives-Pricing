@@ -946,36 +946,48 @@ with strategy_tabs[2]:  # Complex strategies
     
     with complex_col2:
         st.markdown("#### 🪃 Iron Condor")
-        st.markdown("*Short Strangle + Long Strangle (wider)*")
+        st.markdown("*Sell Put Spread + Sell Call Spread*")
         
         K1_condor = st.number_input("Long Put Strike", value=strike_price-20, key="condor_k1")
         K2_condor = st.number_input("Short Put Strike", value=strike_price-10, key="condor_k2")
         K3_condor = st.number_input("Short Call Strike", value=strike_price+10, key="condor_k3")
         K4_condor = st.number_input("Long Call Strike", value=strike_price+20, key="condor_k4")
         
-        # Calculate iron condor cost (net credit)
+        # Calculate iron condor cost (net credit received)
         long_put_low = OptionPricer.black_scholes_put(spot_price, K1_condor, time_to_maturity, risk_free_rate, volatility)
         short_put_mid = OptionPricer.black_scholes_put(spot_price, K2_condor, time_to_maturity, risk_free_rate, volatility)
         short_call_mid = OptionPricer.black_scholes_call(spot_price, K3_condor, time_to_maturity, risk_free_rate, volatility)
         long_call_high = OptionPricer.black_scholes_call(spot_price, K4_condor, time_to_maturity, risk_free_rate, volatility)
+        
+        # Net credit = premiums received - premiums paid
         condor_credit = short_put_mid + short_call_mid - long_put_low - long_call_high
+        max_loss = max(K2_condor - K1_condor, K4_condor - K3_condor) - condor_credit
         
         st.markdown(f"""
         <div class="secondary-box">
-            <strong>Net Credit: ${condor_credit:.2f}</strong><br>
+            <strong>Strategy Cost: ${-condor_credit:.2f}</strong><br>
+            <strong>Net Credit Received: ${condor_credit:.2f}</strong><br>
             <small>Max Profit: ${condor_credit:.2f}</small><br>
-            <small>If price stays between ${K2_condor}-${K3_condor}</small>
+            <small>Max Loss: ${max_loss:.2f}</small><br>
+            <small>Profit if price stays between ${K2_condor:.0f}-${K3_condor:.0f}</small>
         </div>
         """, unsafe_allow_html=True)
         
-        # Iron condor payoff
+        # Iron condor payoff - correct calculation
         condor_payoffs = []
         for S in S_exp:
-            payoff_1 = -max(K1_condor - S, 0)  # Short long put
-            payoff_2 = max(K2_condor - S, 0)   # Long short put
-            payoff_3 = max(S - K3_condor, 0)   # Long short call
-            payoff_4 = -max(S - K4_condor, 0)  # Short long call
-            condor_payoffs.append(payoff_1 + payoff_2 + payoff_3 + payoff_4 + condor_credit)
+            # Long put at K1 (protection)
+            payoff_long_put = max(K1_condor - S, 0)
+            # Short put at K2 (income)
+            payoff_short_put = -max(K2_condor - S, 0)
+            # Short call at K3 (income)
+            payoff_short_call = -max(S - K3_condor, 0)
+            # Long call at K4 (protection)
+            payoff_long_call = max(S - K4_condor, 0)
+            
+            # Total P&L = intrinsic payoffs + initial credit received
+            total_pnl = payoff_long_put + payoff_short_put + payoff_short_call + payoff_long_call + condor_credit
+            condor_payoffs.append(total_pnl)
         
         fig_condor = go.Figure()
         fig_condor.add_trace(go.Scatter(
@@ -988,6 +1000,12 @@ with strategy_tabs[2]:  # Complex strategies
         fig_condor.add_hline(y=0, line_dash="dash", line_color=COLORS['gray_500'])
         fig_condor.add_vline(x=spot_price, line_dash="dot", line_color=COLORS['info'], annotation_text="Current")
         fig_condor.add_vrect(x0=K2_condor, x1=K3_condor, fillcolor=COLORS['success'], opacity=0.2, annotation_text="Max Profit Zone")
+        
+        # Add strike lines
+        fig_condor.add_vline(x=K1_condor, line_dash="dot", line_color=COLORS['gray_500'], annotation_text="K1")
+        fig_condor.add_vline(x=K2_condor, line_dash="dot", line_color=COLORS['danger'], annotation_text="K2")
+        fig_condor.add_vline(x=K3_condor, line_dash="dot", line_color=COLORS['success'], annotation_text="K3")
+        fig_condor.add_vline(x=K4_condor, line_dash="dot", line_color=COLORS['gray_500'], annotation_text="K4")
         
         fig_condor.update_layout(
             title="Iron Condor P&L", 
