@@ -541,7 +541,9 @@ if __name__ == "__main__":
     print(f"95% Confidence Interval: [${result.confidence_interval[0]:,.0f}, ${result.confidence_interval[1]:,.0f}]")
     print(f"Par Rate: {result.par_rate:.4%}")
     print(f"Paths Used: {result.paths_used:,}")
-    print(f"Relative Error: {result.convergence_stats['relative_error']:.4%}")Parameters(
+    print(f"Relative Error: {result.convergence_stats['relative_error']:.4%}")
+    
+    Parameters(
             initial_forwards=initial_forwards,
             volatilities=calibrated_vols,
             correlations=self.correlation_matrix,
