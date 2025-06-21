@@ -786,6 +786,421 @@ with strategy_tabs[0]:  # Directional strategies
         )
         st.plotly_chart(fig_bear, use_container_width=True)
 
+with strategy_tabs[1]:  # Volatility strategies
+    st.markdown("### 📊 Volatility Strategies")
+    
+    vol_col1, vol_col2 = st.columns(2)
+    
+    with vol_col1:
+        st.markdown("#### 🎯 Long Straddle")
+        straddle_strike = st.number_input("Strike Price", value=strike_price, key="straddle_k")
+        
+        straddle_price = OptionsStrategy.straddle(spot_price, straddle_strike, time_to_maturity, risk_free_rate, volatility)
+        
+        st.markdown(f"""
+        <div class="info-box">
+            <strong>Strategy Cost: ${straddle_price:.2f}</strong><br>
+            <small>Profit if |movement| > ${straddle_price:.2f}</small>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Straddle payoff
+        S_exp = np.linspace(spot_price*0.6, spot_price*1.4, 100)
+        straddle_payoffs = []
+        for S in S_exp:
+            call_payoff = max(S - straddle_strike, 0)
+            put_payoff = max(straddle_strike - S, 0)
+            straddle_payoffs.append(call_payoff + put_payoff - straddle_price)
+        
+        fig_straddle = go.Figure()
+        fig_straddle.add_trace(go.Scatter(
+            x=S_exp, y=straddle_payoffs, 
+            name='Long Straddle P&L', 
+            fill='tozeroy', 
+            line=dict(color=COLORS['info'], width=3),
+            hovertemplate="Stock Price: $%{x:.2f}<br>P&L: $%{y:.2f}<extra></extra>"
+        ))
+        fig_straddle.add_hline(y=0, line_dash="dash", line_color=COLORS['gray_500'])
+        fig_straddle.add_vline(x=spot_price, line_dash="dot", line_color=COLORS['primary'], annotation_text="Current Price")
+        fig_straddle.add_vline(x=straddle_strike, line_dash="dot", line_color=COLORS['secondary'], annotation_text="Strike")
+        
+        # Add breakeven lines
+        breakeven_up = straddle_strike + straddle_price
+        breakeven_down = straddle_strike - straddle_price
+        fig_straddle.add_vline(x=breakeven_up, line_dash="dash", line_color=COLORS['success'], annotation_text="Upper BE")
+        fig_straddle.add_vline(x=breakeven_down, line_dash="dash", line_color=COLORS['success'], annotation_text="Lower BE")
+        
+        fig_straddle.update_layout(
+            title="Long Straddle P&L", 
+            xaxis_title="Stock Price at Expiration", 
+            yaxis_title="Profit/Loss ($)", 
+            template="plotly_white", 
+            height=300
+        )
+        st.plotly_chart(fig_straddle, use_container_width=True)
+    
+    with vol_col2:
+        st.markdown("#### 🎪 Long Strangle")
+        K1_strangle = st.number_input("Put Strike (K1)", value=strike_price-10, key="strangle_k1")
+        K2_strangle = st.number_input("Call Strike (K2)", value=strike_price+10, key="strangle_k2")
+        
+        strangle_price = OptionsStrategy.strangle(spot_price, K1_strangle, K2_strangle, time_to_maturity, risk_free_rate, volatility)
+        
+        st.markdown(f"""
+        <div class="warning-box">
+            <strong>Strategy Cost: ${strangle_price:.2f}</strong><br>
+            <small>Lower cost than straddle, wider breakeven range</small>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Strangle payoff
+        strangle_payoffs = []
+        for S in S_exp:
+            call_payoff = max(S - K2_strangle, 0)
+            put_payoff = max(K1_strangle - S, 0)
+            strangle_payoffs.append(call_payoff + put_payoff - strangle_price)
+        
+        fig_strangle = go.Figure()
+        fig_strangle.add_trace(go.Scatter(
+            x=S_exp, y=strangle_payoffs, 
+            name='Long Strangle P&L', 
+            fill='tozeroy', 
+            line=dict(color=COLORS['warning'], width=3),
+            hovertemplate="Stock Price: $%{x:.2f}<br>P&L: $%{y:.2f}<extra></extra>"
+        ))
+        fig_strangle.add_hline(y=0, line_dash="dash", line_color=COLORS['gray_500'])
+        fig_strangle.add_vline(x=spot_price, line_dash="dot", line_color=COLORS['primary'], annotation_text="Current Price")
+        fig_strangle.add_vline(x=K1_strangle, line_dash="dot", line_color=COLORS['danger'], annotation_text="Put Strike")
+        fig_strangle.add_vline(x=K2_strangle, line_dash="dot", line_color=COLORS['success'], annotation_text="Call Strike")
+        
+        # Add breakeven lines
+        breakeven_up = K2_strangle + strangle_price
+        breakeven_down = K1_strangle - strangle_price
+        fig_strangle.add_vline(x=breakeven_up, line_dash="dash", line_color=COLORS['success'], annotation_text="Upper BE")
+        fig_strangle.add_vline(x=breakeven_down, line_dash="dash", line_color=COLORS['success'], annotation_text="Lower BE")
+        
+        fig_strangle.update_layout(
+            title="Long Strangle P&L", 
+            xaxis_title="Stock Price at Expiration", 
+            yaxis_title="Profit/Loss ($)", 
+            template="plotly_white", 
+            height=300
+        )
+        st.plotly_chart(fig_strangle, use_container_width=True)
+
+with strategy_tabs[2]:  # Complex strategies
+    st.markdown("### 🔧 Complex Strategies")
+    
+    complex_col1, complex_col2 = st.columns(2)
+    
+    with complex_col1:
+        st.markdown("#### 🦋 Butterfly Spread")
+        st.markdown("*Long 2 middle strikes, Short 1 lower + 1 higher*")
+        
+        K1_butterfly = st.number_input("Lower Strike", value=strike_price-15, key="butterfly_k1")
+        K2_butterfly = st.number_input("Middle Strike", value=strike_price, key="butterfly_k2")
+        K3_butterfly = st.number_input("Higher Strike", value=strike_price+15, key="butterfly_k3")
+        
+        # Calculate butterfly spread cost
+        long_call_low = OptionPricer.black_scholes_call(spot_price, K1_butterfly, time_to_maturity, risk_free_rate, volatility)
+        short_call_mid = OptionPricer.black_scholes_call(spot_price, K2_butterfly, time_to_maturity, risk_free_rate, volatility)
+        long_call_high = OptionPricer.black_scholes_call(spot_price, K3_butterfly, time_to_maturity, risk_free_rate, volatility)
+        butterfly_cost = long_call_low - 2*short_call_mid + long_call_high
+        
+        st.markdown(f"""
+        <div class="primary-box">
+            <strong>Net Cost: ${butterfly_cost:.2f}</strong><br>
+            <small>Max Profit: ${(K2_butterfly - K1_butterfly) - butterfly_cost:.2f}</small><br>
+            <small>At Stock Price: ${K2_butterfly}</small>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Butterfly payoff
+        butterfly_payoffs = []
+        for S in S_exp:
+            payoff_1 = max(S - K1_butterfly, 0)  # Long lower call
+            payoff_2 = -2 * max(S - K2_butterfly, 0)  # Short 2 middle calls
+            payoff_3 = max(S - K3_butterfly, 0)  # Long higher call
+            butterfly_payoffs.append(payoff_1 + payoff_2 + payoff_3 - butterfly_cost)
+        
+        fig_butterfly = go.Figure()
+        fig_butterfly.add_trace(go.Scatter(
+            x=S_exp, y=butterfly_payoffs, 
+            name='Butterfly Spread P&L', 
+            fill='tozeroy', 
+            line=dict(color=COLORS['primary'], width=3),
+            hovertemplate="Stock Price: $%{x:.2f}<br>P&L: $%{y:.2f}<extra></extra>"
+        ))
+        fig_butterfly.add_hline(y=0, line_dash="dash", line_color=COLORS['gray_500'])
+        fig_butterfly.add_vline(x=spot_price, line_dash="dot", line_color=COLORS['info'], annotation_text="Current")
+        fig_butterfly.add_vline(x=K2_butterfly, line_dash="dot", line_color=COLORS['success'], annotation_text="Max Profit")
+        
+        fig_butterfly.update_layout(
+            title="Butterfly Spread P&L", 
+            xaxis_title="Stock Price at Expiration", 
+            yaxis_title="Profit/Loss ($)", 
+            template="plotly_white", 
+            height=300
+        )
+        st.plotly_chart(fig_butterfly, use_container_width=True)
+    
+    with complex_col2:
+        st.markdown("#### 🪃 Iron Condor")
+        st.markdown("*Short Strangle + Long Strangle (wider)*")
+        
+        K1_condor = st.number_input("Long Put Strike", value=strike_price-20, key="condor_k1")
+        K2_condor = st.number_input("Short Put Strike", value=strike_price-10, key="condor_k2")
+        K3_condor = st.number_input("Short Call Strike", value=strike_price+10, key="condor_k3")
+        K4_condor = st.number_input("Long Call Strike", value=strike_price+20, key="condor_k4")
+        
+        # Calculate iron condor cost (net credit)
+        long_put_low = OptionPricer.black_scholes_put(spot_price, K1_condor, time_to_maturity, risk_free_rate, volatility)
+        short_put_mid = OptionPricer.black_scholes_put(spot_price, K2_condor, time_to_maturity, risk_free_rate, volatility)
+        short_call_mid = OptionPricer.black_scholes_call(spot_price, K3_condor, time_to_maturity, risk_free_rate, volatility)
+        long_call_high = OptionPricer.black_scholes_call(spot_price, K4_condor, time_to_maturity, risk_free_rate, volatility)
+        condor_credit = short_put_mid + short_call_mid - long_put_low - long_call_high
+        
+        st.markdown(f"""
+        <div class="secondary-box">
+            <strong>Net Credit: ${condor_credit:.2f}</strong><br>
+            <small>Max Profit: ${condor_credit:.2f}</small><br>
+            <small>If price stays between ${K2_condor}-${K3_condor}</small>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Iron condor payoff
+        condor_payoffs = []
+        for S in S_exp:
+            payoff_1 = -max(K1_condor - S, 0)  # Short long put
+            payoff_2 = max(K2_condor - S, 0)   # Long short put
+            payoff_3 = max(S - K3_condor, 0)   # Long short call
+            payoff_4 = -max(S - K4_condor, 0)  # Short long call
+            condor_payoffs.append(payoff_1 + payoff_2 + payoff_3 + payoff_4 + condor_credit)
+        
+        fig_condor = go.Figure()
+        fig_condor.add_trace(go.Scatter(
+            x=S_exp, y=condor_payoffs, 
+            name='Iron Condor P&L', 
+            fill='tozeroy', 
+            line=dict(color=COLORS['secondary'], width=3),
+            hovertemplate="Stock Price: $%{x:.2f}<br>P&L: $%{y:.2f}<extra></extra>"
+        ))
+        fig_condor.add_hline(y=0, line_dash="dash", line_color=COLORS['gray_500'])
+        fig_condor.add_vline(x=spot_price, line_dash="dot", line_color=COLORS['info'], annotation_text="Current")
+        fig_condor.add_vrect(x0=K2_condor, x1=K3_condor, fillcolor=COLORS['success'], opacity=0.2, annotation_text="Max Profit Zone")
+        
+        fig_condor.update_layout(
+            title="Iron Condor P&L", 
+            xaxis_title="Stock Price at Expiration", 
+            yaxis_title="Profit/Loss ($)", 
+            template="plotly_white", 
+            height=300
+        )
+        st.plotly_chart(fig_condor, use_container_width=True)
+
+with strategy_tabs[3]:  # Custom Builder
+    st.markdown("### 🏗️ Custom Strategy Builder")
+    st.markdown("Build your own multi-leg options strategy")
+    
+    # Initialize session state for legs
+    if 'strategy_legs' not in st.session_state:
+        st.session_state.strategy_legs = []
+    
+    # Add new leg section
+    st.markdown("#### ➕ Add Strategy Leg")
+    
+    add_col1, add_col2, add_col3, add_col4, add_col5 = st.columns(5)
+    
+    with add_col1:
+        leg_type = st.selectbox("Type", ["Call", "Put"], key="leg_type")
+    with add_col2:
+        leg_position = st.selectbox("Position", ["Long", "Short"], key="leg_position")
+    with add_col3:
+        leg_strike = st.number_input("Strike", value=strike_price, key="leg_strike")
+    with add_col4:
+        leg_quantity = st.number_input("Quantity", value=1, min_value=1, max_value=10, key="leg_quantity")
+    with add_col5:
+        if st.button("➕ Add Leg", type="primary"):
+            # Calculate option price
+            if leg_type == "Call":
+                option_price = OptionPricer.black_scholes_call(spot_price, leg_strike, time_to_maturity, risk_free_rate, volatility)
+            else:
+                option_price = OptionPricer.black_scholes_put(spot_price, leg_strike, time_to_maturity, risk_free_rate, volatility)
+            
+            # Add to strategy
+            leg = {
+                'type': leg_type,
+                'position': leg_position,
+                'strike': leg_strike,
+                'quantity': leg_quantity,
+                'price': option_price
+            }
+            st.session_state.strategy_legs.append(leg)
+            st.success(f"Added {leg_position} {leg_quantity}x {leg_type} @ ${leg_strike}")
+    
+    # Display current strategy
+    if st.session_state.strategy_legs:
+        st.markdown("#### 📋 Current Strategy")
+        
+        # Create strategy summary
+        strategy_df = pd.DataFrame(st.session_state.strategy_legs)
+        strategy_df['Net Cost'] = strategy_df.apply(lambda row: 
+            row['price'] * row['quantity'] * (-1 if row['position'] == 'Long' else 1), axis=1)
+        
+        # Display strategy table
+        st.dataframe(strategy_df[['position', 'type', 'quantity', 'strike', 'price', 'Net Cost']], 
+                    use_container_width=True)
+        
+        # Calculate total cost
+        total_cost = strategy_df['Net Cost'].sum()
+        net_position = "Net Credit" if total_cost > 0 else "Net Debit"
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f"""
+            <div class="{'success-box' if total_cost > 0 else 'danger-box'}">
+                <strong>{net_position}: ${abs(total_cost):.2f}</strong>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            if st.button("🗑️ Clear Strategy", type="secondary"):
+                st.session_state.strategy_legs = []
+                st.rerun()
+        with col3:
+            if st.button("📊 Analyze Strategy", type="primary"):
+                # Calculate custom strategy P&L
+                S_exp = np.linspace(spot_price*0.6, spot_price*1.4, 100)
+                custom_payoffs = []
+                
+                for S in S_exp:
+                    total_payoff = -total_cost  # Start with net cost
+                    
+                    for leg in st.session_state.strategy_legs:
+                        if leg['type'] == 'Call':
+                            intrinsic = max(S - leg['strike'], 0)
+                        else:
+                            intrinsic = max(leg['strike'] - S, 0)
+                        
+                        if leg['position'] == 'Long':
+                            total_payoff += intrinsic * leg['quantity']
+                        else:
+                            total_payoff -= intrinsic * leg['quantity']
+                    
+                    custom_payoffs.append(total_payoff)
+                
+                # Plot custom strategy
+                fig_custom = go.Figure()
+                fig_custom.add_trace(go.Scatter(
+                    x=S_exp, y=custom_payoffs, 
+                    name='Custom Strategy P&L', 
+                    fill='tozeroy', 
+                    line=dict(color=COLORS['primary'], width=4),
+                    hovertemplate="Stock Price: $%{x:.2f}<br>P&L: $%{y:.2f}<extra></extra>"
+                ))
+                fig_custom.add_hline(y=0, line_dash="dash", line_color=COLORS['gray_500'])
+                fig_custom.add_vline(x=spot_price, line_dash="dot", line_color=COLORS['info'], annotation_text="Current Price")
+                
+                # Add strike lines
+                strikes = [leg['strike'] for leg in st.session_state.strategy_legs]
+                for strike in set(strikes):
+                    fig_custom.add_vline(x=strike, line_dash="dot", line_color=COLORS['gray_400'], opacity=0.7)
+                
+                fig_custom.update_layout(
+                    title="Custom Strategy P&L Analysis", 
+                    xaxis_title="Stock Price at Expiration", 
+                    yaxis_title="Profit/Loss ($)", 
+                    template="plotly_white", 
+                    height=400
+                )
+                st.plotly_chart(fig_custom, use_container_width=True)
+                
+                # Strategy analytics
+                max_profit = max(custom_payoffs)
+                max_loss = min(custom_payoffs)
+                breakeven_points = []
+                
+                # Find breakeven points (where P&L crosses zero)
+                for i in range(len(custom_payoffs)-1):
+                    if (custom_payoffs[i] <= 0 <= custom_payoffs[i+1]) or (custom_payoffs[i] >= 0 >= custom_payoffs[i+1]):
+                        # Linear interpolation to find exact breakeven
+                        if custom_payoffs[i+1] != custom_payoffs[i]:
+                            be_price = S_exp[i] + (S_exp[i+1] - S_exp[i]) * (-custom_payoffs[i]) / (custom_payoffs[i+1] - custom_payoffs[i])
+                            breakeven_points.append(be_price)
+                
+                # Display analytics
+                analytics_col1, analytics_col2, analytics_col3 = st.columns(3)
+                
+                with analytics_col1:
+                    st.markdown(f"""
+                    <div class="success-box">
+                        <strong>Max Profit: ${max_profit:.2f}</strong>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with analytics_col2:
+                    st.markdown(f"""
+                    <div class="danger-box">
+                        <strong>Max Loss: ${max_loss:.2f}</strong>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with analytics_col3:
+                    if breakeven_points:
+                        be_text = ", ".join([f"${be:.2f}" for be in breakeven_points])
+                        st.markdown(f"""
+                        <div class="info-box">
+                            <strong>Breakeven: {be_text}</strong>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"""
+                        <div class="warning-box">
+                            <strong>No Breakeven Found</strong>
+                        </div>
+                        """, unsafe_allow_html=True)
+    
+    else:
+        st.info("No strategy legs added yet. Add your first leg above to get started!")
+        
+        # Show some example strategies
+        st.markdown("#### 💡 Example Strategies")
+        
+        example_col1, example_col2, example_col3 = st.columns(3)
+        
+        with example_col1:
+            if st.button("📈 Load Bull Call Spread"):
+                st.session_state.strategy_legs = [
+                    {'type': 'Call', 'position': 'Long', 'strike': strike_price-5, 'quantity': 1, 
+                     'price': OptionPricer.black_scholes_call(spot_price, strike_price-5, time_to_maturity, risk_free_rate, volatility)},
+                    {'type': 'Call', 'position': 'Short', 'strike': strike_price+5, 'quantity': 1, 
+                     'price': OptionPricer.black_scholes_call(spot_price, strike_price+5, time_to_maturity, risk_free_rate, volatility)}
+                ]
+                st.rerun()
+        
+        with example_col2:
+            if st.button("🎯 Load Long Straddle"):
+                call_price = OptionPricer.black_scholes_call(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
+                put_price = OptionPricer.black_scholes_put(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)
+                st.session_state.strategy_legs = [
+                    {'type': 'Call', 'position': 'Long', 'strike': strike_price, 'quantity': 1, 'price': call_price},
+                    {'type': 'Put', 'position': 'Long', 'strike': strike_price, 'quantity': 1, 'price': put_price}
+                ]
+                st.rerun()
+        
+        with example_col3:
+            if st.button("🦋 Load Iron Butterfly"):
+                st.session_state.strategy_legs = [
+                    {'type': 'Put', 'position': 'Long', 'strike': strike_price-10, 'quantity': 1, 
+                     'price': OptionPricer.black_scholes_put(spot_price, strike_price-10, time_to_maturity, risk_free_rate, volatility)},
+                    {'type': 'Put', 'position': 'Short', 'strike': strike_price, 'quantity': 1, 
+                     'price': OptionPricer.black_scholes_put(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)},
+                    {'type': 'Call', 'position': 'Short', 'strike': strike_price, 'quantity': 1, 
+                     'price': OptionPricer.black_scholes_call(spot_price, strike_price, time_to_maturity, risk_free_rate, volatility)},
+                    {'type': 'Call', 'position': 'Long', 'strike': strike_price+10, 'quantity': 1, 
+                     'price': OptionPricer.black_scholes_call(spot_price, strike_price+10, time_to_maturity, risk_free_rate, volatility)}
+                ]
+                st.rerun()
+
 # ----------------------
 # Footer with enhanced styling
 # ----------------------
