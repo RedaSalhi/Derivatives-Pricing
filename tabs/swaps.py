@@ -11,12 +11,12 @@ from styles.app_styles import load_theme
 
 # Import modular components
 try:
-    from pricing.models.market_data import market_data_manager
-    from pricing.models.swap_pricing import (
+    from pricing.models.swaps.market_data import market_data_manager
+    from pricing.models.swaps.swap_pricing import (
         InterestRateSwapPricer, CurrencySwapPricer, EquitySwapPricer, 
         CurveBuilder, PortfolioAnalyzer
     )
-    from pricing.models.display_utils import SwapDisplayManager, MarketIntelligenceDisplay
+    from pricing.models.swaps.display_utils import SwapDisplayManager, MarketIntelligenceDisplay
     PRICING_AVAILABLE = True
 except ImportError as e:
     st.error(f"Pricing modules not available: {e}")
