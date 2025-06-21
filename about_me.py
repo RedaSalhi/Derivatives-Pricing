@@ -1,25 +1,116 @@
 import streamlit as st
 import streamlit.components.v1 as components
-from styles.app_styles import (
-    load_theme,
-    apply_global_styles,
-    get_component_styles,
-)
+import os
+import sys
+
+# Add the current directory to Python path to ensure imports work
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+
+try:
+    from styles.app_styles import load_theme
+except ImportError:
+    # Fallback if import fails
+    def load_theme():
+        pass
 
 def about_me_tab():
     """Professional About Me page with integrated styling"""
-
-    # Configure page and load global styles
-    st.set_page_config(
-        page_title="About Me",
-        page_icon="👋",
-        layout="wide",
-        initial_sidebar_state="expanded",
-    )
-
-    load_theme()
-    apply_global_styles()
-    st.markdown(get_component_styles(), unsafe_allow_html=True)
+    
+    # Load the theme to ensure consistent styling
+    try:
+        load_theme()
+    except:
+        # Fallback CSS if theme loading fails
+        st.markdown("""
+        <style>
+        .profile-box {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            border-left: 6px solid #2563eb;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            font-family: 'Inter', sans-serif;
+        }
+        .section-title {
+            color: #2563eb;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .profile-info {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #374151;
+        }
+        .skills-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .skills-section li {
+            padding: 0.5rem 0;
+            color: #374151;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        .skills-section li::before {
+            content: '▸';
+            color: #2563eb;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+        }
+        .download-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            border-left: 6px solid #0891b2;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .links-box {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            border-left: 6px solid #059669;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .link-item {
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 0.5rem;
+        }
+        .contact-form {
+            background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 2px solid #e5e7eb;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .info-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border-left: 4px solid #2563eb;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .footer-section {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border: 2px solid #e5e7eb;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        </style>
+        """, unsafe_allow_html=True)
     
     # Page header with animation
     st.markdown("""
@@ -81,30 +172,51 @@ def about_me_tab():
     </div>
     """, unsafe_allow_html=True)
     
-    # Create download buttons
+    # Create download buttons - with error handling
     col1, col2 = st.columns(2)
     
     with col1:
-        # CV Download (placeholder - you'll need to add your actual CV file)
-        with open("README.md", "rb") as file:  # Using README as placeholder
-            st.download_button(
-                label="📋 Download CV",
-                data=file,
-                file_name="CV_Reda_Salhi.pdf",
-                mime="application/pdf",
-                help="Download my professional CV"
-            )
+        # CV Download - create a simple text file as placeholder if no CV exists
+        try:
+            if os.path.exists("CV_Reda_Salhi.pdf"):
+                with open("CV_Reda_Salhi.pdf", "rb") as file:
+                    st.download_button(
+                        label="📋 Download CV",
+                        data=file,
+                        file_name="CV_Reda_Salhi.pdf",
+                        mime="application/pdf",
+                        help="Download my professional CV"
+                    )
+            elif os.path.exists("README.md"):
+                with open("README.md", "rb") as file:
+                    st.download_button(
+                        label="📋 Download CV",
+                        data=file,
+                        file_name="CV_Reda_Salhi.pdf",
+                        mime="application/pdf",
+                        help="Download my professional CV (placeholder)"
+                    )
+            else:
+                st.info("CV download will be available soon")
+        except Exception as e:
+            st.info("CV download temporarily unavailable")
     
     with col2:
         # Project documentation
-        with open("README.md", "rb") as file:
-            st.download_button(
-                label="📖 Project Documentation",
-                data=file,
-                file_name="Derivatives_Pricing_Guide.md",
-                mime="text/markdown",
-                help="Comprehensive guide to this derivatives pricing tool"
-            )
+        try:
+            if os.path.exists("README.md"):
+                with open("README.md", "rb") as file:
+                    st.download_button(
+                        label="📖 Project Documentation",
+                        data=file,
+                        file_name="Derivatives_Pricing_Guide.md",
+                        mime="text/markdown",
+                        help="Comprehensive guide to this derivatives pricing tool"
+                    )
+            else:
+                st.info("Documentation download will be available soon")
+        except Exception as e:
+            st.info("Documentation download temporarily unavailable")
     
     # Links section
     st.markdown("""
