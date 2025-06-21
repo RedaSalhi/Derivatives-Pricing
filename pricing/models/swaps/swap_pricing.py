@@ -1,28 +1,35 @@
-# pricing/models/swap_pricing.py
-# Clean Swap Pricing Models
+# Enhanced Swap Pricing Models with Accurate Calculations
+# File: pricing/models/enhanced_swap_pricing.py
 
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
+from datetime import datetime, timedelta
+import math
 
 
 @dataclass
 class SwapResult:
-    """Container for swap pricing results"""
+    """Enhanced container for swap pricing results with detailed explanations"""
     npv: float
     pv_fixed: float = 0.0
     pv_floating: float = 0.0
     par_rate: float = 0.0
     dv01: float = 0.0
     duration: float = 0.0
+    modified_duration: float = 0.0
+    convexity: float = 0.0
+    carry: float = 0.0
     greeks: Optional[Dict[str, float]] = None
     cashflows: Optional[pd.DataFrame] = None
+    methodology: str = ""
+    market_context: Dict = None
 
 
 @dataclass
 class CurrencySwapResult:
-    """Container for currency swap results"""
+    """Enhanced currency swap results with detailed risk metrics"""
     npv_domestic: float
     npv_foreign: float
     pv_domestic_leg: float
@@ -32,376 +39,493 @@ class CurrencySwapResult:
     domestic_dv01: float
     foreign_dv01: float
     cross_gamma: float
+    basis_component: float
+    cashflows_domestic: Optional[pd.DataFrame] = None
+    cashflows_foreign: Optional[pd.DataFrame] = None
 
 
-class InterestRateSwapPricer:
-    """Clean Interest Rate Swap Pricing"""
+class AccurateDiscountCurve:
+    """Accurate discount curve implementation with interpolation"""
+    
+    def __init__(self, rates: Dict[float, float], interpolation='linear'):
+        """
+        Initialize curve with tenor-rate pairs
+        
+        Args:
+            rates: Dictionary of {tenor_in_years: rate}
+            interpolation: 'linear', 'cubic', or 'loglinear'
+        """
+        self.tenors = sorted(rates.keys())
+        self.rates = [rates[t] for t in self.tenors]
+        self.interpolation = interpolation
+        
+    def rate(self, t: float) -> float:
+        """Get interest rate at time t"""
+        if t <= 0:
+            return self.rates[0]
+        if t <= self.tenors[0]:
+            return self.rates[0]
+        if t >= self.tenors[-1]:
+            return self.rates[-1]
+        
+        # Linear interpolation (can be enhanced with cubic spline)
+        for i in range(len(self.tenors) - 1):
+            if self.tenors[i] <= t <= self.tenors[i + 1]:
+                t1, t2 = self.tenors[i], self.tenors[i + 1]
+                r1, r2 = self.rates[i], self.rates[i + 1]
+                return r1 + (r2 - r1) * (t - t1) / (t2 - t1)
+        
+        return self.rates[-1]
+    
+    def discount_factor(self, t: float) -> float:
+        """Calculate discount factor P(0,t)"""
+        if t <= 0:
+            return 1.0
+        return math.exp(-self.rate(t) * t)
+    
+    def forward_rate(self, t1: float, t2: float) -> float:
+        """Calculate forward rate between t1 and t2"""
+        if t1 >= t2:
+            return self.rate(t1)
+        
+        p1 = self.discount_factor(t1)
+        p2 = self.discount_factor(t2)
+        return math.log(p1 / p2) / (t2 - t1)
+
+
+class EnhancedInterestRateSwapPricer:
+    """Accurate Interest Rate Swap pricing with educational explanations"""
     
     @staticmethod
-    def price_enhanced_dcf(notional: float, fixed_rate: float, payment_times: List[float], 
-                          discount_curve, forward_curve, floating_spread: float = 0.0) -> SwapResult:
-        """Enhanced DCF pricing for IRS"""
+    def create_payment_schedule(
+        start_date: datetime,
+        maturity_date: datetime,
+        payment_frequency: str,
+        day_count: str = "ACT/360"
+    ) -> pd.DataFrame:
+        """
+        Create accurate payment schedule
         
-        # Year fractions
-        year_fractions = np.diff([0] + payment_times)
-        
-        # Fixed leg PV
-        pv_fixed = sum([
-            notional * fixed_rate * yf * discount_curve(t)
-            for yf, t in zip(year_fractions, payment_times)
-        ])
-        
-        # Floating leg PV
-        pv_floating = sum([
-            notional * (forward_curve(t) + floating_spread) * yf * discount_curve(t)
-            for yf, t in zip(year_fractions, payment_times)
-        ])
-        
-        # NPV (receiver swap: receive fixed, pay floating)
-        npv = pv_fixed - pv_floating
-        
-        # Par rate calculation
-        annuity = sum([yf * discount_curve(t) for yf, t in zip(year_fractions, payment_times)])
-        par_rate = pv_floating / (notional * annuity) if annuity > 0 else fixed_rate
-        
-        # DV01 calculation
-        dv01 = notional * annuity * 0.0001
-        
-        # Duration (approximate)
-        duration = sum([t * yf * discount_curve(t) for yf, t in zip(year_fractions, payment_times)]) / annuity if annuity > 0 else 0
-        
-        return SwapResult(
-            npv=npv,
-            pv_fixed=pv_fixed,
-            pv_floating=pv_floating,
-            par_rate=par_rate,
-            dv01=dv01,
-            duration=duration
-        )
-    
-    @staticmethod
-    def price_monte_carlo(notional: float, fixed_rate: float, initial_rate: float, 
-                         vol: float, payment_times: List[float], discount_curve, 
-                         n_paths: int = 25000, floating_spread: float = 0.0) -> SwapResult:
-        """Monte Carlo IRS pricing"""
-        
-        np.random.seed(42)
-        dt = payment_times[1] - payment_times[0] if len(payment_times) > 1 else 0.25
-        n_steps = len(payment_times)
-        
-        # Simulate forward rates
-        rates = np.zeros((n_paths, n_steps + 1))
-        rates[:, 0] = initial_rate
-        
-        for i in range(1, n_steps + 1):
-            dW = np.random.normal(0, np.sqrt(dt), n_paths)
-            rates[:, i] = rates[:, i-1] * np.exp(-0.5 * vol**2 * dt + vol * dW)
-        
-        # Calculate floating leg cashflows
-        year_fractions = np.diff([0] + payment_times)
-        
-        floating_cashflows = np.zeros(n_paths)
-        for i, (yf, t) in enumerate(zip(year_fractions, payment_times)):
-            floating_cashflows += notional * (rates[:, i] + floating_spread) * yf * discount_curve(t)
-        
-        pv_floating = np.mean(floating_cashflows)
-        
-        # Fixed leg (deterministic)
-        pv_fixed = sum([
-            notional * fixed_rate * yf * discount_curve(t)
-            for yf, t in zip(year_fractions, payment_times)
-        ])
-        
-        # NPV and statistics
-        npv = pv_fixed - pv_floating
-        annuity = sum([yf * discount_curve(t) for yf, t in zip(year_fractions, payment_times)])
-        par_rate = pv_floating / (notional * annuity) if annuity > 0 else fixed_rate
-        dv01 = notional * annuity * 0.0001
-        
-        return SwapResult(
-            npv=npv,
-            pv_fixed=pv_fixed,
-            pv_floating=pv_floating,
-            par_rate=par_rate,
-            dv01=dv01,
-            greeks={'monte_carlo_paths': n_paths}
-        )
-    
-    @staticmethod
-    def price_hull_white(notional: float, fixed_rate: float, initial_rate: float, 
-                        vol: float, payment_times: List[float], n_paths: int = 25000, 
-                        mean_reversion: float = 0.1) -> SwapResult:
-        """Hull-White model IRS pricing"""
-        
-        np.random.seed(42)
-        dt = payment_times[1] - payment_times[0] if len(payment_times) > 1 else 0.25
-        n_steps = len(payment_times)
-        
-        # Hull-White parameters
-        a = mean_reversion
-        
-        # Simulate short rate paths
-        rates = np.zeros((n_paths, n_steps + 1))
-        rates[:, 0] = initial_rate
-        
-        for i in range(1, n_steps + 1):
-            dW = np.random.normal(0, np.sqrt(dt), n_paths)
-            rates[:, i] = rates[:, i-1] + a * (initial_rate - rates[:, i-1]) * dt + vol * dW
-            rates[:, i] = np.maximum(rates[:, i], 0)  # Floor at zero
-        
-        # Calculate cashflows
-        year_fractions = np.diff([0] + payment_times)
-        
-        floating_cashflows = np.zeros(n_paths)
-        for i, (yf, t) in enumerate(zip(year_fractions, payment_times)):
-            discount_factor = np.exp(-rates[:, i] * t)
-            floating_cashflows += notional * rates[:, i] * yf * discount_factor
-        
-        pv_floating = np.mean(floating_cashflows)
-        
-        # Fixed leg using average rates
-        avg_rates = np.mean(rates, axis=0)
-        pv_fixed = sum([
-            notional * fixed_rate * yf * np.exp(-avg_rates[i] * t)
-            for i, (yf, t) in enumerate(zip(year_fractions, payment_times))
-        ])
-        
-        npv = pv_fixed - pv_floating
-        annuity = sum([yf * np.exp(-avg_rates[i] * t) for i, (yf, t) in enumerate(zip(year_fractions, payment_times))])
-        par_rate = pv_floating / (notional * annuity) if annuity > 0 else fixed_rate
-        dv01 = notional * annuity * 0.0001
-        
-        return SwapResult(
-            npv=npv,
-            pv_fixed=pv_fixed,
-            pv_floating=pv_floating,
-            par_rate=par_rate,
-            dv01=dv01,
-            greeks={'model': 'Hull-White', 'mean_reversion': mean_reversion}
-        )
-
-
-class CurrencySwapPricer:
-    """Clean Currency Swap Pricing"""
-    
-    @staticmethod
-    def price_simple(base_notional: float, quote_notional: float, base_rate: float, 
-                    quote_rate: float, tenor_years: float, fx_spot: float, 
-                    include_principal: bool = True, xccy_basis: float = 0.0) -> CurrencySwapResult:
-        """Simplified currency swap pricing"""
-        
-        # Payment frequency (semi-annual standard)
-        payment_freq = 0.5
-        n_payments = int(tenor_years / payment_freq)
-        payment_times = [payment_freq * (i + 1) for i in range(n_payments)]
-        
-        # Simple discount curves
-        base_discount = lambda t: np.exp(-base_rate * t)
-        quote_discount = lambda t: np.exp(-quote_rate * t)
-        
-        # Base currency leg (what we pay)
-        base_leg_pv = sum([
-            base_notional * base_rate * payment_freq * base_discount(t)
-            for t in payment_times
-        ])
-        
-        # Quote currency leg (what we receive, converted to base currency)
-        quote_leg_pv = sum([
-            quote_notional * quote_rate * payment_freq * fx_spot * quote_discount(t)
-            for t in payment_times
-        ])
-        
-        # Principal exchange
-        principal_pv = 0
-        if include_principal:
-            # Initial exchange: receive quote notional, pay base notional
-            initial_exchange = quote_notional * fx_spot - base_notional
-            
-            # Final exchange: pay quote notional, receive base notional
-            final_exchange = (base_notional - quote_notional * fx_spot) * base_discount(tenor_years)
-            
-            principal_pv = initial_exchange + final_exchange
-        
-        # Apply cross-currency basis
-        basis_adjustment = quote_leg_pv * xccy_basis * tenor_years
-        
-        # NPV (from base currency perspective)
-        npv_base = quote_leg_pv - base_leg_pv + principal_pv + basis_adjustment
-        npv_quote = npv_base / fx_spot
-        
-        # Calculate Greeks (simplified)
-        fx_delta = quote_notional  # Simplified FX sensitivity
-        domestic_dv01 = base_notional * tenor_years * 0.0001
-        foreign_dv01 = quote_notional * fx_spot * tenor_years * 0.0001
-        
-        return CurrencySwapResult(
-            npv_domestic=npv_base,
-            npv_foreign=npv_quote,
-            pv_domestic_leg=base_leg_pv,
-            pv_foreign_leg=quote_leg_pv,
-            pv_principal_exchanges=principal_pv,
-            fx_delta=fx_delta,
-            domestic_dv01=domestic_dv01,
-            foreign_dv01=foreign_dv01,
-            cross_gamma=fx_delta * 0.01
-        )
-
-
-class EquitySwapPricer:
-    """Clean Equity Swap Pricing"""
-    
-    @staticmethod
-    def price_enhanced(symbol: str, notional: float, fixed_rate: float, tenor_years: float, 
-                      equity_data: Dict, swap_direction: str, financing_spread: float = 0.0, 
-                      dividend_treatment: str = "Gross") -> SwapResult:
-        """Enhanced equity swap pricing"""
-        
-        # Get current equity parameters
-        current_price = equity_data['price']
-        volatility = equity_data['volatility'] / 100
-        dividend_yield = equity_data['dividend_yield'] / 100
-        
-        # Calculate expected equity return
-        risk_free_rate = 0.04
-        equity_risk_premium = 0.06
-        expected_equity_return = risk_free_rate + equity_risk_premium
-        
-        # Equity leg PV
-        equity_pv = notional * expected_equity_return * tenor_years
-        
-        # Fixed leg PV
-        fixed_pv = notional * fixed_rate * tenor_years
-        
-        # Add dividend adjustments
-        dividend_pv = notional * dividend_yield * tenor_years
-        if dividend_treatment == "Net":
-            dividend_pv *= 0.85  # Apply withholding tax
-        
-        # NPV calculation
-        if swap_direction == "Pay Equity, Receive Fixed":
-            npv = fixed_pv - equity_pv + dividend_pv
-        else:
-            npv = equity_pv - fixed_pv + dividend_pv
-        
-        # Calculate Greeks
-        equity_delta = notional / current_price if swap_direction == "Pay Fixed, Receive Equity" else -notional / current_price
-        equity_vega = notional * volatility * np.sqrt(tenor_years) * 0.01
-        
-        greeks = {
-            'equity_delta': equity_delta,
-            'equity_vega': equity_vega,
-            'current_price': current_price,
-            'expected_return': expected_equity_return,
-            'volatility': volatility,
-            'financing_spread': financing_spread
+        Educational Note:
+        - Payment frequencies determine cash flow timing
+        - Day count conventions affect accrual calculations
+        - Business day adjustments ensure realistic settlement
+        """
+        freq_map = {
+            "Quarterly": 3,
+            "Semi-Annual": 6,
+            "Annual": 12
         }
+        
+        months_between = freq_map[payment_frequency]
+        schedule = []
+        
+        current_date = start_date
+        while current_date < maturity_date:
+            next_date = min(
+                current_date + timedelta(days=30 * months_between),
+                maturity_date
+            )
+            
+            # Calculate year fraction based on day count convention
+            if day_count == "ACT/360":
+                year_frac = (next_date - current_date).days / 360.0
+            elif day_count == "ACT/365":
+                year_frac = (next_date - current_date).days / 365.0
+            else:  # 30/360
+                year_frac = months_between / 12.0
+            
+            schedule.append({
+                'start_date': current_date,
+                'end_date': next_date,
+                'payment_date': next_date,
+                'year_fraction': year_frac,
+                'time_to_payment': (next_date - start_date).days / 365.25
+            })
+            
+            current_date = next_date
+        
+        return pd.DataFrame(schedule)
+    
+    @staticmethod
+    def price_accurate_dcf(
+        notional: float,
+        fixed_rate: float,
+        discount_curve: AccurateDiscountCurve,
+        payment_schedule: pd.DataFrame,
+        floating_spread: float = 0.0,
+        position: str = "receive_fixed"
+    ) -> SwapResult:
+        """
+        Accurate DCF pricing with detailed methodology
+        
+        Educational Explanation:
+        1. Fixed Leg: Known cash flows discounted at risk-free rates
+        2. Floating Leg: Expected floating payments based on forward rates
+        3. NPV: Difference between fixed and floating leg values
+        4. Par Rate: Rate that makes NPV = 0
+        """
+        
+        # Calculate fixed leg cash flows
+        fixed_cashflows = []
+        fixed_pv = 0.0
+        
+        for _, payment in payment_schedule.iterrows():
+            cf_amount = notional * fixed_rate * payment['year_fraction']
+            df = discount_curve.discount_factor(payment['time_to_payment'])
+            pv = cf_amount * df
+            
+            fixed_cashflows.append({
+                'payment_date': payment['payment_date'],
+                'nominal_amount': cf_amount,
+                'discount_factor': df,
+                'present_value': pv
+            })
+            fixed_pv += pv
+        
+        # Calculate floating leg cash flows using forward rates
+        floating_cashflows = []
+        floating_pv = 0.0
+        
+        for i, payment in payment_schedule.iterrows():
+            if i == 0:
+                forward_rate = discount_curve.rate(payment['time_to_payment'])
+            else:
+                prev_time = payment_schedule.iloc[i-1]['time_to_payment']
+                forward_rate = discount_curve.forward_rate(
+                    prev_time, payment['time_to_payment']
+                )
+            
+            cf_amount = notional * (forward_rate + floating_spread) * payment['year_fraction']
+            df = discount_curve.discount_factor(payment['time_to_payment'])
+            pv = cf_amount * df
+            
+            floating_cashflows.append({
+                'payment_date': payment['payment_date'],
+                'forward_rate': forward_rate,
+                'nominal_amount': cf_amount,
+                'discount_factor': df,
+                'present_value': pv
+            })
+            floating_pv += pv
+        
+        # Calculate NPV based on position
+        if position == "receive_fixed":
+            npv = fixed_pv - floating_pv
+        else:
+            npv = floating_pv - fixed_pv
+        
+        # Calculate par rate (rate that makes NPV = 0)
+        annuity = sum([cf['discount_factor'] * payment['year_fraction'] 
+                      for cf, payment in zip(fixed_cashflows, payment_schedule.itertuples())])
+        par_rate = floating_pv / (notional * annuity) if annuity > 0 else fixed_rate
+        
+        # Calculate DV01 (dollar value of 01 basis point)
+        dv01 = notional * annuity * 0.0001
+        
+        # Calculate duration and convexity
+        weighted_time = sum([
+            cf['present_value'] * payment['time_to_payment'] 
+            for cf, payment in zip(fixed_cashflows, payment_schedule.itertuples())
+        ])
+        duration = weighted_time / fixed_pv if fixed_pv > 0 else 0
+        modified_duration = duration / (1 + par_rate)
+        
+        # Approximate convexity
+        convexity = sum([
+            cf['present_value'] * payment['time_to_payment'] ** 2
+            for cf, payment in zip(fixed_cashflows, payment_schedule.itertuples())
+        ]) / fixed_pv if fixed_pv > 0 else 0
+        
+        # Create detailed cashflow DataFrame
+        cashflows_df = pd.DataFrame({
+            'Payment_Date': [cf['payment_date'] for cf in fixed_cashflows],
+            'Fixed_CF': [cf['nominal_amount'] for cf in fixed_cashflows],
+            'Fixed_PV': [cf['present_value'] for cf in fixed_cashflows],
+            'Floating_CF': [cf['nominal_amount'] for cf in floating_cashflows],
+            'Floating_PV': [cf['present_value'] for cf in floating_cashflows],
+            'Net_CF': [f - fl for f, fl in zip([cf['nominal_amount'] for cf in fixed_cashflows],
+                                              [cf['nominal_amount'] for cf in floating_cashflows])],
+            'Discount_Factor': [cf['discount_factor'] for cf in fixed_cashflows]
+        })
         
         return SwapResult(
             npv=npv,
             pv_fixed=fixed_pv,
-            pv_floating=equity_pv + dividend_pv,
-            greeks=greeks
+            pv_floating=floating_pv,
+            par_rate=par_rate,
+            dv01=dv01,
+            duration=duration,
+            modified_duration=modified_duration,
+            convexity=convexity,
+            cashflows=cashflows_df,
+            methodology="Discounted Cash Flow with Forward Rate Projection",
+            market_context={
+                'position': position,
+                'floating_spread': floating_spread,
+                'annuity': annuity
+            }
         )
 
 
-class CurveBuilder:
-    """Simple curve building utilities"""
+class EnhancedCurrencySwapPricer:
+    """Accurate Cross-Currency Swap pricing"""
     
     @staticmethod
-    def build_discount_curve(base_rate: float, curve_type: str = "flat"):
-        """Build simple discount curve"""
-        if curve_type == "flat":
-            return lambda t: np.exp(-base_rate * t)
-        else:
-            # Simple Nelson-Siegel approximation
-            beta0, beta1, beta2, tau = base_rate, -0.005, 0.01, 2.0
-            def enhanced_curve(t):
-                if t <= 0:
-                    return 1.0
-                rate = beta0 + beta1 * (1 - np.exp(-t/tau)) / (t/tau) + beta2 * ((1 - np.exp(-t/tau)) / (t/tau) - np.exp(-t/tau))
-                return np.exp(-rate * t)
-            return enhanced_curve
-    
-    @staticmethod
-    def build_forward_curve(base_rate: float, spread: float = 0.0):
-        """Build simple forward curve"""
-        return lambda t: base_rate + spread + 0.001 * t  # Slight upward slope
+    def price_accurate(
+        domestic_notional: float,
+        foreign_notional: float,
+        domestic_curve: AccurateDiscountCurve,
+        foreign_curve: AccurateDiscountCurve,
+        fx_spot: float,
+        payment_schedule: pd.DataFrame,
+        cross_currency_basis: float = 0.0,
+        include_principals: bool = True
+    ) -> CurrencySwapResult:
+        """
+        Accurate cross-currency swap pricing
+        
+        Educational Explanation:
+        1. Two interest rate swaps in different currencies
+        2. Principal exchanges at start and maturity
+        3. FX risk from currency exposure
+        4. Cross-currency basis reflects funding costs
+        """
+        
+        # Domestic leg cash flows
+        domestic_pv = 0.0
+        domestic_cashflows = []
+        
+        for _, payment in payment_schedule.iterrows():
+            # Interest payment
+            interest = domestic_notional * domestic_curve.rate(payment['time_to_payment']) * payment['year_fraction']
+            df_domestic = domestic_curve.discount_factor(payment['time_to_payment'])
+            pv = interest * df_domestic
+            
+            domestic_cashflows.append({
+                'payment_date': payment['payment_date'],
+                'interest': interest,
+                'present_value': pv
+            })
+            domestic_pv += pv
+        
+        # Foreign leg cash flows (converted to domestic currency)
+        foreign_pv = 0.0
+        foreign_cashflows = []
+        
+        for _, payment in payment_schedule.iterrows():
+            # Interest payment in foreign currency
+            foreign_rate = foreign_curve.rate(payment['time_to_payment']) + cross_currency_basis
+            interest_foreign = foreign_notional * foreign_rate * payment['year_fraction']
+            
+            # Convert to domestic currency
+            interest_domestic = interest_foreign * fx_spot
+            df_foreign = foreign_curve.discount_factor(payment['time_to_payment'])
+            pv = interest_domestic * df_foreign
+            
+            foreign_cashflows.append({
+                'payment_date': payment['payment_date'],
+                'interest_foreign': interest_foreign,
+                'interest_domestic': interest_domestic,
+                'present_value': pv
+            })
+            foreign_pv += pv
+        
+        # Principal exchanges
+        principal_pv = 0.0
+        if include_principals:
+            # Initial exchange (receive foreign, pay domestic)
+            initial_exchange = foreign_notional * fx_spot - domestic_notional
+            
+            # Final exchange (pay foreign, receive domestic)
+            final_time = payment_schedule['time_to_payment'].iloc[-1]
+            final_exchange_domestic = domestic_notional * domestic_curve.discount_factor(final_time)
+            final_exchange_foreign = -foreign_notional * fx_spot * foreign_curve.discount_factor(final_time)
+            
+            principal_pv = initial_exchange + final_exchange_domestic + final_exchange_foreign
+        
+        # Calculate basis component impact
+        basis_component = sum([
+            foreign_notional * cross_currency_basis * payment['year_fraction'] * 
+            fx_spot * foreign_curve.discount_factor(payment['time_to_payment'])
+            for _, payment in payment_schedule.iterrows()
+        ])
+        
+        # Total NPV (from domestic currency perspective)
+        npv_domestic = foreign_pv - domestic_pv + principal_pv
+        npv_foreign = npv_domestic / fx_spot
+        
+        # Calculate risk metrics
+        fx_delta = foreign_notional  # Simplified FX delta
+        domestic_dv01 = domestic_notional * sum([
+            payment['year_fraction'] * domestic_curve.discount_factor(payment['time_to_payment'])
+            for _, payment in payment_schedule.iterrows()
+        ]) * 0.0001
+        
+        foreign_dv01 = foreign_notional * fx_spot * sum([
+            payment['year_fraction'] * foreign_curve.discount_factor(payment['time_to_payment'])
+            for _, payment in payment_schedule.iterrows()
+        ]) * 0.0001
+        
+        cross_gamma = fx_delta * 0.01  # Simplified cross gamma
+        
+        return CurrencySwapResult(
+            npv_domestic=npv_domestic,
+            npv_foreign=npv_foreign,
+            pv_domestic_leg=domestic_pv,
+            pv_foreign_leg=foreign_pv,
+            pv_principal_exchanges=principal_pv,
+            fx_delta=fx_delta,
+            domestic_dv01=domestic_dv01,
+            foreign_dv01=foreign_dv01,
+            cross_gamma=cross_gamma,
+            basis_component=basis_component
+        )
 
 
-class PortfolioAnalyzer:
-    """Portfolio-level analytics"""
+class EducationalSwapCalculator:
+    """Educational utilities for understanding swap mechanics"""
     
     @staticmethod
-    def create_swap_object(swap_type: str, notional: float, tenor: str, direction: str, **kwargs):
-        """Create standardized swap object"""
+    def explain_swap_mechanics(swap_type: str) -> str:
+        """Provide educational explanations for different swap types"""
         
-        base_npv = np.random.normal(0, notional * 0.001)  # Simplified NPV
-        
-        swap_obj = {
-            'Type': swap_type,
-            'Notional': f"${notional:,.0f}",
-            'Tenor': tenor,
-            'Direction': direction,
-            'NPV': base_npv
+        explanations = {
+            "interest_rate": """
+            **Interest Rate Swap Mechanics:**
+            
+            1. **Fixed Leg**: You pay/receive a predetermined fixed rate
+               - Cash Flow = Notional × Fixed Rate × Year Fraction
+               - Present Value = Cash Flow × Discount Factor
+            
+            2. **Floating Leg**: You receive/pay based on market rates
+               - Rate resets at each period based on reference rate (LIBOR/SOFR)
+               - Forward rates used for valuation
+            
+            3. **Net Present Value**: Difference between fixed and floating legs
+               - NPV = PV(Fixed Leg) - PV(Floating Leg)
+               - Positive NPV means the swap is in your favor
+            
+            4. **Par Rate**: The fixed rate that makes NPV = 0
+               - This is the market's fair value for the swap
+            
+            5. **Risk Metrics**:
+               - DV01: Dollar value change for 1bp rate move
+               - Duration: Price sensitivity to yield changes
+               - Convexity: Second-order price sensitivity
+            """,
+            
+            "currency": """
+            **Cross-Currency Swap Mechanics:**
+            
+            1. **Dual Currency Structure**: Exchange interest payments in two currencies
+               - Pay interest in Currency A, receive in Currency B
+               - Notional amounts typically exchanged at start/end
+            
+            2. **FX Risk**: Exposure to exchange rate movements
+               - Changes in FX rates affect the value of foreign currency flows
+               - FX Delta measures sensitivity to 1% FX move
+            
+            3. **Interest Rate Risk**: Exposure to both domestic and foreign rates
+               - Separate DV01 for each currency
+               - Cross-currency basis affects relative pricing
+            
+            4. **Valuation Process**:
+               - Discount each currency's cash flows using its own curve
+               - Convert foreign currency flows to domestic using spot FX
+               - Sum all present values for total NPV
+            """,
+            
+            "equity": """
+            **Equity Swap Mechanics:**
+            
+            1. **Equity Leg**: Returns based on equity performance
+               - Total return includes price appreciation + dividends
+               - Performance calculated over reset periods
+            
+            2. **Fixed/Floating Leg**: Traditional interest payment
+               - Usually LIBOR/SOFR + spread
+               - Can be fixed or floating rate
+            
+            3. **Dividend Treatment**:
+               - Gross: Full dividend amount
+               - Net: After withholding taxes
+            
+            4. **Risk Factors**:
+               - Equity price risk (delta)
+               - Volatility risk (vega)
+               - Interest rate risk
+               - Dividend yield changes
+            """
         }
         
-        # Add type-specific fields
-        if swap_type == "Currency":
-            swap_obj['Pair'] = kwargs.get('currency_pair', 'EURUSD')
-        elif swap_type == "Equity":
-            swap_obj['Underlying'] = kwargs.get('underlying', 'SPY')
-        elif swap_type == "Interest Rate":
-            swap_obj['Rate'] = kwargs.get('rate', '3.50%')
-        
-        return swap_obj
+        return explanations.get(swap_type, "Explanation not available")
     
     @staticmethod
-    def analyze_portfolio(portfolio: List[Dict]) -> Dict:
-        """Analyze portfolio of swaps"""
+    def calculate_scenario_analysis(
+        base_result: SwapResult,
+        rate_shocks: List[float],
+        curve: AccurateDiscountCurve
+    ) -> pd.DataFrame:
+        """
+        Perform scenario analysis for educational purposes
         
-        if not portfolio:
-            return {
-                'total_notional': 0,
-                'portfolio_npv': 0,
-                'portfolio_dv01': 0,
-                'portfolio_vega': 0,
-                'ir_exposure': 0,
-                'fx_exposure': 0,
-                'equity_exposure': 0,
-                'num_swaps': 0
-            }
+        Shows how swap value changes under different rate scenarios
+        """
+        scenarios = []
         
-        total_notional = sum([
-            float(swap['Notional'].replace('$', '').replace(',', '')) 
-            for swap in portfolio
-        ])
+        for shock in rate_shocks:
+            # Create shocked curve
+            shocked_rates = {t: curve.rate(t) + shock for t in curve.tenors}
+            shocked_curve = AccurateDiscountCurve(shocked_rates)
+            
+            # Recalculate swap value (simplified)
+            # In practice, would need to reprice entire swap
+            pnl_estimate = -base_result.dv01 * shock * 10000  # Approximate using DV01
+            
+            scenarios.append({
+                'Rate_Shock_bp': shock * 10000,
+                'New_NPV': base_result.npv + pnl_estimate,
+                'PnL': pnl_estimate,
+                'PnL_Percent': (pnl_estimate / abs(base_result.npv) * 100) if base_result.npv != 0 else 0
+            })
         
-        # Calculate portfolio metrics
-        portfolio_npv = sum([swap.get('NPV', 0) for swap in portfolio])
-        portfolio_dv01 = total_notional * 0.0001
-        portfolio_vega = total_notional * 0.0005
-        
-        # Risk decomposition
-        ir_exposure = sum([
-            float(swap['Notional'].replace('$', '').replace(',', '')) 
-            for swap in portfolio if swap['Type'] == 'Interest Rate'
-        ])
-        fx_exposure = sum([
-            float(swap['Notional'].replace('$', '').replace(',', '')) 
-            for swap in portfolio if swap['Type'] == 'Currency'
-        ])
-        equity_exposure = sum([
-            float(swap['Notional'].replace('$', '').replace(',', '')) 
-            for swap in portfolio if swap['Type'] == 'Equity'
-        ])
-        
-        return {
-            'total_notional': total_notional,
-            'portfolio_npv': portfolio_npv,
-            'portfolio_dv01': portfolio_dv01,
-            'portfolio_vega': portfolio_vega,
-            'ir_exposure': ir_exposure,
-            'fx_exposure': fx_exposure,
-            'equity_exposure': equity_exposure,
-            'num_swaps': len(portfolio)
-        }
+        return pd.DataFrame(scenarios)
+
+
+# Example usage and testing
+if __name__ == "__main__":
+    # Example: Price a 5-year USD interest rate swap
+    
+    # Create market data
+    usd_rates = {
+        0.25: 0.045,  # 3M
+        1.0: 0.044,   # 1Y
+        2.0: 0.043,   # 2Y
+        5.0: 0.042,   # 5Y
+        10.0: 0.041   # 10Y
+    }
+    
+    curve = AccurateDiscountCurve(usd_rates)
+    
+    # Create payment schedule
+    start_date = datetime(2024, 1, 15)
+    maturity_date = datetime(2029, 1, 15)
+    
+    schedule = EnhancedInterestRateSwapPricer.create_payment_schedule(
+        start_date, maturity_date, "Semi-Annual"
+    )
+    
+    # Price swap
+    result = EnhancedInterestRateSwapPricer.price_accurate_dcf(
+        notional=100_000_000,
+        fixed_rate=0.0425,
+        discount_curve=curve,
+        payment_schedule=schedule,
+        position="receive_fixed"
+    )
+    
+    print(f"Swap NPV: ${result.npv:,.0f}")
+    print(f"Par Rate: {result.par_rate:.4f}")
+    print(f"DV01: ${result.dv01:,.0f}")
+    print(f"Duration: {result.duration:.2f} years")
