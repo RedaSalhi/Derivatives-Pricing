@@ -1103,7 +1103,7 @@ with strategy_tabs[3]:  # Custom Builder
                 # Add strike lines
                 strikes = [leg['strike'] for leg in st.session_state.strategy_legs]
                 for strike in set(strikes):
-                    fig_custom.add_vline(x=strike, line_dash="dot", line_color=COLORS['gray_400'], opacity=0.7)
+                    fig_custom.add_vline(x=strike, line_dash="dot", line_color=COLORS['gray_500'], opacity=0.7)
                 
                 fig_custom.update_layout(
                     title="Custom Strategy P&L Analysis", 
