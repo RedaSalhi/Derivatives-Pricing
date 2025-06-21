@@ -342,20 +342,5 @@ st.markdown("""
             </div>
         </div>
     </div>
-    
-    <div style="text-align: center; padding-top: 2rem; border-top: 2px solid #e5e7eb;">
-        <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; color: #1a365d;">
-            📊 Professional Derivatives Pricing Suite
-        </div>
-        <div style="color: #4a5568; font-size: 1rem; margin-bottom: 0.5rem;">
-            <strong>Version 2.0</strong> | Built with Streamlit, NumPy, SciPy & Plotly
-        </div>
-        <div style="color: #718096; font-size: 0.9rem; margin-bottom: 1rem;">
-            © {datetime.now().year} | Advanced Quantitative Finance Platform | Financial Engineering Research
-        </div>
-        <div style="color: #dc3545; font-weight: 600; font-size: 0.95rem;">
-            ⚠️ For Educational & Research Use Only - Not Financial Advice
-        </div>
-    </div>
 </div>
 """, unsafe_allow_html=True)
