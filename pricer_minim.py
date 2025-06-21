@@ -24,7 +24,7 @@ st.set_page_config(
     page_title="Derivatives Pricer Suite",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"  # Collapse sidebar since we're not using it
 )
 
 # Apply comprehensive styling
@@ -275,55 +275,36 @@ with tab6:
         </div>
         """, unsafe_allow_html=True)
 
-# Enhanced sidebar with navigation and info
-with st.sidebar:
+# Model status indicator in main area
+st.markdown("### 🔧 Available Models & Performance Guide")
+
+col_model1, col_model2, col_model3 = st.columns(3)
+
+with col_model1:
     st.markdown(f"""
-    <div class="sidebar-title">🧭 Navigation Guide</div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="feature-box">
-        <div class="feature-title">Quick Start</div>
-        <div class="feature-text">
-            <strong>New Users:</strong> Start with Vanilla Options<br>
-            <strong>Strategies:</strong> Use Option Strategies tab<br>
-            <strong>Advanced:</strong> Explore Exotic Options<br>
-            <strong>Fixed Income:</strong> Try Interest Rate tools
-        </div>
+    <div class="success-box">
+        <h4>⚡ Analytical Models</h4>
+        <p><strong>Black-Scholes:</strong> ✅ Active - Instant calculations</p>
+        <p><strong>Vasicek Model:</strong> ✅ Active - Bond pricing</p>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Model status indicator
-    st.markdown("### 🔧 Available Models")
-    
-    models_status = {
-        "Black-Scholes": "✅ Active",
-        "Binomial Trees": "✅ Active", 
-        "Monte Carlo": "✅ Active",
-        "Vasicek Model": "✅ Active",
-        "LMM (Basic)": "✅ Active",
-        "Hull-White": "🚧 Coming Soon",
-        "CIR Model": "🚧 Coming Soon"
-    }
-    
-    for model, status in models_status.items():
-        color = COLORS['success'] if "✅" in status else COLORS['warning']
-        st.markdown(f"""
-        <div style="padding: 5px; margin: 2px 0; color: {color}; font-size: 0.9rem;">
-            <strong>{model}:</strong> {status}
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Performance tips
-    st.markdown("### ⚡ Performance Tips")
-    st.markdown("""
+
+with col_model2:
+    st.markdown(f"""
     <div class="info-box">
-        <div class="feature-text">
-            • <strong>Speed:</strong> Use Black-Scholes for rapid calculations<br>
-            • <strong>Accuracy:</strong> Increase Monte Carlo paths for precision<br>
-            • <strong>Memory:</strong> Reduce simulation parameters for large analyses<br>
-            • <strong>Stability:</strong> Use analytical models when available
-        </div>
+        <h4>🔄 Numerical Models</h4>
+        <p><strong>Binomial Trees:</strong> ✅ Active - American options</p>
+        <p><strong>Monte Carlo:</strong> ✅ Active - Complex payoffs</p>
+        <p><strong>LMM (Basic):</strong> ✅ Active - Interest rates</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_model3:
+    st.markdown(f"""
+    <div class="warning-box">
+        <h4>🚧 Coming Soon</h4>
+        <p><strong>Hull-White:</strong> Advanced interest rate model</p>
+        <p><strong>CIR Model:</strong> Cox-Ingersoll-Ross rates</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -375,6 +356,10 @@ st.markdown("""
         <div style="color: #dc3545; font-weight: 600; font-size: 0.95rem;">
             ⚠️ For Educational & Research Use Only - Not Financial Advice
         </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
     </div>
 </div>
 """, unsafe_allow_html=True)
