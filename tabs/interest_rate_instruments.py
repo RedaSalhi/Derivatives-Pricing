@@ -606,7 +606,7 @@ def _bond_options_tab():
         r_current = st.number_input(
             "Current rate (r)", 
             0.001, 
-            0.20, 
+            1.0, 
             max(0.001, params['r0']), 
             step=0.001, 
             format="%.4f", 
@@ -632,8 +632,13 @@ def _bond_options_tab():
             min(1.0, max(0.1, default_strike)), 
             step=0.01, 
             key="opt_K",
-            help=f"Current bond price per $1 face: ${current_bond_price:.4f}"
+            help=(
+                f"**Current bond price:** "
+                f"${current_bond_price:,.4f}\n\n"
+                "Pick a strike reasonably close to that price."
+            ),
         )
+            
         
         # Face value for final scaling
         face_value = st.number_input("Face value ($)", 100, 10000, 1000, step=100, key="opt_face")
