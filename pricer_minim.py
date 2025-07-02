@@ -1,4 +1,4 @@
-# pricer_minim.py - Enhanced with Comprehensive Styling Integration
+# pricer_minim.py
 # Licensed under the MIT License. See LICENSE file in the project root for full license text.
 
 import sys
@@ -45,8 +45,8 @@ except ImportError as e:
 
 # Enhanced main header with professional styling
 render_app_header(
-    "Professional Derivatives Pricing Suite",
-    "Advanced Quantitative Finance Tools for Options, Forwards & Interest Rate Instruments"
+    "Derivatives Pricing Suite",
+    "Quantitative Finance Tools for Options, Forwards & Interest Rate Instruments"
 )
 
 # Quick stats display
@@ -56,7 +56,7 @@ with col1:
     st.markdown(f"""
     <div class="metric-card animate-fade-in">
         <div style="color: {COLORS['success']}; font-size: 1rem; font-weight: 600;">Vanilla Options</div>
-        <div style="font-size: 1.5rem; font-weight: bold; color: {COLORS['gray_800']};">BS/Binomial/MC</div>
+        <div style="font-size: 1.5rem; font-weight: bold; color: {COLORS['gray_800']};">BS/ Binomial/ MC</div>
         <div style="color: {COLORS['gray_500']}; font-size: 0.8rem;">European & American</div>
     </div>
     """, unsafe_allow_html=True)
