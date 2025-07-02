@@ -126,7 +126,7 @@ def _setup_tab():
     if not st.session_state.setup_completed:
         st.markdown("""
         <div class="setup-incomplete">
-            <h2 style="color: #856404; margin-top: 0;">Quick Start Guide</h2>
+            <h2 style="color: #1f77b4; margin-top: 0px;">Quick Start Guide</h2>
             <p style="font-size: 1.1em; margin-bottom: 0;">
                 Configure your market parameters below to unlock advanced options analysis tools!
             </p>
@@ -135,7 +135,7 @@ def _setup_tab():
     else:
         st.markdown("""
         <div class="setup-complete">
-            <h3 style="color: #155724; margin-top: 0;">Setup Complete!</h3>
+            <h3 style="color: #1f77b4; margin-top: 0px;">Setup Complete!</h3>
             <p style="margin-bottom: 0;">All analysis tools are now available. You can modify parameters anytime.</p>
         </div>
         """, unsafe_allow_html=True)
