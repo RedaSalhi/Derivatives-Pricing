@@ -49,48 +49,6 @@ render_app_header(
     "Advanced Quantitative Finance Tools for Options, Forwards & Interest Rate Instruments"
 )
 
-# Add platform overview with enhanced styling
-st.markdown("""
-<div class="objective-box animate-fade-in">
-    <div class="section-title">Platform Capabilities</div>
-    <div class="content-text">
-        Comprehensive derivatives pricing platform combining theoretical accuracy with practical usability.
-        Built for quantitative analysts, traders, risk managers, and finance students.
-    </div>
-    <div class="highlight-box">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
-            <div>
-                <h4 style="color: #2563eb; margin-bottom: 10px;">Pricing Models</h4>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li><strong>Black-Scholes:</strong> Analytical solutions for European options</li>
-                    <li><strong>Binomial Trees:</strong> American options & flexible modeling</li>
-                    <li><strong>Monte Carlo:</strong> Complex payoffs & path dependencies</li>
-                    <li><strong>Vasicek Model:</strong> Interest rate modeling & bond pricing</li>
-                </ul>
-            </div>
-            <div>
-                <h4 style="color: #10b981; margin-bottom: 10px;">Risk Analytics</h4>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li><strong>Complete Greeks:</strong> Delta, Gamma, Theta, Vega, Rho</li>
-                    <li><strong>Scenario Analysis:</strong> Stress testing & what-if scenarios</li>
-                    <li><strong>P&L Attribution:</strong> Real-time mark-to-market</li>
-                    <li><strong>Portfolio Analytics:</strong> Multi-instrument analysis</li>
-                </ul>
-            </div>
-            <div>
-                <h4 style="color: #f59e0b; margin-bottom: 10px;">Professional Tools</h4>
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li><strong>Strategy Builder:</strong> Multi-leg option strategies</li>
-                    <li><strong>Payoff Diagrams:</strong> Interactive visualizations</li>
-                    <li><strong>Parameter Sensitivity:</strong> Real-time analysis</li>
-                    <li><strong>Educational Content:</strong> Formulas & explanations</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
 # Quick stats display
 col1, col2, col3, col4, col5 = st.columns(5)
 
