@@ -30,7 +30,7 @@ apply_global_styles()
 # Page header with proper CSS classes
 render_app_header(
     "About Me",
-    "Advanced Quantitative Finance Tools for Options, Forwards, Swaps & Interest Rate Instruments"
+    "Quantitative Finance Tools for Options, Forwards, Swaps & Interest Rate Instruments"
 )
 
 # Professional Profile section using enhanced CSS
@@ -38,11 +38,11 @@ st.markdown("""
 <div class="profile-box animate-fade-in">
     <h2 class="section-title">Professional Profile</h2>
     <div class="profile-info">
-        <strong>Welcome to my Derivatives Pricing Application!</strong> I'm passionate about quantitative finance and building tools that make complex financial concepts accessible to students, practitioners, and enthusiasts alike.
+        <strong>Welcome to my Derivatives Pricing Application!</strong> I'm passionate about quantitative finance and building tools that make complex financial concepts accessible to students, and enthusiasts.
         <br><br>
         This application demonstrates <strong>advanced derivatives pricing models</strong> including Black-Scholes for European options, binomial trees for American options, and Monte Carlo simulations for exotic derivatives. Each model includes educational insights to help users understand the underlying mathematics and financial theory.
         <br><br>
-        I believe in making <strong>quantitative finance education</strong> more interactive and practical, bridging the gap between academic theory and real-world application through clean, professional tools.
+        I believe in making <strong>quantitative finance education</strong> more interactive and practical. My goal is to bridge the gap between theory and real-world practice by using professional tools.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -56,11 +56,11 @@ with col1:
         <h3 class="section-title">Technical Skills</h3>
         <div class="content-text">
             <ul>
-                <li><strong>Programming:</strong> Python, R, SQL, MATLAB</li>
+                <li><strong>Programming:</strong> Python, VBA, SQL, MATLAB</li>
                 <li><strong>Finance:</strong> Derivatives Pricing, Risk Management</li>
                 <li><strong>Analytics:</strong> Monte Carlo Simulation, Statistical Modeling</li>
-                <li><strong>Tools:</strong> Streamlit, NumPy, SciPy, Pandas</li>
-                <li><strong>Visualization:</strong> Plotly, Matplotlib, Financial Charts</li>
+                <li><strong>Tools:</strong> Streamlit, NumPy, SciPy, Pandas, Bloomberg, S&P Capital IQ, GitHub</li>
+                <li><strong>Visualization:</strong> Plotly, Matplotlib</li>
             </ul>
         </div>
     </div>
@@ -72,11 +72,9 @@ with col2:
         <h3 class="section-title">Interests & Focus</h3>
         <div class="content-text">
             <ul>
-                <li><strong>Quantitative Finance:</strong> Options pricing and risk metrics</li>
+                <li><strong>Quantitative Finance:</strong> Options pricing, Portfolio Theory and risk metrics</li>
                 <li><strong>Financial Engineering:</strong> Model development and validation</li>
-                <li><strong>Education:</strong> Making finance accessible through technology</li>
                 <li><strong>Open Source:</strong> Building tools for the finance community</li>
-                <li><strong>Research:</strong> Market volatility and pricing accuracy</li>
             </ul>
         </div>
     </div>
@@ -94,7 +92,7 @@ st.markdown("""
         <a href="https://www.linkedin.com/in/reda-salhi-195297290/" target="_blank">LinkedIn Profile</a>
     </div>
     <div class="link-item shadow-hover">
-        <a href="mailto:salhi.reda47@gmail.com" class="email-link">Email</a>
+        <a href="mailto:salhi.reda47@gmail.com" target="_blank">Email</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -185,7 +183,7 @@ st.markdown("""
         Professional-Grade Derivatives Pricing & Risk Management
     </div>
     <div style="color: #718096; font-size: 0.9rem;">
-        © 2025 | SALHI Reda | Financial Engineering Research | Advanced Analytics Suite
+        © 2025 | SALHI Reda | Financial Engineering Research | Advanced Analytics
     </div>
     <div style="margin-top: 1rem; color: #718096; font-size: 0.8rem;">
         <strong>Disclaimer:</strong> This platform is for educational and research purposes. 
