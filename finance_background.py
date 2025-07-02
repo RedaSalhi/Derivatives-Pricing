@@ -1230,10 +1230,10 @@ st.markdown("""
         📊 Quantitative Finance Platform
     </div>
     <div style="color: #4a5568; font-style: italic; margin-bottom: 1rem;">
-        Professional-Grade Derivatives Pricing & Risk Management
+        Derivatives Pricing & Risk Management
     </div>
     <div style="color: #718096; font-size: 0.9rem;">
-        © 2025 | SALHI Reda | Financial Engineering Research | Advanced Analytics Suite
+        © 2025 | SALHI Reda | Financial Engineering Research | Advanced Analytics
     </div>
     <div style="margin-top: 1rem; color: #718096; font-size: 0.8rem;">
         <strong>Disclaimer:</strong> This platform is for educational and research purposes. 
