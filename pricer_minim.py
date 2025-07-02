@@ -204,7 +204,7 @@ with tab5:
         """, unsafe_allow_html=True)
 
 # Model status indicator in main area
-st.markdown("### 🔧 Available Models & Performance Guide")
+st.markdown("### Available Models & Performance Guide")
 
 col_model1, col_model2, col_model3 = st.columns(3)
 
@@ -223,7 +223,6 @@ with col_model2:
         <h4>🔄 Numerical Models</h4>
         <p><strong>Binomial Trees:</strong> ✅ Active - American options</p>
         <p><strong>Monte Carlo:</strong> ✅ Active - Complex payoffs</p>
-        <p><strong>LMM (Basic):</strong> ✅ Active - Interest rates</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -236,39 +235,25 @@ with col_model3:
     </div>
     """, unsafe_allow_html=True)
 
-# Enhanced footer with comprehensive information
-st.markdown("---")
+
+# Footer
 st.markdown("""
 <div class="footer-section animate-fade-in">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 2rem;">
-        <div>
-            <h4 style="color: #2563eb; margin-bottom: 10px;">Platform Features</h4>
-            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #4a5568;">
-                <li>Real-time option pricing across multiple models</li>
-                <li>Interactive Greeks analysis with live updates</li>
-                <li>Advanced strategy construction & backtesting</li>
-                <li>Comprehensive risk scenario analysis</li>
-                <li>Professional-grade visualizations</li>
-            </ul>
-        </div>
-        <div>
-            <h4 style="color: #10b981; margin-bottom: 10px;">Use Cases</h4>
-            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #4a5568;">
-                <li><strong>Trading:</strong> Strategy evaluation & optimization</li>
-                <li><strong>Risk Management:</strong> Portfolio hedging analysis</li>
-                <li><strong>Education:</strong> Learning derivatives theory</li>
-                <li><strong>Research:</strong> Model validation & comparison</li>
-                <li><strong>Compliance:</strong> Risk reporting & documentation</li>
-            </ul>
-        </div>
-        <div>
-            <h4 style="color: #f59e0b; margin-bottom: 10px;">Risk Disclaimer</h4>
-            <div style="font-size: 0.9rem; color: #4a5568;">
-                <p><strong>Educational Purpose:</strong> This platform is designed for educational and research purposes.</p>
-                <p><strong>Not Financial Advice:</strong> All calculations and analyses should be independently verified before use in trading or investment decisions.</p>
-                <p><strong>Model Risk:</strong> All models are theoretical approximations of market behavior.</p>
-            </div>
-        </div>
+    <div style="font-size: 1.4rem; font-weight: 600; margin-bottom: 1rem; color: #1a365d;">
+        📊 Quantitative Finance Platform
+    </div>
+    <div style="color: #4a5568; font-style: italic; margin-bottom: 1rem;">
+        Derivatives Pricing & Risk Management
+    </div>
+    <div style="color: #718096; font-size: 0.9rem;">
+        © 2025 | SALHI Reda | Financial Engineering Research | Advanced Analytics
+    </div>
+    <div style="margin-top: 1rem; color: #718096; font-size: 0.8rem;">
+        <strong>Disclaimer:</strong> This platform is for educational and research purposes. 
+        All models are theoretical and should not be used for actual trading without proper validation.
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Add some spacing at the bottom
+st.markdown("<br><br>", unsafe_allow_html=True)
