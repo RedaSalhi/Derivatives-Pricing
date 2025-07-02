@@ -1,9 +1,5 @@
 """
-Main Streamlit Application for Options Strategy Suite
 tabs.option_strategies1.py
-
-This is the main entry point for the Options Strategy Suite application.
-It imports the pricing models and utilities from separate modules.
 """
 
 import streamlit as st
@@ -59,13 +55,12 @@ def option_strategies_tab():
         }
 
     # Tab structure
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "Setup & Parameters",
         "Single Option Pricing", 
         "Strategy Builder", 
         "Payoff Analysis", 
-        "Greeks Analysis",
-        "Sensitivity Analysis"
+        "Greeks Analysis"
     ])
     
     with tab1:
@@ -86,13 +81,10 @@ def option_strategies_tab():
         
         with tab5:
             _greeks_analysis_tab(params)
-        
-        with tab6:
-            _sensitivity_analysis_tab(params)
     
     else:
         # Show warning for incomplete setup in other tabs
-        for tab in [tab2, tab3, tab4, tab5, tab6]:
+        for tab in [tab2, tab3, tab4, tab5]:
             with tab:
                 st.markdown("""
                 <div class="warning-box">
@@ -944,167 +936,6 @@ def _greeks_analysis_tab(params):
                 <p>Error calculating Greeks: {str(e)}</p>
             </div>
             """, unsafe_allow_html=True)
-
-
-def _sensitivity_analysis_tab(params):
-    """Advanced Sensitivity Analysis Tab"""
-    st.markdown('<div class="sub-header">Advanced Multi-Parameter Sensitivity</div>', unsafe_allow_html=True)
-    
-    if 'current_legs' not in st.session_state:
-        st.markdown("""
-        <div class="warning-box">
-            <h4>No Strategy Configured</h4>
-            <p>Please build a strategy in the <strong>Strategy Builder</strong> tab first!</p>
-        </div>
-        """, unsafe_allow_html=True)
-        return
-    
-    legs = st.session_state.current_legs
-    strategy_exercise = st.session_state.get('current_strategy_exercise', 'european')
-    
-    st.markdown("#### Multi-Parameter Sensitivity Heatmap")
-    
-    # Parameter selection
-    sens_col1, sens_col2, sens_col3 = st.columns(3)
-    
-    with sens_col1:
-        param1 = st.selectbox("First Parameter (X-Axis)", ["S", "T", "r", "sigma", "q"], key="param1")
-        param1_range = st.slider(f"{param1} Range (%)", -50, 100, (-20, 20), step=5, key="param1_range")
-    
-    with sens_col2:
-        param2 = st.selectbox("Second Parameter (Y-Axis)", ["S", "T", "r", "sigma", "q"], key="param2")
-        param2_range = st.slider(f"{param2} Range (%)", -50, 100, (-20, 20), step=5, key="param2_range")
-    
-    with sens_col3:
-        resolution = st.slider("Grid Resolution", 10, 50, 20, key="sensitivity_resolution")
-        analysis_type = st.selectbox("Analysis Type", ["Strategy Price", "Profit/Loss", "% Change"])
-        generate_heatmap = st.button("Generate Sensitivity Heatmap", type="primary")
-    
-    if generate_heatmap:
-        if param1 == param2:
-            st.warning("Please select different parameters for X and Y axes!")
-        else:
-            try:
-                with st.spinner("Generating multi-parameter sensitivity analysis..."):
-                    # Get base values
-                    base_values = {
-                        "S": params['spot_price'], "T": params['time_to_expiry'], "r": params['risk_free_rate'],
-                        "sigma": params['volatility'], "q": params['dividend_yield']
-                    }
-                    
-                    # Create parameter grids
-                    param1_vals = np.linspace(
-                        base_values[param1] * (1 + param1_range[0]/100),
-                        base_values[param1] * (1 + param1_range[1]/100),
-                        resolution
-                    )
-                    param2_vals = np.linspace(
-                        base_values[param2] * (1 + param2_range[0]/100),
-                        base_values[param2] * (1 + param2_range[1]/100),
-                        resolution
-                    )
-                    
-                    # Calculate strategy prices for each combination
-                    price_grid = np.zeros((len(param2_vals), len(param1_vals)))
-                    
-                    progress_bar = st.progress(0)
-                    total_iterations = len(param1_vals) * len(param2_vals)
-                    iteration = 0
-                    
-                    # Base strategy price for comparison
-                    base_strategy_price = None
-                    if 'strategy_result' in st.session_state:
-                        base_strategy_price = st.session_state.strategy_result['strategy_price']
-                    
-                    for i, p1_val in enumerate(param1_vals):
-                        for j, p2_val in enumerate(param2_vals):
-                            temp_kwargs = {
-                                'S': base_values['S'],
-                                'T': base_values['T'], 
-                                'r': base_values['r'],
-                                'sigma': base_values['sigma'],
-                                'q': base_values['q']
-                            }
-                            temp_kwargs[param1] = p1_val
-                            temp_kwargs[param2] = p2_val
-                            
-                            if params['model'] == "binomial":
-                                temp_kwargs["N"] = params['n_steps']
-                            elif params['model'] == "monte-carlo":
-                                temp_kwargs["n_simulations"] = params['n_simulations']
-                            
-                            try:
-                                result = price_option_strategy(
-                                    legs=legs,
-                                    exercise_style=strategy_exercise,
-                                    model=params['model'],
-                                    **temp_kwargs
-                                )
-                                
-                                strategy_price = result["strategy_price"]
-                                
-                                if analysis_type == "Strategy Price":
-                                    price_grid[j, i] = strategy_price
-                                elif analysis_type == "Profit/Loss" and base_strategy_price is not None:
-                                    price_grid[j, i] = strategy_price - base_strategy_price
-                                elif analysis_type == "% Change" and base_strategy_price is not None and base_strategy_price != 0:
-                                    price_grid[j, i] = (strategy_price - base_strategy_price) / abs(base_strategy_price) * 100
-                                else:
-                                    price_grid[j, i] = strategy_price
-                                    
-                            except:
-                                price_grid[j, i] = np.nan
-                            
-                            iteration += 1
-                            progress_bar.progress(iteration / total_iterations)
-                    
-                    # Create heatmap
-                    fig = go.Figure(data=go.Heatmap(
-                        z=price_grid,
-                        x=param1_vals,
-                        y=param2_vals,
-                        colorscale='RdYlBu_r',
-                        colorbar=dict(title=f"{analysis_type}")
-                    ))
-                    
-                    # Add current position marker
-                    fig.add_scatter(
-                        x=[base_values[param1]],
-                        y=[base_values[param2]],
-                        mode='markers',
-                        name='Current Position',
-                        marker=dict(symbol='star', size=15, color='white', line=dict(color='black', width=2))
-                    )
-                    
-                    fig.update_layout(
-                        title=f'Strategy {analysis_type} Sensitivity: {param1} vs {param2}',
-                        xaxis_title=f'{param1} Value',
-                        yaxis_title=f'{param2} Value',
-                        height=600
-                    )
-                    
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Analysis summary
-                    min_val = np.nanmin(price_grid)
-                    max_val = np.nanmax(price_grid)
-                    
-                    st.markdown(f"""
-                    <div class="success-box">
-                        <h4>Sensitivity Analysis Summary</h4>
-                        <p><strong>Minimum {analysis_type}:</strong> {min_val:.4f}</p>
-                        <p><strong>Maximum {analysis_type}:</strong> {max_val:.4f}</p>
-                        <p><strong>Range:</strong> {max_val - min_val:.4f}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-            except Exception as e:
-                st.markdown(f"""
-                <div class="error-box">
-                    <h4>❌ Sensitivity Analysis Error</h4>
-                    <p>Error generating sensitivity analysis: {str(e)}</p>
-                </div>
-                """, unsafe_allow_html=True)
 
 
 def display_educational_content():
